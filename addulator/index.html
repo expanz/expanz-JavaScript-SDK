@@ -6,24 +6,45 @@
 
 <script type='text/javascript'>
 
-	var payload = '<s:Envelope><ESA><CreateSession user="demo" password="demo" appSite="ESADEMO" authenticationMode="Primary" clientVersion="Flex 1.0" schemaVersion="2.0"/></ESA></s:Envelope>';
-
-	var proper_payload = '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Body><tns:CreateSession xmlns:tns="http://tempuri.org/"><tns:inXml>&lt;ESA&gt; &lt;CreateSession user="demo" password="demo" appSite="ESADEMO" authenticationMode="Primary" clientVersion="Flex 1.0" schemaVersion="2.0"/&gt; &lt;/ESA&gt;</tns:inXml></tns:CreateSession></SOAP-ENV:Body></SOAP-ENV:Envelope>';
 
 	$(document).ready( function() {
 
-		$('a').click( function () {
-			MakeRequest( proper_payload );
+		$('#loginform').submit( function () {
+			console.log( "submit!" );
+
+			var request = CreateRequest( 	'CreateSession',
+							$('#loginform #username').val(),
+							$('#loginform #password').val()
+							);
+			SendRequest( request );
+
+			console.log( "request complete" );
 		});
 
 	});
 
 </script>
+
+<link href="css/common.css?1308766139" media="screen" rel="stylesheet" type="text/css" />
+
 </head>
 
 <body>
 
-<a href="#">Make Request</a>
+	<form id='loginform' method='post'>
+		<div class='textinput'>
+			<label for='username'>Username:</label>
+			<input id='username' name='username' type='text' />
+		</div>
+
+		<div class='textinput'>
+			<label for='password'>Password:</label>
+			<input id='password' name='password' type='text' />
+		</div>
+		<div class='submit'>
+			<input type='submit' value='Login' />
+		</div>
+	</form>
 
 <div id='result'></div>
 
