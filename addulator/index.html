@@ -6,6 +6,8 @@
 
 <script type='text/javascript'>
 
+	function callback( string ){ #('.result').append( string ); }
+
 
 	$(document).ready( function() {
 
@@ -13,12 +15,13 @@
 			console.log( "submit!" );
 
 			var request = CreateRequest( 	'CreateSession',
-							$('#loginform #username').val(),
-							$('#loginform #password').val()
-							);
-			SendRequest( request );
+								$('#loginform #username').val(),
+								$('#loginform #password').val()
+								);
+			SendRequest( request, callback );
 
 			console.log( "request complete" );
+			return false;
 		});
 
 	});
@@ -46,7 +49,7 @@
 		</div>
 	</form>
 
-<div id='result'></div>
+<div class='result'></div>
 
 </body>
 </html>
