@@ -4,6 +4,7 @@
 
 // WebService URL
 // NOTE: this needs to be better abstracted (also, not currently applied because of cross domain request limitations on browser)
+
 var wsURL = 'https://test.expanz.com/ESADemoService/ESAService.asmx';
 
 var soapHeader = 	'<SOAP-ENV:Envelope ' +
@@ -67,9 +68,12 @@ function parseXML( xml ){
 
 	$(xml).find( 'CreateSessionResponse' ).each( function ()
 	{
-		//$(this).each( $('#result').append( $(this).text ) );
-		$('#result').append( '<div>' + $(this).find('CreateSessionResult').text() + '</div>' );
-		$('#result').append( $(this).find('errorMessage').text() );
+		$('.result').append( '<div>' + $(this).find('CreateSessionResult').text() + '</div>' );
+		$('.result').append( $(this).find('errorMessage').text() );
+
+		$.cookie( '_us', new String($(this).find('CreateSessionResult').text()), {  path: '/', expires: 1 } ); //NOTE: will need to add {domain: '.test.expanz.com',} at some point. Now it makes cookies impossible to read.
+
+		$('.result').append( '<div>Cookie session ID: ' + $.cookie( '_us' ) + '</div>' );
 
 	});
 }
