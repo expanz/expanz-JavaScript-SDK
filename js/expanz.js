@@ -17,14 +17,22 @@ var soapHeader = 	'<SOAP-ENV:Envelope ' +
 var soapFooter = 	'</SOAP-ENV:Body>' +
 			'</SOAP-ENV:Envelope>';
 
+function getSessionHandle() {
 
-function CreateRequest( type, username, password ){
+	return $.cookie( '_us' );
+}
 
-	var body = '';
+var activityHandle = "";
 
-	if( type == 'CreateSession' ){
+function getActivityHandle(){
 
-		body = 	'<tns:CreateSession xmlns:tns="http://tempuri.org/">' +
+	return activityHandle;
+}
+
+
+function CreateSessionRequest( username, password ){
+
+	var body = 	'<tns:CreateSession xmlns:tns="http://tempuri.org/">' +
 			'<tns:inXml>' +
 				'&lt;ESA&gt; &lt;CreateSession user="' + username + '" ' +
 				'password="' + password + '" ' +
@@ -34,49 +42,109 @@ function CreateRequest( type, username, password ){
 				'schemaVersion="2.0"/&gt; &lt;/ESA&gt;' +
 			'</tns:inXml></tns:CreateSession>';
 
-	}
+	return soapHeader + body + soapFooter;
+}
+
+function CreateGetSessionDataRequest(){
+
+	var body = 	'<tns:Exec xmlns:tns="http://tempuri.org/">' +
+			'<tns:inXML>&lt;ESA&gt;' +
+			'&lt;GetSessionData/&gt;' +
+			'&lt;/ESA&gt;</tns:inXML>' +
+			'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
+			'</tns:Exec>';
+
+	return soapHeader + body + soapFooter;
+}
+
+function CreateActivityRequest( name, style ){
+
+	var body = 	'<tns:Exec xmlns:tns="http://tempuri.org/">' +
+			'<tns:inXML>&lt;ESA sessionHandle="' + getSessionHandle() + '"&gt;' +
+			'&lt;CreateActivity name="' + name + '" style="' + style + '"/&gt;' + //name = Samples.Calc
+			'&lt;/ESA&gt;</tns:inXML>' +
+			'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
+			'</tns:Exec>';
+
+	return soapHeader + body + soapFooter;
+}
+
+
+function CreateDeltaRequest( id, value ){
+
+	var body = '<tns:Exec xmlns:tns="http://tempuri.org/">' +
+		'<tns:inXML>&lt;ESA sessionHandle="' + getSessionHandle() + '"&gt;' +
+		'&lt;Activity activityHandle="' + activityHandle + '"&gt;' +
+		'&lt;Delta id="' + id + '" value="' + value + '"/&gt;' +
+		'&lt;/Activity&gt;' +
+		'&lt;/ESA&gt;</tns:inXML>' +
+		'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
+		'</tns:Exec>';
+	var bodyP = '<tns:Exec xmlns:tns="http://tempuri.org/">' +
+		'<tns:inXML>' +
+		'<ESA sessionHandle="' + getSessionHandle() + '">' +
+		'<Activity activityHandle="' + activityHandle + '">' +
+		'<Delta id="' + id + '" value="' + value + '"/>' +
+		'</Activity>' +
+		'</ESA>' +
+		'</tns:inXML>' +
+		'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
+		'</tns:Exec>';
+
 
 	return soapHeader + body + soapFooter;
 
 }
 
-function CreateRequestSimple( type, username, password ){
+function CreateMethodRequest( name ){
 
-	var body = '';
 
-	if( type == 'CreateSession' ){
-
-		body = 	'<ESA xmlns="http://ns.expanz.com/ep/2008">' +
-			'<CreateSession ' +
-				'user="' + username + '" ' +
-				'password="' + password + '" ' +
-				'appSite="ESA.BANKING" ' +
-				'authDomain="Mattdone-PC" ' +
-				'station="MATTDONE-PC" ' +
-				'clientType="Win32" ' +
-				'clientVersion="2.1" ' +
-				'schemaVersion="2.0" ' +
-				'authenticationMode="Primary" ' +
-				'TimeZone=""/>' +
-				'</ESA>';
-	}
+	var body = '<tns:Exec xmlns:tns="http://tempuri.org/">' +
+		'<tns:inXML>&lt;ESA sessionHandle="' + getSessionHandle() + '"&gt;' +
+		'&lt;Activity activityHandle="' + activityHandle + '"&gt;' +
+		'&lt;Method name="' + name + '"/&gt;' +
+		'&lt;/Activity&gt;' +
+		'&lt;/ESA&gt;</tns:inXML>' +
+		'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
+		'</tns:Exec>';
 
 	return soapHeader + body + soapFooter;
+
 }
 
 function parseXML( xml ){
 
+	xml.replace("&lt;", "<");
+	xml.replace("&gt;", ">");
+
+
 	$(xml).find( 'CreateSessionResponse' ).each( function ()
 	{
-		$('.result').append( '<div>' + $(this).find('CreateSessionResult').text() + '</div>' );
-		$('.result').append( $(this).find('errorMessage').text() );
-
 		$.cookie( '_us', new String($(this).find('CreateSessionResult').text()), {  path: '/', expires: 1 } ); //NOTE: will need to add {domain: '.test.expanz.com',} at some point. Now it makes cookies impossible to read.
 
-		$('.result').append( '<div>Cookie session ID: ' + $.cookie( '_us' ) + '</div>' );
-
 	});
+
+	var execResults = $(xml).find("ExecResult").text();
+	var results = "";
+
+	if( execResults ){
+
+		$( execResults ).find( 'Activity' ).each( function ()
+		{
+			activityHandle = $(this).attr('activityHandle');
+		});
+
+		$( execResults ).find( 'Field' ).each( function() 
+		{ 
+			if( $(this).attr('id') == "Result" ){ 
+				results = $(this).attr('value');
+			} 
+		});
+	}
+	
+	return results;
 }
+
 
 function SendRequest ( xmlrequest, callback ){
 
@@ -85,9 +153,25 @@ function SendRequest ( xmlrequest, callback ){
 		url: "/ESADemoService", // /ESADemoService 
 		data: xmlrequest,
 		contentType: "text/xml",
-		dataType: "xml",
+		dataType: "string", //"xml",
 		processData: false,	//keeps data: from being serialized
-		success: parseXML
+		//success: parseXML
+		complete: function( request ){
+
+			if( request.status != 200 ){
+
+				alert( 'There was a problem with the last request.' );
+
+			} else {
+
+				var response = request.response;
+				var result = parseXML( response );
+
+				if( callback ){
+					eval( callback )( result );
+				}
+			}
+		}
 	});
 }
 

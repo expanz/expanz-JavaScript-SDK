@@ -1,41 +1,47 @@
 <html>
 <head>
 <title>Addulator</title>
+
+<link href="css/common.css?1308766139" media="screen" rel="stylesheet" type="text/css" />
+
 <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js'></script>
 <script type='text/javascript' src='../js/jquery.cookie.js'></script>
 <script type='text/javascript' src='../js/expanz.js' ></script>
 
 <script type='text/javascript'>
 
-	function callback( str ){ $('.result').append( str ); }
+	function redirect(){
+		window.location.href = $('#loginform').attr('action');
+	}
+
+
+	function callback( str ){ 
+
+		var request = CreateGetSessionDataRequest();
+		SendRequest( request, redirect );
+
+	}
 
 
 	$(document).ready( function() {
 
 		$('#loginform').submit( function () {
-			console.log( "submit!" );
-
-			var request = CreateRequest( 	'CreateSession',
-								$('#loginform #username').val(),
+			var request = CreateSessionRequest( 	$('#loginform #username').val(),
 								$('#loginform #password').val()
 								);
 			SendRequest( request, callback );
 
-			console.log( "request complete" );
 			return false;
 		});
 
 	});
 
 </script>
-
-<link href="css/common.css?1308766139" media="screen" rel="stylesheet" type="text/css" />
-
 </head>
 
 <body>
 
-	<form id='loginform' method='post'>
+	<form id='loginform' method='post' action='./activity.samples.calc.html'>
 		<div class='textinput'>
 			<label for='username'>Username:</label>
 			<input id='username' name='username' type='text' />
