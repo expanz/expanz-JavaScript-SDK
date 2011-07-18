@@ -37,6 +37,10 @@
 		var request = CreateActivityRequest( $('form').attr('id') );
 		SendRequest( request ); 
 
+		window.onbeforeunload = function () {
+			endSession();
+		};
+
 	});
 
 

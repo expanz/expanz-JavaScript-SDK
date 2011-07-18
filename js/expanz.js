@@ -22,6 +22,12 @@ function getSessionHandle() {
 	return $.cookie( '_us' );
 }
 
+function endSession() {
+
+	$.cookie( '_us', "" );
+	return true;
+}
+
 var activityHandle = "";
 
 function getActivityHandle(){
@@ -80,17 +86,6 @@ function CreateDeltaRequest( id, value ){
 		'&lt;/ESA&gt;</tns:inXML>' +
 		'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
 		'</tns:Exec>';
-	var bodyP = '<tns:Exec xmlns:tns="http://tempuri.org/">' +
-		'<tns:inXML>' +
-		'<ESA sessionHandle="' + getSessionHandle() + '">' +
-		'<Activity activityHandle="' + activityHandle + '">' +
-		'<Delta id="' + id + '" value="' + value + '"/>' +
-		'</Activity>' +
-		'</ESA>' +
-		'</tns:inXML>' +
-		'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
-		'</tns:Exec>';
-
 
 	return soapHeader + body + soapFooter;
 
@@ -117,12 +112,26 @@ function parseXML( xml ){
 	xml.replace("&lt;", "<");
 	xml.replace("&gt;", ">");
 
+	var sessionHandle = "";
 
 	$(xml).find( 'CreateSessionResponse' ).each( function ()
 	{
-		$.cookie( '_us', new String($(this).find('CreateSessionResult').text()), {  path: '/', expires: 1 } ); //NOTE: will need to add {domain: '.test.expanz.com',} at some point. Now it makes cookies impossible to read.
-
+		if( $(this).find( 'CreateSessionResult' ).text() ) {
+			sessionHandle = new String($(this).find('CreateSessionResult').text());
+			$.cookie( '_us', sessionHandle, {  path: '/', expires: 1 } ); 
+			//NOTE: will need to add {domain: '.test.expanz.com',} at some point. Now it makes cookies impossible to read.
+		}
 	});
+
+	if( !getSessionHandle() || getSessionHandle.length > 0 ){
+
+		var result = "";
+		var errorString = $(xml).find( 'errorMessage' ).each( function ()
+		{
+			result = $(this).text();
+		});
+		return result;
+	}
 
 	var execResults = $(xml).find("ExecResult").text();
 	var results = "";
@@ -146,7 +155,7 @@ function parseXML( xml ){
 }
 
 
-function SendRequest ( xmlrequest, callback ){
+function SendRequest ( xmlrequest, callback, error ){
 
 	$.ajax({
 		type: "post",

@@ -11,25 +11,30 @@
 <script type='text/javascript'>
 
 	function redirect(){
-		window.location.href = $('#loginform').attr('action');
+		var url = './activity.samples.calc.html';
+		window.location.href = url;
 	}
 
 
-	function callback( str ){ 
+	function success( str ){ 
 
-		var request = CreateGetSessionDataRequest();
-		SendRequest( request, redirect );
+		if( !str ){
+			var request = CreateGetSessionDataRequest();
+			SendRequest( request, redirect );
+		} else {
+			$('.result').html( "<span style='color:red'>" + str + "</span>" );
+		}
 
 	}
 
 
 	$(document).ready( function() {
 
-		$('#loginform').submit( function () {
-			var request = CreateSessionRequest( 	$('#loginform #username').val(),
-								$('#loginform #password').val()
+		$('#Login').click( function () {
+			var request = CreateSessionRequest( 	$('#username').val(),
+								$('#password').val()
 								);
-			SendRequest( request, callback );
+			SendRequest( request, success );
 
 			return false;
 		});
@@ -41,22 +46,20 @@
 
 <body>
 
-	<form id='loginform' method='post' action='./activity.samples.calc.html'>
-		<div class='textinput'>
-			<label for='username'>Username:</label>
-			<input id='username' name='username' type='text' />
-		</div>
+	<div class='textinput'>
+		<label for='username'>Username:</label>
+		<input id='username' name='username' type='text' />
+	</div>
 
-		<div class='textinput'>
-			<label for='password'>Password:</label>
-			<input id='password' name='password' type='text' />
-		</div>
-		<div class='submit'>
-			<input type='submit' value='Login' />
-		</div>
-	</form>
+	<div class='textinput'>
+		<label for='password'>Password:</label>
+		<input id='password' name='password' type='text' />
+	</div>
+	<div class='submit'>
+		<button id='Login' type='submit'>Login</button>
+	</div>
 
-<div class='result'></div>
+	<div class='result'></div>
 
 </body>
 </html>
