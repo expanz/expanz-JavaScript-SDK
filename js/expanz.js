@@ -17,14 +17,22 @@ var soapHeader = 	'<SOAP-ENV:Envelope ' +
 var soapFooter = 	'</SOAP-ENV:Body>' +
 			'</SOAP-ENV:Envelope>';
 
+
 function getSessionHandle() {
 
 	return $.cookie( '_us' );
 }
 
+function setSessionHandle( sessionHandle ){
+
+	//NOTE: will need to add {domain: '.test.expanz.com',} at some point. Now it makes cookies impossible to read.
+	$.cookie( '_us', sessionHandle ); //, {  path: '/', expires: 1 } ); 
+	return true;
+}
+
 function endSession() {
 
-	$.cookie( '_us', "" );
+	$.cookie( '_us', "" ); //, {  path: '/', expires: 1 } );
 	return true;
 }
 
@@ -34,6 +42,10 @@ function getActivityHandle(){
 
 	return activityHandle;
 }
+
+
+
+
 
 
 function CreateSessionRequest( username, password ){
@@ -112,16 +124,9 @@ function parseXML( xml ){
 	xml.replace("&lt;", "<");
 	xml.replace("&gt;", ">");
 
-	var sessionHandle = "";
-
-	$(xml).find( 'CreateSessionResponse' ).each( function ()
-	{
-		if( $(this).find( 'CreateSessionResult' ).text() ) {
-			sessionHandle = new String($(this).find('CreateSessionResult').text());
-			$.cookie( '_us', sessionHandle, {  path: '/', expires: 1 } ); 
-			//NOTE: will need to add {domain: '.test.expanz.com',} at some point. Now it makes cookies impossible to read.
-		}
-	});
+	if( $(xml).find( 'CreateSessionResult' ) ) {
+		setSessionHandle( new String( $(xml).find('CreateSessionResult').text() ) );
+	}
 
 	if( !getSessionHandle() || getSessionHandle.length > 0 ){
 
