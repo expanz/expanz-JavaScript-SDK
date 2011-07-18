@@ -19,7 +19,6 @@
 
 		$('input[type=text]').change( function (){
 
-			console.log( $(this).attr('name') + ' new value is: ' + $(this).val() );
 			var request = CreateDeltaRequest( $(this).attr('name'), $(this).val() );
 			SendRequest( request, callback );
 
@@ -33,6 +32,10 @@
 
 			return false;
 		});
+
+		if( !getSessionHandle() ){
+			window.location.href = './';
+		}
 
 		var request = CreateActivityRequest( $('form').attr('id') );
 		SendRequest( request ); 

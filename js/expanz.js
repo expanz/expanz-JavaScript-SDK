@@ -124,8 +124,8 @@ function parseXML( xml ){
 	xml.replace("&lt;", "<");
 	xml.replace("&gt;", ">");
 
-	if( $(xml).find( 'CreateSessionResult' ) ) {
-		setSessionHandle( new String( $(xml).find('CreateSessionResult').text() ) );
+	if( $(xml).find( 'CreateSessionResult' ).length > 0 ) {
+		setSessionHandle( $(xml).find('CreateSessionResult').text() );
 	}
 
 	if( !getSessionHandle() || getSessionHandle.length > 0 ){
