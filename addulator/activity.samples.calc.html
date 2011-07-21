@@ -4,41 +4,43 @@
 <link href="css/common.css?1308766139" media="screen" rel="stylesheet" type="text/css" />
 
 <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js'></script>
+<script type='text/javascript' src='http://knockoutjs.com/js/knockout-1.2.1.js' ></script>
 <script type='text/javascript' src='../js/jquery.cookie.js'></script>
-<script type='text/javascript' src='../js/expanz.js' ></script>
+<script type='text/javascript' src='../js/expanz.js?987245745' ></script>
 
 <script type='text/javascript'>
 
-	function callback( result ) {
+	function success( result ) {
 
-		$('.result').text( result );
+		$('#Result').text( result );
+	}
+	function error( str ) {
+		console.log( str );
 	}
 
 
 	$(document).ready( function() {
 
-		$('input[type=text]').change( function (){
+		//$('input[type=text]').change( function (){
 
-			var request = CreateDeltaRequest( $(this).attr('name'), $(this).val() );
-			SendRequest( request, callback );
+		//	var request = CreateDeltaRequest( $(this).attr('name'), $(this).val() );
+		//	SendRequest( request, callback );
 
-		});
+		//});
 
 
-		$('form').submit( function () {
+		$('#submit').click( function () {
 
-			var request = CreateMethodRequest( $('input[type=submit]').attr('name') );
-			SendRequest( request, callback );
-
-			return false;
+			var request = CreateMethodRequest( 'add' );
+			SendRequest( request, success );
 		});
 
 		if( !getSessionHandle() ){
 			window.location.href = './';
 		}
 
-		var request = CreateActivityRequest( $('form').attr('id') );
-		SendRequest( request ); 
+		//var request = CreateActivityRequest( $('form').attr('id') );
+		//SendRequest( request ); 
 
 		window.onbeforeunload = function () {
 			endSession();
@@ -52,26 +54,28 @@
 </head>
 <body>
 
-<form id='Samples.Calc' action=''>
+<div id='Activity' value='Samples.Calc' >
 
 	<div class='textinput'>
-		<label for='Op1'>Op1</label>
-		<input type='text' name='Op1' id='Op1' />
+		<span data-bind='text: Op1.label()'></span>
+		<input type='text' data-bind='value: Op1.value' />
 	</div>
 
 	<div class='textinput'>
-		<label for='Op2'>Op2</label>
-		<input type='text' name='Op2' id='Op2' />
+		<span data-bind='text: Op2.label()'></span>
+		<input type='text' data-bind='value: Op2.value' />
 	</div>
 
-	<p>Result:</p>
-	<div class='result'></div>
+	<div class='results'>
+		<span data-bind='text: Result.label()'></span>
+		<div id='Result' data-bind='text: Result.value'></div>
+	</div>
 
 	<div class='submit'>
-		<input type='submit' value='+' name='add' />
+		<button id='submit' data-bind='text: Result.label()' ></button>
 	</div>
 
-</form>
+</div>
 
 </body>
 </html>

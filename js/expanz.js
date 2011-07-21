@@ -45,35 +45,10 @@ function getActivityHandle(){
 
 
 
+/*
+ *   Create Activity
+ */
 
-
-
-function CreateSessionRequest( username, password ){
-
-	var body = 	'<tns:CreateSession xmlns:tns="http://tempuri.org/">' +
-			'<tns:inXml>' +
-				'&lt;ESA&gt; &lt;CreateSession user="' + username + '" ' +
-				'password="' + password + '" ' +
-				'appSite="ESADEMO" ' +
-				'authenticationMode="Primary" ' +
-				'clientVersion="Flex 1.0" ' +
-				'schemaVersion="2.0"/&gt; &lt;/ESA&gt;' +
-			'</tns:inXml></tns:CreateSession>';
-
-	return soapHeader + body + soapFooter;
-}
-
-function CreateGetSessionDataRequest(){
-
-	var body = 	'<tns:Exec xmlns:tns="http://tempuri.org/">' +
-			'<tns:inXML>&lt;ESA&gt;' +
-			'&lt;GetSessionData/&gt;' +
-			'&lt;/ESA&gt;</tns:inXML>' +
-			'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
-			'</tns:Exec>';
-
-	return soapHeader + body + soapFooter;
-}
 
 function CreateActivityRequest( name, style ){
 
@@ -87,6 +62,46 @@ function CreateActivityRequest( name, style ){
 	return soapHeader + body + soapFooter;
 }
 
+function parseCreateActivityResponse( success, error ){
+	return function apply( xml ){
+
+		xml.replace("&lt;", "<");
+		xml.replace("&gt;", ">");
+
+		var execResults = $(xml).find("ExecResult").text();
+		var results = "";
+
+		if( execResults ){
+
+			$( execResults ).find( 'Activity' ).each( function ()
+			{
+				activityHandle = $(this).attr('activityHandle');
+			});
+
+			$( execResults ).find( 'Field' ).each( function() 
+			{ 
+				var field = new Field(	$(this).attr('id'),
+							$(this).attr('label'),
+							$(this).attr('disabled'),
+							$(this).attr('null'),
+							$(this).attr('value'),
+							$(this).attr('datatype'),
+							$(this).attr('valid')
+							);  
+				//ActivityFields.push( field );
+				ActivityFields[ field.id() ] = field;
+			});
+		}
+
+		return eval( success )( success, error );
+	}
+}
+
+
+
+/*
+ * Delta
+ */
 
 function CreateDeltaRequest( id, value ){
 
@@ -102,6 +117,41 @@ function CreateDeltaRequest( id, value ){
 	return soapHeader + body + soapFooter;
 
 }
+
+function parseDeltaResponse( fields, success, error ){
+	return function apply ( xml ){
+
+			xml.replace("&lt;", "<");
+			xml.replace("&gt;", ">");
+
+			var execResults = $(xml).find("ExecResult").text();
+			var results = "";
+
+			if( execResults ){
+
+				$( execResults ).find( 'Field' ).each( function() 
+				{ 
+					//fields[ $(this).attr('id') ].id( $(this).attr('id') );
+					//fields[ $(this).attr('id') ].label( $(this).attr('label') );
+					//fields[ $(this).attr('id') ].disabled( $(this).attr('disabled') );
+					//fields[ $(this).attr('id') ].isnull( $(this).attr('null') );
+					fields[ $(this).attr('id') ].value( $(this).attr('value') );
+					//fields[ $(this).attr('id') ].datatype( $(this).attr('datatype') );
+					//fields[ $(this).attr('id') ].valid( $(this).attr('valid') );
+
+				});
+			}
+			return true;	// this might need to be moved up into the .each (above)
+
+	}
+}
+
+
+
+/*
+ * Method
+ */
+
 
 function CreateMethodRequest( name ){
 
@@ -119,24 +169,16 @@ function CreateMethodRequest( name ){
 
 }
 
+
+
+/*
+ *  LEGACY
+ */
+
 function parseXML( xml ){
 
 	xml.replace("&lt;", "<");
 	xml.replace("&gt;", ">");
-
-	if( $(xml).find( 'CreateSessionResult' ).length > 0 ) {
-		setSessionHandle( $(xml).find('CreateSessionResult').text() );
-	}
-
-	if( !getSessionHandle() || getSessionHandle.length > 0 ){
-
-		var result = "";
-		var errorString = $(xml).find( 'errorMessage' ).each( function ()
-		{
-			result = $(this).text();
-		});
-		return result;
-	}
 
 	var execResults = $(xml).find("ExecResult").text();
 	var results = "";
@@ -160,7 +202,15 @@ function parseXML( xml ){
 }
 
 
-function SendRequest ( xmlrequest, callback, error ){
+
+/*
+ *     Send Request
+ *		harness for HTTP requests to the server
+ *
+ */
+
+
+function SendRequest ( xmlrequest, error, parser ){
 
 	$.ajax({
 		type: "post",
@@ -169,24 +219,114 @@ function SendRequest ( xmlrequest, callback, error ){
 		contentType: "text/xml",
 		dataType: "string", //"xml",
 		processData: false,	//keeps data: from being serialized
-		//success: parseXML
 		complete: function( request ){
 
 			if( request.status != 200 ){
 
-				alert( 'There was a problem with the last request.' );
+				error( 'There was a problem with the last request.' );
 
 			} else {
 
 				var response = request.response;
-				var result = parseXML( response );
-
-				if( callback ){
-					eval( callback )( result );
-				}
+				
+				if( parser ){
+					eval( parser )( response );
+				} 
 			}
 		}
 	});
 }
+
+
+
+
+
+/*
+/*   Automatic binding to View objects
+/*
+/*
+/*/
+
+function Field( id, label, disabled, isnull, value, datatype, valid ){
+	this.id = ko.observable(id);
+	this.label = ko.observable(label);
+	this.isnull = ko.observable(isnull);
+	this.value = ko.observable( value );
+	this.datatype = ko.observable(datatype);
+	this.valid = ko.observable(valid);
+}
+
+
+var ActivityName = "";
+var ActivityFields = {};	//ko.observableArray( [] );
+
+var viewModel = {
+	Op1: new Field( 'Op1', 'Operand 1', '', '1', '', 'number', '1' ),
+	Op2: new Field( 'Op1', 'Operand 1', '', '1', '', 'number', '1' ),
+	Result: new Field( 'Result', 'Result', '1', '1', '', 'number', '1' )
+}
+
+function setupObserversManually ( fields, success, error ){
+
+	var boundElements = $('[data-bind]');
+
+	for( var key in fields ) {
+		
+		$( '#' + fields[key].id ).change( function (){
+
+			SendRequest( 	CreateDeltaRequest( fields[key].id, fields[key].value ),
+					success,
+					error,
+					parseDeltaResponse( fields, success, error )
+					);
+		});
+	};
+
+	return true;
+}
+
+function setupObservers( fields, success, error ){
+
+	for( var id in fields ){
+	//for( var i=0; i < fields().length; i++ ){
+
+		fields[id].value.subscribe( 
+			function( fields, id, success, error ){
+				return function( newValue ){
+					SendRequest(	CreateDeltaRequest( id, newValue ),
+							error,
+							parseDeltaResponse( fields, success, error )
+							);
+				}
+			} ( fields, fields[id].id(), success, error )
+		);
+	}
+
+}
+
+function setupBindings( success, error ){
+	return function apply(){
+
+		ko.applyBindings( ActivityFields );
+		setupObservers( ActivityFields, success, error );
+		return true;
+	}
+}
+
+
+$(document).ready( function() {
+
+
+	ActivityName = $('#Activity').attr('value');
+	
+	SendRequest(	CreateActivityRequest( ActivityName ),
+			error,
+			parseCreateActivityResponse(  setupBindings( success, error ), error )
+			); 
+
+	
+});
+
+
 
 

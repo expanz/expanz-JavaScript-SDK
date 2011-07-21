@@ -5,41 +5,23 @@
 <link href="css/common.css?1308766139" media="screen" rel="stylesheet" type="text/css" />
 
 <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js'></script>
+<script type='text/javascript' src='http://knockoutjs.com/js/knockout-1.2.1.js' ></script>
 <script type='text/javascript' src='../js/jquery.cookie.js'></script>
-<script type='text/javascript' src='../js/expanz.js' ></script>
+<script type='text/javascript' src='../js/expanz.login.js' ></script>
+
 
 <script type='text/javascript'>
 
-	function redirect(){
+	function success(){
 		var url = './activity.samples.calc.html';
 		window.location.href = url;
 	}
 
+	function error( str ){
 
-	function success( str ){ 
-
-		if( !str ){
-			var request = CreateGetSessionDataRequest();
-			SendRequest( request, redirect );
-		} else {
-			$('.result').html( "<span style='color:red'>" + str + "</span>" );
-		}
-
+		$('.result').html( "<span style='color:red'>" + str + "</span>" );
+		return true;
 	}
-
-
-	$(document).ready( function() {
-
-		$('#Login').click( function () {
-			var request = CreateSessionRequest( 	$('#username').val(),
-								$('#password').val()
-								);
-			SendRequest( request, success );
-
-			return false;
-		});
-
-	});
 
 </script>
 </head>
@@ -47,19 +29,23 @@
 <body>
 
 	<div class='textinput'>
-		<label for='username'>Username:</label>
-		<input id='username' name='username' type='text' />
+		<span data-bind='text: Username.label'></span>
+		<input type='text' data-bind='value: Username.value' />
 	</div>
 
 	<div class='textinput'>
-		<label for='password'>Password:</label>
-		<input id='password' name='password' type='text' />
+		<span data-bind='text: Password.label'></span>
+		<input type='text' data-bind='value: Password.value'/>
 	</div>
+
 	<div class='submit'>
-		<button id='Login' type='submit'>Login</button>
+		<button id='submit'>Login</button>
 	</div>
 
 	<div class='result'></div>
 
 </body>
 </html>
+
+
+
