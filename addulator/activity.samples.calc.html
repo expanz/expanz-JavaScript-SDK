@@ -12,7 +12,7 @@
 
 	function success( result ) {
 
-		$('#Result').text( result );
+		// Deprecated: this function needs to refactored out
 	}
 	function error( str ) {
 		console.log( str );
@@ -21,26 +21,15 @@
 
 	$(document).ready( function() {
 
-		//$('input[type=text]').change( function (){
+		//$('#submit').click( function () {
 
-		//	var request = CreateDeltaRequest( $(this).attr('name'), $(this).val() );
-		//	SendRequest( request, callback );
+		//	callMethod( 'add', success, error );
 
 		//});
-
-
-		$('#submit').click( function () {
-
-			var request = CreateMethodRequest( 'add' );
-			SendRequest( request, success );
-		});
 
 		if( !getSessionHandle() ){
 			window.location.href = './';
 		}
-
-		//var request = CreateActivityRequest( $('form').attr('id') );
-		//SendRequest( request ); 
 
 		window.onbeforeunload = function () {
 			endSession();
@@ -72,7 +61,7 @@
 	</div>
 
 	<div class='submit'>
-		<button id='submit' data-bind='text: Result.label()' ></button>
+		<button id='submit' name='add' data-bind='click: callMethod, text: Result.label()' ></button>
 	</div>
 
 </div>

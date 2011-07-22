@@ -23,13 +23,6 @@ function getSessionHandle() {
 	return $.cookie( '_us' );
 }
 
-function setSessionHandle( sessionHandle ){
-
-	//NOTE: will need to add {domain: '.test.expanz.com',} at some point. Now it makes cookies impossible to read.
-	$.cookie( '_us', sessionHandle ); //, {  path: '/', expires: 1 } ); 
-	return true;
-}
-
 function endSession() {
 
 	$.cookie( '_us', "" ); //, {  path: '/', expires: 1 } );
@@ -37,7 +30,6 @@ function endSession() {
 }
 
 var activityHandle = "";
-
 function getActivityHandle(){
 
 	return activityHandle;
@@ -118,7 +110,7 @@ function CreateDeltaRequest( id, value ){
 
 }
 
-function parseDeltaResponse( fields, success, error ){
+function parseUpdateResponse( fields, success, error ){
 	return function apply ( xml ){
 
 			xml.replace("&lt;", "<");
@@ -131,18 +123,11 @@ function parseDeltaResponse( fields, success, error ){
 
 				$( execResults ).find( 'Field' ).each( function() 
 				{ 
-					//fields[ $(this).attr('id') ].id( $(this).attr('id') );
-					//fields[ $(this).attr('id') ].label( $(this).attr('label') );
-					//fields[ $(this).attr('id') ].disabled( $(this).attr('disabled') );
-					//fields[ $(this).attr('id') ].isnull( $(this).attr('null') );
 					fields[ $(this).attr('id') ].value( $(this).attr('value') );
-					//fields[ $(this).attr('id') ].datatype( $(this).attr('datatype') );
-					//fields[ $(this).attr('id') ].valid( $(this).attr('valid') );
 
 				});
 			}
 			return true;	// this might need to be moved up into the .each (above)
-
 	}
 }
 
@@ -151,6 +136,20 @@ function parseDeltaResponse( fields, success, error ){
 /*
  * Method
  */
+
+
+function callMethod( error ){
+	return function apply( event ){
+
+		var name = event.currentTarget.name;
+		SendRequest( 	CreateMethodRequest( name ),
+				error,
+				parseUpdateResponse( ActivityFields, error )
+				);
+
+		return true;
+	}
+}
 
 
 function CreateMethodRequest( name ){
@@ -172,38 +171,6 @@ function CreateMethodRequest( name ){
 
 
 /*
- *  LEGACY
- */
-
-function parseXML( xml ){
-
-	xml.replace("&lt;", "<");
-	xml.replace("&gt;", ">");
-
-	var execResults = $(xml).find("ExecResult").text();
-	var results = "";
-
-	if( execResults ){
-
-		$( execResults ).find( 'Activity' ).each( function ()
-		{
-			activityHandle = $(this).attr('activityHandle');
-		});
-
-		$( execResults ).find( 'Field' ).each( function() 
-		{ 
-			if( $(this).attr('id') == "Result" ){ 
-				results = $(this).attr('value');
-			} 
-		});
-	}
-	
-	return results;
-}
-
-
-
-/*
  *     Send Request
  *		harness for HTTP requests to the server
  *
@@ -214,7 +181,7 @@ function SendRequest ( xmlrequest, error, parser ){
 
 	$.ajax({
 		type: "post",
-		url: "/ESADemoService", // /ESADemoService 
+		url: "/ESADemoService", // wsURL
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
@@ -260,52 +227,30 @@ function Field( id, label, disabled, isnull, value, datatype, valid ){
 var ActivityName = "";
 var ActivityFields = {};	//ko.observableArray( [] );
 
-var viewModel = {
-	Op1: new Field( 'Op1', 'Operand 1', '', '1', '', 'number', '1' ),
-	Op2: new Field( 'Op1', 'Operand 1', '', '1', '', 'number', '1' ),
-	Result: new Field( 'Result', 'Result', '1', '1', '', 'number', '1' )
-}
-
-function setupObserversManually ( fields, success, error ){
-
-	var boundElements = $('[data-bind]');
-
-	for( var key in fields ) {
-		
-		$( '#' + fields[key].id ).change( function (){
-
-			SendRequest( 	CreateDeltaRequest( fields[key].id, fields[key].value ),
-					success,
-					error,
-					parseDeltaResponse( fields, success, error )
-					);
-		});
-	};
-
-	return true;
-}
-
 function setupObservers( fields, success, error ){
 
 	for( var id in fields ){
-	//for( var i=0; i < fields().length; i++ ){
 
-		fields[id].value.subscribe( 
-			function( fields, id, success, error ){
-				return function( newValue ){
-					SendRequest(	CreateDeltaRequest( id, newValue ),
-							error,
-							parseDeltaResponse( fields, success, error )
-							);
-				}
-			} ( fields, fields[id].id(), success, error )
-		);
+		if( fields[id] instanceof Field ){
+			fields[id].value.subscribe( 
+				function( fields, id, success, error ){
+					return function( newValue ){
+						SendRequest(	CreateDeltaRequest( id, newValue ),
+								error,
+								parseUpdateResponse( fields, success, error )
+								);
+					}
+				} ( fields, fields[id].id(), success, error )
+			);
+		}
 	}
 
 }
 
 function setupBindings( success, error ){
 	return function apply(){
+
+		ActivityFields.callMethod = callMethod( error );
 
 		ko.applyBindings( ActivityFields );
 		setupObservers( ActivityFields, success, error );
