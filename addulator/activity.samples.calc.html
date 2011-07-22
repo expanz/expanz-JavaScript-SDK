@@ -21,12 +21,6 @@
 
 	$(document).ready( function() {
 
-		//$('#submit').click( function () {
-
-		//	callMethod( 'add', success, error );
-
-		//});
-
 		if( !getSessionHandle() ){
 			window.location.href = './';
 		}
@@ -61,7 +55,7 @@
 	</div>
 
 	<div class='submit'>
-		<button id='submit' name='add' data-bind='click: callMethod, text: Result.label()' ></button>
+		<button id='submit' method-name='add' data-bind='click: callMethod, text: Result.label()' ></button>
 	</div>
 
 </div>

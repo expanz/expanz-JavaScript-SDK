@@ -141,7 +141,7 @@ function parseUpdateResponse( fields, success, error ){
 function callMethod( error ){
 	return function apply( event ){
 
-		var name = event.currentTarget.name;
+		var name = $(event.currentTarget).attr('method-name');
 		SendRequest( 	CreateMethodRequest( name ),
 				error,
 				parseUpdateResponse( ActivityFields, error )
