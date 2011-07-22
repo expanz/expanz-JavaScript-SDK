@@ -1,0 +1,57 @@
+SDK Usage Examples:
+
+
+***  Login HTML
+
+
+<html>
+<head>
+<script type='text/javascript' src='/js/expanz.login.js' />
+<script type='text/javascript'>
+     function error( result ){
+          // display error to user
+     }
+</script>
+</head>
+
+<body>
+     <span>Username</span>
+     <input type='text' data-bind='value: username'></input>
+     
+     <span>Password</span>
+     <input type='text' data-bind='value: password'></input>
+
+     <button data-bind='click: login'>login</button>
+</body>
+</html>
+
+
+
+
+***  Activity HTML
+
+<html>
+<head>
+<script type='text/javascript' src='/js/expanz.js' />
+<script type='text/javascript'>
+     function error( result ){
+          // display error to user
+     }
+</script>
+</head>
+
+<body>
+     <div id='Activity' name='MyExpanzApp'>
+
+          <span data-bind='text: myFieldNameA.label'></span>
+          <input type='text' data-bind='value: myFieldNameA.value'></input>
+     
+          <span data-bind='text: myFieldNameB.label'></span>
+          <input type='text' data-bind='value: myFieldNameB.value'></input>
+
+          <button id='submit' method-name='myMethodName' data-bind='click: callMethod' >myMethodName</button>
+
+     </div>
+</body>
+</html>
+
