@@ -115,7 +115,7 @@ function SendRequest ( xmlrequest, error, parser ){
 
 			} else {
 
-				var response = request.response;
+				var response = request.responseText;
 				
 				if( parser ){
 					eval( parser )( response );
