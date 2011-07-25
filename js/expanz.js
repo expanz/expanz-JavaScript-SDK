@@ -5,7 +5,7 @@
 // WebService URL
 // NOTE: this needs to be better abstracted (also, not currently applied because of cross domain request limitations on browser)
 
-var wsURL = 'https://test.expanz.com/ESADemoService/ESAService.asmx';
+var wsURL = '/ESADemoService/ESAService.asmx';
 
 var soapHeader = 	'<SOAP-ENV:Envelope ' +
 				'xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" ' +
@@ -181,7 +181,7 @@ function SendRequest ( xmlrequest, error, parser ){
 
 	$.ajax({
 		type: "post",
-		url: "/ESADemoService", // wsURL
+		url: wsURL, //"/ESADemoService",
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
