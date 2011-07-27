@@ -19,7 +19,7 @@
 
 	function error( str ){
 
-		$('.result').html( "<span style='color:red'>" + str + "</span>" );
+		$('.error').html( "<span style='color:red'>" + str + "</span>" );
 		return true;
 	}
 
@@ -39,10 +39,14 @@
 	</div>
 
 	<div class='submit'>
-		<button id='submit'>Login</button>
+		<button	data-bind='click: login' 
+			onSuccess='success' 
+			onError='error'>
+			Login
+		</button>
 	</div>
 
-	<div class='result'></div>
+	<div class='error'></div>
 
 </body>
 </html>

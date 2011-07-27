@@ -76,13 +76,15 @@ function parseCreateSessionResponse( success, error ) {
 
 		if( !getSessionHandle() || getSessionHandle.length > 0 ){
 
-			var error = '';
-			var errorString = $(xml).find( 'errorMessage' ).each( function ()
+			var errorString = '';
+
+			$(xml).find( 'errorMessage' ).each( function ()
 			{
-				error = $(this).text();
+				errorString = $(this).text();
 			});
-			if( error.length > 0 ){
-				eval( error )( $(this).text() );
+
+			if( errorString.length > 0 ){
+				eval( error )( errorString );
 				return false;
 			}
 		}
@@ -102,7 +104,7 @@ function SendRequest ( xmlrequest, error, parser ){
 
 	$.ajax({
 		type: "post",
-		url: wsURL,  // "/ESADemoService", 
+		url: wsURL, //"/ESADemoService",
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
@@ -111,7 +113,7 @@ function SendRequest ( xmlrequest, error, parser ){
 
 			if( request.status != 200 ){
 
-				error( 'There was a problem with the last request.' );
+				eval( error )( 'There was a problem with the last request.' );
 
 			} else {
 
@@ -147,7 +149,8 @@ function Field( id, label, disabled, isnull, value, datatype, valid ){
 
 var viewModel = {
 	Username: new Field( 'Username', 'Username', '0', '0', '', 'string', '1' ),
-	Password: new Field( 'Password', 'Password', '0', '0', '', 'string', '1' )
+	Password: new Field( 'Password', 'Password', '0', '0', '', 'string', '1' ),
+	login: login
 };
 
 function getSessionData( success, error ) {
@@ -164,22 +167,30 @@ function getSessionData( success, error ) {
 	};
 }
 
+function login( event ){
+//function login ( formElement ){
+
+	var success = window[ $(event.currentTarget).attr('onSuccess') ];
+	var error = window[ $(event.currentTarget).attr('onError') ];
+
+	var request = CreateSessionRequest( 	viewModel.Username.value,
+						viewModel.Password.value
+						);
+	SendRequest(	request,
+			error,
+			parseCreateSessionResponse(	getSessionData( success, error ),
+							error
+							) 
+			);
+
+	return false;
+}
+
+
 
 $(document).ready( function() {
 
 	ko.applyBindings(viewModel);
-
-	$('#submit').click( function () {
-			var request = CreateSessionRequest( 	viewModel.Username.value,
-								viewModel.Password.value
-								);
-			SendRequest(	request,
-					error,
-					parseCreateSessionResponse( getSessionData( success, error ), error ) 
-					);
-
-			return false;
-		});
 
 });
 
