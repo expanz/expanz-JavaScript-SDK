@@ -15,7 +15,6 @@
 		
 	}
 	function error( str ) {
-		// Deprecated: this function needs to refactored out
 		console.log( str );
 	}
 
@@ -64,8 +63,9 @@
 			method-name='add'
 			data-bind='click: Method'
 			onSuccess='success'
-			onError='error'
-			>add</button>
+			onError='error'>
+			add
+		</button>
 	</div>
 
 </div>
