@@ -43,7 +43,7 @@ function CreateSessionRequest( username, password ){
 			'<tns:inXml>' +
 				'&lt;ESA&gt; &lt;CreateSession user="' + username + '" ' +
 				'password="' + password + '" ' +
-				'appSite="ESADEMO" ' +
+				'appSite="SALESAPP" ' +
 				'authenticationMode="Primary" ' +
 				'clientVersion="Flex 1.0" ' +
 				'schemaVersion="2.0"/&gt; &lt;/ESA&gt;' +
@@ -104,7 +104,7 @@ function SendRequest ( xmlrequest, error, parser ){
 
 	$.ajax({
 		type: "post",
-		url: wsURL, //"/ESADemoService",
+		url: "/ESADemoService", //wsURL
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
@@ -168,10 +168,16 @@ function getSessionData( success, error ) {
 }
 
 function login( event ){
-//function login ( formElement ){
 
 	var success = window[ $(event.currentTarget).attr('onSuccess') ];
 	var error = window[ $(event.currentTarget).attr('onError') ];
+
+	if( !success ){
+		success = function(){ console.log( 'Attribute onSuccess was not defined.' ); };
+	}
+	if( !error ){
+		error = function(){ console.log( 'Attribute onError was not defined.' ); };
+	}
 
 	var request = CreateSessionRequest( 	viewModel.Username.value,
 						viewModel.Password.value

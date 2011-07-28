@@ -12,9 +12,10 @@
 
 	function success( result ) {
 
-		// Deprecated: this function needs to refactored out
+		
 	}
 	function error( str ) {
+		// Deprecated: this function needs to refactored out
 		console.log( str );
 	}
 
@@ -37,7 +38,7 @@
 </head>
 <body>
 
-<div id='Activity' value='Samples.Calc' >
+<div id='Activity' value='ESA.Sales.Calc' >
 
 	<div class='textinput'>
 		<span data-bind='text: Op1.label()'></span>
@@ -54,8 +55,17 @@
 		<div id='Result' data-bind='text: Result.value'></div>
 	</div>
 
+	<div class='error'>
+		<div id='error'></div>
+	</div>
+
 	<div class='submit'>
-		<button id='submit' method-name='add' data-bind='click: callMethod' >add</button>
+		<button	id='submit'
+			method-name='add'
+			data-bind='click: Method'
+			onSuccess='success'
+			onError='error'
+			>add</button>
 	</div>
 
 </div>

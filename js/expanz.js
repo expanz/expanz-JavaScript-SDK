@@ -35,7 +35,11 @@ function getActivityHandle(){
 	return activityHandle;
 }
 
-
+function getFunctionFromDOMByName( name ){
+	var fn = window[ name ];
+	if( !fn ){ return function(){ console.log( 'Function: ' + name + ' has not been defined.' ); } }
+	return fn;
+}
 
 /*
  *   Create Activity
@@ -127,6 +131,9 @@ function parseUpdateResponse( fields, success, error ){
 
 				});
 			}
+
+			eval( success )( execResults );			
+
 			return true;	// this might need to be moved up into the .each (above)
 	}
 }
@@ -142,9 +149,13 @@ function callMethod( error ){
 	return function apply( event ){
 
 		var name = $(event.currentTarget).attr('method-name');
+
+		var success = getFunctionFromDOMByName( $(event.currentTarget).attr('onSuccess') );
+		var error = getFunctionFromDOMByName( $(event.currentTarget).attr('onError') );
+
 		SendRequest( 	CreateMethodRequest( name ),
 				error,
-				parseUpdateResponse( ActivityFields, error )
+				parseUpdateResponse( ActivityFields, success, error )
 				);
 
 		return true;
@@ -181,7 +192,7 @@ function SendRequest ( xmlrequest, error, parser ){
 
 	$.ajax({
 		type: "post",
-		url: wsURL, //"/ESADemoService",
+		url: "/ESADemoService", //wsURL,
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
@@ -227,20 +238,24 @@ function Field( id, label, disabled, isnull, value, datatype, valid ){
 var ActivityName = "";
 var ActivityFields = {};	//ko.observableArray( [] );
 
-function setupObservers( fields, success, error ){
+function setupObservers( fields ){
 
 	for( var id in fields ){
 
 		if( fields[id] instanceof Field ){
 			fields[id].value.subscribe( 
-				function( fields, id, success, error ){
+				function( fields, id ){
 					return function( newValue ){
+
+						var success = function(){}; //getFunctionFromDOMByName( $(this).attr('onSuccess') );
+						var error = function(){}; //getFunctionFromDOMByName( $(this).attr('onError') );
+
 						SendRequest(	CreateDeltaRequest( id, newValue ),
 								error,
 								parseUpdateResponse( fields, success, error )
 								);
 					}
-				} ( fields, fields[id].id(), success, error )
+				} ( fields, fields[id].id() )
 			);
 		}
 	}
@@ -250,7 +265,16 @@ function setupObservers( fields, success, error ){
 function setupBindings( success, error ){
 	return function apply(){
 
-		ActivityFields.callMethod = callMethod( error );
+		ActivityFields.Method = callMethod( error );
+		ActivityFields.Error = ko.dependentObservable( {
+			read: function() {
+				return 'This is a test error';
+			},
+			write: function( value ) {
+				console.log( 'A new error is being added; ' + value );
+			},
+			owner: ActivityFields
+		});
 
 		ko.applyBindings( ActivityFields );
 		setupObservers( ActivityFields, success, error );
@@ -271,7 +295,5 @@ $(document).ready( function() {
 
 	
 });
-
-
 
 
