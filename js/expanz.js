@@ -38,6 +38,7 @@ var Activities = [];
 function Field( id, label, disabled, isnull, value, datatype, valid ){
 	this.id = ko.observable(id);
 	this.label = ko.observable(label);
+	this.disabled = ko.observable(disabled);
 	this.isnull = ko.observable(isnull);
 	this.value = ko.observable( value );
 	this.datatype = ko.observable(datatype);
@@ -155,6 +156,12 @@ function parseUpdateResponse( fields, success, error ){
 				{ 
 					fields[ $(this).attr('id') ].value( $(this).attr('value') );
 				});
+				$( execResults ).find( 'Message' ).each( function ()	
+				{
+					if( $(this).attr('type') == 'Error' ){
+						eval( error )( $(this).text() );
+					}
+				});
 			}
 
 			eval( success )( execResults );			
@@ -215,7 +222,7 @@ function SendRequest ( xmlrequest, parser, error ){
 
 	$.ajax({
 		type: "post",
-		url: "/ESADemoService", // wsURL,
+		url: wsURL, //"/ESADemoService",
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
@@ -256,18 +263,23 @@ function setupObservers( activity, fields ){
 
 		if( fields[id] instanceof Field ){
 			fields[id].value.subscribe( 
-				function( fields, id ){
+				function( field, allFields ){
 					return function( newValue ){
 
 						var success = function(){}; //getFunctionFromDOMByName( $(this).attr('onSuccess') );
-						var error = function(){}; //getFunctionFromDOMByName( $(this).attr('onError') );
+						var error = function( string ){ 
+							$('#error').text( "Error: " + string ); 
+						}; //getFunctionFromDOMByName( $(this).attr('onError') );
 
-						SendRequest(	CreateDeltaRequest( activity, id, newValue ),
-								parseUpdateResponse( fields, success, error ),
+						if( field.disabled() != 1 ){
+							
+							SendRequest(	CreateDeltaRequest( activity, field.id(), newValue ),
+								parseUpdateResponse( allFields, success, error ),
 								networkError
 								);
+						}
 					}
-				} ( fields, fields[id].id() )
+				} ( fields[id], fields )
 			);
 		}
 	}
@@ -278,21 +290,21 @@ function setupBindings( activity ){
 	return function apply( fields ){
 
 		for( attr in fields ){ Bindings[attr] = fields[attr]; }
+		
+		setupObservers( activity, Bindings );
 
 		Bindings.Method = callMethod( activity, Bindings );
-
-		Bindings.Error = ko.dependentObservable( {
-			read: function() {
-				return 'This is a test error';
-			},
-			write: function( value ) {
-				console.log( 'A new error is being added; ' + value );
-			},
-			owner: Bindings
-		});
+		//Bindings.Error = ko.dependentObservable( {
+		//	read: function() {
+		//		return 'This is a test error';
+		//	},
+		//	write: function( value ) {
+		//		console.log( 'A new error is being added; ' + value );
+		//	},
+		//	owner: Bindings
+		//});
 
 		ko.applyBindings( Bindings );
-		setupObservers( activity, Bindings );
 		return true;
 	}
 }
@@ -301,7 +313,7 @@ function setupBindings( activity ){
 $(document).ready( function() {
 
 
-	$('#Activity').each( function(){
+	$('.Activity').each( function(){
 		var newActivity = new Activity( $(this).attr('value') );
 		LoadActivity( newActivity );
 		Activities.push( newActivity );

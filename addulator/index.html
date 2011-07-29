@@ -28,25 +28,28 @@
 
 <body>
 
-	<div class='textinput'>
-		<span data-bind='text: Username.label'></span>
-		<input type='text' data-bind='value: Username.value' />
-	</div>
+	<div id='container'>
 
-	<div class='textinput'>
-		<span data-bind='text: Password.label'></span>
-		<input type='text' data-bind='value: Password.value'/>
-	</div>
+		<div class='textinput' id='username'>
+			<span data-bind='text: Username.label'></span>
+			<input type='text' data-bind='value: Username.value' />
+		</div>
 
-	<div class='submit'>
-		<button	data-bind='click: login' 
-			onSuccess='success'
-			onError='error'>
-			Login
-		</button>
-	</div>
+		<div class='textinput' id='password'>
+			<span data-bind='text: Password.label'></span>
+			<input type='password' data-bind='value: Password.value'/>
+		</div>
 
-	<div class='error'></div>
+		<div class='submit' id='login'>
+			<button	data-bind='click: login' 
+				onSuccess='success'
+				onError='error'>
+				Login
+			</button>
+		</div>
+
+		<div class='error'></div>
+	</div>
 
 </body>
 </html>

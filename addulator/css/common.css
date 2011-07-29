@@ -1,11 +1,89 @@
+/*
+ *  Common Elements
+ */
+
 body {
-	width: 200px;
+	margin: 0px;
+	padding: 0px;
+	font-family: Helvetica, Arial, Sans-Serif;
+}
+
+input {
+	font-size: 14px;
+	width: 230px;
+}
+
+button {
+	margin: 0px;
+	padding: 10px 35px;
+	vertical-align: middle;
+	cursor: pointer;
+
+	border: 0px;
+	border-radius: 4px;
+	background: #65a9d7;
+	
+	color: white;
+	font-size: 16px;
+	font-weight: bold;
+	text-decoration: none;
+}
+button:hover {
+	background: #28597a;
+	color: #ccc;
+}
+
+/*
+ *  Common selectors
+ */
+
+#container {
+	margin: 100px auto;
+	width: 400px;
+	display: block;
 }
 
 .textinput {
 	margin: 10px;
+	width:  350px;
+}
+.label {
+	font-size: 18px;
+	width: 100px;
+	float: left;
 }
 
-.submit {
-	float: right;
+/*
+ * Login Page
+ */
+ 
+#login {
+	width: 100px;
+	margin: 25px 0px 25px 220px;
 }
+
+
+/*
+ * Activity
+ */
+ 
+.submit{
+	width: 100px;
+	margin: 25px 0px 25px 220px;
+}
+
+.results{
+	display:inline-block;
+	
+	font-size: 16px;
+}
+
+
+
+
+
+
+
+
+
+
