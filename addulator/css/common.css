@@ -39,18 +39,37 @@ button:hover {
 
 #container {
 	margin: 100px auto;
-	width: 400px;
+	width: 500px;
 	display: block;
 }
 
-.textinput {
+.errorContainer {
+	text-align: center;
+	
+	width: 450px;
 	margin: 10px;
-	width:  350px;
+	
+	background-color: #ffd56f;
+}
+.error {
+	display: block;
+	
+	font-size: 12px;
+	color: red;
+}
+
+.textinput {
+	
+	margin: 10px;
+	width: 450px;
 }
 .label {
 	font-size: 18px;
 	width: 100px;
 	float: left;
+}
+.textinput input {
+	
 }
 
 /*
@@ -68,12 +87,15 @@ button:hover {
  */
  
 .submit{
-	width: 100px;
-	margin: 25px 0px 25px 220px;
+	width: 340px;
+}
+.submit button {
+	float: right;
 }
 
 .results{
 	display:inline-block;
+	margin: 25px 0px 0px 0px;
 	
 	font-size: 16px;
 }

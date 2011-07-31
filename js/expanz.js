@@ -43,6 +43,7 @@ function Field( id, label, disabled, isnull, value, datatype, valid ){
 	this.value = ko.observable( value );
 	this.datatype = ko.observable(datatype);
 	this.valid = ko.observable(valid);
+	this.error = ko.observable("");
 }
 
 
@@ -149,7 +150,7 @@ function parseUpdateResponse( fields, success, error ){
 			xml.replace("&gt;", ">");
 
 			var execResults = $(xml).find("ExecResult").text();
-			var results = "";
+			var errorOccurred = false;
 
 			if( execResults ){
 				$( execResults ).find( 'Field' ).each( function() 
@@ -160,12 +161,13 @@ function parseUpdateResponse( fields, success, error ){
 				{
 					if( $(this).attr('type') == 'Error' ){
 						eval( error )( $(this).text() );
+						errorOccurred = true;
 					}
 				});
 			}
 
-			eval( success )( execResults );			
-			return true;	// this might need to be moved up into the .each (above)
+			if( !errorOccurred ){	eval( success )( execResults );	}
+			return execResults;
 	}
 }
 
@@ -266,10 +268,12 @@ function setupObservers( activity, fields ){
 				function( field, allFields ){
 					return function( newValue ){
 
-						var success = function(){}; //getFunctionFromDOMByName( $(this).attr('onSuccess') );
+						var success = function(){
+							field.error( "" );
+						}; 
 						var error = function( string ){ 
-							$('#error').text( "Error: " + string ); 
-						}; //getFunctionFromDOMByName( $(this).attr('onError') );
+							field.error( string );
+						};
 
 						if( field.disabled() != 1 ){
 							
@@ -290,20 +294,9 @@ function setupBindings( activity ){
 	return function apply( fields ){
 
 		for( attr in fields ){ Bindings[attr] = fields[attr]; }
-		
+
 		setupObservers( activity, Bindings );
-
 		Bindings.Method = callMethod( activity, Bindings );
-		//Bindings.Error = ko.dependentObservable( {
-		//	read: function() {
-		//		return 'This is a test error';
-		//	},
-		//	write: function( value ) {
-		//		console.log( 'A new error is being added; ' + value );
-		//	},
-		//	owner: Bindings
-		//});
-
 		ko.applyBindings( Bindings );
 		return true;
 	}
