@@ -10,10 +10,8 @@
 
 <script type='text/javascript'>
 
-	function success( result ) {
-	}
-	function error( str ) {
-	}
+	function success( result ) {}
+	function error( errorString ) {}
 
 
 	$(document).ready( function() {
@@ -37,18 +35,18 @@
 <div id='container' class='Activity' value='ESA.Sales.Calc' >
 
 	<div class='errorContainer'>
-		<span class='error' data-bind='text: Op1.error()'></span>
-		<span class='error' data-bind='text: Op2.error()'></span>
-		<span class='error' data-bind='text: Result.error()'></span>
+		<span class='error' data-bind='text: Op1.error'></span>
+		<span class='error' data-bind='text: Op2.error'></span>
+		<span class='error' data-bind='text: Result.error'></span>
 	</div>
 
 	<div class='textinput'>
-		<div class='label' data-bind='text: Op1.label()'></div>
+		<div class='label' data-bind='text: Op1.label'></div>
 		<input type='text' data-bind='value: Op1.value' />
 	</div>
 
 	<div class='textinput'>
-		<span class='label' data-bind='text: Op2.label()'></span>
+		<span class='label' data-bind='text: Op2.label'></span>
 		<input type='text' data-bind='value: Op2.value' />
 	</div>
 
@@ -63,7 +61,7 @@
 	</div>
 
 	<div class='results'>
-		<span class='label' data-bind='text: Result.label()'></span>
+		<span class='label' data-bind='text: Result.label'></span>
 		<input type='text' data-bind='value: Result.value' disabled='true' />
 	</div>
 

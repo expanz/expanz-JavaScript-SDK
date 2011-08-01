@@ -35,15 +35,15 @@ function Activity( name ) {
 }
 var Activities = [];
 
-function Field( id, label, disabled, isnull, value, datatype, valid ){
-	this.id = ko.observable(id);
-	this.label = ko.observable(label);
+function Field( id, label, disabled, nullvalue, value, datatype, valid ){
+	this.id = id;
+	this.label = label;
 	this.disabled = ko.observable(disabled);
-	this.isnull = ko.observable(isnull);
+	this.nullvalue = nullvalue;
 	this.value = ko.observable( value );
-	this.datatype = ko.observable(datatype);
-	this.valid = ko.observable(valid);
-	this.error = ko.observable("");
+	this.datatype = datatype;
+	this.valid = valid;
+	this.error = ko.observable( "" );
 }
 
 
@@ -114,7 +114,7 @@ function parseCreateActivityResponse( activity, callback ){
 							$(this).attr('datatype'),
 							$(this).attr('valid')
 							);  
-				fields[ field.id() ] = field;
+				fields[ field.id ] = field;
 			});
 		}
 
@@ -233,7 +233,7 @@ function SendRequest ( xmlrequest, parser, error ){
 
 			if( request.status != 200 ){
 
-				error( 'There was a problem with the last request.' );
+				eval( error )( 'There was a problem with the last request.' );
 
 			} else {
 
@@ -273,14 +273,14 @@ function setupObservers( activity, fields ){
 						}; 
 						var error = function( string ){ 
 							field.error( string );
+							//field.error = string;
 						};
 
 						if( field.disabled() != 1 ){
-							
-							SendRequest(	CreateDeltaRequest( activity, field.id(), newValue ),
-								parseUpdateResponse( allFields, success, error ),
-								networkError
-								);
+							SendRequest(	CreateDeltaRequest( activity, field.id, newValue ),
+									parseUpdateResponse( allFields, success, error ),
+									networkError
+									);
 						}
 					}
 				} ( fields[id], fields )
