@@ -13,14 +13,11 @@
 <script type='text/javascript'>
 
 	function success(){
-		var url = './activity.samples.calc.html';
-		window.location.href = url;
+		redirect( './activity.samples.calc.html' );
 	}
 
 	function error( str ){
-
 		$('.error').html( "<span style='color:red'>" + str + "</span>" );
-		return true;
 	}
 
 </script>
@@ -41,7 +38,7 @@
 		</div>
 
 		<div class='submit' id='login'>
-			<button	data-bind='click: login' 
+			<button	data-bind='click: Login' 
 				onSuccess='success'
 				onError='error'>
 				Login

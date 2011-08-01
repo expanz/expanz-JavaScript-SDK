@@ -1,22 +1,25 @@
-//
-// SDK Functions
-//
+/*
+ *                EXPANZ JavaScript SDK
+ *
+ *
+ */
 
-// WebService URL
-// NOTE: this needs to be better abstracted (also, not currently applied because of cross domain request limitations on browser)
 
-var wsURL = '/ESADemoService/ESAService.asmx';
 
-var soapHeader = 	'<SOAP-ENV:Envelope ' +
-				'xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" ' +
-				'xmlns:s="http://www.w3.org/2001/XMLSchema" ' +
-				'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' +
-			'>' +
-			'<SOAP-ENV:Body>';
+/*
+ *   SDK Exposed Functions
+ *           Use these functions to write your apps
+ */
 
-var soapFooter = 	'</SOAP-ENV:Body>' +
-			'</SOAP-ENV:Envelope>';
+function redirect( destinationURL ){
+	window.location.href = destinationURL;
+}
 
+
+/*
+ *   Session Functions
+ *         These functions create, query, maintain, destroy user sessions
+ */
 
 function getSessionHandle() {
 
@@ -37,32 +40,64 @@ function endSession() {
 }
 
 
-function CreateSessionRequest( username, password ){
 
-	var body = 	'<tns:CreateSession xmlns:tns="http://tempuri.org/">' +
-			'<tns:inXml>' +
-				'&lt;ESA&gt; &lt;CreateSession user="' + username + '" ' +
-				'password="' + password + '" ' +
-				'appSite="SALESAPP" ' +
-				'authenticationMode="Primary" ' +
-				'clientVersion="Flex 1.0" ' +
-				'schemaVersion="2.0"/&gt; &lt;/ESA&gt;' +
-			'</tns:inXml></tns:CreateSession>';
+/*
+ *   On Ready (once the page loads, do: )
+ *          :setup the bindings (using Knockout.js) that connection Username/Password/Login to the DOM elements
+ */
 
-	return soapHeader + body + soapFooter;
+$(document).ready( function() {
+	
+	var Bindings = {
+		Username: new Field( 'Username', 'Username', '0', '0', '', 'string', '1' ),
+		Password: new Field( 'Password', 'Password', '0', '0', '', 'string', '1' ),
+	};
+	Bindings.Login = login( Bindings );
+
+	ko.applyBindings( Bindings );
+
+});
+
+
+
+/*
+ *   Actions
+ *         :top-level functions issued by user input or server request
+ */
+
+function login( fields ){
+	// apply: gets called when 'Login' is invoked (you click 'Login')
+	return function apply( event ){
+
+		var success = 	getFunctionFromDOMByName( $(event.currentTarget).attr('onSuccess') );
+		var error = 	getFunctionFromDOMByName( $(event.currentTarget).attr('onError') );
+
+		SendRequest(	CreateSessionRequest( fields['Username'].value, fields['Password'].value ),
+				parseCreateSessionResponse( getSessionData( success, error ), error ),
+				error
+				);
+		return false;
+	}
 }
 
-function CreateGetSessionDataRequest(){
 
-	var body = 	'<tns:Exec xmlns:tns="http://tempuri.org/">' +
-			'<tns:inXML>&lt;ESA&gt;' +
-			'&lt;GetSessionData/&gt;' +
-			'&lt;/ESA&gt;</tns:inXML>' +
-			'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
-			'</tns:Exec>';
+function getSessionData( success, error ) {
+	// apply: gets called when parseCreateSessionResponse has succeed (see 'login', where the SendRequest call is made)
+	return function apply( str ){ 
 
-	return soapHeader + body + soapFooter;
+		SendRequest(	CreateGetSessionDataRequest(),
+				parseGetSessionDataResponse( success, error ),
+				error
+				);
+	};
 }
+
+
+
+/*
+ *    Response Parsers
+ *         :used to parse XML results from server requests. Use these functions for the 'responseHandler' argument to 'SendRequest'
+ */
 
 function parseCreateSessionResponse( success, error ) {
 	return function apply ( xml ) {
@@ -100,11 +135,17 @@ function parseGetSessionDataResponse( success, error ){
 }
 
 
-function SendRequest ( xmlrequest, error, parser ){
+
+/*
+ *    Send Request
+ *        :manage the sending of XML requests to the server, and dispatching of response handlers
+ */
+
+function SendRequest ( xmlrequest, responseHandler, error ){
 
 	$.ajax({
 		type: "post",
-		url: wsURL, //"/ESADemoService",
+		url: "/ESADemoService", //wsURL
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
@@ -119,8 +160,8 @@ function SendRequest ( xmlrequest, error, parser ){
 
 				var response = request.responseText;
 				
-				if( parser ){
-					eval( parser )( response );
+				if( responseHandler ){
+					eval( responseHandler )( response );
 				} 
 			}
 		}
@@ -129,14 +170,61 @@ function SendRequest ( xmlrequest, error, parser ){
 
 
 
+/*
+ *   SOAP Message Contruction Functions
+ *
+ */
+
+var soapHeader = 	'<SOAP-ENV:Envelope ' +
+				'xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" ' +
+				'xmlns:s="http://www.w3.org/2001/XMLSchema" ' +
+				'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' +
+			'>' +
+			'<SOAP-ENV:Body>';
+
+var soapFooter = 	'</SOAP-ENV:Body>' +
+			'</SOAP-ENV:Envelope>';
+
+function CreateSessionRequest( username, password ){
+
+	var body = 	'<tns:CreateSession xmlns:tns="http://tempuri.org/">' +
+			'<tns:inXml>' +
+				'&lt;ESA&gt; &lt;CreateSession user="' + username + '" ' +
+				'password="' + password + '" ' +
+				'appSite="SALESAPP" ' +
+				'authenticationMode="Primary" ' +
+				'clientVersion="Flex 1.0" ' +
+				'schemaVersion="2.0"/&gt; &lt;/ESA&gt;' +
+			'</tns:inXml></tns:CreateSession>';
+
+	return soapHeader + body + soapFooter;
+}
+
+function CreateGetSessionDataRequest(){
+
+	var body = 	'<tns:Exec xmlns:tns="http://tempuri.org/">' +
+			'<tns:inXML>&lt;ESA&gt;' +
+			'&lt;GetSessionData/&gt;' +
+			'&lt;/ESA&gt;</tns:inXML>' +
+			'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
+			'</tns:Exec>';
+
+	return soapHeader + body + soapFooter;
+}
+
 
 
 /*
-/*   Automatic binding to View objects
-/*
-/*
-/*/
+ *   Private Variables
+ *
+ */
 
+var wsURL = '/ESADemoService/ESAService.asmx';
+
+/*
+ *   Private Object Prototypes
+ *
+ */
 
 function Field( id, label, disabled, isnull, value, datatype, valid ){
 	this.id = id;
@@ -147,59 +235,16 @@ function Field( id, label, disabled, isnull, value, datatype, valid ){
 	this.valid = valid;
 }
 
-var viewModel = {
-	Username: new Field( 'Username', 'Username', '0', '0', '', 'string', '1' ),
-	Password: new Field( 'Password', 'Password', '0', '0', '', 'string', '1' ),
-	login: login
-};
 
-function getSessionData( success, error ) {
-	return function apply( str ){ 
+/*
+ *   Private Helper Functions
+ *
+ */
 
-		if( !str ){
-			SendRequest(	CreateGetSessionDataRequest(),
-					error,
-					parseGetSessionDataResponse( success, error )
-					);
-		} else {
-			eval( error )( str );
-		}
-	};
+
+function getFunctionFromDOMByName( name ){
+	var fn = window[ name ];
+	if( !fn ){ return function(){ console.log( 'Function: ' + name + ' has not been defined.' ); } }
+	return fn;
 }
-
-function login( event ){
-
-	var success = window[ $(event.currentTarget).attr('onSuccess') ];
-	var error = window[ $(event.currentTarget).attr('onError') ];
-
-	if( !success ){
-		success = function(){ console.log( 'Attribute onSuccess was not defined.' ); };
-	}
-	if( !error ){
-		error = function(){ console.log( 'Attribute onError was not defined.' ); };
-	}
-
-	var request = CreateSessionRequest( 	viewModel.Username.value,
-						viewModel.Password.value
-						);
-	SendRequest(	request,
-			error,
-			parseCreateSessionResponse(	getSessionData( success, error ),
-							error
-							) 
-			);
-
-	return false;
-}
-
-
-
-$(document).ready( function() {
-
-	ko.applyBindings(viewModel);
-
-});
-
-
-
 
