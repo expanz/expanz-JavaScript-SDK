@@ -13,20 +13,6 @@
 	function success( result ) {}
 	function error( errorString ) {}
 
-
-	$(document).ready( function() {
-
-		if( !getSessionHandle() ){
-			window.location.href = './';
-		}
-
-		window.onbeforeunload = function () {
-			endSession();
-		};
-
-	});
-
-
 </script>
 
 </head>

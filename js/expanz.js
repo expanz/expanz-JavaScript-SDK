@@ -273,7 +273,6 @@ function setupObservers( activity, fields ){
 						}; 
 						var error = function( string ){ 
 							field.error( string );
-							//field.error = string;
 						};
 
 						if( field.disabled() != 1 ){
@@ -305,6 +304,13 @@ function setupBindings( activity ){
 
 $(document).ready( function() {
 
+	if( !getSessionHandle() ){
+		window.location.href = './';
+	}
+
+	window.onbeforeunload = function () {
+		endSession();
+	};
 
 	$('.Activity').each( function(){
 		var newActivity = new Activity( $(this).attr('value') );
