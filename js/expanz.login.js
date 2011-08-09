@@ -177,7 +177,7 @@ function SendRequest ( xmlrequest, responseHandler, error ){
 
 var soapHeader = 	'<SOAP-ENV:Envelope ' +
 				'xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" ' +
-				'xmlns:s="http://www.w3.org/2001/XMLSchema" ' +
+				'xmlns:xsd="http://www.w3.org/2001/XMLSchema" ' +
 				'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' +
 			'>' +
 			'<SOAP-ENV:Body>';

@@ -25,7 +25,7 @@ function getSessionHandle() {
 	return $.cookie( '_us' );
 }
 
-function endSession() {
+function deleteSessionHandle() {
 
 	$.cookie( '_us', "" ); //, {  path: '/', expires: 1 } );
    return true;
@@ -38,13 +38,15 @@ function networkError( e ){
 
 function onLogout( event ){
 
-   if( endSession() ){
-      return callLogoutFromDOM( true, event );
-   }
-   return callLogoutFromDOM( false, event );
+   var successFn = getAttrFnFromDOM( 'Logout', 'onSuccess' );
+   var errorFn = getAttrFnFromDOM( 'Logout', 'onError' );
+
+   SendRequest(   CreateReleaseSessionRequest(),
+                  parseReleaseSessionResponse( successFn, errorFn ),
+                  networkError
+                  );
 }
 
-      
 
 
 /*
@@ -178,6 +180,13 @@ function parseCreateActivityResponse( activity, callback ){
 
 		if( execResults ){
 
+         $(execResults).find( 'Message' ).each( function ()
+         {
+            if( $(this).attr('type') == 'Error' ){
+               networkError( $(this).text() );
+            }
+         });
+
 			$( execResults ).find( 'Activity' ).each( function ()
 			{
 				activity.handle = $(this).attr('activityHandle');
@@ -196,6 +205,9 @@ function parseCreateActivityResponse( activity, callback ){
 				fields[ field.id ] = field;
 			});
 		}
+      else{
+         networkError( execResults );
+      }
 
 		return eval( callback )( fields );
 	}
@@ -232,9 +244,21 @@ function parseUpdateResponse( fields, success, error ){
 	}
 }
 
+function parseReleaseSessionResponse( success, error ){
+   return function apply( xml ){
 
+      if( $(xml).find("ReleaseSessionResult").text() == 'true' ){
+      
+         if( deleteSessionHandle() ){
+            //return eval( success )();
+            return true;
+         }
+         return eval( error )();
+      }
 
-
+      networkError( $(xml).find('errors').text() );
+   }
+}   
 
 
 
@@ -281,7 +305,7 @@ function SendRequest ( xmlrequest, responseHandler, error ){
 
 var soapHeader = 	'<SOAP-ENV:Envelope ' +
 				'xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" ' +
-				'xmlns:s="http://www.w3.org/2001/XMLSchema" ' +
+				'xmlns:xsd="http://www.w3.org/2001/XMLSchema" ' +
 				'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' +
 			'>' +
 			'<SOAP-ENV:Body>';
@@ -334,7 +358,14 @@ function CreateMethodRequest( activity, methodName ){
 }
 
 
+function CreateReleaseSessionRequest( username, password ){
 
+	var body = 	'<i0:ReleaseSession xmlns:i0="http://www.expanz.com/ESAService">' +
+               '<i0:sessionHandle>' + getSessionHandle() + '</i0:sessionHandle>' +
+               '</i0:ReleaseSession>';
+
+	return soapHeader + body + soapFooter;
+}
 
 
 /*
@@ -382,22 +413,20 @@ function getFunctionFromDOMByName( name ){
 	return fn;
 }
 
-function callLogoutFromDOM( success, event ){
+function getAttrFnFromDOM( databindName, attributeName ){
 
-   var attribute = 'onSuccess';
-   if( !success ){
-      attribute = 'onError';
-   }
-   if( event ){
-     var fn = getFunctionFromDOMByName( $(event.currentTarget).attr( attribute ) );
-     return eval( fn )();
-  }
-  $('[data-bind]').each( function() {
-     if( $(this).attr('data-bind').indexOf("Logout") != -1){ 
-        fn = getFunctionFromDOMByName( $(this).attr( attribute ) );
-        return eval( fn )();
-     }
-  });
+   //if( possibleFunctionName ){
+   //  var fn = getFunctionFromDOMByName( $(event.currentTarget).attr( attributeName ) );
+   //  return fn;
+   //}
+   var fnName = '';
+   $('[data-bind]').each( function() {
+      if( $(this).attr('data-bind').indexOf( databindName ) != -1){ 
+         fnName = $(this).attr( attributeName );
+      }
+   });
+
+   return getFunctionFromDOMByName( fnName );
 }
 
 
