@@ -145,7 +145,7 @@ function SendRequest ( xmlrequest, responseHandler, error ){
 
 	$.ajax({
 		type: "post",
-		url: "/ESADemoService", //wsURL
+		url: wsURL, //"/ESADemoService",
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
@@ -187,27 +187,27 @@ var soapFooter = 	'</SOAP-ENV:Body>' +
 
 function CreateSessionRequest( username, password ){
 
-	var body = 	'<tns:CreateSession xmlns:tns="http://tempuri.org/">' +
-			'<tns:inXml>' +
+	var body = 	'<i0:CreateSession xmlns:i0="http://www.expanz.com/ESAService">' +
+			'<i0:inXml>' +
 				'&lt;ESA&gt; &lt;CreateSession user="' + username + '" ' +
 				'password="' + password + '" ' +
 				'appSite="SALESAPP" ' +
 				'authenticationMode="Primary" ' +
 				'clientVersion="Flex 1.0" ' +
 				'schemaVersion="2.0"/&gt; &lt;/ESA&gt;' +
-			'</tns:inXml></tns:CreateSession>';
+			'</i0:inXml></i0:CreateSession>';
 
 	return soapHeader + body + soapFooter;
 }
 
 function CreateGetSessionDataRequest(){
 
-	var body = 	'<tns:Exec xmlns:tns="http://tempuri.org/">' +
-			'<tns:inXML>&lt;ESA&gt;' +
+	var body = 	'<i0:Exec xmlns:i0="http://www.expanz.com/ESAService">' +
+			'<i0:inXML>&lt;ESA&gt;' +
 			'&lt;GetSessionData/&gt;' +
-			'&lt;/ESA&gt;</tns:inXML>' +
-			'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
-			'</tns:Exec>';
+			'&lt;/ESA&gt;</i0:inXML>' +
+			'<i0:sessionHandle>' + getSessionHandle() + '</i0:sessionHandle>' +
+			'</i0:Exec>';
 
 	return soapHeader + body + soapFooter;
 }

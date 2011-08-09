@@ -106,12 +106,14 @@ function setupObservers( activity, fields ){
 							field.error( string );
 						};
 
-						if( field.disabled != 1 ){
+						if( field.disabled != 1 && !field.serverUpdated ){
 							SendRequest(	CreateDeltaRequest( activity, field.id, newValue ),
 									parseUpdateResponse( allFields, success, error ),
 									networkError
 									);
 						}
+
+                  field.serverUpdated = false;
 					}
 				} ( fields[id], fields )
 			);
@@ -170,13 +172,13 @@ function parseCreateActivityResponse( activity, callback ){
 			$( execResults ).find( 'Field' ).each( function() 
 			{ 
 				var field = new Field(	$(this).attr('id'),
-							$(this).attr('label'),
-							$(this).attr('disabled'),
-							$(this).attr('null'),
-							$(this).attr('value'),
-							$(this).attr('datatype'),
-							$(this).attr('valid')
-							);  
+							               $(this).attr('label'),
+               							$(this).attr('disabled'),
+					               		$(this).attr('null'),
+               							$(this).attr('value'),
+               							$(this).attr('datatype'),
+					               		$(this).attr('valid')
+            							);  
 				fields[ field.id ] = field;
 			});
 		}
@@ -197,11 +199,14 @@ function parseUpdateResponse( fields, success, error ){
 			if( execResults ){
 				$( execResults ).find( 'Field' ).each( function() 
 				{ 
-					fields[ $(this).attr('id') ].value( $(this).attr('value') );
+               if(  fields[ $(this).attr('id') ].value() != $(this).attr('value') ){
+                  fields[ $(this).attr('id') ].serverUpdated = true;
+	   				fields[ $(this).attr('id') ].value( $(this).attr('value') );
+               }
 				});
-				$( execResults ).find( 'Message' ).each( function ()	
+				$( execResults ).find( 'Message' ).each( function()	
 				{
-					if( $(this).attr('type') == 'Error' ){
+					if( $(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning'  ){
 						eval( error )( $(this).text() );
 						errorOccurred = true;
 					}
@@ -229,7 +234,7 @@ function SendRequest ( xmlrequest, responseHandler, error ){
 
 	$.ajax({
 		type: "post",
-		url: "/ESADemoService", //wsURL
+		url: wsURL, //"/ESADemoService",
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
@@ -273,26 +278,26 @@ var soapFooter = 	'</SOAP-ENV:Body>' +
 
 function CreateActivityRequest( activity, style ){
 
-	var body = 	'<tns:Exec xmlns:tns="http://tempuri.org/">' +
-			'<tns:inXML>&lt;ESA sessionHandle="' + getSessionHandle() + '"&gt;' +
+	var body = 	'<i0:Exec xmlns:i0="http://www.expanz.com/ESAService">' +
+			'<i0:inXML>&lt;ESA sessionHandle="' + getSessionHandle() + '"&gt;' +
 			'&lt;CreateActivity name="' + activity.name + '" style="' + style + '"/&gt;' + //name = Samples.Calc
-			'&lt;/ESA&gt;</tns:inXML>' +
-			'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
-			'</tns:Exec>';
+			'&lt;/ESA&gt;</i0:inXML>' +
+			'<i0:sessionHandle>' + getSessionHandle() + '</i0:sessionHandle>' +
+			'</i0:Exec>';
 
 	return soapHeader + body + soapFooter;
 }
 
 function CreateDeltaRequest( activity, id, value ){
 
-	var body = '<tns:Exec xmlns:tns="http://tempuri.org/">' +
-		'<tns:inXML>&lt;ESA sessionHandle="' + getSessionHandle() + '"&gt;' +
+	var body = '<i0:Exec xmlns:i0="http://www.expanz.com/ESAService">' +
+		'<i0:inXML>&lt;ESA sessionHandle="' + getSessionHandle() + '"&gt;' +
 		'&lt;Activity activityHandle="' + activity.handle + '"&gt;' +
 		'&lt;Delta id="' + id + '" value="' + value + '"/&gt;' +
 		'&lt;/Activity&gt;' +
-		'&lt;/ESA&gt;</tns:inXML>' +
-		'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
-		'</tns:Exec>';
+		'&lt;/ESA&gt;</i0:inXML>' +
+		'<i0:sessionHandle>' + getSessionHandle() + '</i0:sessionHandle>' +
+		'</i0:Exec>';
 
 	return soapHeader + body + soapFooter;
 
@@ -301,14 +306,14 @@ function CreateDeltaRequest( activity, id, value ){
 function CreateMethodRequest( activity, methodName ){
 
 
-	var body = '<tns:Exec xmlns:tns="http://tempuri.org/">' +
-		'<tns:inXML>&lt;ESA sessionHandle="' + getSessionHandle() + '"&gt;' +
+	var body = '<i0:Exec xmlns:i0="http://www.expanz.com/ESAService">' +
+		'<i0:inXML>&lt;ESA sessionHandle="' + getSessionHandle() + '"&gt;' +
 		'&lt;Activity activityHandle="' + activity.handle + '"&gt;' +
 		'&lt;Method name="' + methodName + '"/&gt;' +
 		'&lt;/Activity&gt;' +
-		'&lt;/ESA&gt;</tns:inXML>' +
-		'<tns:sessionHandle>' + getSessionHandle() + '</tns:sessionHandle>' +
-		'</tns:Exec>';
+		'&lt;/ESA&gt;</i0:inXML>' +
+		'<i0:sessionHandle>' + getSessionHandle() + '</i0:sessionHandle>' +
+		'</i0:Exec>';
 
 	return soapHeader + body + soapFooter;
 
@@ -347,6 +352,7 @@ function Field( id, label, disabled, nullvalue, value, datatype, valid ){
 	this.datatype = datatype;
 	this.valid = valid;
 	this.error = ko.observable( "" );
+   this.serverUpdated = false;
 }
 
 
