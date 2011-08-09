@@ -4,7 +4,7 @@
 <link href="css/common.css?1308766139" media="screen" rel="stylesheet" type="text/css" />
 
 <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js'></script>
-<script type='text/javascript' src='http://knockoutjs.com/js/knockout-1.2.1.js' ></script>
+<script type='text/javascript' src='../js/knockout-1.2.1.js' ></script>
 <script type='text/javascript' src='../js/jquery.cookie.js'></script>
 <script type='text/javascript' src='../js/expanz.js?987245745' ></script>
 
@@ -12,11 +12,18 @@
 
 	function success( result ) {}
 	function error( errorString ) {}
+   function logout() {
+      redirect( './' );
+   }
 
 </script>
 
 </head>
 <body>
+
+<div class='logout'>
+   <button data-bind='click: Logout' onSuccess='logout'>logout</button>
+</div>
 
 <div id='container' class='Activity' value='ESA.Sales.Calc' >
 

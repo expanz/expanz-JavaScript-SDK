@@ -145,7 +145,7 @@ function SendRequest ( xmlrequest, responseHandler, error ){
 
 	$.ajax({
 		type: "post",
-		url: wsURL, //"/ESADemoService",
+		url: "/ESADemoService",
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",

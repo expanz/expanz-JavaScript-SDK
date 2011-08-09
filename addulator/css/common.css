@@ -85,7 +85,11 @@ button:hover {
 /*
  * Activity
  */
- 
+
+.logout{
+	margin: -70px 10px auto auto;
+	float: right;
+}
 .submit{
 	width: 340px;
 }

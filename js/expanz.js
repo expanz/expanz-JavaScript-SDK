@@ -10,7 +10,9 @@
  *           Use these functions to write your apps
  */
 
-
+function redirect( destinationURL ){
+	window.location.href = destinationURL;
+}
 
 /*
  *   Session Functions
@@ -26,13 +28,23 @@ function getSessionHandle() {
 function endSession() {
 
 	$.cookie( '_us', "" ); //, {  path: '/', expires: 1 } );
-	return true;
+   return true;
 }
 
 function networkError( e ){
 	console.log( e );
 }
 
+
+function onLogout( event ){
+
+   if( endSession() ){
+      return callLogoutFromDOM( true, event );
+   }
+   return callLogoutFromDOM( false, event );
+}
+
+      
 
 
 /*
@@ -43,11 +55,11 @@ function networkError( e ){
 $(document).ready( function() {
 
 	if( !getSessionHandle() ){
-		window.location.href = './';
+		onLogout();
 	}
 
 	window.onbeforeunload = function () {
-		endSession();
+		onLogout();
 	};
 
 	$('.Activity').each( function(){
@@ -79,9 +91,11 @@ function setupBindings( activity ){
 		for( attr in fields ){ Bindings[attr] = fields[attr]; }
 
 		setupObservers( activity, Bindings );
+
 		Bindings.Method = callMethod( activity, Bindings );
+      Bindings.Logout = onLogout;
+
 		ko.applyBindings( Bindings );
-		return true;
 	}
 }
 
@@ -234,7 +248,7 @@ function SendRequest ( xmlrequest, responseHandler, error ){
 
 	$.ajax({
 		type: "post",
-		url: wsURL, //"/ESADemoService",
+		url: "/ESADemoService",
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
@@ -368,5 +382,22 @@ function getFunctionFromDOMByName( name ){
 	return fn;
 }
 
+function callLogoutFromDOM( success, event ){
+
+   var attribute = 'onSuccess';
+   if( !success ){
+      attribute = 'onError';
+   }
+   if( event ){
+     var fn = getFunctionFromDOMByName( $(event.currentTarget).attr( attribute ) );
+     return eval( fn )();
+  }
+  $('[data-bind]').each( function() {
+     if( $(this).attr('data-bind').indexOf("Logout") != -1){ 
+        fn = getFunctionFromDOMByName( $(this).attr( attribute ) );
+        return eval( fn )();
+     }
+  });
+}
 
 
