@@ -250,8 +250,7 @@ function parseReleaseSessionResponse( success, error ){
       if( $(xml).find("ReleaseSessionResult").text() == 'true' ){
       
          if( deleteSessionHandle() ){
-            //return eval( success )();
-            return true;
+            return eval( success )();
          }
          return eval( error )();
       }
@@ -272,7 +271,7 @@ function SendRequest ( xmlrequest, responseHandler, error ){
 
 	$.ajax({
 		type: "post",
-		url: "/ESADemoService",
+		url: wsURL, //"/ESADemoService",
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
