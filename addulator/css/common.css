@@ -53,23 +53,21 @@ button:hover {
 }
 .error {
 	display: block;
-	
 	font-size: 12px;
 	color: red;
 }
 
 .textinput {
-	
-	margin: 10px;
-	width: 450px;
+	margin: 20px 10px 10px 10px;
+	width: 350px;
+	text-align: left;
 }
 .label {
 	font-size: 18px;
 	width: 100px;
-	float: left;
 }
 .textinput input {
-	
+	float: right;
 }
 
 /*
@@ -77,8 +75,8 @@ button:hover {
  */
  
 #login {
-	width: 100px;
-	margin: 25px 0px 25px 220px;
+	width: 350px;
+	margin-top: 25px;
 }
 
 
@@ -91,17 +89,13 @@ button:hover {
 	float: right;
 }
 .submit{
-	width: 340px;
+	width: 350px;
+	height: 50px;
+	margin: 25px 10px 20px 10px;
 }
 .submit button {
 	float: right;
-}
-
-.results{
-	display:inline-block;
-	margin: 25px 0px 0px 0px;
-	
-	font-size: 16px;
+	margin-right: -10px;
 }
 
 

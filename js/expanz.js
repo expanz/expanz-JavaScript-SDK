@@ -21,13 +21,12 @@ function redirect( destinationURL ){
 
 
 function getSessionHandle() {
-
-	return $.cookie( '_us' );
+	return $.cookies.get( '_expanz.session.handle' );
 }
 
 function deleteSessionHandle() {
 
-	$.cookie( '_us', "" ); //, {  path: '/', expires: 1 } );
+   $.cookies.set( '_expanz.session.handle' ) //, sessionHandle, { domain: document.domain } );
    return true;
 }
 
@@ -248,14 +247,13 @@ function parseReleaseSessionResponse( success, error ){
    return function apply( xml ){
 
       if( $(xml).find("ReleaseSessionResult").text() == 'true' ){
-      
          if( deleteSessionHandle() ){
             return eval( success )();
          }
-         return eval( error )();
       }
 
       networkError( $(xml).find('errors').text() );
+      return eval( error )();
    }
 }   
 
@@ -271,7 +269,7 @@ function SendRequest ( xmlrequest, responseHandler, error ){
 
 	$.ajax({
 		type: "post",
-		url: wsURL, //"/ESADemoService",
+		url: "/ESADemoService",
 		data: xmlrequest,
 		contentType: "text/xml",
 		dataType: "string", //"xml",

@@ -5,7 +5,7 @@
 
 <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js'></script>
 <script type='text/javascript' src='../js/knockout-1.2.1.js' ></script>
-<script type='text/javascript' src='../js/jquery.cookie.js'></script>
+<script type='text/javascript' src='../js/jquery.cookies.2.2.0.js'></script>
 <script type='text/javascript' src='../js/expanz.js?987245745' ></script>
 
 <script type='text/javascript'>
@@ -22,7 +22,7 @@
 <body>
 
 <div class='logout'>
-   <button data-bind='click: Logout' onSuccess='logout'>logout</button>
+   <button data-bind='click: Logout' onSuccess='logout' onError='logout'>logout</button>
 </div>
 
 <div id='container' class='Activity' value='ESA.Sales.Calc' >
@@ -34,7 +34,7 @@
 	</div>
 
 	<div class='textinput'>
-		<div class='label' data-bind='text: Op1.label'></div>
+		<span class='label' data-bind='text: Op1.label'></span>
 		<input type='text' data-bind='value: Op1.value' />
 	</div>
 
@@ -53,7 +53,7 @@
 		</button>
 	</div>
 
-	<div class='results'>
+	<div class='textinput'>
 		<span class='label' data-bind='text: Result.label'></span>
 		<input type='text' data-bind='value: Result.value' disabled='true' />
 	</div>

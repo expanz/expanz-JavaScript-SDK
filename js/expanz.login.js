@@ -23,19 +23,18 @@ function redirect( destinationURL ){
 
 function getSessionHandle() {
 
-	return $.cookie( '_us' );
+	return $.cookies.get( '_expanz.session.handle' );
 }
 
 function setSessionHandle( sessionHandle ){
 
-	//NOTE: will need to add {domain: '.test.expanz.com',} at some point. Now it makes cookies impossible to read.
-	$.cookie( '_us', sessionHandle ); //, {  path: '/', expires: 1 } ); 
+	$.cookies.set( '_expanz.session.handle', sessionHandle ); //, { domain: document.domain } );
 	return true;
 }
 
 function endSession() {
 
-	$.cookie( '_us', "" ); //, {  path: '/', expires: 1 } );
+	$.cookies.del( '_expanz.session.handle' ) //, { domain: document.domain } );
 	return true;
 }
 
