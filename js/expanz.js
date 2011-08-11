@@ -40,7 +40,7 @@ function onLogout( event ){
    var successFn = getAttrFnFromDOM( 'Logout', 'onSuccess' );
    var errorFn = getAttrFnFromDOM( 'Logout', 'onError' );
 
-   SendRequest(   CreateReleaseSessionRequest(),
+   SendRequest(   new CreateReleaseSessionRequest(),
                   parseReleaseSessionResponse( successFn, errorFn ),
                   networkError
                   );
@@ -74,10 +74,10 @@ $(document).ready( function() {
 
 function LoadActivity( activity ){
 
-	SendRequest(	CreateActivityRequest( activity ),
-			parseCreateActivityResponse( activity, setupBindings( activity ) ),
-			networkError
-			); 
+	SendRequest(	new CreateActivityRequest( activity ),
+			         parseCreateActivityResponse( activity, setupBindings( activity ) ),
+         			networkError
+         			); 
 }
 
 
@@ -122,10 +122,10 @@ function setupObservers( activity, fields ){
 						};
 
 						if( field.disabled != 1 && !field.serverUpdated ){
-							SendRequest(	CreateDeltaRequest( activity, field.id, newValue ),
-									parseUpdateResponse( allFields, success, error ),
-									networkError
-									);
+							SendRequest(	new CreateDeltaRequest( activity, field.id, newValue ),
+         									parseUpdateResponse( allFields, success, error ),
+         									networkError
+         									);
 						}
 
                   field.serverUpdated = false;
@@ -152,10 +152,10 @@ function callMethod( activity, fields ){
 		var successFn = getFunctionFromDOMByName( $(event.currentTarget).attr('onSuccess') );
 		var errorFn = getFunctionFromDOMByName( $(event.currentTarget).attr('onError') );
 
-		SendRequest( 	CreateMethodRequest( activity, name ),
-				parseUpdateResponse( fields, successFn, errorFn ),
-				errorFn
-				);
+		SendRequest( 	new CreateMethodRequest( activity, name ),
+         				parseUpdateResponse( fields, successFn, errorFn ),
+         				errorFn
+           				);
 
 		return true;
 	}
@@ -171,10 +171,7 @@ function callMethod( activity, fields ){
 function parseCreateActivityResponse( activity, callback ){
 	return function apply( xml ){
 
-		xml.replace("&lt;", "<");
-		xml.replace("&gt;", ">");
-
-		var execResults = $(xml).find("ExecResult").text();
+		var execResults = $(xml).find("ExecXResult");
 		var fields = {};
 
 		if( execResults ){
@@ -215,10 +212,7 @@ function parseCreateActivityResponse( activity, callback ){
 function parseUpdateResponse( fields, success, error ){
 	return function apply ( xml ){
 
-			xml.replace("&lt;", "<");
-			xml.replace("&gt;", ">");
-
-			var execResults = $(xml).find("ExecResult").text();
+			var execResults = $(xml).find("ExecXResult");
 			var errorOccurred = false;
 
 			if( execResults ){
@@ -265,24 +259,24 @@ function parseReleaseSessionResponse( success, error ){
  *        :manage the sending of XML requests to the server, and dispatching of response handlers
  */
 
-function SendRequest ( xmlrequest, responseHandler, error ){
+function SendRequest ( request, responseHandler, error ){
 
 	$.ajax({
 		type: "post",
-		url: "/ESADemoService",
-		data: xmlrequest,
+		url: 'http://' + document.domain + _URLprefix + request.url,
+		data: request.data,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
 		processData: false,	//keeps data: from being serialized
-		complete: function( request ){
+		complete: function( HTTPrequest ){
 
-			if( request.status != 200 ){
+			if( HTTPrequest.status != 200 ){
 
 				eval( error )( 'There was a problem with the last request.' );
 
 			} else {
 
-				var response = request.responseText;
+				var response = HTTPrequest.responseText;
 				
 				if( responseHandler ){
 					eval( responseHandler )( response );
@@ -293,75 +287,94 @@ function SendRequest ( xmlrequest, responseHandler, error ){
 }
 
 
-
-
 /*
- *   SOAP Message Contruction Functions
+ *   Request Objects
  *
  */
 
-var soapHeader = 	'<SOAP-ENV:Envelope ' +
-				'xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" ' +
-				'xmlns:xsd="http://www.w3.org/2001/XMLSchema" ' +
-				'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' +
-			'>' +
-			'<SOAP-ENV:Body>';
-
-var soapFooter = 	'</SOAP-ENV:Body>' +
-			'</SOAP-ENV:Envelope>';
-
-
 function CreateActivityRequest( activity, style ){
-
-	var body = 	'<i0:Exec xmlns:i0="http://www.expanz.com/ESAService">' +
-			'<i0:inXML>&lt;ESA sessionHandle="' + getSessionHandle() + '"&gt;' +
-			'&lt;CreateActivity name="' + activity.name + '" style="' + style + '"/&gt;' + //name = Samples.Calc
-			'&lt;/ESA&gt;</i0:inXML>' +
-			'<i0:sessionHandle>' + getSessionHandle() + '</i0:sessionHandle>' +
-			'</i0:Exec>';
-
-	return soapHeader + body + soapFooter;
+   this.data = getCreateActivityRequestBody( activity, style );
+   this.url = 'ExecX';
 }
-
 function CreateDeltaRequest( activity, id, value ){
-
-	var body = '<i0:Exec xmlns:i0="http://www.expanz.com/ESAService">' +
-		'<i0:inXML>&lt;ESA sessionHandle="' + getSessionHandle() + '"&gt;' +
-		'&lt;Activity activityHandle="' + activity.handle + '"&gt;' +
-		'&lt;Delta id="' + id + '" value="' + value + '"/&gt;' +
-		'&lt;/Activity&gt;' +
-		'&lt;/ESA&gt;</i0:inXML>' +
-		'<i0:sessionHandle>' + getSessionHandle() + '</i0:sessionHandle>' +
-		'</i0:Exec>';
-
-	return soapHeader + body + soapFooter;
-
+   this.data = getCreateDeltaRequestBody( activity, id, value );
+   this.url = 'ExecX';
 }
-
 function CreateMethodRequest( activity, methodName ){
-
-
-	var body = '<i0:Exec xmlns:i0="http://www.expanz.com/ESAService">' +
-		'<i0:inXML>&lt;ESA sessionHandle="' + getSessionHandle() + '"&gt;' +
-		'&lt;Activity activityHandle="' + activity.handle + '"&gt;' +
-		'&lt;Method name="' + methodName + '"/&gt;' +
-		'&lt;/Activity&gt;' +
-		'&lt;/ESA&gt;</i0:inXML>' +
-		'<i0:sessionHandle>' + getSessionHandle() + '</i0:sessionHandle>' +
-		'</i0:Exec>';
-
-	return soapHeader + body + soapFooter;
-
+   this.data = getCreateMethodRequestBody( activity, methodName );
+   this.url = 'ExecX';
+}
+function CreateReleaseSessionRequest(){
+   this.data = getCreateReleaseSessionRequestBody();
+   this.url = 'ReleaseSession';
 }
 
 
-function CreateReleaseSessionRequest( username, password ){
+/*
+ *   XML Message Contruction Functions
+ *
+ */
 
-	var body = 	'<i0:ReleaseSession xmlns:i0="http://www.expanz.com/ESAService">' +
-               '<i0:sessionHandle>' + getSessionHandle() + '</i0:sessionHandle>' +
-               '</i0:ReleaseSession>';
+function getCreateActivityRequestBody( activity, style ){
 
-	return soapHeader + body + soapFooter;
+   var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' +
+                  '<xml>' +
+                     '<ESA>' +
+                        '<CreateActivity name="' + activity.name + '" style="' + style + '"/>' +
+                     '</ESA>' +
+                  '</xml>' +
+                  '<sessionHandle>' + getSessionHandle() + '</sessionHandle>' +
+               '</ExecX>';
+
+	return body;
+}
+
+function getCreateDeltaRequestBody( activity, id, value ){
+
+   var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' +
+                  '<xml>' +
+                     '<ESA>' +
+                        '<Activity activityHandle="' + activity.handle + '">' +
+                           '<Delta id="' + id + '" value="' + value + '"/>' +
+                        '</Activity>' +
+                     '</ESA>' +
+                  '</xml>' +
+                  '<sessionHandle>' + getSessionHandle() + '</sessionHandle>' +
+               '</ExecX>';
+
+	return body;
+}
+
+function getCreateMethodRequestBody( activity, methodName ){
+
+
+	var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' +
+                  '<xml>' +
+                     '<ESA>' +
+                        '<Activity activityHandle="' + activity.handle + '">' +
+                           '<Method name="' + methodName + '"/>' +
+                        '</Activity>' +
+                     '</ESA>' +
+                  '</xml>' +
+                  '<sessionHandle>' + getSessionHandle() + '</sessionHandle>' +
+               '</ExecX>';
+
+	return body;
+}
+
+
+function getCreateReleaseSessionRequestBody(){
+
+   var body = '<ReleaseSession xmlns="http://www.expanz.com/ESAService">' +
+                  '<xml>' +
+                     '<ESA>' +
+                        '<ReleaseSession/>' +
+                     '</ESA>' +
+                   '</xml>' +
+                   '<sessionHandle>' + getSessionHandle() + '</sessionHandle>' +
+               '</ReleaseSession>';
+
+	return body;
 }
 
 
@@ -370,7 +383,7 @@ function CreateReleaseSessionRequest( username, password ){
  *
  */
 
-var wsURL = '/ESADemoService/ESAService.asmx';
+var _URLprefix = '/ESADemoService/ESAService.svc/post/';
 var Bindings = {};
 
 
@@ -412,10 +425,6 @@ function getFunctionFromDOMByName( name ){
 
 function getAttrFnFromDOM( databindName, attributeName ){
 
-   //if( possibleFunctionName ){
-   //  var fn = getFunctionFromDOMByName( $(event.currentTarget).attr( attributeName ) );
-   //  return fn;
-   //}
    var fnName = '';
    $('[data-bind]').each( function() {
       if( $(this).attr('data-bind').indexOf( databindName ) != -1){ 

@@ -71,10 +71,10 @@ function login( fields ){
 		var success = 	getFunctionFromDOMByName( $(event.currentTarget).attr('onSuccess') );
 		var error = 	getFunctionFromDOMByName( $(event.currentTarget).attr('onError') );
 
-		SendRequest(	CreateSessionRequest( fields['Username'].value, fields['Password'].value ),
-				parseCreateSessionResponse( getSessionData( success, error ), error ),
-				error
-				);
+		SendRequest(	new CreateSessionRequest( fields['Username'].value, fields['Password'].value ),
+         				parseCreateSessionResponse( getSessionData( success, error ), error ),
+			         	error
+         				);
 		return false;
 	}
 }
@@ -84,10 +84,10 @@ function getSessionData( success, error ) {
 	// apply: gets called when parseCreateSessionResponse has succeed (see 'login', where the SendRequest call is made)
 	return function apply( str ){ 
 
-		SendRequest(	CreateGetSessionDataRequest(),
-				parseGetSessionDataResponse( success, error ),
-				error
-				);
+		SendRequest(	new GetSessionDataRequest( getSessionHandle() ),
+      				   parseGetSessionDataResponse( success, error ),
+         				error
+         				);
 	};
 }
 
@@ -104,8 +104,8 @@ function parseCreateSessionResponse( success, error ) {
 		xml.replace("&lt;", "<");
 		xml.replace("&gt;", ">");
 
-		if( $(xml).find( 'CreateSessionResult' ).length > 0 ) {
-			setSessionHandle( $(xml).find('CreateSessionResult').text() );
+		if( $(xml).find( 'CreateSessionXResult' ).length > 0 ) {
+			setSessionHandle( $(xml).find('CreateSessionXResult').text() );
 		}
 
 		if( !getSessionHandle() || getSessionHandle.length > 0 ){
@@ -140,24 +140,24 @@ function parseGetSessionDataResponse( success, error ){
  *        :manage the sending of XML requests to the server, and dispatching of response handlers
  */
 
-function SendRequest ( xmlrequest, responseHandler, error ){
+function SendRequest ( request, responseHandler, error ){
 
 	$.ajax({
 		type: "post",
-		url: "/ESADemoService",
-		data: xmlrequest,
+		url: 'http://' + document.domain + _URLprefix + request.url,
+		data: request.data,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
 		processData: false,	//keeps data: from being serialized
-		complete: function( request ){
+		complete: function( HTTPrequest ){
 
-			if( request.status != 200 ){
+			if( HTTPrequest.status != 200 ){
 
 				eval( error )( 'There was a problem with the last request.' );
 
 			} else {
 
-				var response = request.responseText;
+				var response = HTTPrequest.responseText;
 				
 				if( responseHandler ){
 					eval( responseHandler )( response );
@@ -168,50 +168,53 @@ function SendRequest ( xmlrequest, responseHandler, error ){
 }
 
 
+/*
+ *   Request Objects
+ *
+ */
+
+function CreateSessionRequest( username, password ){
+   this.data = getCreateSessionRequestBody( username, password );
+   this.url = 'CreateSessionX';
+}
+
+function GetSessionDataRequest( sessionHandle ){
+   this.data = getCreateGetSessionDataRequestBody( sessionHandle );
+   this.url = 'ExecX';
+}
+
 
 /*
  *   SOAP Message Contruction Functions
  *
  */
 
-var soapHeader = 	'<SOAP-ENV:Envelope ' +
-				'xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" ' +
-				'xmlns:xsd="http://www.w3.org/2001/XMLSchema" ' +
-				'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' +
-			'>' +
-			'<SOAP-ENV:Body>';
+function getCreateSessionRequestBody( username, password ){
 
-var soapFooter = 	'</SOAP-ENV:Body>' +
-			'</SOAP-ENV:Envelope>';
+   var body = '<CreateSessionX xmlns="http://www.expanz.com/ESAService">' +
+                  '<xml>' +
+                     '<ESA>' +
+                        '<CreateSession user="' + username + '" password="' + password + '" appSite="SALESAPP" authenticationMode="Primary" clientVersion="Flex 1.0" schemaVersion="2.0"/>' +
+                     '</ESA>' +
+                   '</xml>' +
+               '</CreateSessionX>';
 
-function CreateSessionRequest( username, password ){
-
-	var body = 	'<i0:CreateSession xmlns:i0="http://www.expanz.com/ESAService">' +
-			'<i0:inXml>' +
-				'&lt;ESA&gt; &lt;CreateSession user="' + username + '" ' +
-				'password="' + password + '" ' +
-				'appSite="SALESAPP" ' +
-				'authenticationMode="Primary" ' +
-				'clientVersion="Flex 1.0" ' +
-				'schemaVersion="2.0"/&gt; &lt;/ESA&gt;' +
-			'</i0:inXml></i0:CreateSession>';
-
-	return soapHeader + body + soapFooter;
+	return body;
 }
 
-function CreateGetSessionDataRequest(){
+function getCreateGetSessionDataRequestBody( sessionHandle ){
 
-	var body = 	'<i0:Exec xmlns:i0="http://www.expanz.com/ESAService">' +
-			'<i0:inXML>&lt;ESA&gt;' +
-			'&lt;GetSessionData/&gt;' +
-			'&lt;/ESA&gt;</i0:inXML>' +
-			'<i0:sessionHandle>' + getSessionHandle() + '</i0:sessionHandle>' +
-			'</i0:Exec>';
+   var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' +
+                  '<xml>' +
+                     '<ESA>' +
+                        '<GetSessionData/>' +
+                     '</ESA>' +
+                  '</xml>' +
+                  '<sessionHandle>' + sessionHandle + '</sessionHandle>' +
+               '</ExecX>';
 
-	return soapHeader + body + soapFooter;
+	return body;
 }
-
-
 
 /*
  *   Private Variables
@@ -219,6 +222,7 @@ function CreateGetSessionDataRequest(){
  */
 
 var wsURL = '/ESADemoService/ESAService.asmx';
+var _URLprefix = '/ESADemoService/ESAService.svc/post/';
 
 /*
  *   Private Object Prototypes
@@ -233,6 +237,7 @@ function Field( id, label, disabled, isnull, value, datatype, valid ){
 	this.datatype = datatype;
 	this.valid = valid;
 }
+
 
 
 /*
