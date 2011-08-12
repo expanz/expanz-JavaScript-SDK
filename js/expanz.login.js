@@ -221,8 +221,7 @@ function getCreateGetSessionDataRequestBody( sessionHandle ){
  *
  */
 
-var wsURL = '/ESADemoService/ESAService.asmx';
-var _URLprefix = '/ESADemoService/ESAService.svc/post/';
+var _URLprefix = '/ESADemoService/ESAService.svc/restish/';
 
 /*
  *   Private Object Prototypes

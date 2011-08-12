@@ -26,7 +26,7 @@ function getSessionHandle() {
 
 function deleteSessionHandle() {
 
-   $.cookies.set( '_expanz.session.handle' ) //, sessionHandle, { domain: document.domain } );
+   $.cookies.set( '_expanz.session.handle' );
    return true;
 }
 
@@ -56,7 +56,8 @@ function onLogout( event ){
 $(document).ready( function() {
 
 	if( !getSessionHandle() ){
-		onLogout();
+		deleteSessionHandle();
+      eval( getAttrFnFromDOM( 'Logout', 'onSuccess' ) )();
 	}
 
 	window.onbeforeunload = function () {
@@ -64,7 +65,7 @@ $(document).ready( function() {
 	};
 
 	$('.Activity').each( function(){
-		LoadActivity( new Activity( $(this).attr('value') ) );
+		LoadActivity( new Activity( $(this).attr('name') ) );
 	});
 	
 });
@@ -383,7 +384,7 @@ function getCreateReleaseSessionRequestBody(){
  *
  */
 
-var _URLprefix = '/ESADemoService/ESAService.svc/post/';
+var _URLprefix = '/ESADemoService/ESAService.svc/restish/';
 var Bindings = {};
 
 
