@@ -30,15 +30,25 @@ function deleteSessionHandle() {
    return true;
 }
 
+
+
 function networkError( e ){
 	console.log( e );
+}
+
+function getLoginURL(){
+   return $.cookies.get( '_expanz.login.url' );
+}
+
+function getActivityList(){
+   return $.cookies.get( '_expanz.activity.list' );
 }
 
 
 function onLogout( event ){
 
-   var successFn = getAttrFnFromDOM( 'Logout', 'onSuccess' );
-   var errorFn = getAttrFnFromDOM( 'Logout', 'onError' );
+   var successFn = function(){ redirect( getLoginURL() ); }; 
+   var errorFn = networkError;
 
    SendRequest(   new CreateReleaseSessionRequest(),
                   parseReleaseSessionResponse( successFn, errorFn ),
@@ -57,12 +67,16 @@ $(document).ready( function() {
 
 	if( !getSessionHandle() ){
 		deleteSessionHandle();
-      eval( getAttrFnFromDOM( 'Logout', 'onSuccess' ) )();
+      redirect( getLoginURL() );
 	}
 
-	window.onbeforeunload = function () {
-		onLogout();
-	};
+   // Load Menu & insert it into .menu
+   $.each( getActivityList(), function( name, url ) {
+      $('.menu ul').append( '<li><a href=\'' + url + '\'>' + name + '</a></li>' );
+   });
+
+   // insert the logout button into .logout
+   $('.logout').append( '<a data-bind=\'click: Logout\' >logout</a>' );
 
 	$('.Activity').each( function(){
 		LoadActivity( new Activity( $(this).attr('name') ) );
@@ -247,8 +261,7 @@ function parseReleaseSessionResponse( success, error ){
          }
       }
 
-      networkError( $(xml).find('errors').text() );
-      return eval( error )();
+      return error( $(xml).find('errors').text() );
    }
 }   
 

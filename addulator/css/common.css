@@ -38,7 +38,7 @@ button:hover {
  */
 
 #container {
-	margin: 100px auto;
+	margin: 200px auto;
 	width: 500px;
 	display: block;
 }
@@ -79,15 +79,61 @@ button:hover {
 	margin-top: 25px;
 }
 
+/*
+ * Menu
+ */
+.menu{
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	margin: 5px auto auto 5px;
+	height: 45px;
+}
+.menu ul{
+	float: left;
+	list-style-type: none;
+	display: inline;
+	margin: 0px;
+}
+.menu ul li{
+	float: left;
+}
+.menu ul li a{
+	display: block;
+	padding: 5px 10px;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 14px;
+	line-height: 35px;
+}
+.logout{
+	float: right;
+	height: 45px;
+}
+.logout a {
+	margin: 0px;
+	padding: 0px 25px;
+	line-height: 45px;
+
+	color: black;
+	font-size: 14px;
+	font-weight: bold;
+	text-decoration: none;
+	cursor: pointer;
+	
+	border: 0px;
+	border-radius: 40px;
+}
+.logout:hover {
+	background-color: yellowgreen;
+}
+
+
 
 /*
  * Activity
  */
 
-.logout{
-	margin: -70px 10px auto auto;
-	float: right;
-}
 .submit{
 	width: 350px;
 	height: 50px;

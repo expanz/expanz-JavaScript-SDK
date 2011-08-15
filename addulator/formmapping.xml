@@ -1,0 +1,14 @@
+<activities>
+   <!--
+   Namespace elements. Must be specified. Allows you to define which assembly and namespace to dynamically load views from.
+   -->
+   <Namespaces>
+      <namespace id="Main" path="SalesOrderSample" assembly="SalesOrderSample"/>
+   </Namespaces>
+   <!--
+   Activity to view mapping definition elements. name: the name of the Server Activity. form: The clientside View to map the Server Activity too. namespace: The namespace id of the namespace element from which to load the view from which may be in a different assembly. style: (optional) An activity can be displayed in different styles e.g. a list of Customer view - style="browse" a Customer Details view - style="details" tabItem: (optional) TBD. default: (optional) The default Activity to Launch once authenticated e.g. <activity name="Samples.Customer" form="Views.Customers" namespace="Main" style="" tabItem="" />
+   -->
+   <activity name="ESA.Sales.AdvancedCalc" style="" form="./activity.sales.advancedcalc.html" namespace="Main" tabItem=""/>
+   <activity name="ESA.Sales.Calc" style="" form="./activity.sales.calc.html" namespace="Main" tabItem="" default="true"/>
+</activities>
+

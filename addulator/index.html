@@ -12,10 +12,6 @@
 
 <script type='text/javascript'>
 
-	function success(){
-		redirect( './activity.samples.calc.html' );
-	}
-
 	function error( str ){
 		$('.error').html( "<span style='color:red'>" + str + "</span>" );
 	}
@@ -38,11 +34,7 @@
 		</div>
 
 		<div class='submit' id='login'>
-			<button	data-bind='click: Login' 
-				onSuccess='success'
-				onError='error'>
-				Login
-			</button>
+			<button	data-bind='click: Login' onError='error'>Login</button>
 		</div>
 
 		<div class='error'></div>

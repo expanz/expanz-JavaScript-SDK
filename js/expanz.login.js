@@ -28,13 +28,26 @@ function getSessionHandle() {
 
 function setSessionHandle( sessionHandle ){
 
-	$.cookies.set( '_expanz.session.handle', sessionHandle ); //, { domain: document.domain } );
+	$.cookies.set( '_expanz.session.handle', sessionHandle );
+   setLoginURL( document.location.pathname );
 	return true;
+}
+
+function setLoginURL( url ){
+
+   $.cookies.set( '_expanz.login.url', url ); 
+	return true;
+}
+
+function setActivityList( list ){
+
+   $.cookies.set( '_expanz.activity.list', JSON.stringify(list) );
+   return true;
 }
 
 function endSession() {
 
-	$.cookies.del( '_expanz.session.handle' ) //, { domain: document.domain } );
+	$.cookies.del( '_expanz.session.handle' ) 
 	return true;
 }
 
@@ -129,7 +142,26 @@ function parseCreateSessionResponse( success, error ) {
 
 function parseGetSessionDataResponse( success, error ){
 	return function apply ( xml ) {
-			eval( success )( xml );
+
+         $.get("./formmapping.xml", function(data){
+
+            var activities = {}
+            $(data).find('activity').each( function()
+            {
+               activities[ $(this).attr('name') ] = $(this).attr('form');
+            });
+            setActivityList( activities );
+
+            $(data).find('activity').each( function()
+            {
+               if( $(this).attr('default') == 'true' ){
+                  redirect( $(this).attr('form') );
+               }
+               //console.log( 'activity: ' + $(this).attr('name') + ' ' + $(this).attr('form') );
+            });
+         });
+         
+			//eval( success )( xml );
 	};
 }
 
