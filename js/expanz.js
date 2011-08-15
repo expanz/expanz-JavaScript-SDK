@@ -71,8 +71,8 @@ $(document).ready( function() {
 	}
 
    // Load Menu & insert it into .menu
-   $.each( getActivityList(), function( name, url ) {
-      $('.menu ul').append( '<li><a href=\'' + url + '\'>' + name + '</a></li>' );
+   $.each( getActivityList(), function( name, activityInfo ) {
+      $('.menu ul').append( '<li><a href=\'' + activityInfo.url + '\'>' + activityInfo.title + '</a></li>' );
    });
 
    // insert the logout button into .logout
@@ -424,6 +424,11 @@ function Field( id, label, disabled, nullvalue, value, datatype, valid ){
    this.serverUpdated = false;
 }
 
+function ActivityInfo( name, title, url ){
+   this.name = name;
+   this.title = title;
+   this.url = '';
+}
 
 
 /*

@@ -140,15 +140,22 @@ function parseCreateSessionResponse( success, error ) {
 	};
 }
 
+
 function parseGetSessionDataResponse( success, error ){
 	return function apply ( xml ) {
 
+         var activities = {};
+         $(xml).find('activity').each( function(){
+            activities[ $(this).attr('name') ] = new ActivityInfo( $(this).attr('name'), $(this).attr('title') );
+         });
+
          $.get("./formmapping.xml", function(data){
 
-            var activities = {}
             $(data).find('activity').each( function()
             {
-               activities[ $(this).attr('name') ] = $(this).attr('form');
+               if( activities[ $(this).attr('name') ] ){
+                  activities[ $(this).attr('name') ].url = $(this).attr('form');
+               }
             });
             setActivityList( activities );
 
@@ -157,7 +164,6 @@ function parseGetSessionDataResponse( success, error ){
                if( $(this).attr('default') == 'true' ){
                   redirect( $(this).attr('form') );
                }
-               //console.log( 'activity: ' + $(this).attr('name') + ' ' + $(this).attr('form') );
             });
          });
          
@@ -269,6 +275,11 @@ function Field( id, label, disabled, isnull, value, datatype, valid ){
 	this.valid = valid;
 }
 
+function ActivityInfo( name, title ){
+   this.name = name;
+   this.title = title;
+   this.url = '';
+}
 
 
 /*
