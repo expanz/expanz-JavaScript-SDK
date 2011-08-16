@@ -82,55 +82,48 @@ button:hover {
 /*
  * Menu
  */
-.menu{
+#menu{
 	position: fixed;
 	top: 0px;
 	left: 0px;
 	margin: 5px auto auto 5px;
-	height: 45px;
+	height: 50px;
 }
-.menu ul{
+.menuitem{
 	float: left;
+	margin: 0px;
+	padding: 10px 25px;
+
+	border: 0px;
+	border-radius: 4px;
+
+	color: black;
+	font-size: 16px;
+	font-weight: bold;
+	text-decoration: none;
+}
+.menuitem:hover {
+	background-color: yellowgreen;
+}
+
+.menuitem ul{
 	list-style-type: none;
 	display: inline;
 	margin: 0px;
 }
-.menu ul li{
-	float: left;
+.menuitem ul li{
 }
-.menu ul li a{
-	display: block;
-	padding: 5px 10px;
+.menuitem ul li a{
 	text-decoration: none;
 	font-weight: bold;
 	font-size: 14px;
-	line-height: 35px;
+	line-height: 25px;
 	color: blue;
 }
-.menu ul li a:visited{
+.menuitem ul li a:visited{
 	color: blue;
 }
-.logout{
-	float: right;
-	height: 45px;
-}
-.logout a {
-	margin: 0px;
-	padding: 0px 25px;
-	line-height: 45px;
 
-	color: black;
-	font-size: 14px;
-	font-weight: bold;
-	text-decoration: none;
-	cursor: pointer;
-	
-	border: 0px;
-	border-radius: 40px;
-}
-.logout:hover {
-	background-color: yellowgreen;
-}
 
 
 

@@ -39,9 +39,9 @@ function setLoginURL( url ){
 	return true;
 }
 
-function setActivityList( list ){
+function setProcessAreaList( list ){
 
-   $.cookies.set( '_expanz.activity.list', JSON.stringify(list) );
+   $.cookies.set( '_expanz.processarea.list', JSON.stringify(list) );
    return true;
 }
 
@@ -144,20 +144,33 @@ function parseCreateSessionResponse( success, error ) {
 function parseGetSessionDataResponse( success, error ){
 	return function apply ( xml ) {
 
-         var activities = {};
-         $(xml).find('activity').each( function(){
-            activities[ $(this).attr('name') ] = new ActivityInfo( $(this).attr('name'), $(this).attr('title') );
+         var processAreas = [];
+
+         $(xml).find('processarea').each( function(){
+
+            var processArea = new ProcessArea( $(this).attr('id'), $(this).attr('title') );
+            $(this).find('activity').each( function() {
+               processArea.activities.push( new ActivityInfo( $(this).attr('name'), $(this).attr('title'), '#' ) );
+            });
+            processAreas.push( processArea );
          });
 
          $.get("./formmapping.xml", function(data){
 
             $(data).find('activity').each( function()
             {
-               if( activities[ $(this).attr('name') ] ){
-                  activities[ $(this).attr('name') ].url = $(this).attr('form');
-               }
+               var name = $(this).attr('name');
+               var url = $(this).attr('form');
+               $.each( processAreas, function( i, processArea ){
+                  $.each( processArea.activities, function( j, activity ){ 
+                     if( activity.name == name ){
+                        activity.url = url;
+                     }
+                  });
+               });
             });
-            setActivityList( activities );
+
+            setProcessAreaList( processAreas );
 
             $(data).find('activity').each( function()
             {
@@ -275,10 +288,16 @@ function Field( id, label, disabled, isnull, value, datatype, valid ){
 	this.valid = valid;
 }
 
-function ActivityInfo( name, title ){
+function ProcessArea( id, title ){
+   this.id = id;
+   this.title = title;
+   this.activities = [];
+}
+
+function ActivityInfo( name, title, url ){
    this.name = name;
    this.title = title;
-   this.url = '';
+   this.url = url;
 }
 
 

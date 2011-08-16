@@ -40,8 +40,8 @@ function getLoginURL(){
    return $.cookies.get( '_expanz.login.url' );
 }
 
-function getActivityList(){
-   return $.cookies.get( '_expanz.activity.list' );
+function getProcessAreaList(){
+   return $.cookies.get( '_expanz.processarea.list' );
 }
 
 
@@ -71,12 +71,22 @@ $(document).ready( function() {
 	}
 
    // Load Menu & insert it into .menu
-   $.each( getActivityList(), function( name, activityInfo ) {
-      $('.menu ul').append( '<li><a href=\'' + activityInfo.url + '\'>' + activityInfo.title + '</a></li>' );
+   $.each( getProcessAreaList(), function( i, processArea ) {
+      $('#menu').append(   '<div class=\'menuitem ' + processArea.id + '\'>' +
+                              '<a>' + processArea.title + '</a>' + 
+                              '<ul></ul>' +
+                           '</div>'
+                           );
+      $.each( processArea.activities, function( j, activity ){
+         $('#menu .menuitem ul').append(   '<li>' + 
+                                                   '<a href=\'' + activity.url + '\'>' + activity.title + '</a>' + 
+                                                   '</li>'
+                                                   );
+      });
    });
 
    // insert the logout button into .logout
-   $('.logout').append( '<a data-bind=\'click: Logout\' >logout</a>' );
+   $('#menu').append( '<div id=\'logout\' class=\'menuitem\'><a data-bind=\'click: Logout\' >logout</a></div>' );
 
 	$('.Activity').each( function(){
 		LoadActivity( new Activity( $(this).attr('name') ) );

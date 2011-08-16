@@ -15,16 +15,22 @@
       console.log( 'error fn: ' + errorString );
    }
 
+   $(document).ready( function(){
+
+      $('#menu .menuitem').click(
+         function(){
+            $(this).find('ul').toggle( 'slow' );
+         });
+      $('#menu .menuitem ul').hide();
+
+   });
+
 </script>
 
 </head>
 <body>
 
-<div class='menu'>
-   
-   <ul></ul>
-
-   <div class='logout'></div>
+<div id='menu'>
 </div>
 
 <div id='container' class='Activity' name='ESA.Sales.Calc' >
