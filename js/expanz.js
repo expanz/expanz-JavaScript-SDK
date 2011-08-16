@@ -287,7 +287,7 @@ function SendRequest ( request, responseHandler, error ){
 
 	$.ajax({
 		type: "post",
-		url: 'http://' + document.domain + _URLprefix + request.url,
+		url: document.location.origin + _URLprefix + request.url,
 		data: request.data,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
