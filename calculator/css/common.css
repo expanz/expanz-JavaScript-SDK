@@ -14,7 +14,7 @@ input {
 }
 
 button {
-	margin: 0px;
+	margin: 5px;
 	padding: 10px 35px;
 	vertical-align: middle;
 	cursor: pointer;
@@ -31,6 +31,12 @@ button {
 button:hover {
 	background: #28597a;
 	color: #ccc;
+}
+
+button.small {
+	margin: 5px 15px;
+	padding: 5px 15px;
+	font-size: 12px;
 }
 
 /*

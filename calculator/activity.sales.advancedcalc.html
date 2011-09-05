@@ -10,8 +10,8 @@
 
 <script type='text/javascript'>
 
-	function success( result ) {}
-	function error( errorString ) {
+   function success( result ) {}
+   function error( errorString ) {
       console.log( 'error fn: ' + errorString );
    }
 
@@ -33,7 +33,7 @@
 <div id='menu'>
 </div>
 
-<div id='container' class='Activity' name='ESA.Sales.Calc' >
+<div id='container' class='Activity' name='ESA.Sales.AdvancedCalc' >
 
 	<div class='errorContainer'>
 		<span class='error' data-bind='text: Op1.error'></span>
@@ -52,12 +52,54 @@
 	</div>
 
 	<div class='submit'>
-		<button	id='submit'
+		<button	id='submit' class='small'
 			method-name='Add'
 			data-bind='click: Method'
 			onSuccess='success'
 			onError='error'>
-			add
+		     add
+		</button>
+                <button	id='submit' class='small'
+			method-name='Subtract'
+			data-bind='click: Method'
+			onSuccess='success'
+			onError='error'>
+		     subtract	
+		</button>
+                <button	id='submit' class='small'
+			method-name='Multiply'
+			data-bind='click: Method'
+			onSuccess='success'
+			onError='error'>
+		     multiply
+		</button>
+                <button	id='submit' class='small'
+			method-name='Divide'
+			data-bind='click: Method'
+			onSuccess='success'
+			onError='error'>
+		     divide
+		</button>
+                <button	id='submit' class='small'
+			method-name='AddToMemory'
+			data-bind='click: Method'
+			onSuccess='success'
+			onError='error'>
+	             M+ 
+		</button>
+                <button	id='submit' class='small'
+			method-name='RecallMemory'
+			data-bind='click: Method'
+			onSuccess='success'
+			onError='error'>
+		     MR
+		</button>
+                <button	id='submit' class='small'
+			method-name='ClearMemory'
+			data-bind='click: Method'
+			onSuccess='success'
+			onError='error'>
+		     MC
 		</button>
 	</div>
 
