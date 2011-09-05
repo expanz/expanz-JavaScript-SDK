@@ -287,7 +287,7 @@ function SendRequest ( request, responseHandler, error ){
 
 	$.ajax({
 		type: "post",
-		url: document.location.origin + _URLprefix + request.url,
+		url: document.location.origin + _URLprefixSSL + request.url,
 		data: request.data,
 		contentType: "text/xml",
 		dataType: "string", //"xml",
@@ -408,6 +408,8 @@ function getCreateReleaseSessionRequestBody(){
  */
 
 var _URLprefix = '/ESADemoService/ESAService.svc/restish/';
+var _URLprefixSSL = '/ESADemoService/ESAService.svc/restishssl/';
+
 var Bindings = {};
 
 
