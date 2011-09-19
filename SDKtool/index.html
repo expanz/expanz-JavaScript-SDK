@@ -1,0 +1,51 @@
+<html>
+<head>
+<title>Addulator</title>
+
+<link href="css/common.css?1308766139" media="screen" rel="stylesheet" type="text/css" />
+
+<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js'></script>
+<script type='text/javascript' src='../js/knockout-1.2.1.js' ></script>
+<script type='text/javascript' src='../js/jquery.cookies.2.2.0.js'></script>
+<script type='text/javascript' src='../js/expanz.tool.js' ></script>
+
+
+<script type='text/javascript'>
+
+	function error( str ){
+		$('.error').html( "<span style='color:red'>" + str + "</span>" );
+	}
+
+</script>
+</head>
+
+<body>
+
+	<div id='container'>
+                <div class='textinput' id='url'>
+                  <span data-bind='text: Endpoint.label'>Endpoint URL</span>
+                  <input type='text' data-bind='value: Endpoint.value' />
+                </div>
+
+		<div class='textinput' id='username'>
+			<span data-bind='text: Username.label'></span>
+			<input type='text' data-bind='value: Username.value'/>
+		</div>
+
+		<div class='textinput' id='password'>
+			<span data-bind='text: Password.label'></span>
+			<input type='password' data-bind='value: Password.value'/>
+		</div>
+
+		<div class='submit' id='login'>
+			<button	data-bind='click: Login' onError='error' >Login</button>
+		</div>
+
+		<div class='error'></div>
+	</div>
+
+</body>
+</html>
+
+
+
