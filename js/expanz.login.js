@@ -193,6 +193,28 @@ function parseGetSessionDataResponse( success, error ){
 
 function SendRequest ( request, responseHandler, error ){
 
+
+      $.ajax({
+         type: 'POST',
+	 url: _URLproxy,
+	 data: { url: _URLprefixSSL + request.url, data: request.data },
+	 dataType: "string",
+	 processData: true,
+	 complete: function( HTTPrequest ){
+	    if( HTTPrequest.status != 200 ){
+               eval( error )( 'There was a problem with the last request.' );
+            } else {
+	       var response = HTTPrequest.responseText;
+	          if( responseHandler ){
+                     var xml = response.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+		     eval( responseHandler )( xml );
+		  } 
+	    }
+	 }
+      });
+
+
+   /*
 	$.ajax({
 		type: "post",
 		url: document.location.origin + _URLprefixSSL + request.url, 
@@ -216,6 +238,7 @@ function SendRequest ( request, responseHandler, error ){
 			}
 		}
 	});
+   */
 }
 
 
@@ -272,8 +295,9 @@ function getCreateGetSessionDataRequestBody( sessionHandle ){
  *
  */
 
-var _URLprefix = '/ESADemoService/ESAService.svc/restish/';
-var _URLprefixSSL = '/ESADemoService/ESAService.svc/restishssl/';
+var _URLproxy = '../../expanz-Proxy/proxy.php';
+var _URLprefix = 'http://test.expanz.com/ESADemoService/ESAService.svc/restish/';
+var _URLprefixSSL = 'https://test.expanz.com/ESADemoService/ESAService.svc/restishssl/';
 
 /*
  *   Private Object Prototypes
