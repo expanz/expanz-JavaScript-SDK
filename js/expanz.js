@@ -303,32 +303,6 @@ function SendRequest ( request, responseHandler, error ){
 	    }
 	 }
       });
-
-/*
-	$.ajax({
-		type: "post",
-		url: document.location.origin + _URLprefixSSL + request.url,
-		data: request.data,
-		contentType: "text/xml",
-		dataType: "string", //"xml",
-		processData: false,	//keeps data: from being serialized
-		complete: function( HTTPrequest ){
-
-			if( HTTPrequest.status != 200 ){
-
-				eval( error )( 'There was a problem with the last request.' );
-
-			} else {
-
-				var response = HTTPrequest.responseText;
-				
-				if( responseHandler ){
-					eval( responseHandler )( response );
-				} 
-			}
-		}
-	});
-   */
 }
 
 
