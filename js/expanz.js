@@ -65,10 +65,10 @@ function onLogout( event ){
 
 $(document).ready( function() {
 
-	if( !getSessionHandle() ){
-		deleteSessionHandle();
+   if( !getSessionHandle() ){
+      deleteSessionHandle();
       redirect( getLoginURL() );
-	}
+   }
 
    // Load Menu & insert it into .menu
    $.each( getProcessAreaList(), function( i, processArea ) {
@@ -88,9 +88,17 @@ $(document).ready( function() {
    // insert the logout button into .logout
    $('#menu').append( '<div id=\'logout\' class=\'menuitem\'><a data-bind=\'click: Logout\' >logout</a></div>' );
 
-	$('.Activity').each( function(){
-		LoadActivity( new Activity( $(this).attr('name') ) );
-	});
+   $('.Activity').each( function(){
+      var activity = new Activity( $(this).attr('name') );
+      $(this).find('.GridView').each( function(){
+         activity.datapublication.push(   new GridView(  $(this).attr('id'),
+                                                         $(this).attr('popluateMethod'),
+                                                         $(this)
+                                                         )
+                                       );
+      });
+      LoadActivity( activity );
+   });
 	
 });
 
@@ -99,10 +107,10 @@ $(document).ready( function() {
 
 function LoadActivity( activity ){
 
-	SendRequest(	new CreateActivityRequest( activity ),
-			         parseCreateActivityResponse( activity, setupBindings( activity ) ),
-         			networkError
-         			); 
+	SendRequest( new CreateActivityRequest( activity ),
+		     parseCreateActivityResponse( activity, setupBindings( activity ) ),
+         	     networkError
+         	     ); 
 }
 
 
@@ -153,7 +161,7 @@ function setupObservers( activity, fields ){
          									);
 						}
 
-                  field.serverUpdated = false;
+                                                field.serverUpdated = false;
 					}
 				} ( fields[id], fields )
 			);
@@ -194,12 +202,12 @@ function callMethod( activity, fields ){
  */
 
 function parseCreateActivityResponse( activity, callback ){
-	return function apply( xml ){
+   return function apply( xml ){
 
-		var execResults = $(xml).find("ExecXResult");
-		var fields = {};
+      var execResults = $(xml).find("ExecXResult");
+      var fields = {};
 
-		if( execResults ){
+      if( execResults ){
 
          $(execResults).find( 'Message' ).each( function ()
          {
@@ -225,6 +233,36 @@ function parseCreateActivityResponse( activity, callback ){
             							);  
 				fields[ field.id ] = field;
 			});
+
+                        $( execResults ).find( 'Data' ).each( function()
+                        {
+                           var gridview;
+                           for( var i=0; i < activity.datapublication.length; i++ ){
+                              if( activity.datapublication[i].id = $(this).attr('id') )
+                                 gridview = activity.datapublication[i];
+                           }
+                           gridview.source = $(this).attr('source');
+
+                           $(this).find( 'Column' ).each( function() {
+                              gridview.addColumn(  $(this).attr('id'),
+                                                   $(this).attr('field'),
+                                                   $(this).attr('label'),
+                                                   $(this).attr('datatype'),
+                                                   $(this).attr('width')
+                                                );
+                           });
+
+                           $(this).find( 'Row' ).each( function(){
+                              gridview.addRow(  $(this).attr('id'),
+                                                $(this).attr('type'),
+                                                $(this).html()
+
+                                             );
+                           });
+                           fields[ gridview.id ] = gridview;
+                        });
+
+
 		}
       else{
          networkError( execResults );
@@ -338,9 +376,17 @@ function getCreateActivityRequestBody( activity, style ){
 
    var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' +
                   '<xml>' +
-                     '<ESA>' +
-                        '<CreateActivity name="' + activity.name + '" style="' + style + '"/>' +
-                     '</ESA>' +
+                     '<ESA>';
+                     if( activity.datapublication.length > 0 ){
+                        body +=  '<CreateActivity name="' + activity.name + '" style="' + style + '">';
+                        $.each( activity.datapublication, function(){                     
+                           body += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '" />"';
+                        });
+                        body += '</CreateActivity>';
+                     } else {
+                        body +=  '<CreateActivity name="' + activity.name + '" style="' + style + '"/>';
+                     }
+                     body += '</ESA>' +
                   '</xml>' +
                   '<sessionHandle>' + getSessionHandle() + '</sessionHandle>' +
                '</ExecX>';
@@ -418,24 +464,81 @@ var Bindings = {};
 function Activity( name ) {
 	this.name = name;
 	this.handle = "";
+        this.datapublication = new Array();
 }
 
 function Field( id, label, disabled, nullvalue, value, datatype, valid ){
-	this.id = id;
-	this.label = label;
-	this.disabled = disabled;
-	this.nullvalue = nullvalue;
-	this.value = ko.observable( value );
-	this.datatype = datatype;
-	this.valid = valid;
-	this.error = ko.observable( "" );
+   this.id = id;
+   this.label = label;
+   this.disabled = disabled;
+   this.nullvalue = nullvalue;
+   this.value = ko.observable( value );
+   this.datatype = datatype;
+   this.valid = valid;
+   this.error = ko.observable( "" );
    this.serverUpdated = false;
 }
 
-function ActivityInfo( name, title, url ){
-   this.name = name;
-   this.title = title;
-   this.url = '';
+function GridView( id, popluateMethod, jQ ) {
+   this.id = id;
+   this.populateMethod = popluateMethod;
+   this.jQ = jQ;
+
+   this.columns = new Array();
+   this.rows = new Array();
+   createScaffold( id );
+
+   function Column( id, field, label, datatype, width ){
+      this.id = id;
+      this.field = field;
+      this.datatype = datatype;
+      this.label = label;
+      this.width = width;
+   }
+   function Row( id, type ){
+      this.id = id;
+      this.type = type;
+      this.cells = new Array();
+   }
+   function Cell( id, value, sortType ){
+      this.id = id;
+      this.value = value;
+      this.sortType = sortType;
+   }
+
+   this.addColumn = function( id, field, label, datatype, width ){
+      var column = new Column( id, field, label, datatype, width );
+      this.columns.push( column );
+      createColumn( column );
+      return column;
+   };
+   this.addRow = function( id, type, cells ){
+      var row = new Row( id, type );
+      $(cells).each( function() {
+         row.cells.push( new Cell(  $(this).attr('id'),
+                                    $(this).html(),
+                                    $(this).attr('sorttype')
+                                    )
+                        );
+      });
+      this.rows.push( row );
+      createRow( row );
+      return row;
+   };
+
+   function createScaffold( id ){
+      jQ.append( '<table id="' + id + '"><thead><tr></tr></thead><tbody></tbody></table>' );
+   }
+   function createColumn( column ){
+      jQ.find('thead tr').append( '<td>' + column.label + '</td>' );
+   }
+   function createRow( row ){
+      var html = '<tr id="' + row.id + '">';
+      $.each( row.cells, function(){ html += '<td id="' + this.id + '">' + this.value + '</td>'; } );
+      html += '</tr>';
+      jQ.find('tbody').append( html );
+   }
+
 }
 
 
