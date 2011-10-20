@@ -14,6 +14,42 @@ function redirect( destinationURL ){
 	window.location.href = destinationURL;
 }
 
+
+var onDynamicLoadFunctions = new Array();
+var onDynamicLoad = function applyLater(fn){
+                              if( fn )
+                                 onDynamicLoadFunctions.push( fn );
+                              else
+                                 for( var i=0; i < onDynamicLoadFunctions.length; i++ )
+                                    eval( onDynamicLoadFunctions[i] )();
+                           };
+
+function DynamicLoadActivity(){
+   
+   // TODO: remove duplicates every time this gets run
+   $('.Activity').each( function(){
+      var activity = new Activity( $(this).attr('name'), $(this).attr('initialKey') );
+      $(this).find('.GridView').each( function(){
+         activity.datapublication.push(   new GridView(  $(this).attr('id'),
+                                                         $(this).attr('popluateMethod'),
+                                                         $(this).attr('contextObject'),
+                                                         $(this)
+                                                         )
+                                       );
+      });
+      LoadActivity( activity );
+   });
+}
+
+
+(function( $ ){
+  $.fn.ExpanzLoad = function( fn ) {
+   onDynamicLoad( fn );
+  };
+  $.fn.ExpanzLoadActivity = DynamicLoadActivity;
+})( jQuery );
+
+
 /*
  *   Session Functions
  *         These functions create, query, maintain, destroy user sessions
@@ -88,29 +124,25 @@ $(document).ready( function() {
    // insert the logout button into .logout
    $('#menu').append( '<div id=\'logout\' class=\'menuitem\'><a data-bind=\'click: Logout\' >logout</a></div>' );
 
-   $('.Activity').each( function(){
-      var activity = new Activity( $(this).attr('name') );
-      $(this).find('.GridView').each( function(){
-         activity.datapublication.push(   new GridView(  $(this).attr('id'),
-                                                         $(this).attr('popluateMethod'),
-                                                         $(this)
-                                                         )
-                                       );
-      });
-      LoadActivity( activity );
-   });
+
+   DynamicLoadActivity();
 	
 });
 
 
 
 
+
+
+
 function LoadActivity( activity ){
 
+   //if( ! activity.loaded ){
 	SendRequest( new CreateActivityRequest( activity ),
 		     parseCreateActivityResponse( activity, setupBindings( activity ) ),
          	     networkError
          	     ); 
+   //}
 }
 
 
@@ -120,17 +152,20 @@ function LoadActivity( activity ){
  */
 
 function setupBindings( activity ){
-	return function apply( fields ){
+   return function apply( fields ){
 
-		for( attr in fields ){ Bindings[attr] = fields[attr]; }
+      for( attr in fields ){ Bindings[attr] = fields[attr]; }
 
-		setupObservers( activity, Bindings );
+         setupObservers( activity, fields ); //Bindings );
 
-		Bindings.Method = callMethod( activity, Bindings );
-      Bindings.Logout = onLogout;
+         Bindings.Method = callMethod( activity, Bindings );
+         Bindings.MenuAction = callMenuAction();
+         Bindings.Logout = onLogout;
 
-		ko.applyBindings( Bindings );
-	}
+         ko.applyBindings( Bindings );
+
+         onDynamicLoad();
+   }
 }
 
 /*
@@ -170,6 +205,8 @@ function setupObservers( activity, fields ){
 
 }
 
+function setupClickGridViewClickHandlers( ){}
+
 
 
 /*
@@ -194,6 +231,24 @@ function callMethod( activity, fields ){
 	}
 }
 
+function callMenuAction( activity, fields ){
+   return function apply( event ){
+      
+      var actionName = $(event.currentTarget).attr('method-name');
+      var contextSelectorFn = getFunctionFromDOMByName( $(event.currentTarget).attr('context-selector') );
+      var contextId = eval( contextSelectorFn )();
+
+      var successFn = getFunctionFromDOMByName( $(event.currentTarget).attr('onSuccess') );
+      var errorFn = getFunctionFromDOMByName( $(event.currentTarget).attr('onError') );
+
+      SendRequest(   new CreateMenuActionRequest( activity, contextId, actionName ),
+                     parseMenuActionResponse( fields, successFn, errorFn ),
+         	     errorFn
+           	     );
+
+      
+   };
+}
 
 
 /*
@@ -205,7 +260,7 @@ function parseCreateActivityResponse( activity, callback ){
    return function apply( xml ){
 
       var execResults = $(xml).find("ExecXResult");
-      var fields = {};
+      var fields = new Array();
 
       if( execResults ){
 
@@ -236,12 +291,9 @@ function parseCreateActivityResponse( activity, callback ){
 
                         $( execResults ).find( 'Data' ).each( function()
                         {
-                           var gridview;
-                           for( var i=0; i < activity.datapublication.length; i++ ){
-                              if( activity.datapublication[i].id = $(this).attr('id') )
-                                 gridview = activity.datapublication[i];
-                           }
+                           var gridview = activity.findDatapublicationForID( $(this).attr('id') );
                            gridview.source = $(this).attr('source');
+                           gridview.clear();
 
                            $(this).find( 'Column' ).each( function() {
                               gridview.addColumn(  $(this).attr('id'),
@@ -253,13 +305,13 @@ function parseCreateActivityResponse( activity, callback ){
                            });
 
                            $(this).find( 'Row' ).each( function(){
-                              gridview.addRow(  $(this).attr('id'),
-                                                $(this).attr('type'),
-                                                $(this).html()
-
-                                             );
+                              var row = gridview.addRow( $(this).attr('id'),
+                                                               $(this).attr('type'),
+                                                               $(this).html()
+                                                               );
+                              for( var i=0; i < row.cells.length; i++ )
+                                 fields[ row.cells[i].id ] = row.cells[i];
                            });
-                           fields[ gridview.id ] = gridview;
                         });
 
 
@@ -268,8 +320,9 @@ function parseCreateActivityResponse( activity, callback ){
          networkError( execResults );
       }
 
-		return eval( callback )( fields );
-	}
+      activity.loaded = true;
+      return eval( callback )( fields );
+   }
 }
 
 function parseUpdateResponse( fields, success, error ){
@@ -299,6 +352,37 @@ function parseUpdateResponse( fields, success, error ){
 			return execResults;
 	}
 }
+
+
+function parseMenuActionResponse( fields, success, error ){
+	return function apply ( xml ){
+
+			var execResults = $(xml).find("ExecXResult");
+			var errorOccurred = false;
+
+			if( execResults ){
+                           $.get("./formmapping.xml", function(data){
+
+                              $(data).find('activity').each( function()
+                              {
+                                 var name = $(this).attr('name');
+                                 var url = $(this).attr('form');
+                                 $.each( processAreas, function( i, processArea ){
+                                    $.each( processArea.activities, function( j, activity ){ 
+                                       if( activity.name == name ){
+                                          activity.url = url;
+                                       }
+                                    });
+                                 });
+                              });
+                           });
+                        }
+
+			if( !errorOccurred ){	eval( success )( execResults );	}
+			return execResults;
+	}
+}
+
 
 function parseReleaseSessionResponse( success, error ){
    return function apply( xml ){
@@ -361,6 +445,10 @@ function CreateMethodRequest( activity, methodName ){
    this.data = getCreateMethodRequestBody( activity, methodName );
    this.url = 'ExecX';
 }
+function CreateMenuActionRequest( activity, contextId, menuAction ){
+   this.data = getCreateMethodRequestBody( activity, contextId, activity.name, menuAction );
+   this.url = 'ExecX';
+}
 function CreateReleaseSessionRequest(){
    this.data = getCreateReleaseSessionRequestBody();
    this.url = 'ReleaseSession';
@@ -378,9 +466,17 @@ function getCreateActivityRequestBody( activity, style ){
                   '<xml>' +
                      '<ESA>';
                      if( activity.datapublication.length > 0 ){
-                        body +=  '<CreateActivity name="' + activity.name + '" style="' + style + '">';
+                        if( activity.initialkey ){
+                           body +=  '<CreateActivity name="' + activity.name + '" style="' + style + '" initialkey="' + activity.initialkey + '">';
+                        } else {
+                           body +=  '<CreateActivity name="' + activity.name + '" style="' + style + '">';
+                        }
                         $.each( activity.datapublication, function(){                     
-                           body += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '" />"';
+                           if( this.contextObject ){
+                              body += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '" contextObject="' + this.contextObject + '"/>"';
+                           } else {
+                              body += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '"/>"'; 
+                           }
                         });
                         body += '</CreateActivity>';
                      } else {
@@ -427,6 +523,24 @@ function getCreateMethodRequestBody( activity, methodName ){
 	return body;
 }
 
+function getCreateMenuActionRequestBody( activity, contextId, contextType, menuAction ){
+
+
+	var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' +
+                  '<xml>' +
+                     '<ESA>' +
+                        '<Activity activityHandle="' + activity.handle + '">' +
+                           '<Context id="' + contextId + '" Type="' + contextType + '"/>' +
+                           '<MenuAction action="' + menuAction + '"/>' +
+                        '</Activity>' +
+                     '</ESA>' +
+                  '</xml>' +
+                  '<sessionHandle>' + getSessionHandle() + '</sessionHandle>' +
+               '</ExecX>';
+
+	return body;
+}
+
 
 function getCreateReleaseSessionRequestBody(){
 
@@ -461,10 +575,19 @@ var Bindings = {};
  */
 
 
-function Activity( name ) {
+function Activity( name, initialkey ) {
 	this.name = name;
+        this.initialkey = initialkey;
 	this.handle = "";
         this.datapublication = new Array();
+        this.loaded = false;
+
+        this.findDatapublicationForID = function( id ){
+            for( var i=0; i < this.datapublication.length; i++ ){
+               if( this.datapublication[i].id = id )
+                  return this.datapublication[i];
+            }
+         };
 }
 
 function Field( id, label, disabled, nullvalue, value, datatype, valid ){
@@ -479,9 +602,10 @@ function Field( id, label, disabled, nullvalue, value, datatype, valid ){
    this.serverUpdated = false;
 }
 
-function GridView( id, popluateMethod, jQ ) {
+function GridView( id, popluateMethod, contextObject, jQ ) {
    this.id = id;
    this.populateMethod = popluateMethod;
+   this.contextObject = contextObject;
    this.jQ = jQ;
 
    this.columns = new Array();
@@ -495,14 +619,18 @@ function GridView( id, popluateMethod, jQ ) {
       this.label = label;
       this.width = width;
    }
-   function Row( id, type ){
-      this.id = id;
+   function Row( mother, id, type ){
+      this.mother = mother;
+      this.id = mother.id + '_' + id;
+      this.rawId = id;
       this.type = type;
       this.cells = new Array();
    }
-   function Cell( id, value, sortType ){
-      this.id = id;
-      this.value = value;
+   function Cell( mother, id, value, sortType ){
+      this.mother = mother;
+      this.id = mother.id + '_' + id;
+      this.rawId = id;
+      this.value = ko.observable( value );
       this.sortType = sortType;
    }
 
@@ -512,29 +640,36 @@ function GridView( id, popluateMethod, jQ ) {
       createColumn( column );
       return column;
    };
-   this.addRow = function( id, type, cells ){
-      var row = new Row( id, type );
-      $(cells).each( function() {
-         row.cells.push( new Cell(  $(this).attr('id'),
-                                    $(this).html(),
-                                    $(this).attr('sorttype')
-                                    )
-                        );
+   this.addRow = function( id, type, cellsXML ){
+      var row = new Row( this, id, type );
+      $(cellsXML).each( function() {
+         var cell = new Cell( row,
+                              $(this).attr('id'),
+                              $(this).html(),
+                              $(this).attr('sorttype')
+                              );
+         row.cells.push( cell );
       });
+
       this.rows.push( row );
       createRow( row );
+
       return row;
    };
 
+   this.clear = function(){
+      createScaffold( this.id );
+   };
+
    function createScaffold( id ){
-      jQ.append( '<table id="' + id + '"><thead><tr></tr></thead><tbody></tbody></table>' );
+      jQ.html( '<table id="' + id + '"><thead><tr></tr></thead><tbody></tbody></table>' );
    }
    function createColumn( column ){
       jQ.find('thead tr').append( '<td>' + column.label + '</td>' );
    }
    function createRow( row ){
       var html = '<tr id="' + row.id + '">';
-      $.each( row.cells, function(){ html += '<td id="' + this.id + '">' + this.value + '</td>'; } );
+      $.each( row.cells, function(){ html += '<td id="' + this.id + '"><span data-bind="text: ' + this.id + '.value"></span></td>'; } );
       html += '</tr>';
       jQ.find('tbody').append( html );
    }
