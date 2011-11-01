@@ -87,7 +87,7 @@ function onLogout( event ){
    var errorFn = networkError;
 
    SendRequest(   new CreateReleaseSessionRequest(),
-                  parseReleaseSessionResponse( successFn, errorFn ),
+                  parseReleaseSessionResponse( successFn, successFn ),
                   networkError
                   );
 }
@@ -159,7 +159,7 @@ function setupBindings( activity ){
          setupObservers( activity, fields ); //Bindings );
 
          Bindings.Method = callMethod( activity, Bindings );
-         Bindings.MenuAction = callMenuAction();
+         Bindings.MenuAction = callMenuAction( activity, Bindings );
          Bindings.Logout = onLogout;
 
          ko.applyBindings( Bindings );
@@ -234,7 +234,7 @@ function callMethod( activity, fields ){
 function callMenuAction( activity, fields ){
    return function apply( event ){
       
-      var actionName = $(event.currentTarget).attr('method-name');
+      var actionName = $(event.currentTarget).attr('action-name');
       var contextSelectorFn = getFunctionFromDOMByName( $(event.currentTarget).attr('context-selector') );
       var contextId = eval( contextSelectorFn )();
 
@@ -358,28 +358,28 @@ function parseMenuActionResponse( fields, success, error ){
 	return function apply ( xml ){
 
 			var execResults = $(xml).find("ExecXResult");
-			var errorOccurred = false;
 
 			if( execResults ){
-                           $.get("./formmapping.xml", function(data){
+                           var fields = new Array();
 
-                              $(data).find('activity').each( function()
-                              {
-                                 var name = $(this).attr('name');
-                                 var url = $(this).attr('form');
-                                 $.each( processAreas, function( i, processArea ){
-                                    $.each( processArea.activities, function( j, activity ){ 
-                                       if( activity.name == name ){
-                                          activity.url = url;
-                                       }
-                                    });
-                                 });
-                              });
-                           });
+                           var fieldsXml = $( execResults ).find( 'Field' );
+                           for( var i=0; i < fieldsXml.length; i++ ) {
+				var field = new Field(   $(fieldsXml[i]).attr('id'),
+							 $(fieldsXml[i]).attr('label'),
+               						 $(fieldsXml[i]).attr('disabled'),
+					               	 $(fieldsXml[i]).attr('null'),
+               						 $(fieldsXml[i]).attr('value'),
+               						 $(fieldsXml[i]).attr('datatype'),
+					               	 $(fieldsXml[i]).attr('valid')
+            						 );  
+				fields[ field.id ] = field;
+			   }
+
+                           eval( success )( fields );
+                        } else {
+                           eval( error )( xml );
                         }
-
-			if( !errorOccurred ){	eval( success )( execResults );	}
-			return execResults;
+			return xml;
 	}
 }
 
@@ -446,7 +446,7 @@ function CreateMethodRequest( activity, methodName ){
    this.url = 'ExecX';
 }
 function CreateMenuActionRequest( activity, contextId, menuAction ){
-   this.data = getCreateMethodRequestBody( activity, contextId, activity.name, menuAction );
+   this.data = getCreateMenuActionRequestBody( activity, contextId, activity.name, menuAction );
    this.url = 'ExecX';
 }
 function CreateReleaseSessionRequest(){
@@ -462,32 +462,40 @@ function CreateReleaseSessionRequest(){
 
 function getCreateActivityRequestBody( activity, style ){
 
-   var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' +
+   var head = '<ExecX xmlns="http://www.expanz.com/ESAService">' +
                   '<xml>' +
                      '<ESA>';
-                     if( activity.datapublication.length > 0 ){
-                        if( activity.initialkey ){
-                           body +=  '<CreateActivity name="' + activity.name + '" style="' + style + '" initialkey="' + activity.initialkey + '">';
-                        } else {
-                           body +=  '<CreateActivity name="' + activity.name + '" style="' + style + '">';
-                        }
-                        $.each( activity.datapublication, function(){                     
-                           if( this.contextObject ){
-                              body += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '" contextObject="' + this.contextObject + '"/>"';
-                           } else {
-                              body += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '"/>"'; 
-                           }
-                        });
-                        body += '</CreateActivity>';
-                     } else {
-                        body +=  '<CreateActivity name="' + activity.name + '" style="' + style + '"/>';
-                     }
-                     body += '</ESA>' +
+   var center = '';
+   if( activity.datapublication.length > 0 ){
+      if( activity.initialkey ){
+         center +=  '<CreateActivity name="' + activity.name + '"';
+         //style? center += ' style="' + style + '"' : '';
+         center += ' style="';
+         style? center += style: '';
+         center += '"';
+         center += ' initialKey="' + activity.initialkey + '">';
+      } else {
+         center +=  '<CreateActivity name="' + activity.name + '" ';
+         style? center += 'style="' + style + '"' : '';
+         center += '>';
+      }
+      $.each( activity.datapublication, function(){                     
+         if( this.contextObject ){
+            center += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '" contextObject="' + this.contextObject + '"/>';
+         } else {
+            center += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '"/>'; 
+         }
+      });
+      center += '</CreateActivity>';
+   } else {
+      center +=  '<CreateActivity name="' + activity.name + '" style="' + style + '"/>';
+   }
+   var tail = '</ESA>' +
                   '</xml>' +
                   '<sessionHandle>' + getSessionHandle() + '</sessionHandle>' +
                '</ExecX>';
 
-	return body;
+   return head + center + tail;
 }
 
 function getCreateDeltaRequestBody( activity, id, value ){
@@ -531,7 +539,7 @@ function getCreateMenuActionRequestBody( activity, contextId, contextType, menuA
                      '<ESA>' +
                         '<Activity activityHandle="' + activity.handle + '">' +
                            '<Context id="' + contextId + '" Type="' + contextType + '"/>' +
-                           '<MenuAction action="' + menuAction + '"/>' +
+                           '<MenuAction defaultAction="' + menuAction + '"/>' +
                         '</Activity>' +
                      '</ESA>' +
                   '</xml>' +
