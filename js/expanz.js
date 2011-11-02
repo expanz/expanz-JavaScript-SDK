@@ -90,6 +90,8 @@ function onLogout( event ){
                   parseReleaseSessionResponse( successFn, successFn ),
                   networkError
                   );
+
+   eval( successFn )();
 }
 
 
@@ -278,14 +280,14 @@ function parseCreateActivityResponse( activity, callback ){
 
 			$( execResults ).find( 'Field' ).each( function() 
 			{ 
-				var field = new Field(	$(this).attr('id'),
-							               $(this).attr('label'),
-               							$(this).attr('disabled'),
-					               		$(this).attr('null'),
-               							$(this).attr('value'),
-               							$(this).attr('datatype'),
-					               		$(this).attr('valid')
-            							);  
+				var field = new Field(   $(this).attr('id').replace(/\./g, '_'),
+							 $(this).attr('label'),
+               						 $(this).attr('disabled'),
+					               	 $(this).attr('null'),
+               						 $(this).attr('value'),
+               						 $(this).attr('datatype'),
+					               	 $(this).attr('valid')
+            						 );  
 				fields[ field.id ] = field;
 			});
 
@@ -410,7 +412,7 @@ function SendRequest ( request, responseHandler, error ){
       $.ajax({
          type: 'POST',
 	 url: _URLproxy,
-	 data: { url: _URLprefixSSL + request.url, data: request.data },
+	 data: { url: _URLprefix + request.url, data: request.data },
 	 dataType: "string",
 	 processData: true,
 	 complete: function( HTTPrequest ){
@@ -571,7 +573,7 @@ function getCreateReleaseSessionRequestBody(){
  */
 
 var _URLproxy = '../../expanz-Proxy/proxy.php';
-var _URLprefix = 'http://test.expanz.com/ESADemoService/ESAService.svc/restish/';
+var _URLprefix = 'http://expanzdemo.cloudapp.net:8080/esaservice.svc/restish/';   //'http://test.expanz.com/ESADemoService/ESAService.svc/restish/';
 var _URLprefixSSL = 'https://test.expanz.com/ESADemoService/ESAService.svc/restishssl/';
 
 var Bindings = {};

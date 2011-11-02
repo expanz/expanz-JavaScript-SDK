@@ -197,7 +197,7 @@ function SendRequest ( request, responseHandler, error ){
       $.ajax({
          type: 'POST',
 	 url: _URLproxy,
-	 data: { url: _URLprefixSSL + request.url, data: request.data },
+	 data: { url: _URLprefix + request.url, data: request.data },
 	 dataType: "string",
 	 processData: true,
 	 complete: function( HTTPrequest ){
@@ -241,7 +241,7 @@ function getCreateSessionRequestBody( username, password ){
    var body = '<CreateSessionX xmlns="http://www.expanz.com/ESAService">' +
                   '<xml>' +
                      '<ESA>' +
-                        '<CreateSession user="' + username + '" password="' + password + '" appSite="SALESAPP" authenticationMode="Primary" clientVersion="Flex 1.0" schemaVersion="2.0"/>' +
+                        '<CreateSession user="' + username + '" password="' + password + '" appSite="SALES" authenticationMode="Primary" clientVersion="Flex 1.0" schemaVersion="2.0"/>' +
                      '</ESA>' +
                    '</xml>' +
                '</CreateSessionX>';
@@ -269,7 +269,7 @@ function getCreateGetSessionDataRequestBody( sessionHandle ){
  */
 
 var _URLproxy = '../../expanz-Proxy/proxy.php';
-var _URLprefix = 'http://test.expanz.com/ESADemoService/ESAService.svc/restish/';
+var _URLprefix = 'http://expanzdemo.cloudapp.net:8080/esaservice.svc/restish/';  //'http://test.expanz.com/ESADemoService/ESAService.svc/restish/';
 var _URLprefixSSL = 'https://test.expanz.com/ESADemoService/ESAService.svc/restishssl/';
 
 /*
