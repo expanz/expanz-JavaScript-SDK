@@ -24,20 +24,28 @@ var onDynamicLoad = function applyLater(fn){
                                     eval( onDynamicLoadFunctions[i] )();
                            };
 
+var activities = {};
 function DynamicLoadActivity(){
    
    // TODO: remove duplicates every time this gets run
    $('.Activity').each( function(){
-      var activity = new Activity( $(this).attr('name'), $(this).attr('initialKey') );
-      $(this).find('.GridView').each( function(){
-         activity.datapublication.push(   new GridView(  $(this).attr('id'),
-                                                         $(this).attr('popluateMethod'),
-                                                         $(this).attr('contextObject'),
-                                                         $(this)
-                                                         )
-                                       );
-      });
-      LoadActivity( activity );
+         if( ! activities[ $(this).attr('name') ] || 
+                  ( activities[ $(this).attr('name') ] && 
+                     ($(this).attr('initialKey') != activities[ $(this).attr('name') ].initialKey) 
+                  )
+            ){
+               var activity = new Activity( $(this).attr('name'), $(this).attr('initialKey') );
+               $(this).find('.GridView').each( function(){
+                     activity.datapublication.push(   new GridView(  $(this).attr('id'),
+                                                                     $(this).attr('popluateMethod'),
+                                                                     $(this).attr('contextObject'),
+                                                                     $(this)
+                                                                     )
+                                                   );
+               });
+               LoadActivity( activity );
+               activities[ activity.name ] = activity;
+            }
    });
 }
 
@@ -192,7 +200,7 @@ function setupObservers( activity, fields ){
 						};
 
 						if( field.disabled != 1 && !field.serverUpdated ){
-							SendRequest(	new CreateDeltaRequest( activity, field.id, newValue ),
+							SendRequest(	new CreateDeltaRequest( activity, field.id.replace(/_/g, '.'), newValue ),
          									parseUpdateResponse( allFields, success, error ),
          									networkError
          									);
@@ -262,7 +270,7 @@ function parseCreateActivityResponse( activity, callback ){
    return function apply( xml ){
 
       var execResults = $(xml).find("ExecXResult");
-      var fields = new Array();
+      var fields = {};  //new Array();
 
       if( execResults ){
 
@@ -328,31 +336,34 @@ function parseCreateActivityResponse( activity, callback ){
 }
 
 function parseUpdateResponse( fields, success, error ){
-	return function apply ( xml ){
+   return function apply ( xml ){
 
-			var execResults = $(xml).find("ExecXResult");
-			var errorOccurred = false;
+      var execResults = $(xml).find("ExecXResult");
+      var errorOccurred = false;
 
-			if( execResults ){
-				$( execResults ).find( 'Field' ).each( function() 
-				{ 
-               if(  fields[ $(this).attr('id') ].value() != $(this).attr('value') ){
-                  fields[ $(this).attr('id') ].serverUpdated = true;
-	   				fields[ $(this).attr('id') ].value( $(this).attr('value') );
-               }
-				});
-				$( execResults ).find( 'Message' ).each( function()	
-				{
-					if( $(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning'  ){
-						eval( error )( $(this).text() );
-						errorOccurred = true;
-					}
-				});
-			}
+      if( execResults ){
+         $( execResults ).find( 'Field' ).each( function() 
+	 { 
+            var id = $(this).attr('id').replace(/\./g, '_');
+            if(  fields[ id ].value() != $(this).attr('value') )
+            {
+               fields[ id ].serverUpdated = true;
+	       fields[ id ].value( $(this).attr('value') );
+            }
+	 });
+	 $( execResults ).find( 'Message' ).each( function()	
+	 {
+	    if( $(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning'  )
+            {
+	       eval( error )( $(this).text() );
+	       errorOccurred = true;
+	    }
+	 });
+      }
 
-			if( !errorOccurred ){	eval( success )( execResults );	}
-			return execResults;
-	}
+      if( !errorOccurred ){	eval( success )( execResults );	}
+      return execResults;
+   }
 }
 
 
@@ -472,9 +483,7 @@ function getCreateActivityRequestBody( activity, style ){
       if( activity.initialkey ){
          center +=  '<CreateActivity name="' + activity.name + '"';
          //style? center += ' style="' + style + '"' : '';
-         center += ' style="';
-         style? center += style: '';
-         center += '"';
+         style? center += ' style="' + style + '"': '';
          center += ' initialKey="' + activity.initialkey + '">';
       } else {
          center +=  '<CreateActivity name="' + activity.name + '" ';
@@ -597,6 +606,7 @@ function Activity( name, initialkey ) {
                if( this.datapublication[i].id = id )
                   return this.datapublication[i];
             }
+            return null;
          };
 }
 
