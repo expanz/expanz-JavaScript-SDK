@@ -27,7 +27,6 @@ var onDynamicLoad = function applyLater(fn){
 var activities = {};
 function DynamicLoadActivity(){
    
-   // TODO: remove duplicates every time this gets run
    $('.Activity').each( function(){
          if( ! activities[ $(this).attr('name') ] || 
                   ( activities[ $(this).attr('name') ] && 
@@ -147,12 +146,10 @@ $(document).ready( function() {
 
 function LoadActivity( activity ){
 
-   //if( ! activity.loaded ){
-	SendRequest( new CreateActivityRequest( activity ),
-		     parseCreateActivityResponse( activity, setupBindings( activity ) ),
-         	     networkError
-         	     ); 
-   //}
+   SendRequest(   new CreateActivityRequest( activity ),
+	          parseCreateActivityResponse( activity, setupBindings( activity ) ),
+         	  networkError
+         	  ); 
 }
 
 
@@ -166,7 +163,7 @@ function setupBindings( activity ){
 
       for( attr in fields ){ Bindings[attr] = fields[attr]; }
 
-         setupObservers( activity, fields ); //Bindings );
+         setupObservers( activity, fields ); 
 
          Bindings.Method = callMethod( activity, Bindings );
          Bindings.MenuAction = callMenuAction( activity, Bindings );
@@ -229,10 +226,11 @@ function callMethod( activity, fields ){
 	return function apply( event ){
 
 		var name = $(event.currentTarget).attr('method-name');
+                var contextObject = $(event.currentTarget).attr('contextObject');
 		var successFn = getFunctionFromDOMByName( $(event.currentTarget).attr('onSuccess') );
 		var errorFn = getFunctionFromDOMByName( $(event.currentTarget).attr('onError') );
 
-		SendRequest( 	new CreateMethodRequest( activity, name ),
+		SendRequest( 	new CreateMethodRequest( activity, name, contextObject ),
          				parseUpdateResponse( fields, successFn, errorFn ),
          				errorFn
            				);
@@ -270,7 +268,7 @@ function parseCreateActivityResponse( activity, callback ){
    return function apply( xml ){
 
       var execResults = $(xml).find("ExecXResult");
-      var fields = {};  //new Array();
+      var fields = {};  
 
       if( execResults ){
 
@@ -339,6 +337,7 @@ function parseUpdateResponse( fields, success, error ){
    return function apply ( xml ){
 
       var execResults = $(xml).find("ExecXResult");
+      if( !execResults )   execResults = $(xml).find("ExecXResponse");
       var errorOccurred = false;
 
       if( execResults ){
@@ -351,6 +350,42 @@ function parseUpdateResponse( fields, success, error ){
 	       fields[ id ].value( $(this).attr('value') );
             }
 	 });
+
+         $( execResults ).find( 'Data' ).each( function()
+         {
+            var dataId = $(this).attr('id');
+
+            $(this).find( 'Row' ).each( function() {
+               var rowId = $(this).attr('id');
+               var type = $(this).attr('type');
+               var contents = $(this).html();
+
+               if( ! fields[ dataId + '_' + rowId + '_1' ] ){
+                  $.each( activities, function(){
+                        var datapublication = this.findDatapublicationForID( dataId );
+                        if( datapublication ){
+                           var row = datapublication.addRow( rowId, type, contents );
+                           for( var i=0; i < row.cells.length; i++ )
+                              fields[ row.cells[i].id ] = row.cells[i];
+                           ko.applyBindings( Bindings );
+                        }
+                  });
+               }
+               $(this).find( 'Cell' ).each( function() {
+                  var cellId = $(this).attr('id');
+
+                  var id = dataId + '_' + rowId + '_' + cellId;
+                  if( fields[ id ] ){
+                     if(  fields[ id ].value() != $(this).html() )
+                     {
+                        fields[ id ].serverUpdated = true;
+	                fields[ id ].value( $(this).html() );
+                     }
+                  }
+               });
+            });
+          });
+
 	 $( execResults ).find( 'Message' ).each( function()	
 	 {
 	    if( $(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning'  )
@@ -454,8 +489,8 @@ function CreateDeltaRequest( activity, id, value ){
    this.data = getCreateDeltaRequestBody( activity, id, value );
    this.url = 'ExecX';
 }
-function CreateMethodRequest( activity, methodName ){
-   this.data = getCreateMethodRequestBody( activity, methodName );
+function CreateMethodRequest( activity, methodName, contextObject ){
+   this.data = getCreateMethodRequestBody( activity, methodName, contextObject );
    this.url = 'ExecX';
 }
 function CreateMenuActionRequest( activity, contextId, menuAction ){
@@ -482,7 +517,6 @@ function getCreateActivityRequestBody( activity, style ){
    if( activity.datapublication.length > 0 ){
       if( activity.initialkey ){
          center +=  '<CreateActivity name="' + activity.name + '"';
-         //style? center += ' style="' + style + '"' : '';
          style? center += ' style="' + style + '"': '';
          center += ' initialKey="' + activity.initialkey + '">';
       } else {
@@ -525,14 +559,16 @@ function getCreateDeltaRequestBody( activity, id, value ){
 	return body;
 }
 
-function getCreateMethodRequestBody( activity, methodName ){
+function getCreateMethodRequestBody( activity, methodName, contextObject ){
 
 
 	var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' +
                   '<xml>' +
                      '<ESA>' +
                         '<Activity activityHandle="' + activity.handle + '">' +
-                           '<Method name="' + methodName + '"/>' +
+                           '<Method name="' + methodName + '"';
+                           contextObject? body += ' contextObject="' + contextObject + '"': '';
+                     body += '/>' +
                         '</Activity>' +
                      '</ESA>' +
                   '</xml>' +
@@ -704,7 +740,7 @@ function GridView( id, popluateMethod, contextObject, jQ ) {
 
 function getFunctionFromDOMByName( name ){
 	var fn = window[ name ];
-	if( !fn ){ return function(){ console.log( 'Function: ' + name + ' has not been defined.' ); } }
+	if( !fn ){ fn = function stub(){ console.log( 'Function: ' + name + ' has not been defined.' ); }; }
 	return fn;
 }
 
