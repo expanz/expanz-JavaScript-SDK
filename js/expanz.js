@@ -698,17 +698,19 @@ function GridView( id, popluateMethod, contextObject, jQ ) {
    };
    this.addRow = function( id, type, cellsXML ){
       var row = new Row( this, id, type );
+      var columns = this.columns;
       $(cellsXML).each( function() {
+         var value = $(this).html();
          var cell = new Cell( row,
                               $(this).attr('id'),
-                              $(this).html(),
+                              value,
                               $(this).attr('sorttype')
                               );
          row.cells.push( cell );
       });
 
       this.rows.push( row );
-      createRow( row );
+      createRow( row, this.columns);
 
       return row;
    };
@@ -723,9 +725,16 @@ function GridView( id, popluateMethod, contextObject, jQ ) {
    function createColumn( column ){
       jQ.find('thead tr').append( '<td>' + column.label + '</td>' );
    }
-   function createRow( row ){
+   function createRow( row, columns ){
       var html = '<tr id="' + row.id + '">';
-      $.each( row.cells, function(){ html += '<td id="' + this.id + '" class="row' + row.rawId + ' column' + this.rawId + '"><span data-bind="text: ' + this.id + '.value"></span></td>'; } );
+      $.each( row.cells, function(){ 
+         html += '<td id="' + this.id + '" class="row' + row.rawId + ' column' + this.rawId + '">';
+         if( columns[ this.rawId -1 ].datatype === 'BLOB' )
+            html += '<img src="' + this.value() + '" />';
+         else
+            html += '<span data-bind="text: ' + this.id + '.value"></span>';
+         html += '</td>'; 
+      });
       html += '</tr>';
       jQ.find('tbody').append( html );
    }
