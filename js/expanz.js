@@ -117,16 +117,16 @@ $(document).ready( function() {
 
    // Load Menu & insert it into .menu
    $.each( getProcessAreaList(), function( i, processArea ) {
-      $('#menu').append(   '<div class=\'menuitem ' + processArea.id + '\'>' +
+      $('#menu').append(   '<div id="' + processArea.id + '" class="menuitem">' +
                               '<a>' + processArea.title + '</a>' + 
                               '<ul></ul>' +
                            '</div>'
                            );
       $.each( processArea.activities, function( j, activity ){
-         $('#menu .menuitem ul').append(   '<li>' + 
-                                                   '<a href=\'' + activity.url + '\'>' + activity.title + '</a>' + 
-                                                   '</li>'
-                                                   );
+         $('#' + processArea.id + '.menuitem ul').append(   '<li>' + 
+                                                            '<a href=\'' + activity.url + '\'>' + activity.title + '</a>' + 
+                                                            '</li>'
+                                                            );
       });
    });
 
@@ -725,7 +725,7 @@ function GridView( id, popluateMethod, contextObject, jQ ) {
    }
    function createRow( row ){
       var html = '<tr id="' + row.id + '">';
-      $.each( row.cells, function(){ html += '<td id="' + this.id + '"><span data-bind="text: ' + this.id + '.value"></span></td>'; } );
+      $.each( row.cells, function(){ html += '<td id="' + this.id + '" class="row' + row.rawId + ' column' + this.rawId + '"><span data-bind="text: ' + this.id + '.value"></span></td>'; } );
       html += '</tr>';
       jQ.find('tbody').append( html );
    }
