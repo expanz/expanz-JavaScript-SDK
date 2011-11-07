@@ -823,7 +823,7 @@ function GridView( mother, id , popluateMethod, contextObject, jQ ) {
          html += '<td id="' + this.id + '" class="row' + row.rawId + ' column' + this.rawId + '">';
          if( columns[ this.rawId -1 ].datatype === 'BLOB' ){
             html += '<img src="' + this.value() + '"';
-            if( column.width )   html += ' width="' + column.width + '"';
+            if( columns[ this.rawId -1 ].width )   html += ' width="' + columns[ this.rawId -1 ].width + '"';
             html += '/>';
          } else {
             html += '<span data-bind="text: ' + this.id + '.value"></span>';
