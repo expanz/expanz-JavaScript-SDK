@@ -31,9 +31,10 @@ function DynamicLoadActivity(){
          var activityName = $(this).attr('name');
          if( $(this).attr('initialKey') )
             activityName += '_' + $(this).attr('initialKey');
-
-         if( ! activities[ activityName ] ){
-            var activity = new Activity( $(this) );
+         
+         var activity = activities[ activityName ];
+         if( ! activity ){
+            activity = new Activity( $(this) );
             $(this).find('.GridView').each( function(){
                   activity.datapublication.push(   new GridView(  activity,
                                                                      $(this).attr('id'),
@@ -43,9 +44,9 @@ function DynamicLoadActivity(){
                                                                      )
                                                    );
                });
-            LoadActivity( activity );
-            activities[ activity.name ] = activity;
+            activities[ activityName ] = activity;
          }
+         activity.load();
    });
 }
 
@@ -139,8 +140,9 @@ $(document).ready( function() {
 
    //KOBindingSet.Method = callMethod( ActiveFields );
    //KOBindingSet.MenuAction = callMenuAction( ActiveFields );
-   KOBindingSet.Logout = onLogout;
-   ko.applyBindings( KOBindingSet, $('#menu').get()[0] );
+   var menuBindings = {};
+   menuBindings.Logout = onLogout;
+   ko.applyBindings( menuBindings, $('#menu').get()[0] );
 	
 });
 
@@ -161,13 +163,8 @@ function LoadActivity( activity ){
 
 function setupBindings( activity ){
    return function apply( fields ){
-      $.each( fields, function( id, field ){
-         KOBindingSet[id] = field;
-         ActiveFields[ activity.name + '_' + id ] = field;
-      });
-
-      fields.Method = callMethod( activity );   //, ActiveFields );
-      fields.MenuAction = callMenuAction( activity ); //, ActiveFields );
+      fields.Method = callMethod( activity );
+      fields.MenuAction = callMenuAction( activity );
 
       activity.KOBindings = fields;
 
@@ -222,20 +219,9 @@ function setupObservers( activity, fields ){
  *        :top-level functions issued by user input or server request
  */
 
-function findParentActivity( jQobj ){
-   // PRE-CONDITION: this function has been called on an activity that was already loaded
-   if( !jQobj )
-      return null;
-   if( jQobj.hasClass('Activity') )
-      return activities[ jQobj.attr('name') ];
-   return findParentActivity( jQobj.parent() );
-}
-
-
 function callMethod( activity ){
    return function apply( event ){
 
-      //var activity = findParentActivity( $(event.currentTarget) );
       var fields = activity.KOBindings;
 
       var name = $(event.currentTarget).attr('method-name');
@@ -244,7 +230,7 @@ function callMethod( activity ){
       var errorFn = getFunctionFromDOMByName( $(event.currentTarget).attr('onError') );
 
       SendRequest(   new CreateMethodRequest( activity, name, contextObject ),
-         	     parseUpdateResponse( fields, successFn, errorFn ),
+         	     parseUpdateResponse( activity, successFn, errorFn ),
          	     errorFn
            	     );
 
@@ -255,7 +241,6 @@ function callMethod( activity ){
 function callMenuAction( activity ){
    return function apply( event ){
 
-      //var activity = findParentActivity( $(event.currentTarget) );
       var fields = activity.KOBindings;
 
       var actionName = $(event.currentTarget).attr('action-name');
@@ -347,15 +332,68 @@ function parseCreateActivityResponse( activity, callback ){
       }
 
       activity.loaded = true;
-      return eval( callback )( fields );
+      if( callback )
+         return eval( callback )( fields );
+      return fields;
    }
 }
 
-function parseUpdateResponse( fields, success, error ){
-   return function apply ( xml ){
+function parseCreateActivityResponseUpdate( activity, errorFn ){
+   return function apply( xml ){
 
       var execResults = $(xml).find("ExecXResult");
-      if( !execResults )   execResults = $(xml).find("ExecXResponse");
+
+      if( execResults ){
+
+         $(execResults).find( 'Message' ).each( function ()
+         {
+            if( $(this).attr('type') == 'Error' ){
+               errorFn( $(this).text() );
+            }
+         });
+
+	 $( execResults ).find( 'Activity' ).each( function ()
+	 {
+	    activity.handle = $(this).attr('activityHandle');
+	 });
+
+	 $( execResults ).find( 'Field' ).each( function() 
+	 {
+            activity.KOBindings[ $(this).attr('id').replace(/\./g, '_') ].value( $(this).attr('value') );
+	 });
+
+         $( execResults ).find( 'Data' ).each( function()
+         {
+            var gridviewId = $(this).attr('id');
+            var gridview = activity.findDatapublicationForID( gridviewId );
+            gridview.source = $(this).attr('source');
+            //gridview.clear();
+
+            $(this).find( 'Row' ).each( function(){
+               var rowId = $(this).attr('id');
+               $(this).find( 'Cell' ).each( function(){
+                  activity.KOBindings[ gridviewId + '_' + rowId + '_' + $(this).attr('id') ].value( $(this).html() );
+               });
+
+               //gridview.load();
+            });
+         });
+
+      } else {
+         errorFn( execResults );
+      }
+
+      // TODO: check if activity.loaded is being used at all
+      activity.loaded = true;
+   }
+}
+
+function parseUpdateResponse( activity, success, error ){
+   return function apply ( xml ){
+
+      var fields = activity.KOBindings;
+
+      var execResults = $(xml).find("ExecXResult");
       var errorOccurred = false;
 
       if( execResults ){
@@ -369,6 +407,7 @@ function parseUpdateResponse( fields, success, error ){
             }
 	 });
 
+         // TODO: this code needs to be reviewed
          $( execResults ).find( 'Data' ).each( function()
          {
             var dataId = $(this).attr('id');
@@ -379,17 +418,14 @@ function parseUpdateResponse( fields, success, error ){
                var contents = $(this).html();
 
                if( ! fields[ dataId + '_' + rowId + '_1' ] ){
-                  $.each( activities, function(){
-                        var datapublication = this.findDatapublicationForID( dataId );
-                        if( datapublication ){
-                           var row = datapublication.addRow( rowId, type, contents );
-                           for( var i=0; i < row.cells.length; i++ ){
-                              fields[ row.cells[i].id ] = row.cells[i];
-                              KOBindingSet[ row.cells[i].id ] = row.cells[i];
-                           }
-                           ko.applyBindings( KOBindingSet );
-                        }
-                  });
+                  var datapublication = activity.findDatapublicationForID( dataId );
+                  var row = datapublication.addRow( rowId, type, contents );
+                  var newFields = {};
+                  for( var i=0; i < row.cells.length; i++ ){
+                     newFields[ row.cells[i].id ] = row.cells[i];
+                     fields[ row.cells[i].id ] = row.cells[i];
+                  }
+                  ko.applyBindings( newFields, activity.jQ.get()[0] );
                }
                $(this).find( 'Cell' ).each( function() {
                   var cellId = $(this).attr('id');
@@ -644,9 +680,9 @@ var _URLproxy = '../../expanz-Proxy/proxy.php';
 var _URLprefix = 'http://expanzdemo.cloudapp.net:8080/esaservice.svc/restish/';   //'http://test.expanz.com/ESADemoService/ESAService.svc/restish/';
 var _URLprefixSSL = 'https://test.expanz.com/ESADemoService/ESAService.svc/restishssl/';
 
-var Bindings = {};
-var KOBindingSet = {};
-var ActiveFields = {};
+//var Bindings = {};
+//var KOBindingSet = {};
+//var ActiveFields = {};
 
 
 /*
@@ -689,6 +725,20 @@ function Activity( jQ ) {
       });
       return gridviewTemplates;
    }
+
+   this.load = function( errorFn ){
+
+      SendRequest(   new CreateActivityRequest( this ),
+	          parseCreateActivityResponse( this, setupBindings( this ) ),
+         	  errorFn
+         	  );
+      this.load = function( ){
+         SendRequest(   new CreateActivityRequest( this ),
+	          parseCreateActivityResponseUpdate( this ),
+         	  errorFn
+         	  );
+      }
+   };
 
 }
 
@@ -750,7 +800,7 @@ function GridView( mother, id , popluateMethod, contextObject, jQ ) {
       this.id = mother.id + '_' + id;
       this.rawId = id;
       this.type = type;
-      this.cells = new Array();
+      this.cells = [];
    }
    function Cell( mother, id, value, sortType ){
       this.mother = mother;
@@ -769,7 +819,6 @@ function GridView( mother, id , popluateMethod, contextObject, jQ ) {
 
    this.addColumn = function( id, field, label, datatype, width ){
       var column = new Column( id, field, label, datatype, width );
-      this.columns.push( column );
       
       if( this.columnTemplates.length > 0 ){
          $.each( this.columnTemplates, function( i, columnTemplate ){
@@ -781,6 +830,7 @@ function GridView( mother, id , popluateMethod, contextObject, jQ ) {
          });
       }
 
+      this.columns.push( column );
       return column;
    };
    this.addRow = function( id, type, cellsXML ){
