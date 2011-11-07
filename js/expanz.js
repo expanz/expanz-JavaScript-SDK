@@ -35,7 +35,8 @@ function DynamicLoadActivity(){
             ){
                var activity = new Activity( $(this).attr('name'), $(this).attr('initialKey') );
                $(this).find('.GridView').each( function(){
-                     activity.datapublication.push(   new GridView(  $(this).attr('id'),
+                     activity.datapublication.push(   new GridView(  activity,
+                                                                     $(this).attr('id'),
                                                                      $(this).attr('popluateMethod'),
                                                                      $(this).attr('contextObject'),
                                                                      $(this)
@@ -320,6 +321,8 @@ function parseCreateActivityResponse( activity, callback ){
                               for( var i=0; i < row.cells.length; i++ )
                                  fields[ row.cells[i].id ] = row.cells[i];
                            });
+
+                           gridview.load();
                         });
 
 
@@ -631,19 +634,39 @@ var Bindings = {};
 
 
 function Activity( name, initialkey ) {
-	this.name = name;
-        this.initialkey = initialkey;
-	this.handle = "";
-        this.datapublication = new Array();
-        this.loaded = false;
+   this.name = name;
+   this.initialkey = initialkey;
+   this.handle = "";
+   this.datapublication = getGridViewTemplate();
+   this.loaded = false;
 
-        this.findDatapublicationForID = function( id ){
-            for( var i=0; i < this.datapublication.length; i++ ){
-               if( this.datapublication[i].id = id )
-                  return this.datapublication[i];
+   this.findDatapublicationForID = function( id ){
+      for( var i=0; i < this.datapublication.length; i++ ){
+         if( this.datapublication[i].id = id )
+            return this.datapublication[i];
+      }
+      return null;
+   };
+
+   function getGridViewTemplate(){
+
+      var gridviewTemplates = [];
+      $.each( getProcessAreaList(), function( i, processArea ) {
+         $.each( processArea.activities, function( j, activity ){
+            if( activity.id === this.name && processArea.gridviews ){
+                  $.each( processArea.gridviews, function( j, gridview ){
+                     var gridviewTemplate = new GridView( gridview.id );
+                     $.each( processArea.columns, function( j, column ){
+                        gridviewTemplate.addColumnTemplate( column.field, column.width );
+                     });
+                     gridviewTemplates.push( gridviewTemplate );
+                  });
             }
-            return null;
-         };
+         });
+      });
+      return gridviewTemplates;
+   }
+
 }
 
 function Field( id, label, disabled, nullvalue, value, datatype, valid ){
@@ -658,16 +681,40 @@ function Field( id, label, disabled, nullvalue, value, datatype, valid ){
    this.serverUpdated = false;
 }
 
-function GridView( id, popluateMethod, contextObject, jQ ) {
+function GridView( mother, id , popluateMethod, contextObject, jQ ) {
+   this.mother = mother;
    this.id = id;
    this.populateMethod = popluateMethod;
    this.contextObject = contextObject;
    this.jQ = jQ;
 
-   this.columns = new Array();
-   this.rows = new Array();
-   createScaffold( id );
+   this.columnTemplates = [];
+   this.columns = [];
+   this.rows = [];
 
+   constructor( mother, id, addColumnTemplate( this ) );
+
+   function constructor( mother, id, addColumnTemplate ){
+      $.each( getProcessAreaList(), function( i, processArea ) {
+         $.each( processArea.activities, function( j, activity ){
+            if( activity.name === mother.name && activity.gridviews ){
+               $.each( activity.gridviews, function( k, gridview ){
+                  if( gridview.id === id ){
+                     $.each( gridview.columns, function( l, columnTemplate ){
+                           addColumnTemplate( columnTemplate.field, columnTemplate.width );
+                     });
+                  } 
+               });
+            }
+         });
+      });
+      createScaffold( id );
+   }
+
+   function ColumnTemplate( field, width ){
+      this.field = field;
+      this.width = width;
+   }
    function Column( id, field, label, datatype, width ){
       this.id = id;
       this.field = field;
@@ -690,10 +737,27 @@ function GridView( id, popluateMethod, contextObject, jQ ) {
       this.sortType = sortType;
    }
 
+
+   function addColumnTemplate( gridview ){
+      return function( field, width ){
+         gridview.columnTemplates.push( new ColumnTemplate( field, width ) );
+      };
+   }
+
    this.addColumn = function( id, field, label, datatype, width ){
       var column = new Column( id, field, label, datatype, width );
       this.columns.push( column );
-      createColumn( column );
+      
+      if( this.columnTemplates.length > 0 ){
+         $.each( this.columnTemplates, function( i, columnTemplate ){
+            if( columnTemplate.field === field ){
+               columnTemplate.translate = id;
+               if( columnTemplate.width )
+                  column.width = columnTemplate.width;
+            }
+         });
+      }
+
       return column;
    };
    this.addRow = function( id, type, cellsXML ){
@@ -710,7 +774,7 @@ function GridView( id, popluateMethod, contextObject, jQ ) {
       });
 
       this.rows.push( row );
-      createRow( row, this.columns);
+      //createRow( row, this.columns);
 
       return row;
    };
@@ -718,25 +782,76 @@ function GridView( id, popluateMethod, contextObject, jQ ) {
    this.clear = function(){
       createScaffold( this.id );
    };
+   this.load = function(){
+      createScaffold( this.id );
+
+      var columns = this.columns;
+      var rows = this.rows;
+
+      if( this.columnTemplates.length > 0 ){
+         $.each( this.columnTemplates, function( i, columnTemplate ){
+            createColumn( columns[ columnTemplate.translate -1 ] );
+            $.each( rows, function( i, row ){
+               createCell( i, columnTemplate.translate, row, columns );
+            });
+         });
+
+      } else {
+         $.each( this.columns, function( i, column ){
+            createColumn( column );
+         });
+
+         var columns = this.columns;
+         $.each( this.rows, function( i, row ){
+            createRow( row, columns );
+         });
+      }
+   }
 
    function createScaffold( id ){
       jQ.html( '<table id="' + id + '"><thead><tr></tr></thead><tbody></tbody></table>' );
    }
    function createColumn( column ){
-      jQ.find('thead tr').append( '<td>' + column.label + '</td>' );
+      if( column.width )
+         jQ.find('thead tr').append( '<td width="' + column.width + '">' + column.label + '</td>' );
+      else
+         jQ.find('thead tr').append( '<td>' + column.label + '</td>' );
    }
    function createRow( row, columns ){
       var html = '<tr id="' + row.id + '">';
       $.each( row.cells, function(){ 
          html += '<td id="' + this.id + '" class="row' + row.rawId + ' column' + this.rawId + '">';
-         if( columns[ this.rawId -1 ].datatype === 'BLOB' )
-            html += '<img src="' + this.value() + '" />';
-         else
+         if( columns[ this.rawId -1 ].datatype === 'BLOB' ){
+            html += '<img src="' + this.value() + '"';
+            if( column.width )   html += ' width="' + column.width + '"';
+            html += '/>';
+         } else {
             html += '<span data-bind="text: ' + this.id + '.value"></span>';
+         }
          html += '</td>'; 
       });
       html += '</tr>';
       jQ.find('tbody').append( html );
+   }
+
+   function createCell( newId, oldId, row, columns ){
+      
+      var rowjQ = jQ.find('tbody').find( '#' + row.id );
+      if( rowjQ.length < 1 ){
+         jQ.find('tbody').append( '<tr id="' + row.id + '"></tr>' );
+         rowjQ = jQ.find('tbody').find( '#' + row.id );
+      }
+      var html = '<td id="' + row.cells[oldId -1].id + '" class="row' + row.rawId + ' column' + newId + '">';
+      if( columns[ oldId -1 ].datatype === 'BLOB' ){
+         html += '<img src="' + row.cells[oldId -1].value() + '"';
+         if( columns[ oldId -1 ].width )  html += ' width="' + columns[ oldId -1 ].width + '"';
+         html += '/>';
+      } else {
+         html += '<span data-bind="text: ' + row.cells[oldId -1].id + '.value"></span>';
+      }
+      html += '</td>';
+
+      rowjQ.append( html );
    }
 
 }

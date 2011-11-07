@@ -11,7 +11,7 @@
  *           Use these functions to write your apps
  */
 
-function redirect( destinationURL ){
+function redirect(destinationURL ) {
 	window.location.href = destinationURL;
 }
 
@@ -23,31 +23,31 @@ function redirect( destinationURL ){
 
 function getSessionHandle() {
 
-	return $.cookies.get( '_expanz.session.handle' );
+	return $.cookies.get('_expanz.session.handle');
 }
 
-function setSessionHandle( sessionHandle ){
+function setSessionHandle(sessionHandle ) {
 
-	$.cookies.set( '_expanz.session.handle', sessionHandle );
-   setLoginURL( document.location.pathname );
+	$.cookies.set('_expanz.session.handle', sessionHandle);
+   setLoginURL(document.location.pathname);
 	return true;
 }
 
-function setLoginURL( url ){
+function setLoginURL(url ) {
 
-   $.cookies.set( '_expanz.login.url', url ); 
+   $.cookies.set('_expanz.login.url', url);
 	return true;
 }
 
-function setProcessAreaList( list ){
+function setProcessAreaList(list ) {
 
-   $.cookies.set( '_expanz.processarea.list', JSON.stringify(list) );
+   $.cookies.set('_expanz.processarea.list', JSON.stringify(list));
    return true;
 }
 
 function endSession() {
 
-	$.cookies.del( '_expanz.session.handle' ) 
+	$.cookies.del('_expanz.session.handle');
 	return true;
 }
 
@@ -58,15 +58,15 @@ function endSession() {
  *          :setup the bindings (using Knockout.js) that connection Username/Password/Login to the DOM elements
  */
 
-$(document).ready( function() {
-	
-	var Bindings = {
-		Username: new Field( 'Username', 'Username', '0', '0', '', 'string', '1' ),
-		Password: new Field( 'Password', 'Password', '0', '0', '', 'string', '1' ),
-	};
-	Bindings.Login = login( Bindings );
+$(document).ready(function() {
 
-	ko.applyBindings( Bindings );
+	var Bindings = {
+		Username: new Field('Username', 'Username', '0', '0', '', 'string', '1'),
+		Password: new Field('Password', 'Password', '0', '0', '', 'string', '1')
+	};
+	Bindings.Login = login(Bindings);
+
+	ko.applyBindings(Bindings);
 
 });
 
@@ -77,15 +77,15 @@ $(document).ready( function() {
  *         :top-level functions issued by user input or server request
  */
 
-function login( fields ){
+function login(fields ) {
 	// apply: gets called when 'Login' is invoked (you click 'Login')
-	return function apply( event ){
+	return function apply(event ) {
 
-		var success = 	getFunctionFromDOMByName( $(event.currentTarget).attr('onSuccess') );
-		var error = 	getFunctionFromDOMByName( $(event.currentTarget).attr('onError') );
+		var success = getFunctionFromDOMByName($(event.currentTarget).attr('onSuccess'));
+		var error = getFunctionFromDOMByName($(event.currentTarget).attr('onError'));
 
-		SendRequest(	new CreateSessionRequest( fields['Username'].value, fields['Password'].value ),
-         				parseCreateSessionResponse( getSessionData( success, error ), error ),
+		SendRequest(new CreateSessionRequest(fields['Username'].value, fields['Password'].value),
+         				parseCreateSessionResponse(getSessionData(success, error), error),
 			         	error
          				);
 		return false;
@@ -93,12 +93,12 @@ function login( fields ){
 }
 
 
-function getSessionData( success, error ) {
+function getSessionData(success, error ) {
 	// apply: gets called when parseCreateSessionResponse has succeed (see 'login', where the SendRequest call is made)
-	return function apply( str ){ 
+	return function apply(str ) {
 
-		SendRequest(	new GetSessionDataRequest( getSessionHandle() ),
-      				   parseGetSessionDataResponse( success, error ),
+		SendRequest(new GetSessionDataRequest(getSessionHandle()),
+      				   parseGetSessionDataResponse(success, error),
          				error
          				);
 	};
@@ -111,75 +111,85 @@ function getSessionData( success, error ) {
  *         :used to parse XML results from server requests. Use these functions for the 'responseHandler' argument to 'SendRequest'
  */
 
-function parseCreateSessionResponse( success, error ) {
-	return function apply ( xml ) {
+function parseCreateSessionResponse(success, error ) {
+	return function apply(xml ) {
 
-		xml.replace("&lt;", "<");
-		xml.replace("&gt;", ">");
+		xml.replace('&lt;', '<');
+		xml.replace('&gt;', '>');
 
-		if( $(xml).find( 'CreateSessionXResult' ).length > 0 ) {
-			setSessionHandle( $(xml).find('CreateSessionXResult').text() );
+		if ($(xml).find('CreateSessionXResult').length > 0) {
+			setSessionHandle($(xml).find('CreateSessionXResult').text());
 		}
 
-		if( !getSessionHandle() || getSessionHandle.length > 0 ){
+		if (!getSessionHandle() || getSessionHandle.length > 0) {
 
 			var errorString = '';
 
-			$(xml).find( 'errorMessage' ).each( function ()
+			$(xml).find('errorMessage').each(function()
 			{
 				errorString = $(this).text();
 			});
 
-			if( errorString.length > 0 ){
-				eval( error )( errorString );
+			if (errorString.length > 0) {
+				eval(error)(errorString);
 				return false;
 			}
 		}
 
-		return eval( success )();
+		return eval(success)();
 	};
 }
 
 
-function parseGetSessionDataResponse( success, error ){
-	return function apply ( xml ) {
+function parseGetSessionDataResponse(success, error ) {
+	return function apply(xml ) {
 
          var processAreas = [];
 
-         $(xml).find('processarea').each( function(){
+         $(xml).find('processarea').each(function() {
 
-            var processArea = new ProcessArea( $(this).attr('id'), $(this).attr('title') );
-            $(this).find('activity').each( function() {
-               processArea.activities.push( new ActivityInfo( $(this).attr('name'), $(this).attr('title'), '#' ) );
+            var processArea = new ProcessArea($(this).attr('id'), $(this).attr('title'));
+            $(this).find('activity').each(function() {
+               processArea.activities.push(new ActivityInfo($(this).attr('name'), $(this).attr('title'), '#'));
             });
-            processAreas.push( processArea );
+            processAreas.push(processArea);
          });
 
-         $.get("./formmapping.xml", function(data){
+         $.get('./formmapping.xml', function(data) {
 
-            $(data).find('activity').each( function()
+            $(data).find('activity').each(function()
             {
                var name = $(this).attr('name');
                var url = $(this).attr('form');
-               $.each( processAreas, function( i, processArea ){
-                  $.each( processArea.activities, function( j, activity ){ 
-                     if( activity.name == name ){
+               var gridviewList = [];
+               $(this).find( 'gridview' ).each( function(){
+                  var gridview = new GridViewInfo( $(this).attr('id') );
+                  $(this).find( 'column' ).each( function(){
+                        gridview.addColumn( $(this).attr('field'), $(this).attr('width') );
+                  });
+                  gridviewList.push( gridview );
+               });
+
+               $.each(processAreas, function(i, processArea ) {
+                  $.each(processArea.activities, function(j, activity ) {
+                     if (activity.name == name) {
                         activity.url = url;
+                        activity.gridviews = gridviewList;
                      }
                   });
                });
             });
 
-            setProcessAreaList( processAreas );
+            setProcessAreaList(processAreas);
 
-            $(data).find('activity').each( function()
+            $(data).find('activity').each(function()
             {
-               if( $(this).attr('default') == 'true' ){
-                  redirect( $(this).attr('form') );
+               if ($(this).attr('default') == 'true') {
+                  redirect($(this).attr('form'));
                }
             });
          });
-         
+
 			//eval( success )( xml );
 	};
 }
@@ -191,24 +201,24 @@ function parseGetSessionDataResponse( success, error ){
  *        :manage the sending of XML requests to the server, and dispatching of response handlers
  */
 
-function SendRequest ( request, responseHandler, error ){
+function SendRequest(request, responseHandler, error ) {
 
 
       $.ajax({
          type: 'POST',
 	 url: _URLproxy,
 	 data: { url: _URLprefix + request.url, data: request.data },
-	 dataType: "string",
+	 dataType: 'string',
 	 processData: true,
-	 complete: function( HTTPrequest ){
-	    if( HTTPrequest.status != 200 ){
-               eval( error )( 'There was a problem with the last request.' );
+	 complete: function(HTTPrequest ) {
+	    if (HTTPrequest.status != 200) {
+               eval(error)('There was a problem with the last request.');
             } else {
 	       var response = HTTPrequest.responseText;
-	          if( responseHandler ){
-                     var xml = response.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
-		     eval( responseHandler )( xml );
-		  } 
+	          if (responseHandler) {
+                     var xml = response.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+		     eval(responseHandler)(xml);
+		  }
 	    }
 	 }
       });
@@ -220,13 +230,13 @@ function SendRequest ( request, responseHandler, error ){
  *
  */
 
-function CreateSessionRequest( username, password ){
-   this.data = getCreateSessionRequestBody( username, password );
+function CreateSessionRequest(username, password ) {
+   this.data = getCreateSessionRequestBody(username, password);
    this.url = 'CreateSessionX';
 }
 
-function GetSessionDataRequest( sessionHandle ){
-   this.data = getCreateGetSessionDataRequestBody( sessionHandle );
+function GetSessionDataRequest(sessionHandle ) {
+   this.data = getCreateGetSessionDataRequestBody(sessionHandle);
    this.url = 'ExecX';
 }
 
@@ -236,7 +246,7 @@ function GetSessionDataRequest( sessionHandle ){
  *
  */
 
-function getCreateSessionRequestBody( username, password ){
+function getCreateSessionRequestBody(username, password ) {
 
    var body = '<CreateSessionX xmlns="http://www.expanz.com/ESAService">' +
                   '<xml>' +
@@ -249,7 +259,7 @@ function getCreateSessionRequestBody( username, password ){
 	return body;
 }
 
-function getCreateGetSessionDataRequestBody( sessionHandle ){
+function getCreateGetSessionDataRequestBody(sessionHandle ) {
 
    var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' +
                   '<xml>' +
@@ -277,27 +287,41 @@ var _URLprefixSSL = 'https://test.expanz.com/ESADemoService/ESAService.svc/resti
  *
  */
 
-function Field( id, label, disabled, isnull, value, datatype, valid ){
-	this.id = id;
-	this.label = label;
-	this.isnull = isnull;
-	this.value = value;
-	this.datatype = datatype;
-	this.valid = valid;
+function Field(id, label, disabled, isnull, value, datatype, valid ) {
+   this.id = id;
+   this.label = label;
+   this.isnull = isnull;
+   this.value = value;
+   this.datatype = datatype;
+   this.valid = valid;
 }
 
-function ProcessArea( id, title ){
+function ProcessArea(id, title ) {
    this.id = id;
    this.title = title;
    this.activities = [];
 }
 
-function ActivityInfo( name, title, url ){
+function ActivityInfo(name, title, url ) {
    this.name = name;
    this.title = title;
    this.url = url;
+   this.gridviews = [];
 }
 
+function GridViewInfo(id ) {
+   this.id = id;
+   this.columns = [];
+
+   this.addColumn = function(field, width ) {
+      this.columns.push(new ColumnInfo(field, width));
+   }
+
+   function ColumnInfo(field, width ) {
+      this.field = field;
+      this.width = width;
+   }
+}
 
 /*
  *   Private Helper Functions
@@ -305,9 +329,9 @@ function ActivityInfo( name, title, url ){
  */
 
 
-function getFunctionFromDOMByName( name ){
-	var fn = window[ name ];
-	if( !fn ){ return function(){ console.log( 'Function: ' + name + ' has not been defined.' ); } }
+function getFunctionFromDOMByName(name ) {
+	var fn = window[name];
+	if (!fn) { return function() { console.log('Function: ' + name + ' has not been defined.'); } }
 	return fn;
 }
 
