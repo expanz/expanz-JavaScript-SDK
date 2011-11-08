@@ -25,17 +25,28 @@ var onDynamicLoad = function applyLater(fn){
                            };
 
 var activities = {};
-function DynamicLoadActivity(){
+function DynamicLoadActivity( jQobj ){
    
-   $('.Activity').each( function(){
-         var activityName = $(this).attr('name');
-         if( $(this).attr('initialKey') )
-            activityName += '_' + $(this).attr('initialKey');
+   var activitiesJQ = [];
+   if( jQobj ){
+      if( jQobj.hasClass('Activity') )
+         activitiesJQ = jQobj;
+      else
+         activitiesJQ = jQobj.find( '.Activity' );
+   } else {
+      activitiesJQ = $('.Activity');
+   }
+      
+      
+   $.each( activitiesJQ, function( i, activityJQ ){
+         var activityName = $(activityJQ).attr('name');
+         if( $(activityJQ).attr('initialKey') )
+            activityName += '_' + $(activityJQ).attr('initialKey');
          
          var activity = activities[ activityName ];
          if( ! activity ){
-            activity = new Activity( $(this) );
-            $(this).find('.GridView').each( function(){
+            activity = new Activity( $(activityJQ) );
+            $(activityJQ).find('.GridView').each( function(){
                   activity.datapublication.push(   new GridView(  activity,
                                                                      $(this).attr('id'),
                                                                      $(this).attr('popluateMethod'),
@@ -45,6 +56,8 @@ function DynamicLoadActivity(){
                                                    );
                });
             activities[ activityName ] = activity;
+         } else {
+            //activity.jQ = activityJQ;
          }
          activity.load();
    });
@@ -199,7 +212,7 @@ function setupObservers( activity, fields ){
 
 						if( field.disabled != 1 && !field.serverUpdated ){
 							SendRequest(	new CreateDeltaRequest( activity, field.id.replace(/_/g, '.'), newValue ),
-         									parseUpdateResponse( allFields, success, error ),
+         									parseUpdateResponse( activity, success, error ),
          									networkError
          									);
 						}
@@ -385,6 +398,7 @@ function parseCreateActivityResponseUpdate( activity, errorFn ){
 
       // TODO: check if activity.loaded is being used at all
       activity.loaded = true;
+      //ko.applyBindings( activity.KOBindings, activity.jQ.get()[0] );
    }
 }
 
