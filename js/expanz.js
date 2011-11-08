@@ -306,7 +306,9 @@ function parseCreateActivityResponse( activity, callback ){
 					               	 $(this).attr('null'),
                						 $(this).attr('value'),
                						 $(this).attr('datatype'),
-					               	 $(this).attr('valid')
+					               	 $(this).attr('valid'),
+                                                         $(this).attr('url'),
+                                                         $(this).attr('fileExt')
             						 );  
 				fields[ field.id ] = field;
 			});
@@ -756,16 +758,24 @@ function Activity( jQ ) {
 
 }
 
-function Field( id, label, disabled, nullvalue, value, datatype, valid ){
+function Field( id, label, disabled, nullvalue, value, datatype, valid, url, fileExt ){
    this.id = id;
    this.label = label;
    this.disabled = disabled;
    this.nullvalue = nullvalue;
-   this.value = ko.observable( value );
+   //this.value = value;
    this.datatype = datatype;
    this.valid = valid;
    this.error = ko.observable( "" );
+   this.url = url;
+   this.fileExt = fileExt;
+
    this.serverUpdated = false;
+
+   if( datatype !== 'BLOB' )
+      this.value = ko.observable( value );
+   else
+      this.value = ko.observable( '<img src="' + url + '"/>' );
 }
 
 function GridView( mother, id , popluateMethod, contextObject, jQ ) {
