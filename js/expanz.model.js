@@ -46,6 +46,9 @@ $(function(){
             this[key] = attrs[key];
          }
       },
+   });
+
+   window.expanz.Models.LoginActivity = expanz.Models.Activity.extend({
 
       validate: function(){
          if(   ! this.get('username').get('error') &&

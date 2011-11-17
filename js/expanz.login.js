@@ -15,7 +15,7 @@ $(function(){
       _.each(  $(dom).find('[bind=activity]'),
                function( activityEl ){
                   // create a collection for each activity
-                  var activityModel = new expanz.Models.Activity({  
+                  var activityModel = new expanz.Models.LoginActivity({  
                                        name:    $(activityEl).attr('name'),
                                        title:   $(activityEl).attr('title'),
                                        url:     $(activityEl).attr('url')
