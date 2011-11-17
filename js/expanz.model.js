@@ -48,14 +48,28 @@ $(function(){
       },
 
       validate: function(){
-         var error = this.get('username').validate() || this.get('password').validate();
-         if( !error ){
-            // fire off login event to server
-            return;
+         if(   ! this.get('username').get('error') &&
+               ! this.get('password').get('error'))
+         {
+            return true;
+         } else {
+            return false;
          }
-         else {
-            return error;
+      },
+
+      login:   function(){
+         if( this.validate() ){
+            expanz.Net.CreateSessionRequest( this.get('username').get('value'),
+                                             this.get('password').get('value'),
+                                             this.responseCallback
+                                             );
          }
+      },
+      responseCallback: function( error ){
+         if( error && error.length > 0 ){
+            this.get('error').set({ value: error });
+         }
+         alert( 'Yah' );
       }
                
    });

@@ -85,8 +85,7 @@ $(function(){
 
       attemptLogin: function(){
          // call the server
-         alert( "call the server" );
-         
+         this.collection.login();
       },
 
       update: function(){
