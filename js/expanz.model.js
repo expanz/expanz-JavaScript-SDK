@@ -61,19 +61,29 @@ $(function(){
          if( this.validate() ){
             expanz.Net.CreateSessionRequest( this.get('username').get('value'),
                                              this.get('password').get('value'),
-                                             this.responseCallback
+                                             loginCallback
                                              );
          }
       },
-      responseCallback: function( error ){
-         if( error && error.length > 0 ){
-            this.get('error').set({ value: error });
-         }
-         alert( 'Yah' );
-      }
-               
    });
 
+
+      var loginCallback = function( error ){
+         if( error && error.length > 0 ){
+            this.get('error').set({ value: error });
+         } else {
+            expanz.Net.GetSessionDataRequest( getSessionCallback );
+         }
+      };
+      var getSessionCallback = function( url, error ){
+         if( error && error.length > 0 ){
+            this.get('error').set({ value: error });
+         } else {
+            // redirect to first activity
+            expanz.Views.redirect( url );
+         }
+      };
+               
 });
 
 

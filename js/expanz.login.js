@@ -20,7 +20,7 @@ $(function(){
                                        title:   $(activityEl).attr('title'),
                                        url:     $(activityEl).attr('url')
                                        });
-                  var activityView = new expanz.Views.ActivityView({
+                  var activityView = new expanz.Views.Login.ActivityView({
                                        el:         $(activityEl),
                                        id:         $(activityEl).attr('name'),
                                        collection: activityModel
@@ -34,7 +34,7 @@ $(function(){
                                              id:      $(fieldEl).attr('name'),
                                              label:   $(fieldEl).attr('name')
                                              });
-                                 var view = new expanz.Views.FieldView({
+                                 var view = new expanz.Views.Login.FieldView({
                                              el:         $(fieldEl),
                                              id:         $(fieldEl).attr('id'),
                                              className:  $(fieldEl).attr('class'),
@@ -45,7 +45,7 @@ $(function(){
                                              id:      $(fieldEl).attr('name'),
                                              label:   $(fieldEl).attr('name')
                                              });
-                                 var view = new expanz.Views.DependantFieldView({
+                                 var view = new expanz.Views.Login.DependantFieldView({
                                              el:         $(fieldEl),
                                              id:         $(fieldEl).attr('id'),
                                              className:  $(fieldEl).attr('class'),
@@ -64,7 +64,7 @@ $(function(){
                                              id:      $(fieldEl).attr('name'),
                                              label:   $(fieldEl).find('[attribute=label]')
                                              });
-                              var view = new expanz.Views.MethodView({
+                              var view = new expanz.Views.Login.MethodView({
                                              el:         $(fieldEl),
                                              id:         $(fieldEl).attr('id'),
                                              className:  $(fieldEl).attr('class'),

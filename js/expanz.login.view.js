@@ -5,9 +5,10 @@
 $(function(){
 
    window.expanz = window.expanz || {};
-   window.expanz.Views = {};
+   window.expanz.Views = window.expanz.Views || {};
+   window.expanz.Views.Login = {};
 
-   window.expanz.Views.FieldView = Backbone.View.extend({
+   window.expanz.Views.Login.FieldView = Backbone.View.extend({
 
       initialize: function(){
          this.model.bind( "change:label", this.modelUpdate('label'), this );
@@ -34,7 +35,7 @@ $(function(){
       
    });
 
-   window.expanz.Views.DependantFieldView = Backbone.View.extend({
+   window.expanz.Views.Login.DependantFieldView = Backbone.View.extend({
 
       initialize: function(){
          this.model.bind( "change:value", this.toggle, this );
@@ -54,7 +55,7 @@ $(function(){
       
    });
 
-   window.expanz.Views.MethodView = Backbone.View.extend({
+   window.expanz.Views.Login.MethodView = Backbone.View.extend({
 
       events:  {
          "click [attribute=submit]":   "attemptSubmit"
@@ -68,7 +69,7 @@ $(function(){
 
    });
 
-   window.expanz.Views.ActivityView = Backbone.View.extend({
+   window.expanz.Views.Login.ActivityView = Backbone.View.extend({
 
       initialize: function() {
          this.collection.bind( "error", this.updateError, this );
@@ -98,6 +99,13 @@ $(function(){
 
    });
 
+   // Public Functions
+
+   window.expanz.Views.redirect = function(destinationURL ){
+      window.location.href = destinationURL;
+   };
+
+
 
    // Private Functions
 
@@ -108,7 +116,7 @@ $(function(){
          $(elem).html( value );
       }
       return elem;
-   }
+   };
 
 })
 

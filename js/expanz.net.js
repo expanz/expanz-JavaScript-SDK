@@ -9,20 +9,20 @@ $(function(){
       // Request Objects -> to be passed to SendRequest
    
       CreateSessionRequest:
-         function( username, password, responseHandler ){
+         function( username, password, callback ){
             SendRequest( 
                CreateSessionRequestObject( username, password ),
-               parseCreateSessionResponse( responseHandler )
+               parseCreateSessionResponse( callback )
             );
          },
 
       GetSessionDataRequest:
-         function (sessionHandle ) {
-            this.data = getCreateGetSessionDataRequestBody(sessionHandle);
-            this.url = 'ExecX';
+         function( callback ){
+            SendRequest(
+               GetSessionDataRequestObject( expanz.Storage.getSessionHandle() ),
+               parseGetSessionDataResponse( callback )
+            );
          },
-
-
 
    };
 
@@ -35,6 +35,13 @@ $(function(){
          url: 'CreateSessionX'
       };
    };
+
+   var GetSessionDataRequestObject = function (sessionHandle ) {
+      return {
+         data: getCreateGetSessionDataRequestBody(sessionHandle),
+         url: 'ExecX'
+      };
+   }
 
    // XML Message Contruction Functions
 
@@ -96,6 +103,58 @@ $(function(){
 	};
    };
 
+
+   function parseGetSessionDataResponse(callback ) {
+	return function apply(xml ) {
+
+         var processAreas = [];
+
+         $(xml).find('processarea').each(function() {
+
+            var processArea = new ProcessArea($(this).attr('id'), $(this).attr('title'));
+            $(this).find('activity').each(function() {
+               processArea.activities.push(new ActivityInfo($(this).attr('name'), $(this).attr('title'), '#'));
+            });
+            processAreas.push(processArea);
+         });
+
+         $.get('./formmapping.xml', function(data) {
+
+            $(data).find('activity').each(function()
+            {
+               var name = $(this).attr('name');
+               var url = $(this).attr('form');
+               var gridviewList = [];
+               $(this).find( 'gridview' ).each( function(){
+                  var gridview = new GridViewInfo( $(this).attr('id') );
+                  $(this).find( 'column' ).each( function(){
+                        gridview.addColumn( $(this).attr('field'), $(this).attr('width') );
+                  });
+                  gridviewList.push( gridview );
+               });
+
+               $.each(processAreas, function(i, processArea ) {
+                  $.each(processArea.activities, function(j, activity ) {
+                     if (activity.name == name) {
+                        activity.url = url;
+                        activity.gridviews = gridviewList;
+                     }
+                  });
+               });
+            });
+
+            expanz.Storage.setProcessAreaList(processAreas);
+
+            $(data).find('activity').each(function()
+            {
+               if ($(this).attr('default') == 'true') {
+                  return callback( $(this).attr('form') );
+               }
+            });
+         });
+	};
+   }
+
    /*
    *    Send Request
    *        :manage the sending of XML requests to the server, and dispatching of response handlers
@@ -125,6 +184,36 @@ $(function(){
    var _URLproxy = '../../expanz-Proxy/proxy.php';
    var _URLprefix = 'http://expanzdemo.cloudapp.net:8080/esaservice.svc/restish/';  //'http://test.expanz.com/ESADemoService/ESAService.svc/restish/';
    var _URLprefixSSL = 'https://test.expanz.com/ESADemoService/ESAService.svc/restishssl/';
+
+
+   // Session Data Stub Objects
+
+   function ProcessArea(id, title ) {
+      this.id = id;
+      this.title = title;
+      this.activities = [];
+   }
+
+   function ActivityInfo(name, title, url ) {
+      this.name = name;
+      this.title = title;
+      this.url = url;
+      this.gridviews = [];
+   }
+
+   function GridViewInfo(id ) {
+      this.id = id;
+      this.columns = [];
+
+      this.addColumn = function(field, width ) {
+         this.columns.push(new ColumnInfo(field, width));
+      }
+
+      function ColumnInfo(field, width ) {
+         this.field = field;
+         this.width = width;
+      }
+   }
 
 });
 
