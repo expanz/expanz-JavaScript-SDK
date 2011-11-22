@@ -4,9 +4,12 @@
 
 $(function(){
 
-   window.App = pullActivities( $('body') );
+   window.App = pullActivities(  expanz.Views.Login,
+                                 $('body')
+                                 );
 
-   function pullActivities( dom ){
+   function pullActivities(   viewNamespace, dom ){
+      viewNamespace || (viewNamespace = expanz.Views);
       dom || (dom = $('body'));
 
       var activities = {};
@@ -15,12 +18,12 @@ $(function(){
       _.each(  $(dom).find('[bind=activity]'),
                function( activityEl ){
                   // create a collection for each activity
-                  var activityModel = new expanz.Models.LoginActivity({  
+                  var activityModel = new expanz.Models.Login.Activity({  
                                        name:    $(activityEl).attr('name'),
                                        title:   $(activityEl).attr('title'),
                                        url:     $(activityEl).attr('url')
                                        });
-                  var activityView = new expanz.Views.Login.ActivityView({
+                  var activityView = new viewNamespace.ActivityView({
                                        el:         $(activityEl),
                                        id:         $(activityEl).attr('name'),
                                        collection: activityModel
@@ -34,7 +37,7 @@ $(function(){
                                              id:      $(fieldEl).attr('name'),
                                              label:   $(fieldEl).attr('name')
                                              });
-                                 var view = new expanz.Views.Login.FieldView({
+                                 var view = new viewNamespace.FieldView({
                                              el:         $(fieldEl),
                                              id:         $(fieldEl).attr('id'),
                                              className:  $(fieldEl).attr('class'),
@@ -45,7 +48,7 @@ $(function(){
                                              id:      $(fieldEl).attr('name'),
                                              label:   $(fieldEl).attr('name')
                                              });
-                                 var view = new expanz.Views.Login.DependantFieldView({
+                                 var view = new viewNamespace.DependantFieldView({
                                              el:         $(fieldEl),
                                              id:         $(fieldEl).attr('id'),
                                              className:  $(fieldEl).attr('class'),
@@ -64,7 +67,7 @@ $(function(){
                                              id:      $(fieldEl).attr('name'),
                                              label:   $(fieldEl).find('[attribute=label]')
                                              });
-                              var view = new expanz.Views.Login.MethodView({
+                              var view = new viewNamespace.MethodView({
                                              el:         $(fieldEl),
                                              id:         $(fieldEl).attr('id'),
                                              className:  $(fieldEl).attr('class'),

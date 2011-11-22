@@ -6,6 +6,8 @@ $(function(){
 
    window.expanz = window.expanz || {};
    window.expanz.Models = {};
+   window.expanz.Models.Login = {};
+
    window.expanz.Models.Bindable = Backbone.Model.extend({
 
    });
@@ -20,7 +22,7 @@ $(function(){
       validate:   function( attrs ){
          if( ! attrs.value || attrs.value.length < 1 ){
             this.set({ error: true }, {silent: true});
-            return "Please enter your " + this.get('label');
+            return this.get('label') + " is missing.";
          }
          this.set({ error: false }, {silent: true});
          return;
@@ -48,7 +50,7 @@ $(function(){
       },
    });
 
-   window.expanz.Models.LoginActivity = expanz.Models.Activity.extend({
+   window.expanz.Models.Login.Activity = expanz.Models.Activity.extend({
 
       validate: function(){
          if(   ! this.get('username').get('error') &&
