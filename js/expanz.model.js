@@ -27,11 +27,23 @@ $(function(){
             return this.get('label') + " is missing.";
          }
          return;
+      },
+
+      update:  function( attrs ){
+         
+         expanz.Net.DeltaRequest( this.get('id'), attrs.value, this.get('parent') );
+         return;
       }
 
    });
 
    window.expanz.Models.Method = expanz.Models.Bindable.extend({
+
+      submit:  function() {
+         
+         expanz.Net.MethodRequest( this.get('id'), this.get('parent') );
+         return;
+      }
 
    });
 

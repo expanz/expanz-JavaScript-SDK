@@ -24,11 +24,10 @@ $(function(){
 
       events:  {
          "change [attribute=value]":   "viewUpdate",
-         "blur [attribute=value]":     "viewUpdate"
       },
 
       viewUpdate:  function(){
-         this.model.set({ value:   this.el.find('[attribute=value]').val() });
+         this.model.update({ value:   this.el.find('[attribute=value]').val() });
          this.el.trigger( 'update:field' );
       }
       
@@ -57,13 +56,12 @@ $(function(){
    window.expanz.Views.MethodView = Backbone.View.extend({
 
       events:  {
-         "click [attribute=submit]":   "attemptSubmit"
+         "click [attribute=submit]":   "submit"
       },
 
-      attemptSubmit: function(){
-         // expanz.Activity['login'].validate()
-         // trigger attamptSubmit on el
-         this.el.trigger( 'attemptLogin' );
+      submit: function(){
+         this.model.submit();
+         this.el.trigger( 'submit:' + this.model.get('id') );
       }
 
    });
@@ -79,17 +77,11 @@ $(function(){
       },
 
       events:  {
-         "attemptLogin":   "attemptLogin",
          "update:field":   "update"
       },
 
-      attemptLogin: function(){
-         // call the server
-         this.collection.login();
-      },
-
       update: function(){
-         // perform full activity validation after a field updates .... if necessary
+         // perform full activity validation after a field updates ... if necessary
       },
 
    });
@@ -148,7 +140,7 @@ $(function(){
                               if( $(fieldEl).attr('name') !== "error" ){
                                  var field = new expanz.Models.Field({
                                              id:      $(fieldEl).attr('name'),
-                                             label:   $(fieldEl).attr('name')
+                                             parent:  activityModel
                                              });
                                  var view = new viewNamespace.FieldView({
                                              el:         $(fieldEl),
@@ -158,7 +150,8 @@ $(function(){
                                              });
                               } else {
                                  var field = new expanz.Models.Bindable({
-                                             id:      $(fieldEl).attr('name')
+                                             id:      $(fieldEl).attr('name'),
+                                             parent:  activityModel
                                              });
                                  var view = new viewNamespace.DependantFieldView({
                                              el:         $(fieldEl),
@@ -177,7 +170,8 @@ $(function(){
                               // create a model for each method
                               var method = new expanz.Models.Method({
                                              id:      $(fieldEl).attr('name'),
-                                             label:   $(fieldEl).find('[attribute=label]')
+                                             label:   $(fieldEl).find('[attribute=label]'),
+                                             parent:  activityModel
                                              });
                               var view = new viewNamespace.MethodView({
                                              el:         $(fieldEl),

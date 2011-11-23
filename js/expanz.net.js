@@ -20,6 +20,16 @@ $(function () {
          CreateActivityRequestObject(activity, "", expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callback));
       },
 
+      DeltaRequest: function (id, value, activity, callback) {
+         SendRequest(
+         DeltaRequestObject(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callback));
+      },
+
+      MethodRequest: function( id, activity, callback) {
+         SendRequest(
+         MethodRequestObject( id, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callback));
+      },
+
    };
 
 
@@ -48,6 +58,23 @@ $(function () {
             url: 'ExecX'
          };
       };
+
+   var DeltaRequestObject = function( id, value, activity, sessionHandle ){
+         return {
+            data: getDeltaRequestBody( id, value, activity, sessionHandle ),
+            url: 'ExecX'
+         };
+      };
+
+   var MethodRequestObject = function( methodName, contextObject, activity ) {
+         return {
+            data: getCreateMethodRequestBody( methodName, contextObject, activity ),
+            url: 'ExecX'
+         };
+      };
+
+
+
 
       //
       // XML Message Contruction Functions
@@ -100,19 +127,19 @@ $(function () {
       return head + center + tail;
    }
 
-   function getCreateDeltaRequestBody(activity, id, value) {
+   function getDeltaRequestBody (id, value, activity, sessionHandle) {
 
-      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.handle + '">' + '<Delta id="' + id + '" value="' + value + '"/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + expanz.Storage.getSessionHandle() + '</sessionHandle>' + '</ExecX>';
+      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Delta id="' + id + '" value="' + value + '"/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + sessionHandle + '</sessionHandle>' + '</ExecX>';
 
       return body;
    }
 
-   function getCreateMethodRequestBody(activity, methodName, contextObject) {
+   function getCreateMethodRequestBody( methodName, activity, sessionHandle, contextObject ) {
 
 
-      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.handle + '">' + '<Method name="' + methodName + '"';
+      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Method name="' + methodName + '"';
       contextObject ? body += ' contextObject="' + contextObject + '"' : '';
-      body += '/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + expanz.Storage.getSessionHandle() + '</sessionHandle>' + '</ExecX>';
+      body += '/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + sessionHandle + '</sessionHandle>' + '</ExecX>';
 
       return body;
    }
@@ -120,7 +147,7 @@ $(function () {
    function getCreateMenuActionRequestBody(activity, contextId, contextType, menuAction) {
 
 
-      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.handle + '">' + '<Context id="' + contextId + '" Type="' + contextType + '"/>' + '<MenuAction defaultAction="' + menuAction + '"/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + expanz.Storage.getSessionHandle() + '</sessionHandle>' + '</ExecX>';
+      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Context id="' + contextId + '" Type="' + contextType + '"/>' + '<MenuAction defaultAction="' + menuAction + '"/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + expanz.Storage.getSessionHandle() + '</sessionHandle>' + '</ExecX>';
 
       return body;
    }
@@ -300,9 +327,37 @@ $(function () {
             callback( false );
          }
       }
-   }
+   };
    
 
+   function parseDeltaResponse( activity, callback ){
+      return function apply ( xml ){
+
+         var execResults = $(xml).find("ExecXResult");
+         var errorOccurred = false;
+
+         if( execResults ){
+            $( execResults ).find( 'Message' ).each( function()	
+	    {
+	       if( $(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning'  )
+               {
+	          if( callback ) callback( $(this).text() );
+	          errorOccurred = true;
+	       }
+	    });
+            $( execResults ).find( 'Field' ).each( function() 
+	    { 
+               var id = $(this).attr('id');
+               var field = activity.get( id );
+               if(  field.get('value') != $(this).attr('value') )
+               {
+	          field.set({ value:   $(this).attr('value') });
+               }
+	    });
+         }
+         return;
+      }
+   };
 
 
    /*
