@@ -20,11 +20,12 @@ $(function(){
       },
       
       validate:   function( attrs ){
-         if( ! attrs.value || attrs.value.length < 1 ){
+         
+         this.set({ error: false }, {silent: true});
+         if( attrs.value && attrs.value.length < 1 ) {
             this.set({ error: true }, {silent: true});
             return this.get('label') + " is missing.";
          }
-         this.set({ error: false }, {silent: true});
          return;
       }
 
@@ -34,19 +35,34 @@ $(function(){
 
    });
 
+   window.expanz.Models.Data = Backbone.Collection.extend({
+
+   });
+
 
    window.expanz.Models.Activity = Backbone.Collection.extend({
 
       model:   expanz.Models.Bindable,
 
       initialize: function( attrs ){
-         this.set( attrs );
+         this.setAttr( attrs );
       },
 
-      set:  function( attrs ){
+      getAttr:  function( key ){
+         if( this[key] )
+            return this[key];
+         return false;
+      },
+
+      setAttr:  function( attrs ){
          for( var key in attrs ){
             this[key] = attrs[key];
          }
+         return true;
+      },
+
+      load: function(){
+         expanz.Net.CreateActivityRequest( this);
       },
    });
 
@@ -66,6 +82,7 @@ $(function(){
          if( this.validate() ){
             expanz.Net.CreateSessionRequest( this.get('username').get('value'),
                                              this.get('password').get('value'),
+                                             config._AppSite,
                                              loginCallback
                                              );
          }

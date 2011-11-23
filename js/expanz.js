@@ -4,9 +4,8 @@
 
 $(function(){
 
+   expanz.Views.loadMenu( $('[bind=menu]') );
    window.App = expanz.Views.load(  $('body') );
-
-   expanz.Views.loadSessionData( $('[bind=menu]') );
 
 })
 

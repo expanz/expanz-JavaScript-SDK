@@ -5,9 +5,9 @@ $(function () {
    window.expanz.Net = {
 
       // Request Objects -> to be passed to SendRequest
-      CreateSessionRequest: function (username, password, callback) {
+      CreateSessionRequest: function (username, password, appsite, callback) {
          SendRequest(
-         CreateSessionRequestObject(username, password), parseCreateSessionResponse(callback));
+         CreateSessionRequestObject(username, password, appsite), parseCreateSessionResponse(callback));
       },
 
       GetSessionDataRequest: function (callback) {
@@ -15,13 +15,22 @@ $(function () {
          GetSessionDataRequestObject(expanz.Storage.getSessionHandle()), parseGetSessionDataResponse(callback));
       },
 
+      CreateActivityRequest: function (activity, callback) {
+         SendRequest(
+         CreateActivityRequestObject(activity, "", expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callback));
+      },
+
    };
 
 
+
+   //
    // Request Objects  (used when passed to SendRequest( ... )
-   var CreateSessionRequestObject = function (username, password) {
+   //
+
+   var CreateSessionRequestObject = function (username, password, appsite) {
          return {
-            data: getCreateSessionRequestBody(username, password),
+            data: getCreateSessionRequestBody(username, password, appsite),
             url: 'CreateSessionX'
          };
       };
@@ -31,12 +40,22 @@ $(function () {
             data: getCreateGetSessionDataRequestBody(sessionHandle),
             url: 'ExecX'
          };
-      }
+      };
 
+   var CreateActivityRequestObject = function( activity, style, sessionHandle ){
+         return {
+            data: getCreateActivityRequestBody( activity, style, sessionHandle ),
+            url: 'ExecX'
+         };
+      };
+
+      //
       // XML Message Contruction Functions
-   var getCreateSessionRequestBody = function (username, password) {
+      //
 
-         var body = '<CreateSessionX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<CreateSession user="' + username + '" password="' + password + '" appSite="SALES" authenticationMode="Primary" clientVersion="Flex 1.0" schemaVersion="2.0"/>' + '</ESA>' + '</xml>' + '</CreateSessionX>';
+   var getCreateSessionRequestBody = function (username, password, appsite) {
+
+         var body = '<CreateSessionX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<CreateSession user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="Primary" clientVersion="Flex 1.0" schemaVersion="2.0"/>' + '</ESA>' + '</xml>' + '</CreateSessionX>';
 
          return body;
       };
@@ -48,21 +67,21 @@ $(function () {
          return body;
       };
 
-   function getCreateActivityRequestBody(activity, style) {
+   function getCreateActivityRequestBody(activity, style, sessionHandle) {
 
       var head = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>';
       var center = '';
-      if (activity.datapublication.length > 0) {
-         if (activity.initialkey) {
-            center += '<CreateActivity name="' + activity.name + '"';
+      if ( activity.getAttr('hasDataPublication') ) {
+         if ( activity.getAttr('initialkey') ) {
+            center += '<CreateActivity name="' + activity.getAttr('name') + '"';
             style ? center += ' style="' + style + '"' : '';
-            center += ' initialKey="' + activity.initialkey + '">';
+            center += ' initialKey="' + activity.getAttr('initialkey') + '">';
          } else {
-            center += '<CreateActivity name="' + activity.name + '" ';
+            center += '<CreateActivity name="' + activity.getAttr('name') + '" ';
             style ? center += 'style="' + style + '"' : '';
             center += '>';
          }
-         $.each(activity.datapublication, function () {
+         $.each(activity.datapublications, function () {
             if (this.contextObject) {
                center += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '" contextObject="' + this.contextObject + '"/>';
             } else {
@@ -71,19 +90,19 @@ $(function () {
          });
          center += '</CreateActivity>';
       } else {
-         center += '<CreateActivity name="' + activity.name + '"';
+         center += '<CreateActivity name="' + activity.getAttr('name') + '"';
          style ? center += ' style="' + style + '"' : '';
-         activity.initialkey ? center += ' initialKey="' + activity.initialkey + '"' : '';
+         activity.getAttr('initialkey') ? center += ' initialKey="' + activity.getAttr('initialkey') + '"' : '';
          center += '/>';
       }
-      var tail = '</ESA>' + '</xml>' + '<sessionHandle>' + getSessionHandle() + '</sessionHandle>' + '</ExecX>';
+      var tail = '</ESA>' + '</xml>' + '<sessionHandle>' + sessionHandle + '</sessionHandle>' + '</ExecX>';
 
       return head + center + tail;
    }
 
    function getCreateDeltaRequestBody(activity, id, value) {
 
-      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.handle + '">' + '<Delta id="' + id + '" value="' + value + '"/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + getSessionHandle() + '</sessionHandle>' + '</ExecX>';
+      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.handle + '">' + '<Delta id="' + id + '" value="' + value + '"/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + expanz.Storage.getSessionHandle() + '</sessionHandle>' + '</ExecX>';
 
       return body;
    }
@@ -93,7 +112,7 @@ $(function () {
 
       var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.handle + '">' + '<Method name="' + methodName + '"';
       contextObject ? body += ' contextObject="' + contextObject + '"' : '';
-      body += '/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + getSessionHandle() + '</sessionHandle>' + '</ExecX>';
+      body += '/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + expanz.Storage.getSessionHandle() + '</sessionHandle>' + '</ExecX>';
 
       return body;
    }
@@ -101,7 +120,7 @@ $(function () {
    function getCreateMenuActionRequestBody(activity, contextId, contextType, menuAction) {
 
 
-      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.handle + '">' + '<Context id="' + contextId + '" Type="' + contextType + '"/>' + '<MenuAction defaultAction="' + menuAction + '"/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + getSessionHandle() + '</sessionHandle>' + '</ExecX>';
+      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.handle + '">' + '<Context id="' + contextId + '" Type="' + contextType + '"/>' + '<MenuAction defaultAction="' + menuAction + '"/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + expanz.Storage.getSessionHandle() + '</sessionHandle>' + '</ExecX>';
 
       return body;
    }
@@ -109,14 +128,56 @@ $(function () {
 
    function getCreateReleaseSessionRequestBody() {
 
-      var body = '<ReleaseSession xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<ReleaseSession/>' + '</ESA>' + '</xml>' + '<sessionHandle>' + getSessionHandle() + '</sessionHandle>' + '</ReleaseSession>';
+      var body = '<ReleaseSession xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<ReleaseSession/>' + '</ESA>' + '</xml>' + '<sessionHandle>' + expanz.Storage.getSessionHandle() + '</sessionHandle>' + '</ReleaseSession>';
 
       return body;
    }
 
+   function getCreateActivityRequestBody( activity, style ){
+
+      var head = '<ExecX xmlns="http://www.expanz.com/ESAService">' +
+                     '<xml>' +
+                        '<ESA>';
+      var center = '';
+      if( activity.getAttr('HasDataPublication') ){
+         if( activity.initialkey ){
+            center +=  '<CreateActivity name="' + activity.name + '"';
+            style? center += ' style="' + style + '"': '';
+            center += ' initialKey="' + activity.initialkey + '">';
+         } else {
+            center +=  '<CreateActivity name="' + activity.name + '" ';
+            style? center += 'style="' + style + '"' : '';
+            center += '>';
+         }
+         $.each( activity.datapublication, function(){                     
+            if( this.contextObject ){
+               center += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '" contextObject="' + this.contextObject + '"/>';
+            } else {
+               center += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '"/>'; 
+            }
+         });
+         center += '</CreateActivity>';
+      } else {
+         center +=  '<CreateActivity name="' + activity.name + '"';
+         style? center += ' style="' + style + '"': '';
+         activity.initialkey? center += ' initialKey="' + activity.initialkey + '"': '';
+         center += '/>';
+      }
+      var tail = '</ESA>' +
+                     '</xml>' +
+                     '<sessionHandle>' + expanz.Storage.getSessionHandle() + '</sessionHandle>' +
+                  '</ExecX>';
+
+      return head + center + tail;
+   }
+
+
+   //
    // XML Message Response Parsers
+   //
+
    var parseCreateSessionResponse = function (callback) {
-         return function apply(xml) {
+      return function apply(xml) {
 
             xml.replace('&lt;', '<');
             xml.replace('&gt;', '>');
@@ -140,8 +201,8 @@ $(function () {
             }
 
             return eval(callback)();
-         };
       };
+   };
 
 
    function parseGetSessionDataResponse(callback) {
@@ -191,7 +252,58 @@ $(function () {
             });
          });
       };
+   };
+
+   
+   function parseCreateActivityResponse( activity, callback ){
+      return function apply( xml ){
+
+         var execResults = $(xml).find("ExecXResult");
+         if( execResults ){
+
+            $(execResults).find( 'Message' ).each( function ()
+            {
+               if( $(this).attr('type') == 'Error' ){
+                  callback( $(this).text() );
+               }
+            });
+
+	    $( execResults ).find( 'Activity' ).each( function ()
+	    {
+	       activity.setAttr({handle: $(this).attr('activityHandle') });
+	    });
+
+	    $( execResults ).find( 'Field' ).each( function() 
+	    {
+               var field = activity.get( $(this).attr('id') );
+               if( field  ) {
+                  field.set({ label:   $(this).attr('label') });
+                  field.set({ value:   $(this).attr('value') });
+               }
+	    });
+
+            $( execResults ).find( 'Data' ).each( function()
+            {
+               var gridviewId = $(this).attr('id');
+               var gridview = activity.get( gridviewId );
+               gridview.setAttr({ source: $(this).attr('source') });
+
+               $(this).find( 'Row' ).each( function(){
+                  var rowId = $(this).attr('id');
+                  $(this).find( 'Cell' ).each( function(){
+                     activity.get( gridviewId + '_' + rowId + '_' + $(this).attr('id') ).set({value: $(this).html() });
+                  });
+               });
+            });   // foreach 'Data'
+
+         } else {
+            callback( false );
+         }
+      }
    }
+   
+
+
 
    /*
     *    Send Request
@@ -201,9 +313,9 @@ $(function () {
    var SendRequest = function (request, responseHandler) {
          $.ajax({
             type: 'POST',
-            url: _URLproxy,
+            url: config._URLproxy,
             data: {
-               url: _URLprefix + request.url,
+               url: config._URLprefix + request.url,
                data: request.data
             },
             dataType: 'string',
@@ -222,12 +334,9 @@ $(function () {
          });
       };
 
-   var _URLproxy = '../../expanz-Proxy/proxy.php';
-   var _URLprefix = 'http://expanzdemo.cloudapp.net:8080/esaservice.svc/restish/'; //'http://test.expanz.com/ESADemoService/ESAService.svc/restish/';
-   var _URLprefixSSL = 'https://test.expanz.com/ESADemoService/ESAService.svc/restishssl/';
-
-
-   // Session Data Stub Objects
+   //
+   // GetSessionData Stub Objects
+   //
 
    function ProcessArea(id, title) {
       this.id = id;
