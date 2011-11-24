@@ -97,31 +97,20 @@ $(function () {
    function getCreateActivityRequestBody(activity, style, sessionHandle) {
 
       var head = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>';
-      var center = '';
-      if ( activity.getAttr('hasDataPublication') ) {
-         if ( activity.getAttr('initialkey') ) {
-            center += '<CreateActivity name="' + activity.getAttr('name') + '"';
-            style ? center += ' style="' + style + '"' : '';
-            center += ' initialKey="' + activity.getAttr('initialkey') + '">';
-         } else {
-            center += '<CreateActivity name="' + activity.getAttr('name') + '" ';
-            style ? center += 'style="' + style + '"' : '';
-            center += '>';
-         }
-         $.each(activity.datapublications, function () {
-            if (this.contextObject) {
-               center += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '" contextObject="' + this.contextObject + '"/>';
-            } else {
-               center += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '"/>';
-            }
+      var center = '<CreateActivity name="' + activity.getAttr('name') + '"';
+      style ? center += ' style="' + style + '"' : '';
+      center += activity.getAttr('initialkey')?  ' initialKey="' + activity.getAttr('initialkey') + '">' : '>';
+      
+      if ( activity.hasGrid() ) {
+         _.each( activity.getGrids(), function ( grid, gridId ) {
+            center += '<DataPublication id="' + gridId + '" populateMethod="' + grid.getAttr('populateMethod') + '"';
+            grid.getAttr('contextObject')? center += ' contextObject="' + grid.getAttr('contextObject') + '"': '';
+            center += '/>';
          });
-         center += '</CreateActivity>';
-      } else {
-         center += '<CreateActivity name="' + activity.getAttr('name') + '"';
-         style ? center += ' style="' + style + '"' : '';
-         activity.getAttr('initialkey') ? center += ' initialKey="' + activity.getAttr('initialkey') + '"' : '';
-         center += '/>';
-      }
+         
+      } 
+      center += '</CreateActivity>';
+
       var tail = '</ESA>' + '</xml>' + '<sessionHandle>' + sessionHandle + '</sessionHandle>' + '</ExecX>';
 
       return head + center + tail;
@@ -160,43 +149,6 @@ $(function () {
       return body;
    }
 
-   function getCreateActivityRequestBody( activity, style ){
-
-      var head = '<ExecX xmlns="http://www.expanz.com/ESAService">' +
-                     '<xml>' +
-                        '<ESA>';
-      var center = '';
-      if( activity.getAttr('HasDataPublication') ){
-         if( activity.initialkey ){
-            center +=  '<CreateActivity name="' + activity.name + '"';
-            style? center += ' style="' + style + '"': '';
-            center += ' initialKey="' + activity.initialkey + '">';
-         } else {
-            center +=  '<CreateActivity name="' + activity.name + '" ';
-            style? center += 'style="' + style + '"' : '';
-            center += '>';
-         }
-         $.each( activity.datapublication, function(){                     
-            if( this.contextObject ){
-               center += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '" contextObject="' + this.contextObject + '"/>';
-            } else {
-               center += '<DataPublication id="' + this.id + '" populateMethod="' + this.populateMethod + '"/>'; 
-            }
-         });
-         center += '</CreateActivity>';
-      } else {
-         center +=  '<CreateActivity name="' + activity.name + '"';
-         style? center += ' style="' + style + '"': '';
-         activity.initialkey? center += ' initialKey="' + activity.initialkey + '"': '';
-         center += '/>';
-      }
-      var tail = '</ESA>' +
-                     '</xml>' +
-                     '<sessionHandle>' + expanz.Storage.getSessionHandle() + '</sessionHandle>' +
-                  '</ExecX>';
-
-      return head + center + tail;
-   }
 
 
    //
@@ -309,16 +261,31 @@ $(function () {
                }
 	    });
 
-            $( execResults ).find( 'Data' ).each( function()
-            {
-               var gridviewId = $(this).attr('id');
-               var gridview = activity.get( gridviewId );
-               gridview.setAttr({ source: $(this).attr('source') });
+            _.each( $( execResults ).find( 'Data' ),  function( data ) {
+               var gridId = $(data).attr('id');
+               var gridModel = activity.getGrid( gridId );
+               gridModel.setAttr({ source: $(data).attr('source') });
 
-               $(this).find( 'Row' ).each( function(){
-                  var rowId = $(this).attr('id');
-                  $(this).find( 'Cell' ).each( function(){
-                     activity.get( gridviewId + '_' + rowId + '_' + $(this).attr('id') ).set({value: $(this).html() });
+               // add columns to the grid Model
+               _.each( $(data).find( 'Column' ),  function( column ) {
+                  
+                  gridModel.addColumn( $(column).attr('id'),
+                                       $(column).attr('field'),
+                                       $(column).attr('label'),
+                                       $(column).attr('datatype'),
+                                       $(column).attr('width')
+                                       );
+               });
+
+               // add rows to the grid Model
+               _.each( $(data).find( 'Row' ),  function ( row ) {
+
+                  var rowId = $(row).attr('id');
+                  gridModel.addRow( rowId, $(row).attr('type') );
+                  
+                  // add cells to this row
+                  _.each( $(row).find( 'Cell' ),   function( cell ){
+                     gridModel.addCell( rowId, $(cell).attr('id'), $(cell).html() );
                   });
                });
             });   // foreach 'Data'
