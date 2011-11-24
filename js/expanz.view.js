@@ -85,7 +85,7 @@ $(function(){
          
          // render column header
          var el = $(tableEl).find('thead tr');
-         this.model.getColumns().each( function( cell ) {
+         _.each( this.model.getColumns(), function( cell ) {
             var html = '<td';
             html += cell.get('width')? ' width="' + cell.get('width') + '"': '';
             html += '>' + cell.get('label') + '</td>';

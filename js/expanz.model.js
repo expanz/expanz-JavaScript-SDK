@@ -78,9 +78,9 @@ $(function(){
 
       getAll: function(){
          return this.reject(  function( cell ) { 
-                                 return   (this.getAttr('gridId') === cell.get('id')) 
-                                          || (this.getAttr('activityId') === cell.get('id'))
-                                          || !cell.get('value');
+                                 return   !cell.get('value');  //(this.getAttr('gridId') === cell.get('id')) 
+                                          //|| (this.getAttr('activityId') === cell.get('id'))
+                                          //|| !cell.get('value');
                                  },
                               this
          );
@@ -104,7 +104,10 @@ $(function(){
          return this.get( '_header' ).get( id );
       },
       getColumns: function() {
-         return this.get( '_header' );
+         return   this.get( '_header' )
+                     .reject( function( cell ){
+                                 return !cell.get('label');
+                              });
       },
       addColumn:  function( _id, _field, _label, _datatype, _width ) {
          
