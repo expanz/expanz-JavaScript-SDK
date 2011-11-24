@@ -99,12 +99,19 @@ $(function(){
          _.each( this.model.getAll(), function( row ) {
 
             var html = '<tr id="' + row.getAttr('id') + '">';
-            _.each( row.getAll(), function( cell ) {
+
+            var columnOrder = _.map( this.model.getColumns(), function( cell ){ 
+                                       return { id:      cell.get('id'),
+                                                field:   cell.get('field'),
+                                                label:   cell.get('label')
+                                                };
+                                       });
+            _.each( row.getAll( columnOrder ), function( cell ) {
 
                html += '<td id="' + cell.get('id') + '" class="row' + row.getAttr('id') + ' column' + cell.get('id') + '">';
-               if( model.getColumn( cell.get('id') ).get('datatype') === 'BLOB' ){
+               if( model.getColumn( cell.get('id') ) && model.getColumn( cell.get('id') ).get('datatype') === 'BLOB' ){
                   html += '<img width="' + model.getColumn( cell.get('id') ).get('width') + '" src="' + cell.get('value') + '"/>';
-               } else {
+               } else if( cell.get('value') ) {
                   html += '<span>' + cell.get('value') + '</span>';
                }
                html += '</td>';
@@ -238,7 +245,7 @@ $(function(){
                            function( gridEl ){
                               // create a model for each GridView
 
-                              var grid = new expanz.Models.DataGrid({
+                              var gridModel = new expanz.Models.DataGrid({
                                              id:               $(gridEl).attr('name'),
                                              populateMethod:   'ListMe',
                                              parent:           activityModel
@@ -247,11 +254,40 @@ $(function(){
                                              el:         $(gridEl),
                                              id:         $(gridEl).attr('id'),
                                              className:  $(gridEl).attr('class'),
-                                             model:      grid
+                                             model:      gridModel
                                              });
-                              activityModel.addGrid( grid );
-                           }
-                  );
+
+                              // load pre-defined gridview information from formmapping.xml
+                              $.get(   './formmapping.xml',
+                                 function(defaultsXML) {
+                                    var activityInfo = _.find( $(defaultsXML).find('activity'),
+                                                function( activityXML ) {
+                                                   return $(activityXML).attr('name') === activityModel.getAttr('name');
+                                                });
+                                    if( activityInfo ) {
+                                       var gridviewInfo = _.find(  $(activityInfo).find('gridview'),
+                                                               function( gridviewXML ){
+                                                                  return $(gridviewXML).attr('id') === gridModel.getAttr('id'); 
+                                                               });
+                                       if( gridviewInfo ) {
+
+                                          // found the gridview information from formmapping.xml. Now adding to gridModel
+                                          _.each( $(gridviewInfo).find('column'), function( column ){
+                                             gridModel.addColumnDefault(   $(column).attr('id'),
+                                                                           $(column).attr('field'),
+                                                                           $(column).attr('label'),
+                                                                           $(column).attr('datatype'),
+                                                                           $(column).attr('width')
+                                                                           );
+                                          });
+                                       }
+
+                                    }
+                              })
+
+
+                              activityModel.addGrid( gridModel );
+                  });
 
 
                   activities[ $(activityEl).attr('name') ] = activityView;

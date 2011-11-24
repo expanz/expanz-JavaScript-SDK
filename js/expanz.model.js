@@ -76,14 +76,53 @@ $(function(){
          this.setAttr( attrs );
       },
 
-      getAll: function(){
-         return this.reject(  function( cell ) { 
+      getAll: function( order ){
+
+         var cells = this.reject(  function( cell ) { 
                                  return   !cell.get('value');  //(this.getAttr('gridId') === cell.get('id')) 
                                           //|| (this.getAttr('activityId') === cell.get('id'))
                                           //|| !cell.get('value');
                                  },
                               this
-         );
+                     );
+         if( order && _.reduce( order, function(memo,map){ return memo && map.id; }, true) ) {
+            
+            // filter for only cells that are in the given order
+            //    :necessary in case there are too many or too few
+            var unorderedCells = _.filter(  cells, function( cell ) {
+                                             return _.find( order, function( column ) { 
+                                                if( cell.get('id') )
+                                                   return cell.get('id') === column.id;
+                                                if( cell.get('field') )
+                                                   return cell.get('field') === column.field;
+                                                return cell.get('label') === column.label;
+                                             });
+                                          });
+
+            // generate of map of the cells in the given 'order'
+            var mappedCells = _.map( order, function( map ) { 
+                                 var cell = _.find( unorderedCells, function( cell ) {
+                                                      return   (cell.get('id') === map.id)
+                                                               || (cell.get('field') === map.field)
+                                                               || (cell.get('label') === map.label); 
+                                             });
+                                 if( !cell )
+                                    cell = new expanz.Models.Bindable({ id:   map.id });
+                                 return { id:   map.id, 
+                                          cell: cell
+                                          }; 
+                              });
+            // var filteredCells = _.filter( mappedCells, function( dict ) { return dict.cell; });
+            // take the mapped ordered cells and put them into an array, in order
+            var orderedCells = _.reduce( mappedCells, function( memo, map ) {
+                                                         memo.push( map.cell ); 
+                                                         return memo;
+                                                      },
+                                                      [] 
+                                       );
+            return orderedCells;
+         } 
+         return cells;
       },
 
 
@@ -95,7 +134,9 @@ $(function(){
 
       initialize: function( attrs ){
 
-         this.setAttr({ activityId:  attrs.parent.getAttr('name') });
+         this.setAttr({ activityId:       attrs.parent.getAttr('name'),
+                        lockedColumns:    false
+                        });
          this.add({  id:   '_header' });
          expanz.Collection.prototype.initialize.call( this, attrs );
       },
@@ -106,29 +147,64 @@ $(function(){
       getColumns: function() {
          return   this.get( '_header' )
                      .reject( function( cell ){
-                                 return !cell.get('label');
-                              });
+                                 return cell.get('id') === '_header';
+                              }, this );
       },
-      addColumn:  function( _id, _field, _label, _datatype, _width ) {
+      addColumnDefault:  function( _id, _field, _label, _datatype, _width ) {
          
-         // TODO: check if id: gets replaced with 'id'
+         this.setAttr({ lockedColumns: true });
+
          this.get( '_header' ).add({   id:         _id,
                                        field:      _field,
                                        label:      _label,
                                        datatype:   _datatype,
-                                       width:      _width
+                                       width:      _width,
                                        });
+      },
+      addColumn:  function( _id, _field, _label, _datatype, _width ) {
+         
+         // columns have already been defaulted in formmapping.xml
+         if( this.getAttr('lockedColumns') ) {
+
+            //var existingCell = this.get( '_header' ).get( _id );
+            var existingCell = this.get('_header').find( 
+                                          function( cell ){
+                                             return   (cell.get('id') === _id)
+                                                      || (cell.get('field') === _field)
+                                                      || (cell.get('label') === _label);
+                                          });
+            // if fields are missing from the existing cells, fill them in with new fields
+            if( existingCell ) {
+               if( !existingCell.get('id'))
+                  existingCell.set({ id:  _id });
+               if( !existingCell.get('field'))
+                  existingCell.set({ field:  _field });
+               if( !existingCell.get('label'))
+                  existingCell.set({ label:  _label });
+               if( !existingCell.get('datatype'))
+                  existingCell.set({ datatype:  _datatype });
+               if( !existingCell.get('width'))
+                  existingCell.set({ width:  _width });
+            }
+         } else {
+            this.get( '_header' ).add({   id:         _id,
+                                          field:      _field,
+                                          label:      _label,
+                                          datatype:   _datatype,
+                                          width:      _width,
+                                          });
+         }
       },
 
       getAll: function(){
-         return this.reject(  function( row ) {
+            return this.reject(  function( row ) {
                         // NOTE: 'this' has been set as expanz.Models.DataGrid
                         return   (row.getAttr('id') == '_header')
                                  || (this.getAttr('id') == row.getAttr('id'))
                                  || (this.getAttr('activityId') === row.getAttr('id'));
                         },
                         this
-         );
+               );
       },
       addRow:  function( _id, _type ) {
          
