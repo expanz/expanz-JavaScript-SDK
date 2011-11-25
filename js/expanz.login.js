@@ -4,84 +4,61 @@
 
 $(function(){
 
-   window.App = pullActivities(  expanz.Views.Login,
-                                 $('body')
-                                 );
+   //
+   // Global Namespace definitions
+   //
+   window.App = [];
+   window.expanz = window.expanz || {};
+   window.expanz._error = window.expanz._error ||
+   function (error) {
+      console.log("Expanz JavaScript SDK has encountered an error: " + error);
+   };
 
-   function pullActivities(   viewNamespace, dom ){
-      viewNamespace || (viewNamespace = expanz.Views);
-      dom || (dom = $('body'));
 
-      var activities = {};
+   //
+   // Public Functions & Objects in the Expanz Namespace
+   //
+   window.expanz.CreateActivity = function (DOMObject) {
 
-      // search through DOM body, looking for elements with 'bind' attribute
-      _.each(  $(dom).find('[bind=activity]'),
-               function( activityEl ){
-                  // create a collection for each activity
-                  var activityModel = new expanz.Models.Login.Activity({  
-                                       name:    $(activityEl).attr('name'),
-                                       title:   $(activityEl).attr('title'),
-                                       url:     $(activityEl).attr('url')
-                                       });
-                  var activityView = new viewNamespace.ActivityView({
-                                       el:         $(activityEl),
-                                       id:         $(activityEl).attr('name'),
-                                       collection: activityModel
-                                       });
+      //
+      DOMObject || (DOMObject = $('body'));
+      var viewNamespace = expanz.Views.Login;
+      var modelNamespace = expanz.Model.Login;
 
-                  _.each(  $(activityEl).find('[bind=field]'),
-                           function( fieldEl ){
-                              // create a model for each field
-                              if( $(fieldEl).attr('name') !== "error" ){
-                                 var field = new expanz.Models.Field({
-                                             id:      $(fieldEl).attr('name'),
-                                             label:   $(fieldEl).attr('name')
-                                             });
-                                 var view = new viewNamespace.FieldView({
-                                             el:         $(fieldEl),
-                                             id:         $(fieldEl).attr('id'),
-                                             className:  $(fieldEl).attr('class'),
-                                             model:      field
-                                             });
-                              } else {
-                                 var field = new expanz.Models.Bindable({
-                                             id:      $(fieldEl).attr('name'),
-                                             label:   $(fieldEl).attr('name')
-                                             });
-                                 var view = new viewNamespace.DependantFieldView({
-                                             el:         $(fieldEl),
-                                             id:         $(fieldEl).attr('id'),
-                                             className:  $(fieldEl).attr('class'),
-                                             model:      field
-                                             });
-                                 activityView.errorView = view;
-                              }
-                              activityModel.add( field );
-                           }
-                  );
+      var activities = createActivity(viewNamespace, modelNamespace, DOMObject);
+      _.each(activities, function (activity) {
+         window.App.push(activity);
+      });
+      return;
+   };
 
-                  _.each(  $(activityEl).find('[bind=method]'),
-                           function( fieldEl ){
-                              // create a model for each method
-                              var method = new expanz.Models.Method({
-                                             id:      $(fieldEl).attr('name'),
-                                             label:   $(fieldEl).find('[attribute=label]')
-                                             });
-                              var view = new viewNamespace.MethodView({
-                                             el:         $(fieldEl),
-                                             id:         $(fieldEl).attr('id'),
-                                             className:  $(fieldEl).attr('class'),
-                                             model:      method
-                                             });
-                              activityModel.add( method );
-                           }
-                  );
-                  activities[ $(activityEl).attr('name') ] = activityView;
-                  
-               }
-      ); // _.each activity
+   window.expanz.SetErrorCallback = function (fn) {
+
+      expanz._error = fn;
+   };
+
+   //
+   // Private Functions
+   //
+   function createActivity(viewNamespace, modelNamespace, dom) {
+
+      var activities = [];
+      if ($(dom).attr('bind').toLowerCase() === 'activity') {
+
+         var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
+         //activityView.collection.load();   // NOTE: this load (CreateActivity request) is not necessary for login
+         activities.push(activityView);
+
+      } else {
+         // search through DOM body, looking for elements with 'bind' attribute
+         _.each($(dom).find('[bind=activity]'), function (activityEl) {
+            var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
+            //activityView.collection.load();   // NOTE: this load (CreateActivity request) is not necessary for login
+            activities.push(activityView);
+         }); // _.each activity
+      }
       return activities;
-   }
+   };
 
 })
 

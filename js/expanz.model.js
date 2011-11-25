@@ -31,7 +31,14 @@ $(function(){
             this.attrs[key] = attrs[key];
          }
          return true;
-      }
+      },
+
+      destroy: function(){
+         this.each( function( m ){
+                     m.destroy();
+         });
+         return;
+      },
    });
 
 
@@ -44,9 +51,10 @@ $(function(){
       validate:   function( attrs ){
          
          this.set({ error: false }, {silent: true});
-         if( attrs.value && attrs.value.length < 1 ) {
+         if( !attrs.value ) {
             this.set({ error: true }, {silent: true});
-            return this.get('label') + " is missing.";
+            return   this.get('label')? this.get('label'): this.get('id')
+                     + " is missing.";
          }
          return;
       },
@@ -102,52 +110,6 @@ $(function(){
    });
 
 
-
-
-
-   window.expanz.Model.Login.Activity = expanz.Model.Activity.extend({
-
-      validate: function(){
-         if(   ! this.get('username').get('error') &&
-               ! this.get('password').get('error'))
-         {
-            return true;
-         } else {
-            return false;
-         }
-      },
-
-      login:   function(){
-         if( this.validate() ){
-            expanz.Net.CreateSessionRequest( this.get('username').get('value'),
-                                             this.get('password').get('value'),
-                                             config._AppSite,
-                                             loginCallback
-                                             );
-         }
-      },
-   });
-
-
-      var loginCallback = function( error ){
-         if( error && error.length > 0 ){
-            this.get('error').set({ value: error });
-         } else {
-            expanz.Net.GetSessionDataRequest( getSessionCallback );
-         }
-      };
-      var getSessionCallback = function( url, error ){
-         if( error && error.length > 0 ){
-            this.get('error').set({ value: error });
-         } else {
-            // redirect to first activity
-            expanz.Views.redirect( url );
-         }
-      };
-               
 });
-
-
-
 
 

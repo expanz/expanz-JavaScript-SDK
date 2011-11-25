@@ -37,6 +37,7 @@ $(function(){
 
       initialize: function(){
          this.model.bind( "change:value", this.toggle, this );
+         this.el.hide();
       },
 
       toggle:  function(){
@@ -151,24 +152,7 @@ $(function(){
    };
 
    
-   window.expanz.Views.loadMenu = function( el ){
-
-      // Load Menu & insert it into #menu
-      var menu = new expanz.Storage.AppSiteMenu();
-      _.each( expanz.Storage.getProcessAreaList(), function( processArea ) {
-         var menuItem = new expanz.Storage.ProcessAreaMenu( processArea.id, processArea.title );
-         menu.processAreas.push( menuItem );
-
-         _.each( processArea.activities, function( activity ){
-            menuItem.activities.push( new expanz.Storage.ActivityMenu(  activity.name,
-                                                                        activity.title,
-                                                                        activity.url )
-                                    );
-         });
-      });
-
-      menu.load( el );
-   }
+   
 
    // Private Functions
 

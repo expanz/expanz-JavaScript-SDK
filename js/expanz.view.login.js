@@ -39,6 +39,7 @@ $(function(){
 
       initialize: function(){
          this.model.bind( "change:value", this.toggle, this );
+         this.el.hide();
       },
 
       toggle:  function(){
@@ -62,8 +63,6 @@ $(function(){
       },
 
       attemptSubmit: function(){
-         // expanz.Activity['login'].validate()
-         // trigger attamptSubmit on el
          this.el.trigger( 'attemptLogin' );
       }
 
@@ -76,7 +75,7 @@ $(function(){
       },
 
       updateError: function( model, error ){
-         this.collection.get('error').set({ value: error });
+         expanz._error( error );
       },
 
       events:  {
@@ -86,14 +85,18 @@ $(function(){
 
       attemptLogin: function(){
          // call the server
-         this.collection.login();
+         if(   !this.collection.get('username').get('error') &&
+               !this.collection.get('password').get('error'))
+         {
+            this.collection.login();
+         }
       },
 
       update: function(){
          if(   !this.collection.get('username').get('error') &&
                !this.collection.get('password').get('error'))
          {
-            this.collection.get('error').set({ value: "" });
+            expanz._error( "" );
          }
       },
 

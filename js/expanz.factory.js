@@ -6,34 +6,43 @@ $(function(){
 
    window.expanz.Factory = {
 
-      Activity: function (viewNamespace, activityEl) {
+      Activity: function (viewNamespace, modelNamespace, activityEl) {
          // create a collection for each activity
-         var activityModel = new expanz.Model.Activity({
-            name: $(activityEl).attr('name'),
-            title: $(activityEl).attr('title'),
-            url: $(activityEl).attr('url')
+         var activityModel = new modelNamespace.Activity({    // expanz.Model.Login.Activity
+            name:    $(activityEl).attr('name'),
+            title:   $(activityEl).attr('title'),
+            url:     $(activityEl).attr('url'),
+            key:     $(activityEl).attr('key')
          });
          var activityView = new viewNamespace.ActivityView({
-            el: $(activityEl),
-            id: $(activityEl).attr('name'),
+            el:   $(activityEl),
+            id:   $(activityEl).attr('name'),
+            key:  $(activityEl).attr('key'),
             collection: activityModel
          });
-         _.each(expanz.Factory.Field(viewNamespace, $(activityEl).find('[bind=field]')), function (fieldModel) {
+
+         _.each(expanz.Factory.Field(viewNamespace, modelNamespace, $(activityEl).find('[bind=field]')), function (fieldModel) {
             fieldModel.set({
                parent: activityModel
-            });
+            }, {silent: true});
             activityModel.add(fieldModel);
          });
 
+         _.each(expanz.Factory.DependantField(viewNamespace, modelNamespace, $(activityEl).find('[bind=dependant]')), function (dependantFieldModel) {
+            dependantFieldModel.set({
+               parent: activityModel
+            }, {silent: true});
+            activityModel.add(dependantFieldModel);
+         });
 
-         _.each(expanz.Factory.Method(viewNamespace, $(activityEl).find('[bind=method]')), function (methodModel) {
+         _.each(expanz.Factory.Method(viewNamespace, modelNamespace, $(activityEl).find('[bind=method]')), function (methodModel) {
             methodModel.set({
                parent: activityModel
-            });
+            }, {silent: true});
             activityModel.add(methodModel);
          });
 
-         _.each(expanz.Factory.Grid(viewNamespace, activityModel.getAttr('name'), $(activityEl).find('[bind=grid]')), function (gridModel) {
+         _.each(expanz.Factory.Grid(viewNamespace, modelNamespace, activityModel.getAttr('name'), $(activityEl).find('[bind=grid]')), function (gridModel) {
             gridModel.setAttr({
                parent: activityModel,
                activityId: activityModel.getAttr('name')
@@ -47,14 +56,13 @@ $(function(){
       },
 
 
-      Field: function (viewNamespace, DOMObjects) {
+      Field: function (viewNamespace, modelNamespace, DOMObjects) {
 
          var fieldModels = [];
          _.each(DOMObjects, function (fieldEl) {
             // create a model for each field
-            var field = new expanz.Model.Field({
+            var field = new modelNamespace.Field({
                id: $(fieldEl).attr('name'),
-               //parent:  activityModel
             });
             var view = new viewNamespace.FieldView({
                el: $(fieldEl),
@@ -68,14 +76,33 @@ $(function(){
          return fieldModels;
       },
 
-      Method: function (viewNamespace, DOMObjects) {
+      DependantField: function (viewNamespace, modelNamespace, DOMObjects) {
+
+         var fieldModels = [];
+         _.each(DOMObjects, function (fieldEl) {
+            // create a model for each field
+            var field = new modelNamespace.Field({
+               id: $(fieldEl).attr('name'),
+            });
+            var view = new viewNamespace.DependantFieldView({
+               el: $(fieldEl),
+               id: $(fieldEl).attr('id'),
+               className: $(fieldEl).attr('class'),
+               model: field
+            });
+
+            fieldModels.push(field);
+         });
+         return fieldModels;
+      },
+
+      Method: function (viewNamespace, modelNamespace, DOMObjects) {
 
          var methodModels = [];
          _.each(DOMObjects, function (methodEl) {
             // create a model for each method
-            var method = new expanz.Model.Method({
+            var method = new modelNamespace.Method({
                id: $(methodEl).attr('name'),
-               //parent:  activityModel
             });
             var view = new viewNamespace.MethodView({
                el: $(methodEl),
@@ -89,16 +116,15 @@ $(function(){
          return methodModels;
       },
 
-      Grid: function (viewNamespace, activityName, DOMObjects) {
+      Grid: function (viewNamespace, modelNamespace, activityName, DOMObjects) {
 
          var gridModels = [];
 
          _.each(DOMObjects, function (gridEl) {
             // create a model for each GridView
-            var gridModel = new expanz.Model.Data.Grid({
+            var gridModel = new modelNamespace.Data.Grid({
                id: $(gridEl).attr('name'),
                populateMethod: $(gridEl).attr('populateMethod'),
-               //parent:           activityModel
             });
             var view = new viewNamespace.GridView({
                el: $(gridEl),

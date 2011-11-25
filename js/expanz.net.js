@@ -99,7 +99,7 @@ $(function () {
       var head = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>';
       var center = '<CreateActivity name="' + activity.getAttr('name') + '"';
       style ? center += ' style="' + style + '"' : '';
-      center += activity.getAttr('initialkey')?  ' initialKey="' + activity.getAttr('initialkey') + '">' : '>';
+      center += activity.getAttr('key')?  ' initialKey="' + activity.getAttr('key') + '">' : '>';
       
       if ( activity.hasGrid() ) {
          _.each( activity.getGrids(), function ( grid, gridId ) {
