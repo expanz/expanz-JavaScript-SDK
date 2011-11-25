@@ -85,7 +85,7 @@ $(function(){
          
          // render column header
          var el = $(tableEl).find('thead tr');
-         _.each( this.model.getColumns(), function( cell ) {
+         _.each( this.model.getAllColumns(), function( cell ) {
             var html = '<td';
             html += cell.get('width')? ' width="' + cell.get('width') + '"': '';
             html += '>' + cell.get('label') + '</td>';
@@ -96,17 +96,17 @@ $(function(){
          // render rows
          var model = this.model;
          el = $(tableEl).find('tbody');
-         _.each( this.model.getAll(), function( row ) {
+         _.each( this.model.getAllRows(), function( row ) {
 
             var html = '<tr id="' + row.getAttr('id') + '">';
 
-            var columnOrder = _.map( this.model.getColumns(), function( cell ){ 
+            var columnOrder = _.map( this.model.getAllColumns(), function( cell ){ 
                                        return { id:      cell.get('id'),
                                                 field:   cell.get('field'),
                                                 label:   cell.get('label')
                                                 };
                                        });
-            _.each( row.getAll( columnOrder ), function( cell ) {
+            _.each( row.getAllCells( columnOrder ), function( cell ) {
 
                html += '<td id="' + cell.get('id') + '" class="row' + row.getAttr('id') + ' column' + cell.get('id') + '">';
                if( model.getColumn( cell.get('id') ) && model.getColumn( cell.get('id') ).get('datatype') === 'BLOB' ){
