@@ -10,6 +10,11 @@ $(function(){
 
    window.expanz.Model.Bindable = Backbone.Model.extend({
 
+      destroy: function(){
+         // DO NOTHING
+         // this will be used if server changes API to use proper REST model. In a REST model, Backbone can link Models to specific URLs and interact using HTTP GET/PUT/UPDATE/DELETE. When that happens this override should be removed.
+      },
+
    });
 
    window.expanz.Collection = Backbone.Collection.extend({
@@ -17,6 +22,7 @@ $(function(){
       initialize: function( attrs, options ){
          this.attrs = {};
          this.setAttr( attrs );
+         return;
       },
 
       getAttr:  function( key ){
@@ -71,7 +77,7 @@ $(function(){
 
       submit:  function() {
          
-         expanz.Net.MethodRequest( this.get('id'), this.get('parent') );
+         expanz.Net.MethodRequest( this.get('id'), this.get('contextObject'), this.get('parent') );
          return;
       }
 
@@ -110,7 +116,7 @@ $(function(){
 
       destroy: function( callbacks ){
          expanz.Net.DestroyActivityRequest( this);
-         expanz.Collection.prototype.destroy.call( callbacks );
+         expanz.Collection.prototype.destroy.call( this, callbacks );
       },
    });
 

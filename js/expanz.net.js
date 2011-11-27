@@ -25,9 +25,9 @@ $(function () {
          DeltaRequestObject(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
       },
 
-      MethodRequest: function( id, activity, callbacks) {
+      MethodRequest: function( name, contextObject, activity, callbacks) {
          SendRequest(
-         MethodRequestObject( id, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
+         MethodRequestObject( name, contextObject, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
       },
 
       DestroyActivityRequest: function( activity, callbacks) {
@@ -75,9 +75,9 @@ $(function () {
          };
       };
 
-   var MethodRequestObject = function( methodName, contextObject, activity, sessionHandle ) {
+   var MethodRequestObject = function( name, contextObject, activity, sessionHandle ) {
          return {
-            data: buildRequest( 'ExecX', 'http://www.expanz.com/ESAService', sessionHandle )( getCreateMethodRequestBody( methodName, contextObject, activity ) ),
+            data: buildRequest( 'ExecX', 'http://www.expanz.com/ESAService', sessionHandle )( getCreateMethodRequestBody( name, contextObject, activity ) ),
             url: 'ExecX'
          };
       };
@@ -147,8 +147,8 @@ $(function () {
       return '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Delta id="' + id + '" value="' + value + '"/>' + '</Activity>';
    }
 
-   function getCreateMethodRequestBody( methodName, activity, contextObject ) {
-      var body = '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Method name="' + methodName + '"';
+   function getCreateMethodRequestBody( name, contextObject, activity ) {
+      var body = '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Method name="' + name + '"';
       body += contextObject? ' contextObject="' + contextObject + '"' : '';
       body += '/>' + '</Activity>';
       return body;
@@ -331,28 +331,39 @@ $(function () {
    };
    
 
-   function parseDeltaResponse( activity, callback ){
+   function parseDeltaResponse( activity, callbacks ){
       return function apply ( xml ){
 
          var execResults = $(xml).find("ExecXResult");
-         var errorOccurred = false;
-
          if( execResults ){
             $( execResults ).find( 'Message' ).each( function()	
 	    {
-	       if( $(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning'  )
+	       if(   $(this).attr('type') == 'Error' 
+                     || $(this).attr('type') == 'Warning'
+                     )
                {
-	          if( callback ) callback( $(this).text() );
-	          errorOccurred = true;
+	          if( callbacks && callbacks.error ){
+                     callbacks.error( $(this).text() );
+                  }
 	       }
 	    });
             $( execResults ).find( 'Field' ).each( function() 
 	    { 
                var id = $(this).attr('id');
                var field = activity.get( id );
-               if(  field.get('value') != $(this).attr('value') )
+               if(   field 
+                     && field.get('value')
+                     && (field.get('value') != $(this).attr('value')) 
+                     )
                {
 	          field.set({ value:   $(this).attr('value') });
+               }
+               if(   field 
+                     && field.get('url')
+                     && (field.get('url') != $(this).attr('url')) 
+                     )
+               {
+	          field.set({ value:   $(this).attr('url') });
                }
 	    });
          }
@@ -368,14 +379,14 @@ $(function () {
             var esaResult = $(execResults).find('ESA');
             if( esaResult ){
                if( $(esaResult).attr('success') === 1 ){
-                  if( callbacks.success ){
+                  if( callbacks && callbacks.success ){
                      callbacks.success( true );
                      return true;
                   }
                }
             }
          }
-         if( callbacks.error ){
+         if( callbacks && callbacks.error ){
             callbacks.error( true );
          }
          return;
@@ -387,13 +398,13 @@ $(function () {
          var result = $(xml).find("ReleaseSessionResult").text();
          if( result === 'true' ){
             if( deleteSessionHandle() ){
-               if(callbacks.success){
+               if( callbacks && callbacks.success){
                   callbacks.success( result );
                   return;
                }
             } 
          }
-         if(callbacks.error){
+         if( callbacks && callbacks.error ){
             callbacks.error( result );
          }
          return;

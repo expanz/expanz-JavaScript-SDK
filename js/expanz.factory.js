@@ -37,7 +37,7 @@ $(function(){
 
          _.each(expanz.Factory.Method(viewNamespace, modelNamespace, $(activityEl).find('[bind=method]')), function (methodModel) {
             methodModel.set({
-               parent: activityModel
+               parent:        activityModel
             }, {silent: true});
             activityModel.add(methodModel);
          });
@@ -102,7 +102,8 @@ $(function(){
          _.each(DOMObjects, function (methodEl) {
             // create a model for each method
             var method = new modelNamespace.Method({
-               id: $(methodEl).attr('name'),
+               id:            $(methodEl).attr('name'),
+               contextObject: $(methodEl).attr('contextObject')
             });
             var view = new viewNamespace.MethodView({
                el: $(methodEl),

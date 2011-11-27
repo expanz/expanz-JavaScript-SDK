@@ -60,7 +60,6 @@ $(function () {
 
    window.expanz.SetErrorCallback = function (fn) {
 
-      //
       expanz._error = fn;
    };
 
@@ -71,7 +70,7 @@ $(function () {
    function createActivity(viewNamespace, modelNamespace, dom, callbacks) {
 
       var activities = [];
-      if ($(dom).attr('bind').toLowerCase() === 'activity') {
+      if( $(dom).attr('bind') && ($(dom).attr('bind').toLowerCase() === 'activity')) {
 
          var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
          activityView.collection.load( callbacks );
