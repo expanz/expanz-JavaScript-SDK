@@ -25,6 +25,10 @@ $(function () {
          return true;
       },
 
+      getLoginURL: function () {
+         return $.cookies.get('_expanz.login.url');
+      },
+
       endSession: function () {
          $.cookies.del('_expanz.session.handle');
          return true;
@@ -36,11 +40,16 @@ $(function () {
          this.processAreas = [];
 
          this.load = function (el) {
+            // clear the DOM menu
             el.html("");
+            // load process areas into DOM menu
             _.each(this.processAreas, function (pA) {
                el.append('<div id="' + pA.id + '" class="processarea menuitem">' + '<a>' + pA.title + '</a>' + '</div>');
                pA.load(el.find('#' + pA.id + '.processarea.menuitem'));
             });
+            // add html and click handler to DOM
+            el.append('<div id="logout" class="processarea menuitem"><a>logout</a></div>');
+            $(el.find('#logout')[0]).click(function(e){ expanz.Logout(); });
          }
       },
 

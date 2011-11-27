@@ -21,14 +21,14 @@ $(function () {
    //
    // Public Functions & Objects in the Expanz Namespace
    //
-   window.expanz.CreateActivity = function (DOMObject) {
+   window.expanz.CreateActivity = function (DOMObject, callbacks) {
 
       //
       DOMObject || (DOMObject = $('body'));
       var viewNamespace = expanz.Views;
       var modelNamespace = expanz.Model;
 
-      var activities = createActivity(viewNamespace, modelNamespace, DOMObject);
+      var activities = createActivity(viewNamespace, modelNamespace, DOMObject, callbacks);
       _.each(activities, function (activity) {
          window.App.push(activity);
       });
@@ -40,8 +40,8 @@ $(function () {
       // find the given activity in list from the DOMObject
       if ($(DOMObject).attr('bind').toLowerCase() === 'activity') {
          var activityEl = DOMObject;
-         var activity = popActivity( window.App, $(activityEl).attr('name'), $(activityEl).attr('key') );
-         activity.model.destroy();
+         var activity = pop( window.App, {name: $(activityEl).attr('name'), key: $(activityEl).attr('key')} );
+         activity.collection.destroy();
          activity.remove(); // remove from DOM
       } else {
          _.each($(dom).find('[bind=activity]'), function (activityEl) {
@@ -51,6 +51,11 @@ $(function () {
          });
       }
       return;
+   };
+
+   window.expanz.Logout = function() {
+      function redirect(){ expanz.Views.redirect( expanz.Storage.getLoginURL() ) };
+      expanz.Net.ReleaseSessionRequest({ success: redirect, error: redirect });
    };
 
    window.expanz.SetErrorCallback = function (fn) {
@@ -63,20 +68,20 @@ $(function () {
    //
    // Private Functions
    //
-   function createActivity(viewNamespace, modelNamespace, dom) {
+   function createActivity(viewNamespace, modelNamespace, dom, callbacks) {
 
       var activities = [];
       if ($(dom).attr('bind').toLowerCase() === 'activity') {
 
          var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
-         activityView.collection.load();
+         activityView.collection.load( callbacks );
          activities.push(activityView);
 
       } else {
          // search through DOM body, looking for elements with 'bind' attribute
          _.each($(dom).find('[bind=activity]'), function (activityEl) {
             var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
-            activityView.collection.load();
+            activityView.collection.load( callbacks );
             activities.push(activityView);
          }); // _.each activity
       }
@@ -99,11 +104,12 @@ $(function () {
       menu.load(el);
    };
 
-   function popActivity( ary, name, key ) {
+   function pop( ary, map ) { //, name, key ) {
       
       for( var i=0; i < ary.length; i++ ) {
-         if(   (ary[i].id === name)
-               && (key? (ary[i].key === key): true) )
+         if(_.reduce( map, function(memo, key){return memo && (map.key === ary[i].key);}, true ))
+               //(ary[i].name === name)
+               //&& (key? (ary[i].key === key): true) )
          {
             var found = ary[i];
             ary.remove( i );
@@ -114,11 +120,12 @@ $(function () {
    };
 
    // Array Remove - By John Resig (MIT Licensed)
-   Array.remove = function(array, from, to) {
-      var rest = array.slice((to || from) + 1 || array.length);
-      array.length = from < 0 ? array.length + from : from;
-      return array.push.apply(array, rest);
+   Array.prototype.remove = function(from, to) {
+      var rest = this.slice((to || from) + 1 || this.length);
+      this.length = from < 0 ? this.length + from : from;
+      return this.push.apply(this, rest);
    };
+   
 
 
 }) // $(function() --

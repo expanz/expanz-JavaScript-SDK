@@ -5,31 +5,40 @@ $(function () {
    window.expanz.Net = {
 
       // Request Objects -> to be passed to SendRequest
-      CreateSessionRequest: function (username, password, appsite, callback) {
+      CreateSessionRequest: function (username, password, appsite, callbacks) {
          SendRequest(
-         CreateSessionRequestObject(username, password, appsite), parseCreateSessionResponse(callback));
+         CreateSessionRequestObject(username, password, appsite), parseCreateSessionResponse(callbacks));
       },
 
-      GetSessionDataRequest: function (callback) {
+      GetSessionDataRequest: function (callbacks) {
          SendRequest(
-         GetSessionDataRequestObject(expanz.Storage.getSessionHandle()), parseGetSessionDataResponse(callback));
+         GetSessionDataRequestObject(expanz.Storage.getSessionHandle()), parseGetSessionDataResponse(callbacks));
       },
 
-      CreateActivityRequest: function (activity, callback) {
+      CreateActivityRequest: function (activity, callbacks) {
          SendRequest(
-         CreateActivityRequestObject(activity, "", expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callback));
+         CreateActivityRequestObject(activity, "", expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callbacks));
       },
 
-      DeltaRequest: function (id, value, activity, callback) {
+      DeltaRequest: function (id, value, activity, callbacks) {
          SendRequest(
-         DeltaRequestObject(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callback));
+         DeltaRequestObject(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
       },
 
-      MethodRequest: function( id, activity, callback) {
+      MethodRequest: function( id, activity, callbacks) {
          SendRequest(
-         MethodRequestObject( id, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callback));
+         MethodRequestObject( id, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
       },
 
+      DestroyActivityRequest: function( activity, callbacks) {
+         SendRequest(
+         DestroyActivityRequestObject( activity, expanz.Storage.getSessionHandle()), parseDestroyActivityResponse(activity, callbacks));
+      },
+
+      ReleaseSessionRequest: function( callbacks) {
+         SendRequest(
+         ReleaseSessionRequestObject(expanz.Storage.getSessionHandle()), parseReleaseSessionResponse(callbacks));
+      },
    };
 
 
@@ -40,39 +49,52 @@ $(function () {
 
    var CreateSessionRequestObject = function (username, password, appsite) {
          return {
-            data: getCreateSessionRequestBody(username, password, appsite),
+            data: buildRequest( 'CreateSessionX', 'http://www.expanz.com/ESAService')( getCreateSessionRequestBody(username, password, appsite) ),
             url: 'CreateSessionX'
          };
       };
 
    var GetSessionDataRequestObject = function (sessionHandle) {
          return {
-            data: getCreateGetSessionDataRequestBody(sessionHandle),
+            data: buildRequest( 'ExecX', 'http://www.expanz.com/ESAService', sessionHandle )( getCreateGetSessionDataRequestBody() ),
             url: 'ExecX'
          };
       };
 
    var CreateActivityRequestObject = function( activity, style, sessionHandle ){
          return {
-            data: getCreateActivityRequestBody( activity, style, sessionHandle ),
+            data: buildRequest( 'ExecX', 'http://www.expanz.com/ESAService', sessionHandle )( getCreateActivityRequestBody( activity, style ) ),
             url: 'ExecX'
          };
       };
 
    var DeltaRequestObject = function( id, value, activity, sessionHandle ){
          return {
-            data: getDeltaRequestBody( id, value, activity, sessionHandle ),
+            data: buildRequest( 'ExecX', 'http://www.expanz.com/ESAService', sessionHandle )( getDeltaRequestBody( id, value, activity ) ),
             url: 'ExecX'
          };
       };
 
-   var MethodRequestObject = function( methodName, contextObject, activity ) {
+   var MethodRequestObject = function( methodName, contextObject, activity, sessionHandle ) {
          return {
-            data: getCreateMethodRequestBody( methodName, contextObject, activity ),
+            data: buildRequest( 'ExecX', 'http://www.expanz.com/ESAService', sessionHandle )( getCreateMethodRequestBody( methodName, contextObject, activity ) ),
             url: 'ExecX'
          };
       };
 
+   var DestroyActivityRequestObject = function( activity, sessionHandle ){
+         return {
+            data: buildRequest( 'ExecX', 'http://www.expanz.com/ESAService', sessionHandle )( getDestroyActivityRequestBody( activity ) ),
+            url:  'ExecX'
+         };
+      };
+
+   var ReleaseSessionRequestObject = function( sessionHandle ){
+         return {
+            data: buildRequest( 'ReleaseSession', 'http://www.expanz.com/ESAService', sessionHandle )( getCreateReleaseSessionRequestBody() ),
+            url:  'ExecX'
+         };
+      };
 
 
 
@@ -80,23 +102,32 @@ $(function () {
       // XML Message Contruction Functions
       //
 
+   var buildRequest = function ( requestType,      // CreateSessionX, ExecX
+                                 xmlns,            // http://www.expanz.com/ESAService
+                                 sessionHandle )
+   {
+      return function insertBody( body ){
+
+         var head = '<' + requestType + ' xmlns="' + xmlns + '">' + '<xml>' + '<ESA>';
+         var tail = '</ESA>' + '</xml>';
+         tail += sessionHandle? '<sessionHandle>' + sessionHandle + '</sessionHandle>': '';
+         tail += '</' + requestType + '>';
+
+         return head + body + tail;
+      }
+   }
+
    var getCreateSessionRequestBody = function (username, password, appsite) {
 
-         var body = '<CreateSessionX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<CreateSession user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="Primary" clientVersion="Flex 1.0" schemaVersion="2.0"/>' + '</ESA>' + '</xml>' + '</CreateSessionX>';
-
-         return body;
+         return '<CreateSession user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="Primary" clientVersion="Flex 1.0" schemaVersion="2.0"/>' ;
       };
 
-   var getCreateGetSessionDataRequestBody = function (sessionHandle) {
+   var getCreateGetSessionDataRequestBody = function() {
+         return '<GetSessionData/>';
+   };
 
-         var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<GetSessionData/>' + '</ESA>' + '</xml>' + '<sessionHandle>' + sessionHandle + '</sessionHandle>' + '</ExecX>';
-
-         return body;
-      };
-
-   function getCreateActivityRequestBody(activity, style, sessionHandle) {
-
-      var head = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>';
+   
+   function getCreateActivityRequestBody(activity, style) {
       var center = '<CreateActivity name="' + activity.getAttr('name') + '"';
       style ? center += ' style="' + style + '"' : '';
       center += activity.getAttr('key')?  ' initialKey="' + activity.getAttr('key') + '">' : '>';
@@ -107,46 +138,32 @@ $(function () {
             grid.getAttr('contextObject')? center += ' contextObject="' + grid.getAttr('contextObject') + '"': '';
             center += '/>';
          });
-         
       } 
       center += '</CreateActivity>';
-
-      var tail = '</ESA>' + '</xml>' + '<sessionHandle>' + sessionHandle + '</sessionHandle>' + '</ExecX>';
-
-      return head + center + tail;
+      return center;
    }
 
-   function getDeltaRequestBody (id, value, activity, sessionHandle) {
-
-      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Delta id="' + id + '" value="' + value + '"/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + sessionHandle + '</sessionHandle>' + '</ExecX>';
-
-      return body;
+   function getDeltaRequestBody (id, value, activity) {
+      return '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Delta id="' + id + '" value="' + value + '"/>' + '</Activity>';
    }
 
-   function getCreateMethodRequestBody( methodName, activity, sessionHandle, contextObject ) {
-
-
-      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Method name="' + methodName + '"';
-      contextObject ? body += ' contextObject="' + contextObject + '"' : '';
-      body += '/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + sessionHandle + '</sessionHandle>' + '</ExecX>';
-
+   function getCreateMethodRequestBody( methodName, activity, contextObject ) {
+      var body = '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Method name="' + methodName + '"';
+      body += contextObject? ' contextObject="' + contextObject + '"' : '';
+      body += '/>' + '</Activity>';
       return body;
    }
 
    function getCreateMenuActionRequestBody(activity, contextId, contextType, menuAction) {
-
-
-      var body = '<ExecX xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Context id="' + contextId + '" Type="' + contextType + '"/>' + '<MenuAction defaultAction="' + menuAction + '"/>' + '</Activity>' + '</ESA>' + '</xml>' + '<sessionHandle>' + expanz.Storage.getSessionHandle() + '</sessionHandle>' + '</ExecX>';
-
-      return body;
+      return '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Context id="' + contextId + '" Type="' + contextType + '"/>' + '<MenuAction defaultAction="' + menuAction + '"/>' + '</Activity>';
    }
 
+   function getDestroyActivityRequestBody( activity, sessionHandle) {
+      return '<Close activityHandle="' + activity.getAttr('handle') + '"/>';
+   }
 
    function getCreateReleaseSessionRequestBody() {
-
-      var body = '<ReleaseSession xmlns="http://www.expanz.com/ESAService">' + '<xml>' + '<ESA>' + '<ReleaseSession/>' + '</ESA>' + '</xml>' + '<sessionHandle>' + expanz.Storage.getSessionHandle() + '</sessionHandle>' + '</ReleaseSession>';
-
-      return body;
+      return '<ReleaseSession/>';
    }
 
 
@@ -234,7 +251,7 @@ $(function () {
    };
 
    
-   function parseCreateActivityResponse( activity, callback ){
+   function parseCreateActivityResponse( activity, callbacks ){
       return function apply( xml ){
 
          var execResults = $(xml).find("ExecXResult");
@@ -243,7 +260,9 @@ $(function () {
             $(execResults).find( 'Message' ).each( function ()
             {
                if( $(this).attr('type') == 'Error' ){
-                  callback( $(this).text() );
+                  if( callbacks && callbacks.error ){
+                     callbacks.error( $(this).text() );
+                  }
                }
             });
 
@@ -255,9 +274,18 @@ $(function () {
 	    $( execResults ).find( 'Field' ).each( function() 
 	    {
                var field = activity.get( $(this).attr('id') );
-               if( field  ) {
-                  field.set({ label:   $(this).attr('label') });
-                  field.set({ value:   $(this).attr('value') });
+               if( field  ){
+                  field.set({ label:      $(this).attr('label'),
+                              value:      $(this).attr('value')
+                              });
+                  if( $(this).attr('datatype') ){
+                     field.set({ datatype:      $(this).attr('datatype') }, { silent: true });
+                     if(   $(this).attr('datatype').toLowerCase() === 'blob' 
+                           && $(this).attr('url') )
+                     {
+                        field.set({ value:      $(this).attr('url') });
+                     }
+                  }
                }
 	    });
 
@@ -290,8 +318,14 @@ $(function () {
                });
             });   // foreach 'Data'
 
+            if( callbacks && callbacks.success ){
+               callbacks.success( 'Activity (' + activity.name + ') has been loaded: ' + execResults );
+            }
+
          } else {
-            callback( false );
+            if( callbacks && callbacks.error ){
+               callbacks.error( 'Server gave an empty response to a CreateActivity request: ' + xml );
+            }
          }
       }
    };
@@ -325,6 +359,46 @@ $(function () {
          return;
       }
    };
+
+
+   function parseDestroyActivityResponse( activity, callbacks ){
+      return function apply ( xml ){
+         var execResults = $(xml).find('ExecXResult');
+         if( xml && execResults ){
+            var esaResult = $(execResults).find('ESA');
+            if( esaResult ){
+               if( $(esaResult).attr('success') === 1 ){
+                  if( callbacks.success ){
+                     callbacks.success( true );
+                     return true;
+                  }
+               }
+            }
+         }
+         if( callbacks.error ){
+            callbacks.error( true );
+         }
+         return;
+      }
+   };
+
+   function parseReleaseSessionResponse( callbacks ){
+     return function apply( xml ){
+         var result = $(xml).find("ReleaseSessionResult").text();
+         if( result === 'true' ){
+            if( deleteSessionHandle() ){
+               if(callbacks.success){
+                  callbacks.success( result );
+                  return;
+               }
+            } 
+         }
+         if(callbacks.error){
+            callbacks.error( result );
+         }
+         return;
+      }
+   }
 
 
    /*

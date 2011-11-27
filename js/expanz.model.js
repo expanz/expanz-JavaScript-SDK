@@ -104,8 +104,13 @@ $(function(){
          return this.grids != {};
       },
 
-      load: function(){
-         expanz.Net.CreateActivityRequest( this);
+      load: function( callbacks ){
+         expanz.Net.CreateActivityRequest( this, callbacks);
+      },
+
+      destroy: function( callbacks ){
+         expanz.Net.DestroyActivityRequest( this);
+         expanz.Collection.prototype.destroy.call( callbacks );
       },
    });
 

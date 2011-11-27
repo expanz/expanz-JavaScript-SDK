@@ -17,7 +17,7 @@ $(function(){
       modelUpdate: function( attr ){
          return function(){
             var elem = this.el.find('[attribute='+ attr +']');
-            updateViewElement( elem, this.model.get(attr) );
+            updateViewElement( elem, this.model.attributes, attr );
             this.el.trigger( 'update:field' );
          };
       },
@@ -127,12 +127,19 @@ $(function(){
 
    window.expanz.Views.ActivityView = Backbone.View.extend({
 
-      initialize: function() {
+      initialize: function( attrs ) {
+         Backbone.View.prototype.initialize.call( attrs );
+         if( attrs.key ){
+            this.key = attrs.key;
+         }
          this.collection.bind( "error", this.updateError, this );
       },
 
       updateError: function( model, error ){
-         this.collection.get('error').set({ value: error });
+         var errorFieldView = this.collection.get('error');
+         if( errorFieldView ){
+            errorFieldView.set({ value: error });
+         }
       },
 
       events:  {
@@ -156,11 +163,23 @@ $(function(){
 
    // Private Functions
 
-   function updateViewElement( elem, value ){
+   function updateViewElement( elem, allAttrs, attr ){
+      var datatype = allAttrs['datatype'];
+      if(   datatype && datatype.toLowerCase() === 'blob' 
+            && attr && attr === 'value' )
+      {
+            var width = allAttrs['width'];
+            var imgElem =  '<img src="' + allAttrs['value'] + '"';
+                imgElem += width? ' width="' + width + '"': '';
+                imgElem += '/>';
+            $(elem).html( imgElem );
+            return;
+      }
+
       if( $(elem).is('input') ){
-         $(elem).val( value );
+         $(elem).val( allAttrs[attr] );
       } else {
-         $(elem).html( value );
+         $(elem).html( allAttrs[attr] );
       }
       return elem;
    };
