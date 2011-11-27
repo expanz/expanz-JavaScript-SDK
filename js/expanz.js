@@ -44,6 +44,7 @@ $(function () {
          activity.collection.destroy();
          activity.remove(); // remove from DOM
       } else {
+         // top-level DOMObject wasn't an activity, let's go through the entire DOMObject looking for activities
          _.each($(dom).find('[bind=activity]'), function (activityEl) {
             var activity = popActivity( window.App, $(activityEl).attr('name'), $(activityEl).attr('key') );
             activity.model.destroy();
@@ -107,8 +108,6 @@ $(function () {
       
       for( var i=0; i < ary.length; i++ ) {
          if(_.reduce( map, function(memo, key){return memo && (map.key === ary[i].key);}, true ))
-               //(ary[i].name === name)
-               //&& (key? (ary[i].key === key): true) )
          {
             var found = ary[i];
             ary.remove( i );

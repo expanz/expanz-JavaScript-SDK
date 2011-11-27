@@ -1,3 +1,7 @@
+/* Author: Adam Tait
+
+*/
+
 $(function () {
 
    window.expanz = window.expanz || {};
