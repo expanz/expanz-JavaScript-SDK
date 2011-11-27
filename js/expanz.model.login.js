@@ -18,11 +18,10 @@ $(function () {
 
          login: function () {
             if (this.validate()) {
-               expanz.Net.CreateSessionRequest( this.get('username').get('value'),
-                                                this.get('password').get('value'),
-                                                {  success: loginCallback,
-                                                   error:   expanz._error}   
-                                                );
+               expanz.Net.CreateSessionRequest(this.get('username').get('value'), this.get('password').get('value'), {
+                  success: loginCallback,
+                  error: expanz._error
+               });
             };
          },
       }),
@@ -35,7 +34,9 @@ $(function () {
                value: error
             });
          } else {
-            expanz.Net.GetSessionDataRequest({success: getSessionCallback});
+            expanz.Net.GetSessionDataRequest({
+               success: getSessionCallback
+            });
          }
       };
    var getSessionCallback = function (url) {

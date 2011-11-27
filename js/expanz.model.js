@@ -55,14 +55,14 @@ $(function(){
       },
       
       validate:   function( attrs ){
-         
-         this.set({ error: false }, {silent: true});
-         if( !attrs.value ) {
+         if( ! attrs.value || attrs.value.length < 1 ){
             this.set({ error: true }, {silent: true});
-            return   this.get('label')? this.get('label'): this.get('id')
-                     + " is missing.";
+            var errorString = "The ";
+            errorString += this.get('label')? this.get('label'): this.get('id');
+            errorString += " field is mandatory";
+            return errorString;
          }
-         return;
+         this.set({ error: false }, {silent: true});
       },
 
       update:  function( attrs ){
@@ -94,6 +94,13 @@ $(function(){
       initialize: function( attrs ){
          this.grids = {};
          expanz.Collection.prototype.initialize.call( this, attrs );
+      },
+
+      getAll: function () {
+         return this.reject(function (field) {
+            // NOTE: 'this' has been set as expanz.Model.Activity
+            return (field.get('id') === 'error') || (field.getAttr && field.getAttr('name'));
+         }, this);
       },
 
       addGrid: function( grid ){
