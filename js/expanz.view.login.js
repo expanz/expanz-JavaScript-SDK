@@ -8,6 +8,7 @@ $(function(){
    window.expanz.Views = window.expanz.Views || {};
    window.expanz.Views.Login = {};
 
+
    window.expanz.Views.Login.FieldView = Backbone.View.extend({
 
       initialize: function(){
@@ -39,6 +40,8 @@ $(function(){
 
       initialize: function(){
          this.model.bind( "change:value", this.toggle, this );
+         this.model.bind( "error", this.error, this );
+         this.el.hide();
       },
 
       toggle:  function(){
@@ -50,8 +53,12 @@ $(function(){
          } else {
             this.el.hide( 'slow' );
          }
-      }
+      },
 
+      error:   function (model, error) {
+         // stop from bubbling to Activity
+         return false;
+      },
       
    });
 
@@ -62,12 +69,11 @@ $(function(){
       },
 
       attemptSubmit: function(){
-         // expanz.Activity['login'].validate()
-         // trigger attamptSubmit on el
          this.el.trigger( 'attemptLogin' );
       }
 
    });
+
 
    window.expanz.Views.Login.ActivityView = Backbone.View.extend({
 
@@ -75,8 +81,11 @@ $(function(){
          this.collection.bind( "error", this.updateError, this );
       },
 
-      updateError: function( model, error ){
-         this.collection.get('error').set({ value: error });
+      updateError: function (model, error) {
+         var errorFieldModel = this.collection.get('error');
+         if (errorFieldModel) {
+            errorFieldModel.set({ value: error });
+         }
       },
 
       events:  {
@@ -86,7 +95,11 @@ $(function(){
 
       attemptLogin: function(){
          // call the server
-         this.collection.login();
+         if(   !this.collection.get('username').get('error') &&
+               !this.collection.get('password').get('error'))
+         {
+            this.collection.login();
+         }
       },
 
       update: function(){
