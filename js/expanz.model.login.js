@@ -18,7 +18,11 @@ $(function () {
 
          login: function () {
             if (this.validate()) {
-               expanz.Net.CreateSessionRequest(this.get('username').get('value'), this.get('password').get('value'), config._AppSite, loginCallback);
+               expanz.Net.CreateSessionRequest( this.get('username').get('value'),
+                                                this.get('password').get('value'),
+                                                {  success: loginCallback,
+                                                   error:   expanz._error}   
+                                                );
             };
          },
       }),
@@ -31,18 +35,12 @@ $(function () {
                value: error
             });
          } else {
-            expanz.Net.GetSessionDataRequest(getSessionCallback);
+            expanz.Net.GetSessionDataRequest({success: getSessionCallback});
          }
       };
-   var getSessionCallback = function (url, error) {
-         if (error && error.length > 0) {
-            this.get('error').set({
-               value: error
-            });
-         } else {
-            // redirect to first activity
-            expanz.Views.redirect(url);
-         }
+   var getSessionCallback = function (url) {
+         // redirect to default activity
+         expanz.Views.redirect(url);
       };
 
 });
