@@ -154,7 +154,7 @@ $(function () {
       getAllRows: function () {
          return this.reject(function (row) {
             // NOTE: 'this' has been set as expanz.Model.DataGrid
-            return (row.getAttr('id') == '_header') || (this.getAttr('id') == row.getAttr('id')) || (this.getAttr('activityId') === row.getAttr('id'));
+            return (row.getAttr('id') === '_header') || (this.getAttr('id') === row.getAttr('id')) || (this.getAttr('activityId') === row.getAttr('id'));
          }, this);
       },
       addRow: function (_id, _type) {

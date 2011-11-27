@@ -81,7 +81,7 @@ $(function(){
          var fieldModels = [];
          _.each(DOMObjects, function (fieldEl) {
             // create a model for each field
-            var field = new modelNamespace.Field({
+            var field = new modelNamespace.Bindable({
                id: $(fieldEl).attr('name'),
             });
             var view = new viewNamespace.DependantFieldView({

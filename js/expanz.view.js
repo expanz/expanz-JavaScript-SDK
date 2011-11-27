@@ -131,16 +131,11 @@ $(function () {
          if (attrs.key) {
             this.key = attrs.key;
          }
-         this.collection.bind("error", this.updateError, this);
+         this.collection.bind( "error", this.updateError, this );
       },
 
-      updateError: function (model, error) {
-         var errorFieldView = this.collection.get('error');
-         if (errorFieldView) {
-            errorFieldView.set({
-               value: error
-            });
-         }
+      updateError: function( model, error ){
+         expanz._error( error );
       },
 
       events: {

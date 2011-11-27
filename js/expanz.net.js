@@ -354,7 +354,9 @@ $(function () {
             $(execResults).find('Field').each(function () {
                var id = $(this).attr('id');
                var field = activity.get(id);
-               if (field && field.get('value') && (field.get('value') != $(this).attr('value'))) {
+               if (  field 
+                        && (field.get('value') && (field.get('value') != $(this).attr('value')))
+                        || !field.get('value')) {
                   field.set({
                      value: $(this).attr('value')
                   });
