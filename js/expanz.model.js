@@ -55,14 +55,7 @@ $(function(){
       },
       
       validate:   function( attrs ){
-         if( ! attrs.value || attrs.value.length < 1 ){
-            this.set({ error: true }, {silent: true});
-            var errorString = "The ";
-            errorString += this.get('label')? this.get('label'): this.get('id');
-            errorString += " field is mandatory";
-            return errorString;
-         }
-         this.set({ error: false }, {silent: true});
+         // do validation on fields here
       },
 
       update:  function( attrs ){
