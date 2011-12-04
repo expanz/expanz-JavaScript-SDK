@@ -5,6 +5,7 @@
 #        to run, install ruby and "gem install yui-compressor" (https://github.com/sstephenson/ruby-yui-compressor)
 #
 
+require "rubygems"
 require "yui/compressor"
 
 class ExpanzFiles
@@ -12,6 +13,7 @@ class ExpanzFiles
    @@root = "./js/"
 
    @@common = [   "jquery-1.7.1.js",
+                  "modernizr-2.0.6.js",
                   "jquery.cookies.2.2.0.js",
                   "json2.js",
                   "underscore.js",
