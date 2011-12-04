@@ -42,7 +42,7 @@ $(function () {
       ReleaseSessionRequest: function (callbacks) {
          SendRequest(
          RequestObject.ReleaseSession(expanz.Storage.getSessionHandle()), parseReleaseSessionResponse(callbacks));
-      },
+      }
    };
 
 

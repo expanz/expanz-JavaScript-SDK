@@ -20,7 +20,6 @@ $(function(){
    //
    window.expanz.CreateActivity = function (DOMObject) {
 
-      //
       DOMObject || (DOMObject = $('body'));
       var viewNamespace = expanz.Views.Login;
       var modelNamespace = expanz.Model.Login;

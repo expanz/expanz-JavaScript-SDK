@@ -13,7 +13,7 @@ $(function(){
       destroy: function(){
          // DO NOTHING
          // this will be used if server changes API to use proper REST model. In a REST model, Backbone can link Models to specific URLs and interact using HTTP GET/PUT/UPDATE/DELETE. When that happens this override should be removed.
-      },
+      }
 
    });
 
