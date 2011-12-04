@@ -11,7 +11,7 @@ $(function () {
          this.set({
             selected: false
          });
-      },
+      }
 
    });
 
@@ -70,7 +70,7 @@ $(function () {
             return orderedCells;
          }
          return cells;
-      },
+      }
 
 
    });
@@ -108,7 +108,7 @@ $(function () {
             field: _field,
             label: _label,
             datatype: _datatype,
-            width: _width,
+            width: _width
          });
       },
       addColumn: function (_id, _field, _label, _datatype, _width) {
@@ -146,7 +146,7 @@ $(function () {
                field: _field,
                label: _label,
                datatype: _datatype,
-               width: _width,
+               width: _width
             });
          }
       },
@@ -172,7 +172,7 @@ $(function () {
             id: _cellId,
             value: _value
          });
-      },
+      }
 
 
    });

@@ -22,7 +22,7 @@ $(function () {
       },
 
       events: {
-         "change [attribute=value]": "viewUpdate",
+         "change [attribute=value]": "viewUpdate"
       },
 
       viewUpdate: function () {
@@ -121,7 +121,7 @@ $(function () {
          }, this);
 
          return this;
-      },
+      }
    });
 
    window.expanz.Views.ActivityView = Backbone.View.extend({
@@ -144,7 +144,7 @@ $(function () {
 
       update: function () {
          // perform full activity validation after a field updates ... if necessary
-      },
+      }
 
    });
 
