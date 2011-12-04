@@ -62,7 +62,7 @@ $(function(){
          _.each(DOMObjects, function (fieldEl) {
             // create a model for each field
             var field = new modelNamespace.Field({
-               id: $(fieldEl).attr('name'),
+               id: $(fieldEl).attr('name')
             });
             var view = new viewNamespace.FieldView({
                el: $(fieldEl),
@@ -82,7 +82,7 @@ $(function(){
          _.each(DOMObjects, function (fieldEl) {
             // create a model for each field
             var field = new modelNamespace.Bindable({
-               id: $(fieldEl).attr('name'),
+               id: $(fieldEl).attr('name')
             });
             var view = new viewNamespace.DependantFieldView({
                el: $(fieldEl),
@@ -125,7 +125,7 @@ $(function(){
             // create a model for each GridView
             var gridModel = new modelNamespace.Data.Grid({
                id: $(gridEl).attr('name'),
-               populateMethod: $(gridEl).attr('populateMethod'),
+               populateMethod: $(gridEl).attr('populateMethod')
             });
             var view = new viewNamespace.GridView({
                el: $(gridEl),
@@ -157,7 +157,7 @@ $(function(){
             gridModels.push(gridModel);
          });
          return gridModels;
-      },
+      }
 
    };
 

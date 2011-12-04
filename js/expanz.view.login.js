@@ -108,7 +108,7 @@ $(function(){
          {
             this.collection.get('error').set({ value: "" });
          }
-      },
+      }
 
    });
 

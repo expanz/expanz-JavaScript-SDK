@@ -23,7 +23,7 @@ $(function () {
                   error: expanz._error
                });
             };
-         },
+         }
       })
    });
 

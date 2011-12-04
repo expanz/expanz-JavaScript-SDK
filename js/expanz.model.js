@@ -44,7 +44,7 @@ $(function(){
                      m.destroy();
          });
          return;
-      },
+      }
    });
 
 
@@ -117,7 +117,7 @@ $(function(){
       destroy: function( callbacks ){
          expanz.Net.DestroyActivityRequest( this);
          expanz.Collection.prototype.destroy.call( this, callbacks );
-      },
+      }
    });
 
 

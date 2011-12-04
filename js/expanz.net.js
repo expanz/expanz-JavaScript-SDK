@@ -167,7 +167,7 @@ $(function () {
 
       CreateReleaseSession: function () {
          return '<ReleaseSession/>';
-      },
+      }
 
    };
 
