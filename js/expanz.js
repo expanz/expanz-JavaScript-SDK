@@ -33,7 +33,8 @@ $(function () {
          window.App.push(activity);
       });
       return;
-   };
+   };  
+   
 
    window.expanz.DestroyActivity = function (DOMObject) {
 
@@ -87,6 +88,19 @@ $(function () {
       }
       return activities;
    };
+   
+   
+   
+   function findActivity(activityId) {
+	   if( window && window.App){
+		   for( var i=0; i < window.App.length; i++ ) {
+		         if(window.App[i].id == activityId) {
+		            return window.App[i];
+		         }
+		      }
+   		}
+		return null;
+	};   
 
    function loadMenu(el) {
 

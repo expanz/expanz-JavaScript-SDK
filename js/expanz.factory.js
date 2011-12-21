@@ -5,14 +5,15 @@ $(function(){
    window.expanz = window.expanz || {};
 
    window.expanz.Factory = {
-
+		   
       Activity: function (viewNamespace, modelNamespace, activityEl) {
          // create a collection for each activity
          var activityModel = new modelNamespace.Activity({    // expanz.Model.Login.Activity
             name:    $(activityEl).attr('name'),
             title:   $(activityEl).attr('title'),
             url:     $(activityEl).attr('url'),
-            key:     $(activityEl).attr('key')
+            key:     $(activityEl).attr('key'),
+            style:     $(activityEl).attr('activityStyle')
          });
          var activityView = new viewNamespace.ActivityView({
             el:   $(activityEl),
@@ -20,41 +21,59 @@ $(function(){
             key:  $(activityEl).attr('key'),
             collection: activityModel
          });
-
-         _.each(expanz.Factory.Field(viewNamespace, modelNamespace, $(activityEl).find('[bind=field]')), function (fieldModel) {
-            fieldModel.set({
-               parent: activityModel
-            }, {silent: true});
-            activityModel.add(fieldModel);
-         });
-
-         _.each(expanz.Factory.DependantField(viewNamespace, modelNamespace, $(activityEl).find('[bind=dependant]')), function (dependantFieldModel) {
-            dependantFieldModel.set({
-               parent: activityModel
-            }, {silent: true});
-            activityModel.add(dependantFieldModel);
-         });
-
-         _.each(expanz.Factory.Method(viewNamespace, modelNamespace, $(activityEl).find('[bind=method]')), function (methodModel) {
-            methodModel.set({
-               parent:        activityModel
-            }, {silent: true});
-            activityModel.add(methodModel);
-         });
-
-         _.each(expanz.Factory.Grid(viewNamespace, modelNamespace, activityModel.getAttr('name'), $(activityEl).find('[bind=grid]')), function (gridModel) {
-            gridModel.setAttr({
-               parent: activityModel,
-               activityId: activityModel.getAttr('name')
-            });
-            activityModel.addGrid(gridModel);
-         });
-
+         
+         expanz.Factory.bindDataControls(activityModel,viewNamespace,modelNamespace,activityEl);
+         expanz.Factory.bindFields(activityModel,viewNamespace,modelNamespace,activityEl);
+         expanz.Factory.bindGrids(activityModel,viewNamespace,modelNamespace,activityEl);
 
          //activities[ $(activityEl).attr('name') ] = activityView;
          return activityView;
       },
+      
+      bindFields: function(activityModel,viewNamespace,modelNamespace,el){
+          _.each(expanz.Factory.Field(viewNamespace, modelNamespace, $(el).find('[bind=field]')), function (fieldModel) {
+              fieldModel.set({
+                 parent: activityModel
+              }, {silent: true});
+              activityModel.add(fieldModel);
+           });
 
+           _.each(expanz.Factory.DependantField(viewNamespace, modelNamespace, $(el).find('[bind=dependant]')), function (dependantFieldModel) {
+              dependantFieldModel.set({
+                 parent: activityModel
+              }, {silent: true});
+              activityModel.add(dependantFieldModel);
+           });
+
+           _.each(expanz.Factory.Method(viewNamespace, modelNamespace, $(el).find('[bind=method]')), function (methodModel) {
+              methodModel.set({
+                 parent:        activityModel
+              }, {silent: true});
+              activityModel.add(methodModel);
+           });
+    	  
+      },
+      
+      bindDataControls: function(activityModel,viewNamespace,modelNamespace,el){
+          _.each(expanz.Factory.DataControl(viewNamespace, modelNamespace, $(el).find('[bind=DataControl]')), function (DataControlModel) {
+         	 DataControlModel.set({
+                 parent: activityModel,
+                 activityId: activityModel.getAttr('name')
+              });
+              activityModel.addDataControl(DataControlModel);
+           });
+      },
+      
+      bindGrids: function(activityModel,viewNamespace,modelNamespace,el){
+    	  _.each(expanz.Factory.Grid(viewNamespace, modelNamespace, activityModel.getAttr('name'), $(el).find('[bind=grid]')), function (gridModel) {
+              gridModel.setAttr({
+                 parent: activityModel,
+                 activityId: activityModel.getAttr('name')
+              });
+              activityModel.addGrid(gridModel);
+           });
+                     
+      },
 
       Field: function (viewNamespace, modelNamespace, DOMObjects) {
 
@@ -152,12 +171,28 @@ $(function(){
                   }
 
                }
-            })
+            });
 
             gridModels.push(gridModel);
          });
          return gridModels;
-      }
+      },
+      
+      DataControl: function (viewNamespace, modelNamespace, DOMObjects) {
+
+          var DataControlModels = [];
+
+          _.each(DOMObjects, function (DataControlEl) {
+             // create a model for each DataControl
+             var DataControlModel = new modelNamespace.Data.DataControl({
+                id: $(DataControlEl).attr('name'),
+                view:  $(DataControlEl)
+             });
+
+             DataControlModels.push(DataControlModel);
+          });
+          return DataControlModels;
+       }
 
    };
 

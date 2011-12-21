@@ -74,6 +74,16 @@ $(function () {
 
 
    });
+   
+   window.expanz.Model.Data.DataControl =  expanz.Model.Bindable.extend({
+       
+       update:  function( attrs ){
+           
+           expanz.Net.DeltaRequest( this.get('id'), attrs.value, this.get('parent') );
+           return;
+        }
+   });
+   
 
    window.expanz.Model.Data.Grid = expanz.Collection.extend({
 
@@ -172,9 +182,13 @@ $(function () {
             id: _cellId,
             value: _value
          });
+      },
+      
+      updateRowSelected: function(selectedId,type){
+    	  console.log("GridModel:updateRowSelected id:"+selectedId + ' ,type:' + type);
       }
 
-
+ 
    });
 
 
