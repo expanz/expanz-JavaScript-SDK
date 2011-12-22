@@ -20,23 +20,31 @@ $(function() {
 	},
 
 	CreateActivityRequest : function(activity, callbacks) {
+		if (callbacks == undefined)
+			callbacks = activity.callbacks;
 		SendRequest(RequestObject.CreateActivity(activity, activity
 				.getAttr('style'), expanz.Storage.getSessionHandle()),
 				parseCreateActivityResponse(activity, callbacks));
 	},
 
 	DeltaRequest : function(id, value, activity, callbacks) {
+		if (callbacks == undefined)
+			callbacks = activity.callbacks;
 		SendRequest(RequestObject.Delta(id, value, activity, expanz.Storage
 				.getSessionHandle()), parseDeltaResponse(activity, callbacks));
 	},
 
 	MethodRequest : function(name, contextObject, context, activity, callbacks) {
+		if (callbacks == undefined)
+			callbacks = activity.callbacks;
 		SendRequest(RequestObject.Method(name, contextObject, context, activity,
 				expanz.Storage.getSessionHandle()), parseDeltaResponse(activity,
 				callbacks));
 	},
 
 	DestroyActivityRequest : function(activity, callbacks) {
+		if (callbacks == undefined)
+			callbacks = activity.callbacks;
 		SendRequest(RequestObject.DestroyActivity(activity, expanz.Storage
 				.getSessionHandle()), parseDestroyActivityResponse(activity,
 				callbacks));
@@ -172,12 +180,16 @@ $(function() {
 	},
 
 	CreateMethod : function(name, contextObject, context, activity) {
-		var body = '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Method name="' + name + '"';
-		body += contextObject ? ' contextObject="' + contextObject + '"' : '';
-		body += '/>';
+		var body = '<Activity activityHandle="' + activity.getAttr('handle') + '">' ;
+		
 		if (context != null && context.id) {
 			body += '<Context contextObject="' + context.contextObject + '" id="' + context.id + '" type="' + context.type + '" />'
 		}
+		
+		body += '<Method name="' + name + '"';
+		body += contextObject ? ' contextObject="' + contextObject + '"' : '';
+		body += '/>';
+
 		body += '</Activity>';
 		return body;
 	},
@@ -305,7 +317,12 @@ $(function() {
 						if (callbacks && callbacks.error) {
 							callbacks.error($(this).text());
 						}
-					}
+					} else
+						if ($(this).attr('type') == 'Info') {
+							if (callbacks && callbacks.info) {
+								callbacks.info($(this).text());
+							}
+						}
 				});
 
 				$(execResults).find('Activity').each(function() {
@@ -387,15 +404,42 @@ $(function() {
 			console.log("start parseDeltaResponse");
 			var execResults = $(xml).find("ExecXResult");
 			if (execResults) {
+				var errors = new Array();
+				var infos = new Array();
 				$(execResults).find('Message').each(
 						function() {
 							if ($(this).attr('type') == 'Error' || $(this)
 									.attr('type') == 'Warning') {
-								if (callbacks && callbacks.error) {
-									callbacks.error($(this).text());
+								var source = $(this).attr('source');
+								if (source && source != undefined) {
+									var field = activity.get(source);
+									if (field && field != undefined) {
+										field.set({
+										errorMessage : this.textContent,
+										error : true
+										});
+									}
 								}
-							}
+
+								errors.push($(this).text());
+
+							} else
+								if ($(this).attr('type') == 'Info') {
+									infos.push($(this).text());
+								}
 						});
+
+				if (errors) {
+					callbacks.error(errors);
+				} else {
+					callbacks.error(null);
+				}
+				if (infos) {
+					callbacks.info(infos);
+				} else {
+					callbacks.info(null);
+				}
+
 				$(execResults)
 						.find('Field')
 						.each(
@@ -403,9 +447,7 @@ $(function() {
 									var id = $(this).attr('id');
 									var field = activity.get(id);
 									if (field && field != undefined) {
-										if (field
-
-										&& (field.get('value') && (field.get('value') != $(
+										if ((field.get('value') && (field.get('value') != $(
 												this).attr('value'))) || !field
 												.get('value')) {
 
@@ -419,18 +461,54 @@ $(function() {
 
 											field.set({
 											text : $(this).attr('text'),
-											value : $(this).attr('value')
-
+											value : $(this).attr('value'),
 											});
 										}
-										if (field && field.get('url') && (field
-												.get('url') != $(this).attr('url'))) {
+
+										/* remove error message if field is valid */
+										if ($(this).attr('valid') == "1" && field
+												.get('errorMessage') != undefined) {
+											field.set({
+												'errorMessage' : undefined
+											});
+
+										}
+
+										if (field.get('url') && (field.get('url') != $(
+												this).attr('url'))) {
 											field.set({
 												value : $(this).attr('url')
 											});
 										}
 									}
 								});
+
+				$(execResults).find('UIMessage').each(
+						function(data) {
+							var content = $(this).attr('text');
+							var title = $(this).attr('title');
+
+							var uiMsg = new window.expanz.Views.UIMessage({
+							windowId : "UIMessage",
+							title : title,
+							el : $('body'),
+							content : content
+							});
+							uiMsg.render();
+
+							$(this).find('Action').each(function(action) {
+								var methodName = '';
+								if ($(this).find('Method').length > 0) {
+									methodName = $(this).find('Method').attr('name');
+								}
+								uiMsg.addAction(methodName, $(this).attr('label'));
+							});
+
+							expanz.Factory.bindMethods(activity, expanz.Views,
+									expanz.Model, uiMsg.windowEl.parent());
+
+							uiMsg.display();
+						});
 
 				$(execResults)
 						.find('Data')
@@ -620,6 +698,7 @@ $(function() {
 				gridModel.addCell(rowId, $(cell).attr('id'), $(cell).html());
 			});
 		});
+		gridModel.trigger("update:grid");
 	}
 
 });

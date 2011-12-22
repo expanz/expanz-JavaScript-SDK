@@ -57,7 +57,7 @@ $(function() {
 	},
 
 	validate : function(attrs) {
-		// do validation on fields here
+		// console.log("validating field " + this.get('id'));
 	},
 
 	update : function(attrs) {
@@ -82,6 +82,17 @@ $(function() {
 	window.expanz.Model.Activity = expanz.Collection.extend({
 
 	model : expanz.Model.Bindable,
+
+	callbacks : {
+	success : function(message) {
+	},
+	error : function(message) {
+		expanz._error(message);
+	},
+	info : function(message) {
+		expanz._info(message);
+	}
+	},
 
 	initialize : function(attrs) {
 		this.grids = {};
@@ -125,13 +136,13 @@ $(function() {
 		return this.dataControls != {};
 	},
 
-	load : function(callbacks) {
-		expanz.Net.CreateActivityRequest(this, callbacks);
+	load : function() {
+		expanz.Net.CreateActivityRequest(this, this.callbacks);
 	},
 
-	destroy : function(callbacks) {
+	destroy : function() {
 		expanz.Net.DestroyActivityRequest(this);
-		expanz.Collection.prototype.destroy.call(this, callbacks);
+		expanz.Collection.prototype.destroy.call(this, this.callbacks);
 	}
 	});
 

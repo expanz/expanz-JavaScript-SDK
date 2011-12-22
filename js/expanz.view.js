@@ -6,43 +6,72 @@ $(function() {
 	window.expanz = window.expanz || {};
 	window.expanz.Views = {};
 
-	window.expanz.Views.FieldView = Backbone.View.extend({
+	window.expanz.Views.FieldView = Backbone.View
+			.extend({
 
-	initialize : function() {
-		this.model.bind("change:label", this.modelUpdate('label'), this);
-		this.model.bind("change:value", this.modelUpdate('value'), this);
-	},
+			initialize : function() {
+				this.model.bind("change:label", this.modelUpdate('label'), this);
+				this.model.bind("change:value", this.modelUpdate('value'), this);
+				this.model.bind("change:errorMessage", this.displayError(), this);
+			},
 
-	modelUpdate : function(attr) {
-		return function() {
-			var elem = this.el.find('[attribute=' + attr + ']');
-			updateViewElement(elem, this.model.attributes, attr);
-			this.el.trigger('update:field');
-		};
-	},
+			modelUpdate : function(attr) {
+				return function() {
+					var elem = this.el.find('[attribute=' + attr + ']');
+					updateViewElement(elem, this.model.attributes, attr);
+					this.el.trigger('update:field');
+				};
+			},
 
-	events : {
-		"change [attribute=value]" : "viewUpdate"
-	},
+			displayError : function() {
+				return function() {
+					if (this.model.get('errorMessage') != undefined) {
+						var errorEl = this.el.find('#error' + this.model.get('id'));
+						if (errorEl.length < 1) {
+							this.el
+									.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="error' + this.model
+											.get('id') + '"></p>');
+							errorEl = this.el.find('#error' + this.model.get('id'));
+						}
+						errorEl.html(this.model.get("errorMessage"));
+						errorEl.show();
+						errorEl.css('display', 'inline');
+						this.el.addClass("errorField");
+						console.log("showing error : " + this.model
+								.get("errorMessage"));
+					} else {
+						var errorEl = this.el.find('#error' + this.model.get('id'));
+						if (errorEl) {
+							errorEl.hide();
+						}
+						this.el.removeClass("errorField");
+						console.log("hiding error message")
+					}
 
-	viewUpdate : function() {
-		var elem = this.el.find('[attribute=value]');
-		//handle checkbox field case
-		if ($(elem).is(":checkbox")) {
-			this.model.update({
-				value : $(elem).prop("checked") ? 1 : 0
+				};
+			},
+
+			events : {
+				"change [attribute=value]" : "viewUpdate"
+			},
+
+			viewUpdate : function() {
+				var elem = this.el.find('[attribute=value]');
+				// handle checkbox field case
+				if ($(elem).is(":checkbox")) {
+					this.model.update({
+						value : $(elem).prop("checked") ? 1 : 0
+					});
+				} else {
+					this.model.update({
+						value : $(elem).val()
+					});
+				}
+
+				this.el.trigger('update:field');
+			}
+
 			});
-		}
-		else{
-			this.model.update({
-				value : $(elem).val()
-			});
-		}
-		
-		this.el.trigger('update:field');
-	}
-
-	});
 
 	window.expanz.Views.DependantFieldView = Backbone.View.extend({
 
@@ -81,8 +110,8 @@ $(function() {
 			.extend({
 
 			initialize : function() {
-				this.model.bind("add", this.render, this);
-				this.model.bind("change", this.render, this);
+				this.model.bind("update:grid", this.render, this);
+				// this.model.bind("change", this.render, this);
 				this.bind("rowClicked", this.rowClicked, this);
 			},
 
@@ -91,6 +120,7 @@ $(function() {
 			},
 
 			render : function() {
+				console.log("GridView rendered");
 				// set table scaffold
 				var tableEl = this.el.find('table#' + this.model.getAttr('id'));
 				if (tableEl.length < 1) {
@@ -192,12 +222,16 @@ $(function() {
 
 	});
 
-	window.expanz.Views.PicklistWindowView = Backbone.View
+	window.expanz.Views.PopupView = Backbone.View
 			.extend({
 
 			title : 'New window',
 
+			content : '',
+
 			windowId : 'newWindowId',
+
+			divAttributes : '',
 
 			initialize : function(attrs) {
 				Backbone.View.prototype.initialize.call(attrs);
@@ -205,6 +239,8 @@ $(function() {
 					this.title = this.options.title;
 				if (this.options.windowId)
 					this.windowId = this.options.windowId;
+				if (this.options.content)
+					this.content = this.options.content;
 			},
 
 			windowEl : null,
@@ -215,15 +251,16 @@ $(function() {
 			},
 
 			render : function() {
-				console.log("render");
-				var pickupWindow = this.el.find('#' + this.windowId);
-				if (pickupWindow.length < 1) {
+				console.log("render popupWindow");
+				var popupWindow = this.el.find('#' + this.windowId);
+				if (popupWindow.length < 1) {
 					this.el
-							.append("<div id='" + this.windowId + "' bind='grid' name='" + this.windowId + "'></div>");
+							.append("<div id='" + this.windowId + "' " + this.divAttributes + " name='" + this.windowId + "'>" + this.content + "</div>");
 					this.windowEl = this.el.find('#' + this.windowId);
 					this.createWindowObject();
 				} else {
-					this.windowEl = pickupWindow;
+					popupWindow.html(this.content);
+					this.windowEl = popupWindow;
 				}
 
 			},
@@ -232,7 +269,9 @@ $(function() {
 			createWindowObject : function() {
 				this.windowEl.kendoWindow({
 				visible : false,
-				title : this.title
+				title : this.title,
+				modal : true,
+
 				});
 			},
 
@@ -247,6 +286,33 @@ $(function() {
 				this.windowEl.data("kendoWindow").close();
 			}
 
+			});
+
+	window.expanz.Views.PicklistWindowView = window.expanz.Views.PopupView
+			.extend({
+				divAttributes : " bind='grid' "
+			});
+
+	window.expanz.Views.UIMessage = window.expanz.Views.PopupView
+			.extend({
+				addAction : function(methodName, label) {
+					if (this.windowEl.find("[attribute=submit]").length == 0) {
+						this.windowEl.append("<br/>");
+					}
+
+					var bind = '';
+					if (methodName && methodName != '') {
+						bind = "bind='method'";
+					}
+					this.windowEl
+							.append("<div style='display:inline' name='" + methodName + "' " + bind + "> <button style='margin-top:10px' attribute='submit'>" + label + "</button>");
+					
+					/* add a close listenner on the button */
+					var that = this;
+					this.windowEl.find("button").last().bind("click", function(){
+							that.close();
+					});
+				}
 			});
 
 	// Public Functions

@@ -12,6 +12,13 @@ $(function () {
    function (error) {
       console.log("Expanz JavaScript SDK has encountered an error: " + error);
    };
+   
+   window.expanz._info = window.expanz._info ||
+   function (info) {
+      console.log("Info received: " + info);
+   };   
+   
+   
 
    // Load the Expanz Process Area menu
    loadMenu($('[bind=menu]'));
@@ -63,6 +70,12 @@ $(function () {
    window.expanz.SetErrorCallback = function (fn) {
 
       expanz._error = fn;
+   };
+
+   
+   window.expanz.SetInfoCallback = function (fn) {
+
+      expanz._info = fn;
    };
 
 

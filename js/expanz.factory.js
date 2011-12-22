@@ -24,6 +24,7 @@ $(function(){
          
          expanz.Factory.bindDataControls(activityModel,viewNamespace,modelNamespace,activityEl);
          expanz.Factory.bindFields(activityModel,viewNamespace,modelNamespace,activityEl);
+         expanz.Factory.bindMethods(activityModel,viewNamespace,modelNamespace,activityEl);
          expanz.Factory.bindGrids(activityModel,viewNamespace,modelNamespace,activityEl);
 
          //activities[ $(activityEl).attr('name') ] = activityView;
@@ -44,14 +45,15 @@ $(function(){
               }, {silent: true});
               activityModel.add(dependantFieldModel);
            });
-
-           _.each(expanz.Factory.Method(viewNamespace, modelNamespace, $(el).find('[bind=method]')), function (methodModel) {
-              methodModel.set({
-                 parent:        activityModel
-              }, {silent: true});
-              activityModel.add(methodModel);
-           });
-    	  
+      },
+      
+      bindMethods: function(activityModel,viewNamespace,modelNamespace,el){
+         _.each(expanz.Factory.Method(viewNamespace, modelNamespace, $(el).find('[bind=method]')), function (methodModel) {
+            methodModel.set({
+               parent:        activityModel
+            }, {silent: true});
+            activityModel.add(methodModel);
+         });
       },
       
       bindDataControls: function(activityModel,viewNamespace,modelNamespace,el){
