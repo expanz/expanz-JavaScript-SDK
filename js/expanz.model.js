@@ -68,16 +68,13 @@ $(function(){
 
    window.expanz.Model.Method = expanz.Model.Bindable.extend({
 
-      submit:  function() {
+      submit:  function( callback) {
          
-         expanz.Net.MethodRequest( this.get('id'), this.get('contextObject'), this.get('parent') );
+         expanz.Net.MethodRequest( this.get('id'), this.get('contextObject'), this.get('parent'), callback);
          return;
       }
 
    });
-
-
-
 
 
    window.expanz.Model.Activity = expanz.Collection.extend({
@@ -112,12 +109,30 @@ $(function(){
 
       load: function( callbacks ){
          expanz.Net.CreateActivityRequest( this, callbacks);
+         return true;
       },
 
       destroy: function( callbacks ){
          expanz.Net.DestroyActivityRequest( this);
          expanz.Collection.prototype.destroy.call( this, callbacks );
+         return true;
       }
+   });
+
+
+   window.expanz.Model.ClientMessage = expanz.Collection.extend({
+
+      model:   expanz.Model.Bindable,
+      
+      initialize: function( attrs){
+         expanz.Collection.prototype.initialize.call( this, attrs );
+      },
+
+      submit:  function() {
+         expanz.Net.MethodRequest( this.get('id'), this.get('contextObject'), this.get('parent') );
+         return;
+      }
+   
    });
 
 
