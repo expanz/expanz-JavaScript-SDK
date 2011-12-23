@@ -62,7 +62,7 @@ $(function () {
       },
 
       submit: function () {
-         this.model.submit();
+         this.model.submit({success: this.options.callback});
          this.el.trigger('submit:' + this.model.get('id'));
       }
 
@@ -124,6 +124,55 @@ $(function () {
       }
    });
 
+   window.expanz.Views.ClientMessage = Backbone.View.extend({
+
+      initialize: function( attrs, containerjQ){
+         Backbone.View.prototype.initialize.call(attrs);
+         this.create( containerjQ);
+         this.delegateEvents( this.events);
+      },
+
+      events: {
+         "click button":   "close"   // div#close>button[attribute=submit]
+      },
+
+      create: function( containerjQ){
+         containerjQ.append( '<section id="ExpanzClientMessage"></section>' );
+         this.el = $('section#ExpanzClientMessage', containerjQ);
+         
+         this.el.append('<div id="title">'+ this.model.getAttr('title') +'</div>');
+         this.el.append( '<div id="text">'+ this.model.getAttr('text') +'</div>' );
+
+         this.model.each( function( action){
+               if( action.id == 'close'){
+                  this.el.append( '<div bind="method" name="close" id="close">' +
+                                       '<button attribute="submit">' + action.get('label') + '</button>' +
+                                    '</div>' );
+               } else if ( action.id !== this.model.id) {
+                  this.el.append( '<div bind="method" name="'+ action.id +'" id="'+ action.id +'">' +
+                                       '<button attribute="submit">' + action.get('label') + '</button>' +
+                                    '</div>' );
+                  var methodView = new expanz.Views.MethodView({
+                                    el: $('div#'+action.id, this.el),
+                                    id: action.id,
+                                    model: action,
+                                    callback: this.remove
+                                    });
+               }
+         }, this);
+      },
+
+      close: function(){
+         this.remove();
+      },
+
+      al: function(){
+         alert('m');
+      }
+   });
+
+      
+
    window.expanz.Views.ActivityView = Backbone.View.extend({
 
       initialize: function (attrs) {
@@ -132,6 +181,7 @@ $(function () {
             this.key = attrs.key;
          }
          this.collection.bind( "error", this.updateError, this );
+         //this.collection.bind( "add", this.add, this );
       },
 
       updateError: function( model, error ){

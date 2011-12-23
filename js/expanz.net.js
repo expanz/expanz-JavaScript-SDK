@@ -50,7 +50,8 @@ $(function () {
    //
    // Request Objects  (used when passed to SendRequest( ... )
    //
-   var XMLNamespace = window.config._XMLNamespace || 'http://www.expanz.com/ESAService'; // TODO: throw an error here, saying that window.config._XMLNamespace is required
+   var XMLNamespace = window.config._XMLNamespace || 'http://www.expanz.com/ESAService'; 
+      // TODO: throw an error here, saying that window.config._XMLNamespace is required
    var RequestObject = {
 
       CreateSession: function (username, password, appsite) {
@@ -342,21 +343,48 @@ $(function () {
    function parseDeltaResponse(activity, callbacks) {
       return function apply(xml) {
 
-         var execResults = $(xml).find("ExecXResult");
+         var execResults = $('ExecXResult', xml);
          if (execResults) {
-            $(execResults).find('Message').each(function () {
+            $('Message', execResults).each(function () {
                if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
                   if (callbacks && callbacks.error) {
                      callbacks.error($(this).text());
+                     return false;
                   }
                }
+            });
+            $('UIMessage', execResults).each(function () {
+               var clientMessage = new expanz.Model.ClientMessage({  id: 'ExpanzClientMessage',
+                                                                     title: $(this).attr('title'),
+                                                                     text: $(this).attr('text'),
+                                                                     parent: activity
+                                                                     });
+               $('Action', this).each(function () {
+                  var actionModel = new expanz.Model.Method({
+                                                id:   $('Request > Method', this)[0] ? $($('Request > Method', this)[0]).attr('name') : 'close',
+                                                label: $(this).attr('label'),
+                                                parent: activity
+                                                });
+                  clientMessage.add( actionModel );
+               });
+               activity.add( clientMessage );
+               var clientMessageView = new expanz.Views.ClientMessage({
+                                             id: clientMessage.get('id'),
+                                             model: clientMessage
+                                             }, $('body')
+                                             );
+
             });
             $(execResults).find('Field').each(function () {
                var id = $(this).attr('id');
                var field = activity.get(id);
                if (  field 
-                        && (field.get('value') && (field.get('value') != $(this).attr('value')))
-                        || !field.get('value')) {
+                        && (
+                           (field.get('value') && (field.get('value') != $(this).attr('value')))
+                           || !field.get('value')
+                           )
+                  )
+               {
                   field.set({
                      value: $(this).attr('value')
                   });
@@ -368,7 +396,10 @@ $(function () {
                }
             });
          }
-         return;
+         if( callbacks && callbacks.success ){
+            callbacks.success();
+         }
+         return true;
       }
    };
 
