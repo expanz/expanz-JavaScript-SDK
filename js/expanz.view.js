@@ -137,8 +137,8 @@ $(function () {
       },
 
       create: function( containerjQ){
-         containerjQ.append( '<section id="ExpanzClientMessage"></section>' );
-         this.el = $('section#ExpanzClientMessage', containerjQ);
+         containerjQ.append( '<div id="ExpanzClientMessage"></div>' );
+         this.el = $('div#ExpanzClientMessage', containerjQ);
          
          this.el.append('<div id="title">'+ this.model.getAttr('title') +'</div>');
          this.el.append( '<div id="text">'+ this.model.getAttr('text') +'</div>' );
