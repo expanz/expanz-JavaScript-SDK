@@ -133,7 +133,7 @@ $(function () {
       },
 
       events: {
-         "click button":   "close"   // div#close>button[attribute=submit]
+         "click button":   "close"
       },
 
       create: function( containerjQ){
@@ -155,8 +155,7 @@ $(function () {
                   var methodView = new expanz.Views.MethodView({
                                     el: $('div#'+action.id, this.el),
                                     id: action.id,
-                                    model: action,
-                                    callback: this.remove
+                                    model: action
                                     });
                }
          }, this);
@@ -164,10 +163,6 @@ $(function () {
 
       close: function(){
          this.remove();
-      },
-
-      al: function(){
-         alert('m');
       }
    });
 
@@ -181,7 +176,6 @@ $(function () {
             this.key = attrs.key;
          }
          this.collection.bind( "error", this.updateError, this );
-         //this.collection.bind( "add", this.add, this );
       },
 
       updateError: function( model, error ){

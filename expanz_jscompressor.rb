@@ -1,3 +1,4 @@
+#!/usr/bin/ruby
 #
 #  Build Script for comopressing Expanz JavaScript SDK libraries
 #     By: Adam Tait
@@ -62,8 +63,8 @@ end
 
 filenames = ExpanzFiles.new
 
-[["js/expanz-login-min.js", filenames.login],
-   ["js/expanz-min.js", filenames.main]].each do |filename, toCompress, precompressed|
+[["js/min/expanz-login-min.js", filenames.login],
+   ["js/min/expanz-min.js", filenames.main]].each do |filename, toCompress|
    output = File.open( filename, "w" )
    output.puts("///\n///  Expanz JavaScript SDK\n///   #{filename}\n///  usage: please refer to http://docs.expanz.com\n///\n\n")
    toCompress.each do |filename|
