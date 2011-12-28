@@ -148,5 +148,21 @@ $(function() {
 			expanz.Collection.prototype.destroy.call(this, this.callbacks);
 		}
 	});
+	
+   window.expanz.Model.ClientMessage = expanz.Collection.extend({
+
+      model:   expanz.Model.Bindable,
+      
+      initialize: function( attrs){
+         expanz.Collection.prototype.initialize.call( this, attrs );
+      },
+
+      submit:  function() {
+         expanz.Net.MethodRequest( this.get('id'), this.get('contextObject'), this.get('parent') );
+         return;
+      }
+   
+   });
+	
 
 });

@@ -201,6 +201,49 @@ $(function() {
 			return this;
 		}
 	});
+	
+	 window.expanz.Views.ClientMessage = Backbone.View.extend({
+
+	      initialize: function( attrs, containerjQ){
+	         Backbone.View.prototype.initialize.call(attrs);
+	         this.create( containerjQ);
+	         this.delegateEvents( this.events);
+	      },
+
+	      events: {
+	         "click button":   "close"
+	      },
+
+	      create: function( containerjQ){
+	         containerjQ.append( '<div id="ExpanzClientMessage"></div>' );
+	         this.el = $('div#ExpanzClientMessage', containerjQ);
+	         
+	         this.el.append('<div id="title">'+ this.model.getAttr('title') +'</div>');
+	         this.el.append( '<div id="text">'+ this.model.getAttr('text') +'</div>' );
+
+	         this.model.each( function( action){
+	               if( action.id == 'close'){
+	                  this.el.append( '<div bind="method" name="close" id="close">' +
+	                                       '<button attribute="submit">' + action.get('label') + '</button>' +
+	                                    '</div>' );
+	               } else if ( action.id !== this.model.id) {
+	                  this.el.append( '<div bind="method" name="'+ action.id +'" id="'+ action.id +'">' +
+	                                       '<button attribute="submit">' + action.get('label') + '</button>' +
+	                                    '</div>' );
+	                  var methodView = new expanz.Views.MethodView({
+	                                    el: $('div#'+action.id, this.el),
+	                                    id: action.id,
+	                                    model: action
+	                                    });
+	               }
+	         }, this);
+	      },
+
+	      close: function(){
+	         this.remove();
+	      }
+	   });
+	
 
 	window.expanz.Views.ActivityView = Backbone.View.extend({
 

@@ -498,7 +498,7 @@ $(function() {
 
 				});
 
-				$(execResults).find('UIMessage').each(function(data) {
+				$(execResults).find('UIMessage').each(function() {
 					var content = $(this).attr('text');
 					var title = $(this).attr('title');
 
@@ -523,7 +523,7 @@ $(function() {
 					uiMsg.display();
 				});
 
-				$(execResults).find('Data').each(function(data) {
+				$(execResults).find('Data').each(function() {
 					var id = $(this).attr('id');
 					var pickfield = $(this).attr('pickfield');
 					var contextObject = $(this).attr('contextObject');
