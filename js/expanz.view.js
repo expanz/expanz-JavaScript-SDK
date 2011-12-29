@@ -34,14 +34,14 @@ $(function() {
 					errorEl.show();
 					errorEl.css('display', 'inline');
 					this.el.addClass("errorField");
-					console.log("showing error : " + this.model.get("errorMessage"));
+					window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
 				} else {
 					var errorEl = this.el.find('#error' + this.model.get('id'));
 					if (errorEl) {
 						errorEl.hide();
 					}
 					this.el.removeClass("errorField");
-					console.log("hiding error message")
+					window.expanz.logToConsole("hiding error message")
 				}
 
 			};
@@ -120,7 +120,7 @@ $(function() {
 		},
 
 		render : function() {
-			console.log("GridView rendered");
+			window.expanz.logToConsole("GridView rendered");
 			// set table scaffold
 			var tableEl = this.el.find('table#' + this.model.getAttr('id'));
 			if (tableEl.length < 1) {
@@ -169,7 +169,7 @@ $(function() {
 					html += '<td>';
 					_.each(this.model.getActions(), function(cell) {
 						var buttonId = model.getAttr('id') + "_" + row.getAttr('id') + "_" + cell.get('methodName');
-						html += "<div style='display:inline' name='" + cell.get('methodName') + "' bind='method' attributeId='"+cell.get('attributeId')+"'> <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button>";
+						html += "<div style='display:inline' name='" + cell.get('methodName') + "' bind='method' attributeId='" + cell.get('attributeId') + "'> <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button>";
 
 					});
 					html += '</td>';
@@ -201,49 +201,6 @@ $(function() {
 			return this;
 		}
 	});
-	
-	 window.expanz.Views.ClientMessage = Backbone.View.extend({
-
-	      initialize: function( attrs, containerjQ){
-	         Backbone.View.prototype.initialize.call(attrs);
-	         this.create( containerjQ);
-	         this.delegateEvents( this.events);
-	      },
-
-	      events: {
-	         "click button":   "close"
-	      },
-
-	      create: function( containerjQ){
-	         containerjQ.append( '<div id="ExpanzClientMessage"></div>' );
-	         this.el = $('div#ExpanzClientMessage', containerjQ);
-	         
-	         this.el.append('<div id="title">'+ this.model.getAttr('title') +'</div>');
-	         this.el.append( '<div id="text">'+ this.model.getAttr('text') +'</div>' );
-
-	         this.model.each( function( action){
-	               if( action.id == 'close'){
-	                  this.el.append( '<div bind="method" name="close" id="close">' +
-	                                       '<button attribute="submit">' + action.get('label') + '</button>' +
-	                                    '</div>' );
-	               } else if ( action.id !== this.model.id) {
-	                  this.el.append( '<div bind="method" name="'+ action.id +'" id="'+ action.id +'">' +
-	                                       '<button attribute="submit">' + action.get('label') + '</button>' +
-	                                    '</div>' );
-	                  var methodView = new expanz.Views.MethodView({
-	                                    el: $('div#'+action.id, this.el),
-	                                    id: action.id,
-	                                    model: action
-	                                    });
-	               }
-	         }, this);
-	      },
-
-	      close: function(){
-	         this.remove();
-	      }
-	   });
-	
 
 	window.expanz.Views.ActivityView = Backbone.View.extend({
 
@@ -272,64 +229,60 @@ $(function() {
 
 	window.expanz.Views.PopupView = Backbone.View.extend({
 
-		title : 'New window',
-
-		content : '',
-
-		windowId : 'newWindowId',
-
 		divAttributes : '',
 
-		initialize : function(attrs) {
+		initialize : function(attrs, containerjQ) {
 			Backbone.View.prototype.initialize.call(attrs);
-			if (this.options.title)
-				this.title = this.options.title;
-			if (this.options.windowId)
-				this.windowId = this.options.windowId;
-			if (this.options.content)
-				this.content = this.options.content;
+			this.create(containerjQ);
+			this.renderActions();
+			this.delegateEvents(this.events);
 		},
-
-		windowEl : null,
 
 		events : {
-			"window:close" : "close",
-			"window:display" : "display"
+			"click button" : "close"
 		},
 
-		render : function() {
-			console.log("render popupWindow");
-			var popupWindow = this.el.find('#' + this.windowId);
-			if (popupWindow.length < 1) {
-				this.el.append("<div class='popupView' id='" + this.windowId + "' " + this.divAttributes + " name='" + this.windowId + "'>" + this.content + "</div>");
-				this.windowEl = this.el.find('#' + this.windowId);
-				this.createWindowObject();
-			} else {
-				popupWindow.html(this.content);
-				this.windowEl = popupWindow;
+		renderActions : function() {
+
+		},
+
+		create : function(containerjQ) {
+			window.expanz.logToConsole("render popupWindow");
+			var popupWindow = containerjQ.find('#' + this.id);
+			if (popupWindow.length > 0) {
+				popupWindow.remove();
 			}
+			
+			var content = '';
+			if (this.model.getAttr('text') != undefined && this.model.getAttr('text').length > 0) {
+				content = this.model.getAttr('text');
+			}
+			
+			containerjQ.append("<div class='popupView' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");
+			this.el = containerjQ.find('#' + this.id);
+			this.createWindowObject();
 
 		},
 
 		/* must be overriden depending on the pluggin used */
 		createWindowObject : function() {
-			this.windowEl.kendoWindow({
+			this.el.kendoWindow({
 				visible : false,
-				title : this.title,
+				title : this.model.getAttr('title'),
 				modal : true,
-
 			});
 		},
 
 		/* must be overriden depending on the pluggin used */
 		display : function() {
-			this.windowEl.data("kendoWindow").center();
-			this.windowEl.data("kendoWindow").open();
+			this.el.data("kendoWindow").center();
+			this.el.data("kendoWindow").open();
 		},
 
 		/* must be overriden depending on the pluggin used */
 		close : function() {
-			this.windowEl.data("kendoWindow").close();
+			this.el.data("kendoWindow").close();
+			this.remove();
 		}
 
 	});
@@ -339,22 +292,25 @@ $(function() {
 	});
 
 	window.expanz.Views.UIMessage = window.expanz.Views.PopupView.extend({
-		addAction : function(methodName, label) {
-			if (this.windowEl.find("[attribute=submit]").length == 0) {
-				this.windowEl.append("<br/>");
-			}
+		
+		renderActions : function() {
+			this.model.each(function(action) {
+				if (this.el.find("[attribute=submit]").length == 0) {
+					this.el.append("<br/>");
+				}
+				if (action.id == 'close') {
+					this.el.append('<div style="display:inline"  bind="method" name="close" id="close">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
+				} else
+					if (action.id !== this.model.id) {
+						this.el.append('<div style="display:inline" bind="method" name="' + action.id + '" id="' + action.id + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
+						var methodView = new expanz.Views.MethodView({
+							el : $('div#' + action.id, this.el),
+							id : action.id,
+							model : action
+						});
+					}
+			}, this);
 
-			var bind = '';
-			if (methodName && methodName != '') {
-				bind = "bind='method'";
-			}
-			this.windowEl.append("<div style='display:inline' name='" + methodName + "' " + bind + "> <button style='margin-top:10px' attribute='submit'>" + label + "</button>");
-
-			/* add a close listenner on the button */
-			var that = this;
-			this.windowEl.find("button").last().bind("click", function() {
-				that.close();
-			});
 		}
 	});
 

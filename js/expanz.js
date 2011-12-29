@@ -10,12 +10,12 @@ $(function () {
    window.expanz = window.expanz || {};
    window.expanz._error = window.expanz._error ||
    function (error) {
-      console.log("Expanz JavaScript SDK has encountered an error: " + error);
+   	window.expanz.logToConsole("Expanz JavaScript SDK has encountered an error: " + error);
    };
    
    window.expanz._info = window.expanz._info ||
    function (info) {
-      console.log("Info received: " + info);
+   	window.expanz.logToConsole("Info received: " + info);
    };   
    
    
@@ -24,6 +24,12 @@ $(function () {
    loadMenu($('[bind=menu]'));
 
 
+   window.expanz.logToConsole = function(message){
+   	if (typeof(console) != "undefined" && console.log) {
+         console.log(message);
+     }
+   }
+   
 
    //
    // Public Functions & Objects in the Expanz Namespace

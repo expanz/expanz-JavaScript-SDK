@@ -213,11 +213,11 @@ $(function() {
 		},
 
 		updateRowSelected : function(selectedId, type) {
-			console.log("GridModel:updateRowSelected id:" + selectedId + ' ,type:' + type);
+			window.expanz.logToConsole("GridModel:updateRowSelected id:" + selectedId + ' ,type:' + type);
 		},
 
 		actionSelected : function(selectedId, methodName, attributeId) {
-			console.log("GridModel:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,attributeId:' + attributeId);
+			window.expanz.logToConsole("GridModel:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,attributeId:' + attributeId);
 		}
 
 	});

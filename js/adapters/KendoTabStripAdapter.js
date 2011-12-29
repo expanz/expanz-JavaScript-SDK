@@ -1,29 +1,27 @@
-function createActivityWithKendoTabs(tabElement, ajaxTabContents,callbacks) {
+function createActivityWithKendoTabs(tabElement, ajaxTabContents, callbacks) {
 	var tabLoaded = new Array();
 
 	var nbDynamicTabs = ajaxTabContents.length;
 
 	var onContentLoad = function(e) {
 		tabLoaded[e.item.textContent] = true;
-		console.log(e.item.textContent + " loaded");
+		window.expanz.logToConsole(e.item.textContent + " loaded");
 		if (Object.size(tabLoaded) == nbDynamicTabs) {
 			tabLoaded = new Array();
-			console.log("load the activity");
-			expanz.CreateActivity($(e.item).parents('[bind=activity]'),callbacks);
+			window.expanz.logToConsole("load the activity");
+			expanz.CreateActivity($(e.item).parents('[bind=activity]'), callbacks);
 		}
 	};
 
 	$(tabElement).kendoTabStrip({
-	contentUrls : ajaxTabContents,
-	contentLoad : onContentLoad
+		contentUrls : ajaxTabContents,
+		contentLoad : onContentLoad
 	});
 
 	/* load all unloaded tabs */
-	_.each(tabElement.data("kendoTabStrip").tabGroup.children().not(
-			'[class*=k-state-active]').not('[class*=k-tab-on-top]'),
-			function(child) {
-				tabElement.data("kendoTabStrip").reload($(child));
-			});
+	_.each(tabElement.data("kendoTabStrip").tabGroup.children().not('[class*=k-state-active]').not('[class*=k-tab-on-top]'), function(child) {
+		tabElement.data("kendoTabStrip").reload($(child));
+	});
 
 };
 

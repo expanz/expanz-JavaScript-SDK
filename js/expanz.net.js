@@ -231,7 +231,7 @@ $(function() {
 	//
 	var parseCreateSessionResponse = function(callbacks) {
 		return function apply(xml) {
-			console.log("start parseCreateSessionResponse");
+			window.expanz.logToConsole("start parseCreateSessionResponse");
 			if ($(xml).find('CreateSessionXResult').length > 0) {
 				expanz.Storage.setSessionHandle($(xml).find('CreateSessionXResult').text());
 			} else {
@@ -263,7 +263,7 @@ $(function() {
 
 	function parseGetSessionDataResponse(callbacks) {
 		return function apply(xml) {
-			console.log("start parseGetSessionDataResponse");
+			window.expanz.logToConsole("start parseGetSessionDataResponse");
 			var processAreas = [];
 			$(xml).find('processarea').each(function() {
 				var processArea = new ProcessArea($(this).attr('id'), $(this).attr('title'));
@@ -314,7 +314,7 @@ $(function() {
 
 	function parseCreateActivityResponse(activity, callbacks) {
 		return function apply(xml) {
-			console.log("start parseCreateActivityResponse");
+			window.expanz.logToConsole("start parseCreateActivityResponse");
 			var execResults = $(xml).find("ExecXResult");
 			if (execResults) {
 
@@ -383,7 +383,7 @@ $(function() {
 								}
 							];
 							expanz.Net.MethodRequest(methodName, methodAttributes, null, activity);
-							console.log(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,attributeId:' + attributeId);
+							window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,attributeId:' + attributeId);
 						};
 					}
 
@@ -412,7 +412,7 @@ $(function() {
 
 	function parseDeltaResponse(activity, callbacks) {
 		return function apply(xml) {
-			console.log("start parseDeltaResponse");
+			window.expanz.logToConsole("start parseDeltaResponse");
 			var execResults = $(xml).find("ExecXResult");
 			if (execResults) {
 				var errors = new Array();
@@ -491,34 +491,37 @@ $(function() {
 						if ($(this).attr('name') != undefined) {
 
 						} else {
-							console.log("Not implemented yet");
+							window.expanz.logToConsole("Not implemented yet");
 						}
 
-					console.log("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
+					window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
 
 				});
 
 				$(execResults).find('UIMessage').each(function() {
-					var content = $(this).attr('text');
-					var title = $(this).attr('title');
 
-					var uiMsg = new window.expanz.Views.UIMessage({
-						windowId : "UIMessage",
-						title : title,
-						el : $('body'),
-						content : content
+					var clientMessage = new expanz.Model.ClientMessage({
+						id : 'ExpanzClientMessage',
+						title : $(this).attr('title'),
+						text : $(this).attr('text'),
+						parent : activity
 					});
-					uiMsg.render();
 
 					$(this).find('Action').each(function(action) {
-						var methodName = '';
-						if ($(this).find('Method').length > 0) {
-							methodName = $(this).find('Method').attr('name');
-						}
-						uiMsg.addAction(methodName, $(this).attr('label'));
+						var actionModel = new expanz.Model.Method({
+							id : $('Request > Method', this)[0] ? $($('Request > Method', this)[0]).attr('name') : 'close',
+							label : $(this).attr('label'),
+							parent : activity
+						});
+						clientMessage.add(actionModel);
 					});
 
-					expanz.Factory.bindMethods(activity, expanz.Views, expanz.Model, uiMsg.windowEl.parent());
+					var uiMsg = new window.expanz.Views.UIMessage({
+						id : clientMessage.id,
+						model : clientMessage
+					}, $('body'));
+
+					//expanz.Factory.bindMethods(activity, expanz.Views, expanz.Model, uiMsg.windowEl.parent());
 
 					uiMsg.display();
 				});
@@ -528,26 +531,32 @@ $(function() {
 					var pickfield = $(this).attr('pickfield');
 					var contextObject = $(this).attr('contextObject');
 					if (id == 'picklist') {
-						console.log("picklist received");
+						window.expanz.logToConsole("picklist received");
 						var elId = id + pickfield;
+						
+						var clientMessage = new expanz.Model.ClientMessage({
+							id : elId,
+							title : pickfield,
+							text : '',
+							parent : activity
+						});
 
 						var gridEl = $("#" + elId);
-
+						
 						var picklistWindow = new window.expanz.Views.PicklistWindowView({
-							windowId : elId,
-							title : pickfield,
-							el : $('body')
-						});
-						picklistWindow.render();
+							id : clientMessage.id,
+							model : clientMessage
+						}, $('body'));
 
-						expanz.Factory.bindGrids(activity, expanz.Views, expanz.Model, picklistWindow.windowEl.parent());
+
+						expanz.Factory.bindGrids(activity, expanz.Views, expanz.Model, picklistWindow.el.parent());
 
 						var gridModel = activity.getGrid(elId);
 
 						if (gridModel !== undefined) {
 							fillGridModel(gridModel, $(this));
 							gridModel.updateRowSelected = function(selectedId, type) {
-								console.log("From parseDeltaResponse:updateRowSelected id:" + selectedId + ' ,type:' + type);
+								window.expanz.logToConsole("From parseDeltaResponse:updateRowSelected id:" + selectedId + ' ,type:' + type);
 
 								var context = {
 									id : selectedId,
@@ -583,7 +592,7 @@ $(function() {
 
 	function parseDestroyActivityResponse(activity, callbacks) {
 		return function apply(xml) {
-			console.log("start parseDestroyActivityResponse");
+			window.expanz.logToConsole("start parseDestroyActivityResponse");
 			var execResults = $(xml).find('ExecXResult');
 			if (xml && execResults) {
 				var esaResult = $(execResults).find('ESA');
@@ -606,7 +615,7 @@ $(function() {
 
 	function parseReleaseSessionResponse(callbacks) {
 		return function apply(xml) {
-			console.log("start parseReleaseSessionResponse");
+			window.expanz.logToConsole("start parseReleaseSessionResponse");
 			var result = $(xml).find("ReleaseSessionResult").text();
 			if (result === 'true') {
 				if (deleteSessionHandle()) {
@@ -657,30 +666,26 @@ $(function() {
 			}
 		});
 	};
-	
-	
+
 	/*
 	 * Send Request :manage the sending of XML requests to the server, and dispatching of response handlers
 	 */
 
 	var SendNormalRequest = function(request, responseHandler, isPopup) {
-		
-		if ($("#formFile")){
+
+		if ($("#formFile")) {
 			$("#formFile").remove();
 		}
-		
-		var form = "<form method='post' id='formFile' target='content_frame' action='" + config._URLproxy+ "'>";
+
+		var form = "<form method='post' id='formFile' target='content_frame' action='" + config._URLproxy + "'>";
 		form += "<input type='hidden' name='url' value='" + config._URLprefix + request.url + "'>"
 		form += "<input type='hidden' name='data' value='" + request.data + "'>"
 		form += "</form>";
 		$("body").append(form);
-		
+
 		$("#formFile").submit();
 
-	};	
-	
-	
-	
+	};
 
 	// GetSessionData Stub Objects
 	//
