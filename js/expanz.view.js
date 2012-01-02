@@ -226,10 +226,26 @@ $(function() {
 		}
 
 	});
+	
+
+	window.expanz.Views.DataControlView = Backbone.View.extend({
+
+		initialize : function(attrs) {
+			Backbone.View.prototype.initialize.call(attrs);
+			this.model.bind("change:data", this.publishData, this);
+		},
+
+		publishData : function() {
+			this.el.trigger("publishData", this.model.get('data'), this.model.get('data') );
+		}
+
+	});	
 
 	window.expanz.Views.PopupView = Backbone.View.extend({
 
 		divAttributes : '',
+
+		width : 400,
 
 		initialize : function(attrs, containerjQ) {
 			Backbone.View.prototype.initialize.call(attrs);
@@ -252,47 +268,41 @@ $(function() {
 			if (popupWindow.length > 0) {
 				popupWindow.remove();
 			}
-			
+
 			var content = '';
 			if (this.model.getAttr('text') != undefined && this.model.getAttr('text').length > 0) {
 				content = this.model.getAttr('text');
 			}
-			
+
 			containerjQ.append("<div class='popupView' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");
 			this.el = containerjQ.find('#' + this.id);
 			this.createWindowObject();
 
 		},
 
-		/* must be overriden depending on the pluggin used */
+		/* must be redefined depending on the pluggin used */
 		createWindowObject : function() {
-			this.el.kendoWindow({
-				visible : false,
-				title : this.model.getAttr('title'),
+			this.el.dialog({
 				modal : true,
+				width : this.width,
+				title : this.model.getAttr('title')
 			});
 		},
 
-		/* must be overriden depending on the pluggin used */
-		display : function() {
-			this.el.data("kendoWindow").center();
-			this.el.data("kendoWindow").open();
-		},
-
-		/* must be overriden depending on the pluggin used */
+		/* may be redifined depending on the pluggin used */
 		close : function() {
-			this.el.data("kendoWindow").close();
 			this.remove();
 		}
 
 	});
 
 	window.expanz.Views.PicklistWindowView = window.expanz.Views.PopupView.extend({
-		divAttributes : " bind='grid' "
+		divAttributes : " bind='grid'",
+		width : 600,
 	});
-
+	
 	window.expanz.Views.UIMessage = window.expanz.Views.PopupView.extend({
-		
+
 		renderActions : function() {
 			this.model.each(function(action) {
 				if (this.el.find("[attribute=submit]").length == 0) {
@@ -313,6 +323,14 @@ $(function() {
 
 		}
 	});
+	
+	window.expanz.Views.LoginPopup = window.expanz.Views.UIMessage.extend({
+		width : 450,
+		
+		/* do not close */
+		close : function() {
+		}
+	});		
 
 	// Public Functions
 	window.expanz.Views.redirect = function(destinationURL) {

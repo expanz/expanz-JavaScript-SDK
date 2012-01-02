@@ -56,7 +56,7 @@ $(function(){
       },
 
       error:   function (model, error) {
-         // stop from bubbling to Activity
+      	// stop from bubbling to Activity
          return false;
       }
       

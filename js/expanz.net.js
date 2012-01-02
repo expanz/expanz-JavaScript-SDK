@@ -110,7 +110,7 @@ $(function() {
 
 		GetBlob : function(blobId, activity, sessionHandle) {
 			return {
-				data : buildRequest2('GetBlob', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.GetBlob(blobId, activity)),
+				data : buildRequestWithoutESA('GetBlob', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.GetBlob(blobId, activity)),
 				url : 'GetBlob'
 			};
 		},
@@ -125,7 +125,7 @@ $(function() {
 
 			var head = '<' + requestType + ' xmlns="' + xmlns + '">' + '<xml>' + '<ESA>';
 			var tail = '</ESA>' + '</xml>';
-			tail += sessionHandle ? '<sessionHandle>' + sessionHandle + '</sessionHandle>' : '';
+			tail += sessionHandle ? '<sessionHandle>' + sessionHandle + '</sessionHandle>' : '<sessionHandle>net.tcp://127.0.0.1:8196/TMXTEST#634608391060904702:80</sessionHandle>';
 			tail += '</' + requestType + '>';
 
 			return head + body + tail;
@@ -135,12 +135,12 @@ $(function() {
 	//
 	// XML Message Contruction Functions
 	//
-	var buildRequest2 = function(requestType, xmlns, sessionHandle) {
+	var buildRequestWithoutESA = function(requestType, xmlns, sessionHandle) {
 		return function insertBody(body) {
 
 			var head = '<' + requestType + ' xmlns="' + xmlns + '">';
-			var tail = '';
 			head += sessionHandle ? '<sessionHandle>' + sessionHandle + '</sessionHandle>' : '';
+			var tail = '';
 			tail += '</' + requestType + '>';
 
 			return head + body + tail;
@@ -173,8 +173,8 @@ $(function() {
 			}
 
 			if (activity.hasDataControl()) {
-				_.each(activity.getDataControls(), function(DataControl, DataControlId) {
-					center += '<DataPublication id="' + DataControlId + '"';
+				_.each(activity.getDataControls(), function(dataControl, dataControlId) {
+					center += '<DataPublication id="' + dataControlId + '" populateMethod="' + dataControl.get('populateMethod') + '" Type="' + dataControl.get('type') + '"';
 					center += '/>';
 				});
 			}
@@ -320,6 +320,12 @@ $(function() {
 
 				$(execResults).find('Message').each(function() {
 					if ($(this).attr('type') == 'Error') {
+						var sessionLost = /Session .* not found/.test($(this).text());
+						if (sessionLost) {
+							window.expanz.showLoginPopup(activity, true);
+							return;
+						}
+
 						if (callbacks && callbacks.error) {
 							callbacks.error($(this).text());
 						}
@@ -392,7 +398,21 @@ $(function() {
 
 					/* push the data to the view */
 					if (dataControlModel !== undefined) {
-						dataControlModel.get("view").trigger("publishData", $(data));
+						/* parse xml data */
+						var localData = [];
+
+						_.each($(data).find('Row'), function(row) {
+							var rowId = $(row).attr('id');
+							_.each($(row).find('Cell'), function(cell) {
+								localData.push({
+									text : $(cell).html(),
+									value : rowId
+								});
+							});
+						});
+						dataControlModel.set({
+							data : localData
+						});
 					}
 
 				}); // foreach 'Data'
@@ -520,10 +540,6 @@ $(function() {
 						id : clientMessage.id,
 						model : clientMessage
 					}, $('body'));
-
-					//expanz.Factory.bindMethods(activity, expanz.Views, expanz.Model, uiMsg.windowEl.parent());
-
-					uiMsg.display();
 				});
 
 				$(execResults).find('Data').each(function() {
@@ -533,7 +549,7 @@ $(function() {
 					if (id == 'picklist') {
 						window.expanz.logToConsole("picklist received");
 						var elId = id + pickfield;
-						
+
 						var clientMessage = new expanz.Model.ClientMessage({
 							id : elId,
 							title : pickfield,
@@ -542,12 +558,11 @@ $(function() {
 						});
 
 						var gridEl = $("#" + elId);
-						
+
 						var picklistWindow = new window.expanz.Views.PicklistWindowView({
 							id : clientMessage.id,
 							model : clientMessage
 						}, $('body'));
-
 
 						expanz.Factory.bindGrids(activity, expanz.Views, expanz.Model, picklistWindow.el.parent());
 
@@ -574,8 +589,6 @@ $(function() {
 								expanz.Net.MethodRequest('SetIdFromContext', methodAttributes, context, activity);
 								picklistWindow.close();
 							}
-
-							picklistWindow.display();
 
 						} else {
 							alert("Unexpected error while trying to display the picklist");

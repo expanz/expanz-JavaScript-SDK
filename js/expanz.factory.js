@@ -181,7 +181,6 @@ $(function() {
 								gridModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'),$(action).attr('attributeId'));
 							});
 						}
-
 					}
 				});
 
@@ -194,17 +193,26 @@ $(function() {
 
 			var DataControlModels = [];
 
-			_.each(DOMObjects, function(DataControlEl) {
+			_.each(DOMObjects, function(dataControlEl) {
 				// create a model for each DataControl
-				var DataControlModel = new modelNamespace.Data.DataControl({
-					id : $(DataControlEl).attr('name'),
-					view : $(DataControlEl)
+				var dataControlModel = new modelNamespace.Data.DataControl({
+					id : $(dataControlEl).attr('name'),
+					//view : $(dataControlEl),
+					populateMethod : $(dataControlEl).attr('populateMethod'),
+					type : $(dataControlEl).attr('type')
 				});
-
-				DataControlModels.push(DataControlModel);
+				
+				var view = new viewNamespace.DataControlView({
+					el : $(dataControlEl),
+					id : $(dataControlEl).attr('id'),
+					className : $(dataControlEl).attr('class'),
+					model : dataControlModel
+				});
+				
+				DataControlModels.push(dataControlModel);
 			});
 			return DataControlModels;
-		}
+		}		
 
 	};
 

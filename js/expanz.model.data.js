@@ -12,6 +12,7 @@ $(function() {
 			return;
 		}
 	});
+	
 
 	window.expanz.Model.Data.Cell = expanz.Model.Bindable.extend({
 

@@ -5,32 +5,24 @@ $.fn.KendoDropDownListAdapter = function() {
 	var list = cb.data("kendoDropDownList");
 
 	/**
-	 * define publishData which is called when list of data is ready
+	 * define publishData which is called when list of data is ready, array of data is passed as argument after the event
 	 */
-	var publishData = function(event, data) {
-		/* transform xml data to json data and refresh the combobox element */
-		var localData = [];
+	var publishData = function(event) {
+		if (arguments.length > 1) {
+			var data = Array.prototype.slice.call(arguments, 0);
+			data.remove(0);
 
-		_.each($(data).find('Row'), function(row) {
-			var rowId = $(row).attr('id');
-			_.each($(row).find('Cell'), function(cell) {
-				localData.push({
-				text : $(cell).html(),
-				value : rowId
-				});
+			var ds = new kendo.data.DataSource({
+				data : data
 			});
-		});
 
-		var ds = new kendo.data.DataSource({
-			data : localData
-		});
-
-		list.dataSource = ds;
-		ds.read();
-		list.refresh();
-		/* set initial value if existing */
-		if (cb.val() != undefined) {
-			list.value(cb.val());
+			list.dataSource = ds;
+			ds.read();
+			list.refresh();
+			/* set initial value if existing */
+			if (cb.val() != undefined) {
+				list.value(cb.val());
+			}
 		}
 
 	};
