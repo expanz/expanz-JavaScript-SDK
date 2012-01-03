@@ -10,31 +10,40 @@ $(function() {
 
 		// functions
 
+		_getCookiesGlobalName : function() {
+			return "_expanz_" + config._AppSite + "_";
+		},
+
 		getSessionHandle : function() {
-			return $.cookies.get('_expanz.session.handle');
+			return $.cookies.get(expanz.Storage._getCookiesGlobalName() + '.session.handle');
 		},
 
 		setSessionHandle : function(sessionHandle) {
-			$.cookies.set('_expanz.session.handle', sessionHandle);
+			$.cookies.set(expanz.Storage._getCookiesGlobalName() + '.session.handle', sessionHandle);
 			setLoginURL(document.location.pathname);
 			return true;
 		},
 
 		getProcessAreaList : function() {
-			return $.cookies.get('_expanz.processarea.list');
+			return $.cookies.get(expanz.Storage._getCookiesGlobalName() + '.processarea.list');
 		},
 
 		setProcessAreaList : function(list) {
-			$.cookies.set('_expanz.processarea.list', JSON.stringify(list));
+			$.cookies.set(expanz.Storage._getCookiesGlobalName() + '.processarea.list', JSON.stringify(list));
 			return true;
 		},
 
 		getLoginURL : function() {
-			return $.cookies.get('_expanz.login.url');
+			var loginUrl = $.cookies.get(expanz.Storage._getCookiesGlobalName() + '.login.url');
+			/* if login url is null try to guess it by removing the filename */
+			if(loginUrl == null){
+				loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
+			}
+			return loginUrl;
 		},
 
 		endSession : function() {
-			$.cookies.del('_expanz.session.handle');
+			$.cookies.del(expanz.Storage._getCookiesGlobalName() + '.session.handle');
 			return true;
 		},
 
@@ -85,7 +94,7 @@ $(function() {
 	};
 
 	var setLoginURL = function(url) {
-		$.cookies.set('_expanz.login.url', url);
+		$.cookies.set(expanz.Storage._getCookiesGlobalName() + '.login.url', url);
 		return true;
 	};
 

@@ -50,7 +50,14 @@ $(function() {
 			if (callbacks == undefined)
 				callbacks = activity.callbacks;
 			SendNormalRequest(RequestObject.GetBlob(blobId, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks), true);
-		}
+		},
+
+		CreateMenuActionRequest : function(activity, contextId, contextType, menuAction, callbacks) {
+			if (callbacks == undefined)
+				callbacks = activity.callbacks;
+			SendRequest(RequestObject.CreateMenuAction(activity, contextId, contextType, menuAction, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
+		},
+
 	};
 
 	//
@@ -104,7 +111,7 @@ $(function() {
 		ReleaseSession : function(sessionHandle) {
 			return {
 				data : buildRequest('ReleaseSession', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateReleaseSession()),
-				url : 'ExecX'
+				url : 'ReleaseSession'
 			};
 		},
 
@@ -112,6 +119,13 @@ $(function() {
 			return {
 				data : buildRequestWithoutESA('GetBlob', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.GetBlob(blobId, activity)),
 				url : 'GetBlob'
+			};
+		},
+
+		CreateMenuAction : function(activity, contextId, contextType, menuAction, sessionHandle) {
+			return {
+				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateMenuAction(activity, contextId, contextType, menuAction)),
+				url : 'ExecX'
 			};
 		},
 
@@ -209,7 +223,7 @@ $(function() {
 		},
 
 		CreateMenuAction : function(activity, contextId, contextType, menuAction) {
-			return '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Context id="' + contextId + '" Type="' + contextType + '"/>' + '<MenuAction defaultAction="' + menuAction + '"/>' + '</Activity>';
+			return '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Context id="' + contextId + '" contextObject="' + contextType + '"/>' + '<MenuAction defaultAction="' + menuAction + '"  contextObject="' + contextType + '"/>' + '</Activity>';
 		},
 
 		DestroyActivity : function(activity, sessionHandle) {
@@ -268,7 +282,7 @@ $(function() {
 			$(xml).find('processarea').each(function() {
 				var processArea = new ProcessArea($(this).attr('id'), $(this).attr('title'));
 				$(this).find('activity').each(function() {
-					processArea.activities.push(new ActivityInfo($(this).attr('name'), $(this).attr('title'), '#'));
+					processArea.activities.push(new ActivityInfo($(this).attr('name'), $(this).attr('title'), '#', $(this).attr('style')));
 				});
 				processAreas.push(processArea);
 			});
@@ -278,12 +292,10 @@ $(function() {
 				$(data).find('activity').each(function() {
 					var name = $(this).attr('name');
 					var url = $(this).attr('form');
+					var style = $(this).attr('style');
 					var gridviewList = [];
 					$(this).find('gridview').each(function() {
 						var gridview = new GridViewInfo($(this).attr('id'));
-						$(this).find('column').each(function() {
-							gridview.addColumn($(this).attr('field'), $(this).attr('width'));
-						});
 						gridviewList.push(gridview);
 					});
 
@@ -398,20 +410,8 @@ $(function() {
 
 					/* push the data to the view */
 					if (dataControlModel !== undefined) {
-						/* parse xml data */
-						var localData = [];
-
-						_.each($(data).find('Row'), function(row) {
-							var rowId = $(row).attr('id');
-							_.each($(row).find('Cell'), function(cell) {
-								localData.push({
-									text : $(cell).html(),
-									value : rowId
-								});
-							});
-						});
 						dataControlModel.set({
-							data : localData
+							xml : $(data)
 						});
 					}
 
@@ -631,12 +631,11 @@ $(function() {
 			window.expanz.logToConsole("start parseReleaseSessionResponse");
 			var result = $(xml).find("ReleaseSessionResult").text();
 			if (result === 'true') {
-				if (deleteSessionHandle()) {
-					if (callbacks && callbacks.success) {
-						callbacks.success(result);
-						return;
-					}
+				if (callbacks && callbacks.success) {
+					callbacks.success(result);
+					return;
 				}
+
 			}
 			if (callbacks && callbacks.error) {
 				callbacks.error(result);
@@ -709,10 +708,11 @@ $(function() {
 		this.activities = [];
 	}
 
-	function ActivityInfo(name, title, url) {
+	function ActivityInfo(name, title, url, style) {
 		this.name = name;
 		this.title = title;
 		this.url = url;
+		this.style = style;
 		this.gridviews = [];
 	}
 

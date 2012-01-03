@@ -226,20 +226,25 @@ $(function() {
 		}
 
 	});
-	
 
 	window.expanz.Views.DataControlView = Backbone.View.extend({
 
 		initialize : function(attrs) {
 			Backbone.View.prototype.initialize.call(attrs);
-			this.model.bind("change:data", this.publishData, this);
+			this.model.bind("change:xml", this.publishData, this);
+		},
+
+		itemSelected : function(itemId,type) {
+			this.model.updateItemSelected(itemId,type);
 		},
 
 		publishData : function() {
-			this.el.trigger("publishData", this.model.get('data'), this.model.get('data') );
+			this.el.trigger("publishData", [
+				this.model.get('xml'), this
+			]);
 		}
 
-	});	
+	});
 
 	window.expanz.Views.PopupView = Backbone.View.extend({
 
@@ -300,7 +305,7 @@ $(function() {
 		divAttributes : " bind='grid'",
 		width : 600,
 	});
-	
+
 	window.expanz.Views.UIMessage = window.expanz.Views.PopupView.extend({
 
 		renderActions : function() {
@@ -323,14 +328,14 @@ $(function() {
 
 		}
 	});
-	
+
 	window.expanz.Views.LoginPopup = window.expanz.Views.UIMessage.extend({
 		width : 450,
-		
+
 		/* do not close */
 		close : function() {
 		}
-	});		
+	});
 
 	// Public Functions
 	window.expanz.Views.redirect = function(destinationURL) {

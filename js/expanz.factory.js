@@ -1,4 +1,3 @@
-
 $(function() {
 
 	window.expanz = window.expanz || {};
@@ -170,15 +169,9 @@ $(function() {
 							return $(gridviewXML).attr('id') === gridModel.getAttr('id');
 						});
 						if (gridviewInfo) {
-
-							// found the gridview information from formmapping.xml. Now adding to gridModel
-							_.each($(gridviewInfo).find('column'), function(column) {
-								gridModel.addColumnDefault($(column).attr('id'), $(column).attr('field'), $(column).attr('label'), $(column).attr('datatype'), $(column).attr('width'));
-							});
-
 							// add actions
 							_.each($(gridviewInfo).find('action'), function(action) {
-								gridModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'),$(action).attr('attributeId'));
+								gridModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'), $(action).attr('attributeId'));
 							});
 						}
 					}
@@ -197,22 +190,22 @@ $(function() {
 				// create a model for each DataControl
 				var dataControlModel = new modelNamespace.Data.DataControl({
 					id : $(dataControlEl).attr('name'),
-					//view : $(dataControlEl),
+					// view : $(dataControlEl),
 					populateMethod : $(dataControlEl).attr('populateMethod'),
 					type : $(dataControlEl).attr('type')
 				});
-				
+
 				var view = new viewNamespace.DataControlView({
 					el : $(dataControlEl),
 					id : $(dataControlEl).attr('id'),
 					className : $(dataControlEl).attr('class'),
 					model : dataControlModel
 				});
-				
+
 				DataControlModels.push(dataControlModel);
 			});
 			return DataControlModels;
-		}		
+		}
 
 	};
 
