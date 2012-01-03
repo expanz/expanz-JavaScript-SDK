@@ -7,22 +7,29 @@ $.fn.KendoComboBoxAdapter = function() {
 	/**
 	 * define publishData which is called when list of data is ready, array of data is passed as argument after the event
 	 */
-	var publishData = function(event) {
-		if (arguments.length > 1) {
-			var data = Array.prototype.slice.call(arguments, 0);
-			data.remove(0);
+	var publishData = function(event, xml) {
+		var data = new Array();
 
-			var ds = new kendo.data.DataSource({
-				data : data
+		_.each($(xml).find('Row'), function(row) {
+			var rowId = $(row).attr('id');
+			_.each($(row).find('Cell'), function(cell) {
+				data.push({
+					text : $(cell).html(),
+					value : rowId
+				});
 			});
+		});
 
-			list.dataSource = ds;
-			ds.read();
-			list.refresh();
-			/* set initial value if existing */
-			if (cb.val() != undefined) {
-				list.value(cb.val());
-			}
+		var ds = new kendo.data.DataSource({
+			data : data
+		});
+
+		list.dataSource = ds;
+		ds.read();
+		list.refresh();
+		/* set initial value if existing */
+		if (cb.val() != undefined) {
+			list.value(cb.val());
 		}
 
 	};

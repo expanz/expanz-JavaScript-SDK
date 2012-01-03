@@ -10,9 +10,13 @@ $(function() {
 
 			expanz.Net.DeltaRequest(this.get('id'), attrs.value, this.get('parent'));
 			return;
-		}
+		},
+
+		updateItemSelected : function(selectedId, type) {
+			window.expanz.logToConsole("DataControl:updateItemSelected id:" + selectedId);
+			expanz.Net.CreateMenuActionRequest(this.get('parent'), selectedId, type, "1");
+		},
 	});
-	
 
 	window.expanz.Model.Data.Cell = expanz.Model.Bindable.extend({
 
@@ -118,20 +122,6 @@ $(function() {
 				return cell.get('id') === '_actions';
 			}, this);
 		},
-		addColumnDefault : function(_id, _field, _label, _datatype, _width) {
-
-			this.setAttr({
-				lockedColumns : true
-			});
-
-			this.get('_header').add({
-				id : _id,
-				field : _field,
-				label : _label,
-				datatype : _datatype,
-				width : _width
-			});
-		},
 		addAction : function(_id, _label, _width, _methodName, _attributeId) {
 			this.setAttr({
 				hasActions : true
@@ -146,48 +136,13 @@ $(function() {
 			});
 		},
 		addColumn : function(_id, _field, _label, _datatype, _width) {
-
-			// columns have already been defaulted in formmapping.xml
-			if (this.getAttr('lockedColumns')) {
-
-				// var existingCell = this.get( '_header' ).get( _id );
-				var existingCell = this.get('_header').find(
-
-				function(cell) {
-					return (cell.get('id') === _id) || (cell.get('field') === _field) || (cell.get('label') === _label);
-				});
-				// if fields are missing from the existing cells, fill them in with new fields
-				if (existingCell) {
-					if (!existingCell.get('id'))
-						existingCell.set({
-							id : _id
-						});
-					if (!existingCell.get('field'))
-						existingCell.set({
-							field : _field
-						});
-					if (!existingCell.get('label'))
-						existingCell.set({
-							label : _label
-						});
-					if (!existingCell.get('datatype'))
-						existingCell.set({
-							datatype : _datatype
-						});
-					if (!existingCell.get('width'))
-						existingCell.set({
-							width : _width
-						});
-				}
-			} else {
-				this.get('_header').add({
-					id : _id,
-					field : _field,
-					label : _label,
-					datatype : _datatype,
-					width : _width
-				});
-			}
+			this.get('_header').add({
+				id : _id,
+				field : _field,
+				label : _label,
+				datatype : _datatype,
+				width : _width
+			});
 		},
 
 		getAllRows : function() {
