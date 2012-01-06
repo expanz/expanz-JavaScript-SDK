@@ -41,6 +41,23 @@ $(function() {
 		});
 		return;
 	};
+	
+	//
+	// Public Functions & Objects in the Expanz Namespace
+	//
+	window.expanz.CreateLoginActivity = function(DOMObject, callbacks) {
+
+		//
+		DOMObject || (DOMObject = $('body'));
+		var viewNamespace = expanz.Views.Login;
+		var modelNamespace = expanz.Model.Login;
+
+		var activities = createLoginActivity(viewNamespace, modelNamespace, DOMObject, callbacks);
+		_.each(activities, function(activity) {
+			window.App.push(activity);
+		});
+		return;
+	};	
 
 	//
 	// Public Functions & Objects in the Expanz Namespace
@@ -144,6 +161,18 @@ $(function() {
 
 		expanz._error = fn;
 	};
+	
+	window.expanz.basicErrorDisplay = function(el){
+		return function error(str) {
+			$(el).find('[attribute=value]').html(str);
+			if (!str || str.length < 1) {
+				$(el).hide('slow');
+			} else {
+				$(el).show('slow');
+			}
+		}
+		;
+	}
 
 	window.expanz.basicMsgDisplay = function(el) {
 		return function display(str) {
