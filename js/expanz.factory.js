@@ -150,7 +150,8 @@ $(function() {
 				// create a model for each GridView
 				var gridModel = new modelNamespace.Data.Grid({
 					id : $(gridEl).attr('name'),
-					populateMethod : $(gridEl).attr('populateMethod')
+					populateMethod : $(gridEl).attr('populateMethod'),
+					contextObject : $(gridEl).attr('contextObject')
 				});
 				var view = new viewNamespace.GridView({
 					el : $(gridEl),
@@ -171,7 +172,14 @@ $(function() {
 						if (gridviewInfo) {
 							// add actions
 							_.each($(gridviewInfo).find('action'), function(action) {
-								gridModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'), $(action).attr('attributeId'));
+								var methodParams = new Array();
+								_.each($(action).find('methodParam'), function(methodParam) {
+									methodParams.push({
+										name : $(methodParam).attr('name'),
+										value : $(methodParam).attr('value')
+									});
+								});
+								gridModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'), methodParams);
 							});
 						}
 					}
@@ -190,7 +198,6 @@ $(function() {
 				// create a model for each DataControl
 				var dataControlModel = new modelNamespace.Data.DataControl({
 					id : $(dataControlEl).attr('name'),
-					// view : $(dataControlEl),
 					populateMethod : $(dataControlEl).attr('populateMethod'),
 					type : $(dataControlEl).attr('type')
 				});

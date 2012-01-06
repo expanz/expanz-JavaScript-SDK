@@ -74,11 +74,12 @@ $(function() {
 
 			expanz.Net.MethodRequest(this.get('id'), [
 				{
-					id : "contextObject",
+					name : "contextObject",
 					value : this.get('contextObject')
 				}
 			], null, this.get('parent'));
 			return;
+
 		}
 
 	});
@@ -157,17 +158,17 @@ $(function() {
 			expanz.Collection.prototype.initialize.call(this, attrs);
 		},
 
-		submit : function() {
-
-			expanz.Net.MethodRequest(this.get('id'), [
-				{
-					id : "contextObject",
-					value : this.get('contextObject')
-				}
-			], null, this.get('parent'));
-			
-			return;
-		}
+	// submit : function() {
+	//
+	// expanz.Net.MethodRequest(this.get('id'), [
+	// {
+	// name : "contextObject",
+	// value : this.get('contextObject')
+	// }
+	// ], null, this.get('parent'));
+	//			
+	// return;
+	// }
 
 	});
 

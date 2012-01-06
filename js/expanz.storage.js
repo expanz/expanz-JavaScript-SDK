@@ -15,12 +15,17 @@ $(function() {
 		},
 
 		getSessionHandle : function() {
-			return $.cookies.get(expanz.Storage._getCookiesGlobalName() + '.session.handle');
+			var cookie = $.cookies.get(expanz.Storage._getCookiesGlobalName() + '.session.handle');
+			if (cookie == 'undefined')
+				return undefined;
+			return cookie;
 		},
 
 		setSessionHandle : function(sessionHandle) {
 			$.cookies.set(expanz.Storage._getCookiesGlobalName() + '.session.handle', sessionHandle);
-			setLoginURL(document.location.pathname);
+			if ($.cookies.get(expanz.Storage._getCookiesGlobalName() + '.login.url') == null) {
+				setLoginURL(document.location.pathname);
+			}
 			return true;
 		},
 
@@ -36,7 +41,7 @@ $(function() {
 		getLoginURL : function() {
 			var loginUrl = $.cookies.get(expanz.Storage._getCookiesGlobalName() + '.login.url');
 			/* if login url is null try to guess it by removing the filename */
-			if(loginUrl == null){
+			if (loginUrl == null) {
 				loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
 			}
 			return loginUrl;

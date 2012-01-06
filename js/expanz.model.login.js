@@ -7,7 +7,7 @@ $(function () {
    window.expanz.Model.Login = _.extend(expanz.Model, {
 
       Activity: expanz.Model.Activity.extend({
-
+      	
          validate: function () {
             if (!this.get('username').get('error') && !this.get('password').get('error')) {
                return true;

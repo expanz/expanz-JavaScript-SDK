@@ -24,11 +24,12 @@ $(function() {
 
 		displayError : function() {
 			return function() {
+				var errorId = 'error' + this.model.get('id');
 				if (this.model.get('errorMessage') != undefined) {
-					var errorEl = this.el.find('#error' + this.model.get('id'));
+					var errorEl = this.el.find('#' + errorId);
 					if (errorEl.length < 1) {
-						this.el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="error' + this.model.get('id') + '"></p>');
-						errorEl = this.el.find('#error' + this.model.get('id'));
+						this.el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="' + errorId + '"></p>');
+						errorEl = this.el.find('#' + errorId);
 					}
 					errorEl.html(this.model.get("errorMessage"));
 					errorEl.show();
@@ -36,7 +37,7 @@ $(function() {
 					this.el.addClass("errorField");
 					window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
 				} else {
-					var errorEl = this.el.find('#error' + this.model.get('id'));
+					var errorEl = this.el.find('#' + errorId);
 					if (errorEl) {
 						errorEl.hide();
 					}
@@ -115,8 +116,8 @@ $(function() {
 			this.model.updateRowSelected(row.attr('id'), row.attr('type'));
 		},
 
-		actionClicked : function(id, methodName, attributeId) {
-			this.model.actionSelected(id, methodName, attributeId);
+		actionClicked : function(id, methodName, methodParams) {
+			this.model.actionSelected(id, methodName, methodParams);
 		},
 
 		render : function() {
@@ -169,7 +170,20 @@ $(function() {
 					html += '<td>';
 					_.each(this.model.getActions(), function(cell) {
 						var buttonId = model.getAttr('id') + "_" + row.getAttr('id') + "_" + cell.get('methodName');
-						html += "<div style='display:inline' name='" + cell.get('methodName') + "' bind='method' attributeId='" + cell.get('attributeId') + "'> <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button>";
+						var methodParamsReplaced = new Array();
+						var methodParams = cell.get('methodParams');
+						_.each(methodParams, function(methodParam) {
+							var name = methodParam.name;
+							var value = methodParam.value;
+							if (value == '@contextId') {
+								value = row.getAttr('id');
+							}
+							methodParamsReplaced.push({
+								name : name,
+								value : value
+							});
+						});
+						html += "<div style='display:inline' name='" + cell.get('methodName') + "' methodParams='" + JSON.stringify(methodParamsReplaced) + "' bind='method'> <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button>";
 
 					});
 					html += '</td>';
@@ -190,13 +204,15 @@ $(function() {
 			var onActionClick = function(event) {
 				var rowId = $(this).closest("tr").attr('id');
 				var methodName = $(this).attr('name');
-				var attributeId = $(this).attr('attributeId');
+				var methodParams = $(this).attr('methodParams');
 
-				event.data.trigger("actionClicked", rowId, methodName, attributeId);
+				event.data.trigger("actionClicked", rowId, methodName, JSON.parse(methodParams));
 
 			};
 
 			$('table#' + this.model.getAttr('id') + ' tr [bind=method]').click(this, onActionClick);
+
+			tableEl.trigger("table:rendered");
 
 			return this;
 		}
@@ -234,8 +250,8 @@ $(function() {
 			this.model.bind("change:xml", this.publishData, this);
 		},
 
-		itemSelected : function(itemId,type) {
-			this.model.updateItemSelected(itemId,type);
+		itemSelected : function(itemId, type) {
+			this.model.updateItemSelected(itemId, type);
 		},
 
 		publishData : function() {
@@ -248,19 +264,34 @@ $(function() {
 
 	window.expanz.Views.PopupView = Backbone.View.extend({
 
-		divAttributes : '',
+		width : 'auto',
 
-		width : 400,
+		divAttributes : '',
 
 		initialize : function(attrs, containerjQ) {
 			Backbone.View.prototype.initialize.call(attrs);
 			this.create(containerjQ);
 			this.renderActions();
 			this.delegateEvents(this.events);
+
+			/* find the parent popup -> it is the first parentPopup visible */
+			if (window.expanz.currentPopup != undefined) {
+				this.parentPopup = window.expanz.currentPopup;
+				while (!$(this.parentPopup.el).is(":visible")) {
+					if (this.parentPopup.parentPopup == undefined) {
+						this.parentPopup = undefined;
+						break;
+					}
+					this.parentPopup = this.parentPopup.parentPopup;
+				}
+
+			}
+			window.expanz.currentPopup = this;
+
 		},
 
 		events : {
-			"click button" : "close"
+			"click button" : "closeClicked"
 		},
 
 		renderActions : function() {
@@ -283,6 +314,16 @@ $(function() {
 			this.el = containerjQ.find('#' + this.id);
 			this.createWindowObject();
 
+			if (this.model.getAttr('url') != undefined && this.model.getAttr('url').length > 0) {
+				var url = this.model.getAttr('url');
+				var that = this;
+				this.el.load(url, function() {
+					that.center();
+				});
+			} else {
+				this.center();
+			}
+
 		},
 
 		/* must be redefined depending on the pluggin used */
@@ -294,46 +335,83 @@ $(function() {
 			});
 		},
 
+		closeClicked : function() {
+			this.close();
+		},
+
 		/* may be redifined depending on the pluggin used */
 		close : function() {
 			this.remove();
+		},
+
+		/* may be redifined depending on the pluggin used */
+		center : function() {
+			this.el.dialog("option", "position", 'center');
 		}
 
 	});
 
 	window.expanz.Views.PicklistWindowView = window.expanz.Views.PopupView.extend({
-		divAttributes : " bind='grid'",
-		width : 600,
+		divAttributes : " bind='grid'"
 	});
 
 	window.expanz.Views.UIMessage = window.expanz.Views.PopupView.extend({
+
+		width : '500',
 
 		renderActions : function() {
 			this.model.each(function(action) {
 				if (this.el.find("[attribute=submit]").length == 0) {
 					this.el.append("<br/>");
 				}
+
+				var divId = action.id;
+
 				if (action.id == 'close') {
-					this.el.append('<div style="display:inline"  bind="method" name="close" id="close">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
+					divId += action.get('label').split(' ').join('');
+					this.el.append('<div style="display:inline"  bind="method" name="close" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
 				} else
 					if (action.id !== this.model.id) {
-						this.el.append('<div style="display:inline" bind="method" name="' + action.id + '" id="' + action.id + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
+						this.el.append('<div style="display:inline" bind="method" name="' + action.id + '" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
 						var methodView = new expanz.Views.MethodView({
 							el : $('div#' + action.id, this.el),
 							id : action.id,
 							model : action
 						});
 					}
+
+				/* if response data are present we have to send it during the click event as well */
+				if (action.get('response') != undefined) {
+					var button = this.el.find('#' + divId + ' button');
+					var that = this;
+					button.click(function() {
+						if ( that.model.getAttr('title') == "Order Submitted" ){
+							/* reload the page to clear the cart */
+							window.location.reload();
+						}
+						
+						if (action.get('response').find("closeWindow")) {
+							if (that.parentPopup != undefined) {
+								that.parentPopup.close();
+							}
+							else{
+								window.expanz.logToConsole("Cannot find parent popup");
+							}
+						}
+
+					});
+				}
+
 			}, this);
 
 		}
 	});
 
-	window.expanz.Views.LoginPopup = window.expanz.Views.UIMessage.extend({
-		width : 450,
+	window.expanz.Views.ManuallyClosedPopup = window.expanz.Views.UIMessage.extend({
+		width : 'auto',
 
-		/* do not close */
-		close : function() {
+		/* do not close on button click */
+		closeClicked : function() {
 		}
 	});
 

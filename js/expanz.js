@@ -16,8 +16,8 @@ $(function() {
 		window.expanz.logToConsole("Info received: " + info);
 	};
 
-	// Load the Expanz Process Area menu
-	loadMenu($('[bind=menu]'));
+	// Load the Expanz Process Area menu without empty items
+	loadMenu($('[bind=menu]'), false);
 
 	window.expanz.logToConsole = function(message) {
 		if (typeof (console) != "undefined" && console.log) {
@@ -41,7 +41,7 @@ $(function() {
 		});
 		return;
 	};
-	
+
 	//
 	// Public Functions & Objects in the Expanz Namespace
 	//
@@ -57,7 +57,7 @@ $(function() {
 			window.App.push(activity);
 		});
 		return;
-	};	
+	};
 
 	window.expanz.DestroyActivity = function(DOMObject) {
 
@@ -123,15 +123,7 @@ $(function() {
 			parent : activity
 		});
 
-		/*
-		 * var cancelActionModel = new expanz.Model.Method({ id : 'close', label : 'Cancel', parent : activity }); clientMessage.add(cancelActionModel);
-		 */
-
-		/*
-		 * var LoginActionModel = new expanz.Model.Method({ id : 'attemptLogin', label : 'Login', parent : activity }); clientMessage.add(LoginActionModel);
-		 */
-
-		var loginPopup = new window.expanz.Views.LoginPopup({
+		var loginPopup = new window.expanz.Views.ManuallyClosedPopup({
 			id : clientMessage.id,
 			model : clientMessage
 		}, $('body'));
@@ -152,28 +144,71 @@ $(function() {
 
 		expanz._error = fn;
 	};
-	
-	window.expanz.basicMsgDisplay = function(el){
-		return function error(str) {
-			
-			if(str instanceof Array){
+
+	window.expanz.basicMsgDisplay = function(el) {
+		return function display(str) {
+
+			if (str instanceof Array) {
 				str = str.join("<br/>");
 			}
 			
+			/* display the message in the popup as well if visible */
+			if(window.expanz.currentPopup != undefined && $(window.expanz.currentPopup.el).is(":visible")){
+				var popupEl = window.expanz.currentPopup.el.find(el);
+				if( popupEl){
+					popupEl.find('[attribute=value]').html(str);
+					if (!str || str.length < 1) {
+						$(popupEl).hide('slow');
+					} else {
+						$(popupEl).show('slow');
+					}
+				}
+			}
+
 			$(el).find('[attribute=value]').html(str);
 			if (!str || str.length < 1) {
 				$(el).hide('slow');
 			} else {
 				$(el).show('slow');
 			}
-		}
-		;
+		};
 	}
 
 	window.expanz.SetInfoCallback = function(fn) {
 
 		expanz._info = fn;
 	};
+
+	//
+	// Helper Functions
+	//
+
+	window.expanz.helper.findActivity = function(activityId) {
+		if (window && window.App) {
+			for ( var i = 0; i < window.App.length; i++) {
+				if (window.App[i].id == activityId) {
+					return window.App[i];
+				}
+			}
+		}
+		return null;
+	}
+
+	window.expanz.helper.findActivityURL = function(activityName, activityStyle, callback) {
+		var jqxhr = $.get('./formmapping.xml', function(data) {
+			$(data).find('activity').each(function() {
+				var name = $(this).attr('name');
+				var url = $(this).attr('form');
+				var style = $(this).attr('style');
+				if (name == activityName && style == activityStyle) {
+					callback(url);
+					return;
+				}
+			});
+		});
+
+		callback(null);
+	}
 
 	//
 	// Private Functions
@@ -216,31 +251,20 @@ $(function() {
 		}
 		return activities;
 	}
-	;
 
-	function findActivity(activityId) {
-		if (window && window.App) {
-			for ( var i = 0; i < window.App.length; i++) {
-				if (window.App[i].id == activityId) {
-					return window.App[i];
-				}
-			}
-		}
-		return null;
-	}
-	;
-
-	function loadMenu(el) {
+	function loadMenu(el, displayEmptyItems) {
 
 		// Load Menu & insert it into #menu
 		var menu = new expanz.Storage.AppSiteMenu();
 		_.each(expanz.Storage.getProcessAreaList(), function(processArea) {
-			var menuItem = new expanz.Storage.ProcessAreaMenu(processArea.id, processArea.title);
-			menu.processAreas.push(menuItem);
+			if (displayEmptyItems || processArea.activities.length > 0) {
+				var menuItem = new expanz.Storage.ProcessAreaMenu(processArea.id, processArea.title);
+				menu.processAreas.push(menuItem);
 
-			_.each(processArea.activities, function(activity) {
-				menuItem.activities.push(new expanz.Storage.ActivityMenu(activity.name, activity.title, activity.url));
-			});
+				_.each(processArea.activities, function(activity) {
+					menuItem.activities.push(new expanz.Storage.ActivityMenu(activity.name, activity.title, activity.url));
+				});
+			}
 		});
 
 		menu.load(el);
@@ -269,5 +293,16 @@ $(function() {
 		return this.push.apply(this, rest);
 	};
 
-}) // $(function() --
+	XMLDocumentsToXMLString = function(xmlDoc) {
+		if (window.ActiveXObject) {
+			var str = xmlDoc.xml;
+			return str;
+		}
+		// code for Mozilla, Firefox, Opera, etc.
+		else {
+			var str = (new XMLSerializer()).serializeToString(xmlDoc);
+			return str;
+		}
+	}
 
+})

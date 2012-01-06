@@ -109,6 +109,21 @@ $(function() {
 			]);
 		},
 
+		clear : function() {
+			var that = this;
+			_.each(this.getAllRows(), function(row) {
+				that.remove(row);
+			});
+			this.removeColumns();
+		},
+
+		removeColumns : function() {
+			var that = this;
+			_.each(this.getAllColumns(), function(col) {
+				that.get('_header').remove(col);
+			});
+		},
+
 		getColumn : function(id) {
 			return this.get('_header').get(id);
 		},
@@ -122,7 +137,7 @@ $(function() {
 				return cell.get('id') === '_actions';
 			}, this);
 		},
-		addAction : function(_id, _label, _width, _methodName, _attributeId) {
+		addAction : function(_id, _label, _width, _methodName, _methodParams) {
 			this.setAttr({
 				hasActions : true
 			});
@@ -132,7 +147,7 @@ $(function() {
 				label : _label,
 				width : _width,
 				methodName : _methodName,
-				attributeId : _attributeId
+				methodParams : _methodParams
 			});
 		},
 		addColumn : function(_id, _field, _label, _datatype, _width) {
@@ -172,8 +187,8 @@ $(function() {
 			window.expanz.logToConsole("GridModel:updateRowSelected id:" + selectedId + ' ,type:' + type);
 		},
 
-		actionSelected : function(selectedId, methodName, attributeId) {
-			window.expanz.logToConsole("GridModel:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,attributeId:' + attributeId);
+		actionSelected : function(selectedId, methodName, methodParams) {
+			window.expanz.logToConsole("GridModel:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParams:' + JSON.stringify(methodParams));
 		}
 
 	});

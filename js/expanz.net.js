@@ -5,6 +5,8 @@ $(function() {
 
 	window.expanz = window.expanz || {};
 
+	window.expanz.helper = window.expanz.helper || {};
+
 	window.expanz.Net = {
 
 		// Request Objects -> to be passed to SendRequest
@@ -15,46 +17,93 @@ $(function() {
 		},
 
 		GetSessionDataRequest : function(callbacks) {
+
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
+				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				return;
+			}
+
 			SendRequest(RequestObject.GetSessionData(expanz.Storage.getSessionHandle()), parseGetSessionDataResponse(callbacks));
 		},
 
 		CreateActivityRequest : function(activity, callbacks) {
 			if (callbacks == undefined)
 				callbacks = activity.callbacks;
+
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
+				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				return;
+			}
+
 			SendRequest(RequestObject.CreateActivity(activity, activity.getAttr('style'), expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callbacks));
 		},
 
 		DeltaRequest : function(id, value, activity, callbacks) {
 			if (callbacks == undefined)
 				callbacks = activity.callbacks;
+
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
+				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				return;
+			}
+
 			SendRequest(RequestObject.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
 		},
 
 		MethodRequest : function(name, methodAttributes, context, activity, callbacks) {
 			if (callbacks == undefined)
 				callbacks = activity.callbacks;
+
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
+				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				return;
+			}
+
 			SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
 		},
 
 		DestroyActivityRequest : function(activity, callbacks) {
 			if (callbacks == undefined)
 				callbacks = activity.callbacks;
+
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
+				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				return;
+			}
+
 			SendRequest(RequestObject.DestroyActivity(activity, expanz.Storage.getSessionHandle()), parseDestroyActivityResponse(activity, callbacks));
 		},
 
 		ReleaseSessionRequest : function(callbacks) {
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
+				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				return;
+			}
 			SendRequest(RequestObject.ReleaseSession(expanz.Storage.getSessionHandle()), parseReleaseSessionResponse(callbacks));
 		},
 
 		GetBlobRequest : function(blobId, activity, callbacks) {
 			if (callbacks == undefined)
 				callbacks = activity.callbacks;
+
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
+				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				return;
+			}
+
 			SendNormalRequest(RequestObject.GetBlob(blobId, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks), true);
 		},
 
+		/* call when selecting something from the tree view (file) */
 		CreateMenuActionRequest : function(activity, contextId, contextType, menuAction, callbacks) {
 			if (callbacks == undefined)
 				callbacks = activity.callbacks;
+
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
+				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				return;
+			}
+
 			SendRequest(RequestObject.CreateMenuAction(activity, contextId, contextType, menuAction, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
 		},
 
@@ -139,7 +188,7 @@ $(function() {
 
 			var head = '<' + requestType + ' xmlns="' + xmlns + '">' + '<xml>' + '<ESA>';
 			var tail = '</ESA>' + '</xml>';
-			tail += sessionHandle ? '<sessionHandle>' + sessionHandle + '</sessionHandle>' : '<sessionHandle>net.tcp://127.0.0.1:8196/TMXTEST#634608391060904702:80</sessionHandle>';
+			tail += sessionHandle ? '<sessionHandle>' + sessionHandle + '</sessionHandle>' : '';
 			tail += '</' + requestType + '>';
 
 			return head + body + tail;
@@ -180,7 +229,8 @@ $(function() {
 
 			if (activity.hasGrid()) {
 				_.each(activity.getGrids(), function(grid, gridId) {
-					center += '<DataPublication id="' + gridId + '" populateMethod="' + grid.getAttr('populateMethod') + '"';
+					var populateMethod = grid.getAttr('populateMethod') ? ' populateMethod="' + grid.getAttr('populateMethod') + '"' : '';
+					center += '<DataPublication id="' + gridId + '"' + populateMethod;
 					grid.getAttr('contextObject') ? center += ' contextObject="' + grid.getAttr('contextObject') + '"' : '';
 					center += '/>';
 				});
@@ -188,7 +238,8 @@ $(function() {
 
 			if (activity.hasDataControl()) {
 				_.each(activity.getDataControls(), function(dataControl, dataControlId) {
-					center += '<DataPublication id="' + dataControlId + '" populateMethod="' + dataControl.get('populateMethod') + '" Type="' + dataControl.get('type') + '"';
+					var populateMethod = dataControl.get('populateMethod') ? ' populateMethod="' + dataControl.get('populateMethod') + '"' : '';
+					center += '<DataPublication id="' + dataControlId + '"' + populateMethod + ' Type="' + dataControl.get('type') + '"';
 					center += '/>';
 				});
 			}
@@ -211,7 +262,7 @@ $(function() {
 			if (methodAttributes != undefined && methodAttributes.length > 0) {
 				_.each(methodAttributes, function(attribute) {
 					if (attribute.value != undefined) {
-						body += " " + attribute.id + "='" + attribute.value + "' ";
+						body += " " + attribute.name + "='" + attribute.value + "' ";
 					}
 				});
 			}
@@ -255,7 +306,7 @@ $(function() {
 				return;
 			}
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle.length > 0) {
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle().length == 0) {
 
 				var errorString = '';
 				$(xml).find('errorMessage').each(function() {
@@ -267,9 +318,10 @@ $(function() {
 					}
 					return;
 				}
-			}
-			if (callbacks && callbacks.success) {
-				callbacks.success();
+			} else {
+				if (callbacks && callbacks.success) {
+					callbacks.success();
+				}
 			}
 			return;
 		};
@@ -298,7 +350,7 @@ $(function() {
 						var gridview = new GridViewInfo($(this).attr('id'));
 						gridviewList.push(gridview);
 					});
-
+					// TODO check the style attribute as well
 					$.each(processAreas, function(i, processArea) {
 						$.each(processArea.activities, function(j, activity) {
 							if (activity.name == name) {
@@ -393,15 +445,10 @@ $(function() {
 						fillGridModel(gridModel, data);
 
 						/* add a method handler for each action button */
-						gridModel.actionSelected = function(selectedId, methodName, attributeId) {
-							var methodAttributes = [
-								{
-									id : attributeId,
-									value : selectedId
-								}
-							];
-							expanz.Net.MethodRequest(methodName, methodAttributes, null, activity);
-							window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,attributeId:' + attributeId);
+						gridModel.actionSelected = function(selectedId, methodName, methodParam) {
+
+							expanz.Net.MethodRequest(methodName, methodParam, null, activity);
+							window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParam:' + JSON.stringify(methodParam));
 						};
 					}
 
@@ -428,7 +475,6 @@ $(function() {
 			return;
 		}
 	}
-	;
 
 	function parseDeltaResponse(activity, callbacks) {
 		return function apply(xml) {
@@ -437,6 +483,7 @@ $(function() {
 			if (execResults) {
 				var errors = new Array();
 				var infos = new Array();
+				/* MESSAGE CASE */
 				$(execResults).find('Message').each(function() {
 					if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
 						var source = $(this).attr('source');
@@ -458,17 +505,49 @@ $(function() {
 						}
 				});
 
-				if (errors) {
-					callbacks.error(errors);
-				} else {
-					callbacks.error(null);
-				}
-				if (infos) {
-					callbacks.info(infos);
-				} else {
-					callbacks.info(null);
+				if (callbacks) {
+					if (errors) {
+						callbacks.error(errors);
+					} else {
+						callbacks.error(null);
+					}
+					if (infos) {
+						callbacks.info(infos);
+					} else {
+						callbacks.info(null);
+					}
 				}
 
+				/* Activity Request CASE */
+				$(execResults).find('ActivityRequest').each(function() {
+					var id = $(this).attr('id');
+					var style = $(this).attr('style');
+
+					var callback = function(url) {
+						if (url != null) {
+							window.expanz.logToConsole(url);
+						} else {
+							window.expanz.logToConsole("Url of activity not found");
+						}
+
+						var clientMessage = new expanz.Model.ClientMessage({
+							id : 'ActivityRequest',
+							url : url,
+							parent : activity
+						});
+
+						var popup = new window.expanz.Views.ManuallyClosedPopup({
+							id : clientMessage.id,
+							model : clientMessage
+						}, $('body'));
+					};
+
+					/* find url of activity */
+					window.expanz.helper.findActivityURL(id, style, callback);
+
+				});
+
+				/* FIELD CASE */
 				$(execResults).find('Field').each(function() {
 					var id = $(this).attr('id');
 					var field = activity.get(id);
@@ -503,6 +582,7 @@ $(function() {
 					}
 				});
 
+				/* FILE CASE */
 				$(execResults).find('File').each(function(data) {
 
 					if ($(this).attr('field') != undefined && $(this).attr('path') != undefined) {
@@ -518,6 +598,7 @@ $(function() {
 
 				});
 
+				/* UIMESSAGE CASE */
 				$(execResults).find('UIMessage').each(function() {
 
 					var clientMessage = new expanz.Model.ClientMessage({
@@ -528,9 +609,20 @@ $(function() {
 					});
 
 					$(this).find('Action').each(function(action) {
+
+						if (!window.XMLSerializer) {
+							window.XMLSerializer = function() {
+							};
+
+							window.XMLSerializer.prototype.serializeToString = function(XMLObject) {
+								return XMLObject.xml || '';
+							};
+						}
+
 						var actionModel = new expanz.Model.Method({
 							id : $('Request > Method', this)[0] ? $($('Request > Method', this)[0]).attr('name') : 'close',
 							label : $(this).attr('label'),
+							response : $('Response', this)[0] ? $($('Response', this)[0]).children() : undefined,
 							parent : activity
 						});
 						clientMessage.add(actionModel);
@@ -542,6 +634,7 @@ $(function() {
 					}, $('body'));
 				});
 
+				/* DATA */
 				$(execResults).find('Data').each(function() {
 					var id = $(this).attr('id');
 					var pickfield = $(this).attr('pickfield');
@@ -570,6 +663,7 @@ $(function() {
 
 						if (gridModel !== undefined) {
 							fillGridModel(gridModel, $(this));
+							picklistWindow.center();
 							gridModel.updateRowSelected = function(selectedId, type) {
 								window.expanz.logToConsole("From parseDeltaResponse:updateRowSelected id:" + selectedId + ' ,type:' + type);
 
@@ -581,7 +675,7 @@ $(function() {
 
 								var methodAttributes = [
 									{
-										id : "contextObject",
+										name : "contextObject",
 										value : contextObject
 									}
 								];
@@ -594,6 +688,11 @@ $(function() {
 							alert("Unexpected error while trying to display the picklist");
 						}
 
+					} else {
+						var gridModel = activity.getGrid(id);
+						if (gridModel !== undefined) {
+							fillGridModel(gridModel, $(this));
+						}
 					}
 				});
 
@@ -601,7 +700,6 @@ $(function() {
 			return;
 		}
 	}
-	;
 
 	function parseDestroyActivityResponse(activity, callbacks) {
 		return function apply(xml) {
@@ -624,7 +722,6 @@ $(function() {
 			return;
 		}
 	}
-	;
 
 	function parseReleaseSessionResponse(callbacks) {
 		return function apply(xml) {
@@ -649,38 +746,67 @@ $(function() {
 	 */
 
 	var SendRequest = function(request, responseHandler, isPopup) {
-		$.ajax({
-			type : 'POST',
-			url : config._URLproxy,
-			data : {
-				url : config._URLprefix + request.url,
-				data : request.data
-			},
-			dataType : 'string',
-			processData : true,
-			complete : function(HTTPrequest) {
-				if (HTTPrequest.status != 200) {
-					eval(responseHandler)('There was a problem with the last request.');
-				} else {
-					var response = HTTPrequest.responseText;
-					if (isPopup != undefined && isPopup == true) {
-						var WinId = window.open('', 'newwin', 'width=400,height=500');
-						WinId.document.open();
-						WinId.document.write(response);
-						WinId.document.close();
+
+		if (config._URLproxy != undefined && config._URLproxy.length > 0) {
+			$.ajax({
+				type : 'POST',
+				url : config._URLproxy,
+				data : {
+					url : config._URLprefixSSL + request.url,
+					data : request.data
+				},
+				dataType : 'string',
+				processData : true,
+				complete : function(HTTPrequest) {
+					if (HTTPrequest.status != 200) {
+						eval(responseHandler)('There was a problem with the last request.');
 					} else {
-						if (responseHandler) {
-							var xml = response.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-							eval(responseHandler)(xml);
+						var response = HTTPrequest.responseText;
+						if (isPopup != undefined && isPopup == true) {
+							var WinId = window.open('', 'newwin', 'width=400,height=500');
+							WinId.document.open();
+							WinId.document.write(response);
+							WinId.document.close();
+						} else {
+							if (responseHandler) {
+								var xml = response.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+								eval(responseHandler)(xml);
+							}
 						}
 					}
 				}
-			}
-		});
+			});
+		} else {
+			$.ajax({
+				type : 'POST',
+				url : config._URLprefixSSL + request.url,
+				data : request.data,
+				dataType : 'xml',
+				processData : true,
+				complete : function(HTTPrequest) {
+					if (HTTPrequest.status != 200) {
+						eval(responseHandler)('There was a problem with the last request.');
+					} else {
+						var response = HTTPrequest.responseText;
+						if (isPopup != undefined && isPopup == true) {
+							var WinId = window.open('', 'newwin', 'width=400,height=500');
+							WinId.document.open();
+							WinId.document.write(response);
+							WinId.document.close();
+						} else {
+							if (responseHandler) {
+								var xml = response.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+								eval(responseHandler)(xml);
+							}
+						}
+					}
+				}
+			});
+		}
 	};
 
 	/*
-	 * Send Request :manage the sending of XML requests to the server, and dispatching of response handlers
+	 * Send Request :manage the sending of XML requests to the server, and dispatching of response handlers. Proxy is needed.
 	 */
 
 	var SendNormalRequest = function(request, responseHandler, isPopup) {
@@ -689,8 +815,10 @@ $(function() {
 			$("#formFile").remove();
 		}
 
-		var form = "<form method='post' id='formFile' target='content_frame' action='" + config._URLproxy + "'>";
-		form += "<input type='hidden' name='url' value='" + config._URLprefix + request.url + "'>"
+		var form = ''
+		form += "<form method='post' id='formFile' target='content_frame' action='" + config._URLproxy + "'>";
+		form += "<input type='hidden' name='url' value='" + config._URLprefixSSL + request.url + "'>"
+
 		form += "<input type='hidden' name='data' value='" + request.data + "'>"
 		form += "</form>";
 		$("body").append(form);
@@ -731,6 +859,8 @@ $(function() {
 	}
 
 	function fillGridModel(gridModel, data) {
+		gridModel.clear();
+
 		gridModel.setAttr({
 			source : $(data).attr('source')
 		});
