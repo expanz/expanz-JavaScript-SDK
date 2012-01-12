@@ -25,7 +25,6 @@ $(function() {
 			expanz.Factory.bindMethods(activityModel, viewNamespace, modelNamespace, activityEl);
 			expanz.Factory.bindGrids(activityModel, viewNamespace, modelNamespace, activityEl);
 
-			// activities[ $(activityEl).attr('name') ] = activityView;
 			return activityView;
 		},
 
@@ -71,7 +70,7 @@ $(function() {
 		},
 
 		bindGrids : function(activityModel, viewNamespace, modelNamespace, el) {
-			_.each(expanz.Factory.Grid(viewNamespace, modelNamespace, activityModel.getAttr('name'), $(el).find('[bind=grid]')), function(gridModel) {
+			_.each(expanz.Factory.Grid(viewNamespace, modelNamespace, activityModel.getAttr('name'), activityModel.getAttr('style'), $(el).find('[bind=grid]')), function(gridModel) {
 				gridModel.setAttr({
 					parent : activityModel,
 					activityId : activityModel.getAttr('name')
@@ -142,7 +141,7 @@ $(function() {
 			return methodModels;
 		},
 
-		Grid : function(viewNamespace, modelNamespace, activityName, DOMObjects) {
+		Grid : function(viewNamespace, modelNamespace, activityName, activityStyle, DOMObjects) {
 
 			var gridModels = [];
 
@@ -157,13 +156,14 @@ $(function() {
 					el : $(gridEl),
 					id : $(gridEl).attr('id'),
 					className : $(gridEl).attr('class'),
+					itemsPerPage :  $(gridEl).attr('itemsPerPage'),
 					model : gridModel
 				});
 
 				// load pre-defined gridview information from formmapping.xml
 				$.get('./formmapping.xml', function(defaultsXML) {
 					var activityInfo = _.find($(defaultsXML).find('activity'), function(activityXML) {
-						return $(activityXML).attr('name') === activityName;
+						return $(activityXML).attr('name') === activityName && $(activityXML).attr('style') === activityStyle;
 					});
 					if (activityInfo) {
 						var gridviewInfo = _.find($(activityInfo).find('gridview'), function(gridviewXML) {
@@ -176,7 +176,9 @@ $(function() {
 								_.each($(action).find('methodParam'), function(methodParam) {
 									methodParams.push({
 										name : $(methodParam).attr('name'),
-										value : $(methodParam).attr('value')
+										value : $(methodParam).attr('value'),
+										label : $(methodParam).attr('label'),
+										bindValueFromCellId : $(methodParam).attr('bindValueFromCellId'),
 									});
 								});
 								gridModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'), methodParams);
@@ -199,7 +201,8 @@ $(function() {
 				var dataControlModel = new modelNamespace.Data.DataControl({
 					id : $(dataControlEl).attr('name'),
 					populateMethod : $(dataControlEl).attr('populateMethod'),
-					type : $(dataControlEl).attr('type')
+					type : $(dataControlEl).attr('type'),
+					contextObject : $(dataControlEl).attr('contextObject')
 				});
 
 				var view = new viewNamespace.DataControlView({

@@ -35,7 +35,17 @@ $(function() {
 				return;
 			}
 
-			SendRequest(RequestObject.CreateActivity(activity, activity.getAttr('style'), expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callbacks));
+			/* check if an activity has already been created, if so specify it instead of creating a new one */
+			var activityHandle = expanz.Storage.getActivityHandle(activity.getAttr('name'), activity.getAttr('style'));
+
+			if (activityHandle && activityHandle != undefined) {
+				activity.setAttr({
+					'handle' : activityHandle
+				});
+			}
+
+			SendRequest(RequestObject.CreateActivity(activity, expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callbacks));
+
 		},
 
 		DeltaRequest : function(id, value, activity, callbacks) {
@@ -72,6 +82,18 @@ $(function() {
 			}
 
 			SendRequest(RequestObject.DestroyActivity(activity, expanz.Storage.getSessionHandle()), parseDestroyActivityResponse(activity, callbacks));
+		},
+
+		DataRefreshRequest : function(dataId, activity, callbacks) {
+			if (callbacks == undefined)
+				callbacks = activity.callbacks;
+
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
+				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				return;
+			}
+
+			SendRequest(RequestObject.DataRefresh(dataId, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
 		},
 
 		ReleaseSessionRequest : function(callbacks) {
@@ -129,9 +151,9 @@ $(function() {
 			};
 		},
 
-		CreateActivity : function(activity, style, sessionHandle) {
+		CreateActivity : function(activity, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateActivity(activity, style)),
+				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateActivity(activity)),
 				url : 'ExecX'
 			};
 		},
@@ -168,6 +190,13 @@ $(function() {
 			return {
 				data : buildRequestWithoutESA('GetBlob', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.GetBlob(blobId, activity)),
 				url : 'GetBlob'
+			};
+		},
+
+		DataRefresh : function(dataId, activity, sessionHandle) {
+			return {
+				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.DataRefresh(dataId, activity)),
+				url : 'ExecX'
 			};
 		},
 
@@ -222,10 +251,18 @@ $(function() {
 			return '<GetSessionData/>';
 		},
 
-		CreateActivity : function(activity, style) {
-			var center = '<CreateActivity name="' + activity.getAttr('name') + '"';
-			style ? center += ' style="' + style + '"' : '';
-			center += activity.getAttr('key') ? ' initialKey="' + activity.getAttr('key') + '">' : '>';
+		CreateActivity : function(activity) {
+			var handle = activity.getAttr('handle');
+			var center = '';
+			if (handle) {
+				center = '<PublishSchema activityHandle="' + handle + '"> ';
+			}
+			else {
+				center = '<CreateActivity ';
+				center += 'name="' + activity.getAttr('name') + '"';
+				activity.getAttr('style') ? center += ' style="' + activity.getAttr('style') + '"' : '';
+				center += activity.getAttr('key') ? ' initialKey="' + activity.getAttr('key') + '">' : '>';
+			}
 
 			if (activity.hasGrid()) {
 				_.each(activity.getGrids(), function(grid, gridId) {
@@ -240,10 +277,16 @@ $(function() {
 				_.each(activity.getDataControls(), function(dataControl, dataControlId) {
 					var populateMethod = dataControl.get('populateMethod') ? ' populateMethod="' + dataControl.get('populateMethod') + '"' : '';
 					center += '<DataPublication id="' + dataControlId + '"' + populateMethod + ' Type="' + dataControl.get('type') + '"';
+					dataControl.get('contextObject') ? center += ' contextObject="' + dataControl.get('contextObject') + '"' : '';
 					center += '/>';
 				});
 			}
-			center += '</CreateActivity>';
+			if (handle) {
+				center += '</PublishSchema>';
+			}
+			else {
+				center += '</CreateActivity>';
+			}
 			return center;
 		},
 
@@ -289,6 +332,10 @@ $(function() {
 			return '<activityHandle>' + activity.getAttr('handle') + '</activityHandle><blobId>' + blobId + '</blobId><isbyteArray>false</isbyteArray>';
 		},
 
+		DataRefresh : function(dataId, activity) {
+			return '<activityHandle>' + activity.getAttr('handle') + '</activityHandle><DataPublication id="' + dataId + '" refresh="1" />';
+		}
+
 	};
 
 	//
@@ -298,8 +345,10 @@ $(function() {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseCreateSessionResponse");
 			if ($(xml).find('CreateSessionXResult').length > 0) {
+				expanz.Storage.clearSession();
 				expanz.Storage.setSessionHandle($(xml).find('CreateSessionXResult').text());
-			} else {
+			}
+			else {
 				if (callbacks && callbacks.error) {
 					callbacks.error("Error: Server did not provide a sessionhandle. We are unable to log you in at this time.");
 				}
@@ -318,7 +367,8 @@ $(function() {
 					}
 					return;
 				}
-			} else {
+			}
+			else {
 				if (callbacks && callbacks.success) {
 					callbacks.success();
 				}
@@ -350,10 +400,10 @@ $(function() {
 						var gridview = new GridViewInfo($(this).attr('id'));
 						gridviewList.push(gridview);
 					});
-					// TODO check the style attribute as well
+
 					$.each(processAreas, function(i, processArea) {
 						$.each(processArea.activities, function(j, activity) {
-							if (activity.name == name) {
+							if (activity.name == name && activity.style == style) {
 								activity.url = url;
 								activity.gridviews = gridviewList;
 							}
@@ -393,18 +443,19 @@ $(function() {
 						if (callbacks && callbacks.error) {
 							callbacks.error($(this).text());
 						}
-					} else
-						if ($(this).attr('type') == 'Info') {
-							if (callbacks && callbacks.info) {
-								callbacks.info($(this).text());
-							}
+					}
+					else if ($(this).attr('type') == 'Info') {
+						if (callbacks && callbacks.info) {
+							callbacks.info($(this).text());
 						}
+					}
 				});
 
 				$(execResults).find('Activity').each(function() {
 					activity.setAttr({
 						handle : $(this).attr('activityHandle')
 					});
+					expanz.Storage.setActivityHandle($(this).attr('activityHandle'), activity.getAttr('name'), activity.getAttr('style'));
 				});
 
 				$(execResults).find('Field').each(function() {
@@ -413,7 +464,7 @@ $(function() {
 
 						field.set({
 							text : $(this).attr('text'),
-							disabled : $(this).attr('disabled') == "disabled" ? true : false,
+							disabled : boolValue(this.getAttribute('disabled')),
 							maxLength : $(this).attr('maxLength'),
 							mask : $(this).attr('mask'),
 							label : $(this).attr('label'),
@@ -467,7 +518,8 @@ $(function() {
 					callbacks.success('Activity (' + activity.name + ') has been loaded: ' + execResults);
 				}
 
-			} else {
+			}
+			else {
 				if (callbacks && callbacks.error) {
 					callbacks.error('Server gave an empty response to a CreateActivity request: ' + xml);
 				}
@@ -499,21 +551,26 @@ $(function() {
 
 						errors.push($(this).text());
 
-					} else
-						if ($(this).attr('type') == 'Info') {
-							infos.push($(this).text());
-						}
+					}
+					else if ($(this).attr('type') == 'Info') {
+						infos.push($(this).text());
+					}
 				});
 
-				if (callbacks) {
+				if (callbacks && callbacks.error) {
 					if (errors) {
 						callbacks.error(errors);
-					} else {
+					}
+					else {
 						callbacks.error(null);
 					}
+				}
+
+				if (callbacks && callbacks.info) {
 					if (infos) {
 						callbacks.info(infos);
-					} else {
+					}
+					else {
 						callbacks.info(null);
 					}
 				}
@@ -526,7 +583,8 @@ $(function() {
 					var callback = function(url) {
 						if (url != null) {
 							window.expanz.logToConsole(url);
-						} else {
+						}
+						else {
 							window.expanz.logToConsole("Url of activity not found");
 						}
 
@@ -556,7 +614,7 @@ $(function() {
 
 							if ($(this).attr('disabled')) {
 								field.set({
-									disabled : $(this).attr('disabled') == "disabled" ? true : false
+									disabled : boolValue(this.getAttribute('disabled')),
 								});
 							}
 
@@ -587,12 +645,13 @@ $(function() {
 
 					if ($(this).attr('field') != undefined && $(this).attr('path') != undefined) {
 						expanz.Net.GetBlobRequest($(this).attr('field'), activity);
-					} else
-						if ($(this).attr('name') != undefined) {
+					}
+					else if ($(this).attr('name') != undefined) {
 
-						} else {
-							window.expanz.logToConsole("Not implemented yet");
-						}
+					}
+					else {
+						window.expanz.logToConsole("Not implemented yet");
+					}
 
 					window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
 
@@ -684,18 +743,30 @@ $(function() {
 								picklistWindow.close();
 							}
 
-						} else {
+						}
+						else {
 							alert("Unexpected error while trying to display the picklist");
 						}
 
-					} else {
+					}
+					else {
 						var gridModel = activity.getGrid(id);
 						if (gridModel !== undefined) {
 							fillGridModel(gridModel, $(this));
+
+							/* add a method handler for each action button */
+							gridModel.actionSelected = function(selectedId, methodName, methodParam) {
+
+								expanz.Net.MethodRequest(methodName, methodParam, null, activity);
+								window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParam:' + JSON.stringify(methodParam));
+							};
 						}
 					}
 				});
 
+				if (callbacks && callbacks.success) {
+					callbacks.success('Delta handled: ' + execResults);
+				}
 			}
 			return;
 		}
@@ -752,7 +823,7 @@ $(function() {
 				type : 'POST',
 				url : config._URLproxy,
 				data : {
-					url : config._URLprefixSSL + request.url,
+					url : config._URLprefix + request.url,
 					data : request.data
 				},
 				dataType : 'string',
@@ -760,14 +831,16 @@ $(function() {
 				complete : function(HTTPrequest) {
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
-					} else {
+					}
+					else {
 						var response = HTTPrequest.responseText;
 						if (isPopup != undefined && isPopup == true) {
 							var WinId = window.open('', 'newwin', 'width=400,height=500');
 							WinId.document.open();
 							WinId.document.write(response);
 							WinId.document.close();
-						} else {
+						}
+						else {
 							if (responseHandler) {
 								var xml = response.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 								eval(responseHandler)(xml);
@@ -776,24 +849,27 @@ $(function() {
 					}
 				}
 			});
-		} else {
+		}
+		else {
 			$.ajax({
 				type : 'POST',
-				url : config._URLprefixSSL + request.url,
+				url : config._URLprefix + request.url,
 				data : request.data,
 				dataType : 'xml',
 				processData : true,
 				complete : function(HTTPrequest) {
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
-					} else {
+					}
+					else {
 						var response = HTTPrequest.responseText;
 						if (isPopup != undefined && isPopup == true) {
 							var WinId = window.open('', 'newwin', 'width=400,height=500');
 							WinId.document.open();
 							WinId.document.write(response);
 							WinId.document.close();
-						} else {
+						}
+						else {
 							if (responseHandler) {
 								var xml = response.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 								eval(responseHandler)(xml);
@@ -817,7 +893,7 @@ $(function() {
 
 		var form = ''
 		form += "<form method='post' id='formFile' target='content_frame' action='" + config._URLproxy + "'>";
-		form += "<input type='hidden' name='url' value='" + config._URLprefixSSL + request.url + "'>"
+		form += "<input type='hidden' name='url' value='" + config._URLprefix + request.url + "'>"
 
 		form += "<input type='hidden' name='data' value='" + request.data + "'>"
 		form += "</form>";
@@ -865,8 +941,12 @@ $(function() {
 			source : $(data).attr('source')
 		});
 
+		var columnMap = Object();
 		// add columns to the grid Model
 		_.each($(data).find('Column'), function(column) {
+			var field = $(column).attr('field') ? $(column).attr('field') : $(column).attr('id');
+			field = field.replace(".", "_");
+			columnMap[$(column).attr('id')] = field;
 			gridModel.addColumn($(column).attr('id'), $(column).attr('field'), $(column).attr('label'), $(column).attr('datatype'), $(column).attr('width'));
 		});
 
@@ -878,7 +958,7 @@ $(function() {
 
 			// add cells to this row
 			_.each($(row).find('Cell'), function(cell) {
-				gridModel.addCell(rowId, $(cell).attr('id'), $(cell).html());
+				gridModel.addCell(rowId, $(cell).attr('id'), $(cell).html(), columnMap[$(cell).attr('id')]);
 			});
 		});
 		gridModel.trigger("update:grid");

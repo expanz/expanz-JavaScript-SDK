@@ -12,9 +12,17 @@ $(function() {
 			return;
 		},
 
-		updateItemSelected : function(selectedId, type) {
+		updateItemSelected : function(selectedId, callbacks) {
 			window.expanz.logToConsole("DataControl:updateItemSelected id:" + selectedId);
-			expanz.Net.CreateMenuActionRequest(this.get('parent'), selectedId, type, "1");
+
+			/* exception for documents we have to send a MenuAction request */
+			if (this.get('id') == 'documents') {
+				expanz.Net.CreateMenuActionRequest(this.get('parent'), selectedId, "File", "1", callbacks);
+			}
+			/* normal case we send a delta request */
+			else {
+				expanz.Net.DeltaRequest(this.get('id'), selectedId, this.get('parent'), callbacks);
+			}
 		},
 	});
 
@@ -41,54 +49,31 @@ $(function() {
 			this.setAttr(attrs);
 		},
 
-		getAllCells : function(order) {
+		getAllCells : function() {
 
 			// remove/reject cells without value attribute
 			// :this can happen b/c Backbone inserts a recursive/parent cell into the collection
 			var cells = this.reject(function(cell) {
-				return !cell.get('value');
+				return cell.get('value') === undefined;
 			}, this);
-			// if order has been provided and all cells in order have an 'id' attribute
-			if (order && _.reduce(order, function(memo, map) {
-				return memo && map.id;
-			}, true)) {
 
-				// filter for only cells that are in the given order
-				// :necessary in case there are too many or too few
-				var unorderedCells = _.filter(cells, function(cell) {
-					return _.find(order, function(column) {
-						if (cell.get('id'))
-							return cell.get('id') === column.id;
-						if (cell.get('field'))
-							return cell.get('field') === column.field;
-						return cell.get('label') === column.label;
-					});
-				});
-
-				// generate of map of the cells in the given 'order'
-				var mappedCells = _.map(order, function(map) {
-					var cell = _.find(unorderedCells, function(cell) {
-						return (cell.get('id') === map.id) || (cell.get('field') === map.field) || (cell.get('label') === map.label);
-					});
-					if (!cell)
-						cell = new expanz.Model.Bindable({
-							id : map.id
-						});
-					return {
-						id : map.id,
-						cell : cell
-					};
-				});
-				// take the mapped ordered cells and put them into an array, in order
-				var orderedCells = _.reduce(mappedCells, function(memo, map) {
-					memo.push(map.cell);
-					return memo;
-				}, []);
-				return orderedCells;
-			}
 			return cells;
-		}
+		},
 
+		getCellsMapByField : function() {
+
+			// remove/reject cells without value attribute
+			// :this can happen b/c Backbone inserts a recursive/parent cell into the collection
+			var cells = this.reject(function(cell) {
+				return cell.get('value') === undefined;
+			}, this);
+
+			var map = Object
+			_.each(cells, function(cell) {
+				map[cell.get('field')] = cell.get('value');
+			});
+			return map;
+		}
 	});
 
 	window.expanz.Model.Data.Grid = expanz.Collection.extend({
@@ -137,6 +122,11 @@ $(function() {
 				return cell.get('id') === '_actions';
 			}, this);
 		},
+		getAction : function(methodName) {
+			return this.get('_actions').reject(function(cell) {
+				return cell.get('id') === '_actions' || cell.get('methodName') != methodName;
+			}, this);
+		},
 		addAction : function(_id, _label, _width, _methodName, _methodParams) {
 			this.setAttr({
 				hasActions : true
@@ -175,11 +165,12 @@ $(function() {
 			});
 		},
 
-		addCell : function(_rowId, _cellId, _value) {
+		addCell : function(_rowId, _cellId, _value, _field) {
 
 			this.get(_rowId).add({
 				id : _cellId,
-				value : _value
+				value : _value,
+				field : _field
 			});
 		},
 
@@ -189,6 +180,10 @@ $(function() {
 
 		actionSelected : function(selectedId, methodName, methodParams) {
 			window.expanz.logToConsole("GridModel:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParams:' + JSON.stringify(methodParams));
+		},
+
+		refresh : function() {
+			expanz.Net.DataRefreshRequest(this.getAttr('id'), this.getAttr('parent'));
 		}
 
 	});

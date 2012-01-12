@@ -36,7 +36,8 @@ $(function() {
 					errorEl.css('display', 'inline');
 					this.el.addClass("errorField");
 					window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
-				} else {
+				}
+				else {
 					var errorEl = this.el.find('#' + errorId);
 					if (errorEl) {
 						errorEl.hide();
@@ -59,7 +60,8 @@ $(function() {
 				this.model.update({
 					value : $(elem).prop("checked") ? 1 : 0
 				});
-			} else {
+			}
+			else {
 				this.model.update({
 					value : $(elem).val()
 				});
@@ -83,7 +85,8 @@ $(function() {
 
 			if (this.model.get('value').length > 0) {
 				this.el.show('slow');
-			} else {
+			}
+			else {
 				this.el.hide('slow');
 			}
 		}
@@ -107,115 +110,246 @@ $(function() {
 
 		initialize : function() {
 			this.model.bind("update:grid", this.render, this);
-			// this.model.bind("change", this.render, this);
 			this.bind("rowClicked", this.rowClicked, this);
 			this.bind("actionClicked", this.actionClicked, this);
 		},
 
 		rowClicked : function(row) {
-			this.model.updateRowSelected(row.attr('id'), row.attr('type'));
+			if (row.attr('id') != this.selectedId) {
+				this.selectedId = row.attr('id');
+				this.model.updateRowSelected(this.selectedId, row.attr('type'));
+			}
 		},
 
 		actionClicked : function(id, methodName, methodParams) {
 			this.model.actionSelected(id, methodName, methodParams);
 		},
 
-		render : function() {
-			window.expanz.logToConsole("GridView rendered");
-			// set table scaffold
-			var tableEl = this.el.find('table#' + this.model.getAttr('id'));
-			if (tableEl.length < 1) {
-				this.el.append('<table id="' + this.model.getAttr('id') + '"></table>');
-				tableEl = this.el.find('table#' + this.model.getAttr('id'));
+		renderPagingBar : function(currentPage, itemsPerPage, hostEl) {
+			var pagingBar = "";
+
+			var nbItems = this.model.getAllRows().length;
+			if (nbItems > 0) {
+				var nbPages = Math.ceil(nbItems / itemsPerPage);
+				if (nbPages > 1) {
+					hostEl.append("<div style='clear:both'>");
+					for ( var i = 0; i < nbPages; i++) {
+						var inputId = this.model.getAttr('id') + "BtnPage" + i;
+						var disabled = ""
+						if (i == currentPage)
+							disabled = " disabled='disabled'";
+
+						hostEl.append("<input id='" + inputId + "' type='button' value='" + (i + 1) + "' " + disabled + " />");
+
+						var that = this;
+						$(hostEl).find("#" + inputId).click(function() {
+							that.renderWithPaging(this.value - 1, itemsPerPage);
+						});
+					}
+					hostEl.append("</div>");
+				}
+
 			}
-			$(tableEl).html('<thead><tr></tr></thead><tbody></tbody>');
+		},
 
-			// render column header
-			var el = $(tableEl).find('thead tr');
-			_.each(this.model.getAllColumns(), function(cell) {
-				var html = '<td';
-				html += cell.get('width') ? ' width="' + cell.get('width') + '"' : '';
-				html += '>' + cell.get('label') + '</td>';
-				el.append(html);
-			});
+		renderWithPaging : function(currentPage, itemsPerPage) {
+			window.expanz.logToConsole("GridView rendered for page  " + currentPage);
 
-			if (this.model.getAttr('hasActions')) {
-				el.append('<td/>');
-			}
+			var rows = this.model.getAllRows();
 
-			// render rows
-			var model = this.model;
-			el = $(tableEl).find('tbody');
-			_.each(this.model.getAllRows(), function(row) {
-				var html = '<tr id="' + row.getAttr('id') + '" type="' + row.getAttr('type') + '">';
-				var columnOrder = _.map(this.model.getAllColumns(), function(cell) {
-					return {
-						id : cell.get('id'),
-						field : cell.get('field'),
-						label : cell.get('label')
-					};
-				});
-				_.each(row.getAllCells(columnOrder), function(cell) {
-					html += '<td id="' + cell.get('id') + '" class="row' + row.getAttr('id') + ' column' + cell.get('id') + '">';
-					if (model.getColumn(cell.get('id')) && model.getColumn(cell.get('id')).get('datatype') === 'BLOB') {
-						html += '<img width="' + model.getColumn(cell.get('id')).get('width') + '" src="' + cell.get('value') + '"/>';
-					} else
-						if (cell.get('value')) {
-							html += '<span>' + cell.get('value') + '</span>';
+			var firstItem = parseInt(currentPage * itemsPerPage);
+			var lastItem = Math.min(firstItem + parseInt(itemsPerPage), rows.length);
+
+			var hostEl;
+			var hostId = this.model.getAttr('id') + "_host";
+
+			var itemTemplate = $("#" + this.model.getAttr('id') + "ItemTemplate");
+			/* check if an item template has been defined */
+			if (itemTemplate && itemTemplate.length > 0) {
+
+				/* create a div to host our grid if not existing yet */
+				hostEl = this.el.find('div#' + hostId);
+				if (hostEl.length < 1) {
+					this.el.append('<div id="' + hostId + '"></div>');
+					hostEl = this.el.find('div#' + hostId);
+				}
+				$(hostEl).html('');
+
+				var compiled = _.template(itemTemplate.html());
+				var i;
+				for (i = firstItem; i < lastItem; i++) {
+					var row = rows[i];
+
+					var result = compiled(row.getCellsMapByField());
+					var itemId = this.model.getAttr('id') + "_" + row.getAttr('id');
+					result = $(result).attr('id', itemId).attr('rowId', row.getAttr('id'));
+
+					if (i == 0)
+						result = $(result).addClass('first');
+					if (i == (lastItem - 1))
+						result = $(result).addClass('last');
+
+					/* add row id to eventual user inputs */
+					$(result).find("[id*='userinput_']").each(function() {
+						$(this).attr('id', row.getAttr('id') + "_" + $(this).attr('id'));
+					})
+
+					hostEl.append(result);
+
+					var that = this;
+					hostEl.find("#" + itemId + " > [methodName]").each(function(index, element) {
+						var action = that.model.getAction($(element).attr('methodName'));
+						if (action && action.length > 0) {
+							$(element).click(function() {
+								var rowId = $(this).closest("[rowId]").attr('rowId');
+								var methodParams = action[0].get('methodParams').clone();
+
+								that._handleActionClick(rowId, action[0].get('methodName'), methodParams, $(this).closest("[rowId]"));
+							});
 						}
-					html += '</td>';
-				}, row);
+					});
+				}
+
+			}
+			/* else normal table display */
+			else {
+
+				// set table scaffold
+				hostEl = this.el.find('table#' + hostId);
+				if (hostEl.length < 1) {
+					this.el.append('<table id="' + hostId + '"></table>');
+					hostEl = this.el.find('table#' + hostId);
+				}
+				$(hostEl).html('<thead><tr></tr></thead><tbody></tbody>');
+
+				// render column header
+				var el = $(hostEl).find('thead tr');
+				_.each(this.model.getAllColumns(), function(cell) {
+					var html = '<th ';
+					// html += cell.get('width') ? ' width="' + cell.get('width') + '"' : '';
+					html += '>' + cell.get('label') + '</th>';
+					el.append(html);
+				});
 
 				if (this.model.getAttr('hasActions')) {
-					html += '<td>';
-					_.each(this.model.getActions(), function(cell) {
-						var buttonId = model.getAttr('id') + "_" + row.getAttr('id') + "_" + cell.get('methodName');
-						var methodParamsReplaced = new Array();
-						var methodParams = cell.get('methodParams');
-						_.each(methodParams, function(methodParam) {
-							var name = methodParam.name;
-							var value = methodParam.value;
-							if (value == '@contextId') {
-								value = row.getAttr('id');
-							}
-							methodParamsReplaced.push({
-								name : name,
-								value : value
-							});
-						});
-						html += "<div style='display:inline' name='" + cell.get('methodName') + "' methodParams='" + JSON.stringify(methodParamsReplaced) + "' bind='method'> <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button>";
-
-					});
-					html += '</td>';
+					el.append('<th>actions</th>');
 				}
-				html += '</tr>';
-				el.append(html);
 
-			}, this);
+				// render rows
+				var model = this.model;
+				el = $(hostEl).find('tbody');
+				var i;
+				for (i = firstItem; i < lastItem; i++) {
+					var row = rows[i];
+					var html = '<tr id="' + row.getAttr('id') + '" type="' + row.getAttr('type') + '">';
 
-			/* handle row click event */
-			var onRowClick = function(event) {
-				event.data.trigger("rowClicked", $(this));
-			};
+					var values = new Object();
+					_.each(row.getAllCells(), function(cell) {
+						html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="row' + row.getAttr('id') + ' column' + cell.get('id') + '">';
+						if (model.getColumn(cell.get('id')) && model.getColumn(cell.get('id')).get('datatype') === 'BLOB') {
+							html += '<img width="' + model.getColumn(cell.get('id')).get('width') + '" src="' + cell.get('value') + '"/>';
+						}
+						else if (cell.get('value')) {
+							html += '<span>' + cell.get('value') + '</span>';
+							values[cell.get('id')] = cell.get('value');
+						}
+						html += '</td>';
+					}, row);
 
-			$('table#' + this.model.getAttr('id') + ' tr').click(this, onRowClick);
+					if (this.model.getAttr('hasActions')) {
+						html += '<td>';
+						_.each(this.model.getActions(), function(cell) {
+							var buttonId = model.getAttr('id') + "_" + row.getAttr('id') + "_" + cell.get('methodName');
+							// var methodParamsReplaced = new Array();
+							var methodParams = cell.get('methodParams');
 
-			/* handle button/actions click event */
-			var onActionClick = function(event) {
-				var rowId = $(this).closest("tr").attr('id');
-				var methodName = $(this).attr('name');
-				var methodParams = $(this).attr('methodParams');
+							var userInputs = "";
+							_.each(methodParams, function(methodParam) {
+								var name = methodParam.name;
+								var value = methodParam.value;
+								var label = methodParam.label;
 
-				event.data.trigger("actionClicked", rowId, methodName, JSON.parse(methodParams));
+								if (value == '@userInput.textinput' || value == '@userInput.numericinput') {
+									var format = (value == '@userInput.numericinput') ? 'numeric' : 'text';
+									var bindValueFromCellId = methodParam.bindValueFromCellId;
+									var inputValue = '';
+									if (bindValueFromCellId) {
+										inputValue = " value='" + values[bindValueFromCellId] + "' ";
+									}
+									userInputs += "<label for='" + row.getAttr('id') + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.getAttr('id') + "_userinput_" + name + "'/>";
+								}
+							});
+							html += "<div style='display:inline' name='" + cell.get('methodName') + "' methodParams='" + JSON.stringify(methodParams) + "' bind='method'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button>";
 
-			};
+						});
+						html += '</td>';
+					}
+					html += '</tr>';
+					el.append(html);
+				}
 
-			$('table#' + this.model.getAttr('id') + ' tr [bind=method]').click(this, onActionClick);
+				/* handle row click event */
+				var onRowClick = function(event) {
+					event.data.trigger("rowClicked", $(this));
+				};
 
-			tableEl.trigger("table:rendered");
+				$('table#' + hostId + ' tr').click(this, onRowClick);
+
+				var that = this;
+				/* handle button/actions click event */
+				var onActionClick = function(event) {
+					var rowId = $(this).closest("tr").attr('id');
+					var parentDiv = $(this).parent();
+					var methodName = parentDiv.attr('name');
+					var methodParams = JSON.parse(parentDiv.attr('methodParams'));
+					that._handleActionClick(rowId, methodName, methodParams, parentDiv);
+				};
+
+				$('table#' + hostId + ' tr [bind=method] > button').click(this, onActionClick);
+			}
+
+			this.renderPagingBar(currentPage, itemsPerPage, hostEl);
+
+			$(hostEl).attr('nbItems', rows.length);
+			hostEl.trigger("table:rendered");
 
 			return this;
+		},
+
+		render : function() {
+
+			var itemsPerPage = this.options['itemsPerPage'];
+			if (!itemsPerPage) {
+				itemsPerPage = 1000;
+			}
+
+			this.renderWithPaging(0, itemsPerPage);
+			return this;
+		},
+
+		_handleActionClick : function(rowId, methodName, methodParams, divEl) {
+			var inputValid = true;
+			/* handle user input */
+			_.each(methodParams, function(methodParam) {
+				var name = methodParam.name;
+				if (methodParam.value == '@userInput.textinput' || methodParam.value == '@userInput.numericinput') {
+					var valueInput = divEl.find("#" + rowId + "_userinput_" + name);
+					if (valueInput.length > 0 && valueInput.val().length > 0) {
+						methodParam.value = valueInput.val();
+					}
+					else {
+						inputValid = false;
+					}
+				}
+				else if (methodParam.value == '@contextId') {
+					methodParam.value = rowId;
+				}
+			});
+
+			if (inputValid)
+				this.trigger("actionClicked", rowId, methodName, methodParams);
 		}
+
 	});
 
 	window.expanz.Views.ActivityView = Backbone.View.extend({
@@ -250,8 +384,8 @@ $(function() {
 			this.model.bind("change:xml", this.publishData, this);
 		},
 
-		itemSelected : function(itemId, type) {
-			this.model.updateItemSelected(itemId, type);
+		itemSelected : function(itemId, callbacks) {
+			this.model.updateItemSelected(itemId, callbacks);
 		},
 
 		publishData : function() {
@@ -320,7 +454,8 @@ $(function() {
 				this.el.load(url, function() {
 					that.center();
 				});
-			} else {
+			}
+			else {
 				this.center();
 			}
 
@@ -370,31 +505,31 @@ $(function() {
 				if (action.id == 'close') {
 					divId += action.get('label').split(' ').join('');
 					this.el.append('<div style="display:inline"  bind="method" name="close" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
-				} else
-					if (action.id !== this.model.id) {
-						this.el.append('<div style="display:inline" bind="method" name="' + action.id + '" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
-						var methodView = new expanz.Views.MethodView({
-							el : $('div#' + action.id, this.el),
-							id : action.id,
-							model : action
-						});
-					}
+				}
+				else if (action.id !== this.model.id) {
+					this.el.append('<div style="display:inline" bind="method" name="' + action.id + '" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
+					var methodView = new expanz.Views.MethodView({
+						el : $('div#' + action.id, this.el),
+						id : action.id,
+						model : action
+					});
+				}
 
 				/* if response data are present we have to send it during the click event as well */
 				if (action.get('response') != undefined) {
 					var button = this.el.find('#' + divId + ' button');
 					var that = this;
 					button.click(function() {
-						if ( that.model.getAttr('title') == "Order Submitted" ){
+						if (that.model.getAttr('title') == "Order Submitted") {
 							/* reload the page to clear the cart */
 							window.location.reload();
 						}
-						
+
 						if (action.get('response').find("closeWindow")) {
 							if (that.parentPopup != undefined) {
 								that.parentPopup.close();
 							}
-							else{
+							else {
 								window.expanz.logToConsole("Cannot find parent popup");
 							}
 						}
@@ -436,7 +571,8 @@ $(function() {
 		var value;
 		if ($(elem).attr("showTextValue") == "true") {
 			value = allAttrs["text"];
-		} else {
+		}
+		else {
 			value = allAttrs[attr];
 		}
 
@@ -446,23 +582,27 @@ $(function() {
 				$(elem).addClass('checkbox');
 				if (value == 1) {
 					$(elem).prop("checked", true);
-				} else {
+				}
+				else {
 					$(elem).prop("checked", false);
 				}
-			} else {
+			}
+			else {
 				$(elem).val(value);
 			}
 			$(elem).trigger("valueUpdated", value);
 
 			// if the field is disable apply the disabled attribute and style
-			if (allAttrs["disabled"] == 1) {
+			if (allAttrs["disabled"] == true) {
 				$(elem).attr('disabled', 'disabled');
 				$(elem).addClass('readonlyInput');
-			} else {
+			}
+			else {
 				$(elem).removeAttr('disabled');
 				$(elem).removeClass('readonlyInput');
 			}
-		} else {
+		}
+		else {
 			$(elem).html(value);
 		}
 		return elem;

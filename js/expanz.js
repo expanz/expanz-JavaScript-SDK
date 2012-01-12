@@ -41,7 +41,7 @@ $(function() {
 		});
 		return;
 	};
-	
+
 	//
 	// Public Functions & Objects in the Expanz Namespace
 	//
@@ -57,7 +57,7 @@ $(function() {
 			window.App.push(activity);
 		});
 		return;
-	};	
+	};
 
 	//
 	// Public Functions & Objects in the Expanz Namespace
@@ -87,7 +87,8 @@ $(function() {
 			});
 			activity.collection.destroy();
 			activity.remove(); // remove from DOM
-		} else {
+		}
+		else {
 			// top-level DOMObject wasn't an activity, let's go through the entire DOMObject looking for activities
 			_.each($(dom).find('[bind=activity]'), function(activityEl) {
 				var activity = popActivity(window.App, $(activityEl).attr('name'), $(activityEl).attr('key'));
@@ -100,6 +101,7 @@ $(function() {
 
 	window.expanz.Logout = function() {
 		function redirect() {
+			expanz.Storage.clearSession();
 			expanz.Views.redirect(expanz.Storage.getLoginURL())
 		}
 		;
@@ -113,7 +115,8 @@ $(function() {
 		var content = '';
 		if (sessionLost === true) {
 			content = 'Session not found or expired, please log in again';
-		} else {
+		}
+		else {
 			content = 'Please log in';
 		}
 
@@ -161,17 +164,17 @@ $(function() {
 
 		expanz._error = fn;
 	};
-	
-	window.expanz.basicErrorDisplay = function(el){
+
+	window.expanz.basicErrorDisplay = function(el) {
 		return function error(str) {
 			$(el).find('[attribute=value]').html(str);
 			if (!str || str.length < 1) {
 				$(el).hide('slow');
-			} else {
+			}
+			else {
 				$(el).show('slow');
 			}
-		}
-		;
+		};
 	}
 
 	window.expanz.basicMsgDisplay = function(el) {
@@ -180,15 +183,16 @@ $(function() {
 			if (str instanceof Array) {
 				str = str.join("<br/>");
 			}
-			
+
 			/* display the message in the popup as well if visible */
-			if(window.expanz.currentPopup != undefined && $(window.expanz.currentPopup.el).is(":visible")){
+			if (window.expanz.currentPopup != undefined && $(window.expanz.currentPopup.el).is(":visible")) {
 				var popupEl = window.expanz.currentPopup.el.find(el);
-				if( popupEl){
+				if (popupEl) {
 					popupEl.find('[attribute=value]').html(str);
 					if (!str || str.length < 1) {
 						$(popupEl).hide('slow');
-					} else {
+					}
+					else {
 						$(popupEl).show('slow');
 					}
 				}
@@ -197,7 +201,8 @@ $(function() {
 			$(el).find('[attribute=value]').html(str);
 			if (!str || str.length < 1) {
 				$(el).hide('slow');
-			} else {
+			}
+			else {
 				$(el).show('slow');
 			}
 		};
@@ -235,8 +240,6 @@ $(function() {
 				}
 			});
 		});
-
-		callback(null);
 	}
 
 	//
@@ -251,7 +254,8 @@ $(function() {
 			activityView.collection.load(callbacks);
 			activities.push(activityView);
 
-		} else {
+		}
+		else {
 			// search through DOM body, looking for elements with 'bind' attribute
 			_.each($(dom).find('[bind=activity]'), function(activityEl) {
 				var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
@@ -271,7 +275,8 @@ $(function() {
 			var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
 			activities.push(activityView);
 
-		} else {
+		}
+		else {
 			// search through DOM body, looking for elements with 'bind' attribute
 			_.each($(dom).find('[bind=activity]'), function(activityEl) {
 				var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
@@ -297,41 +302,5 @@ $(function() {
 		});
 
 		menu.load(el);
-	}
-	;
-
-	function pop(ary, map) { // , name, key ) {
-
-		for ( var i = 0; i < ary.length; i++) {
-			if (_.reduce(map, function(memo, key) {
-				return memo && (map.key === ary[i].key);
-			}, true)) {
-				var found = ary[i];
-				ary.remove(i);
-				return found;
-			}
-		}
-		return null;
-	}
-	;
-
-	// Array Remove - By John Resig (MIT Licensed)
-	Array.prototype.remove = function(from, to) {
-		var rest = this.slice((to || from) + 1 || this.length);
-		this.length = from < 0 ? this.length + from : from;
-		return this.push.apply(this, rest);
 	};
-
-	XMLDocumentsToXMLString = function(xmlDoc) {
-		if (window.ActiveXObject) {
-			var str = xmlDoc.xml;
-			return str;
-		}
-		// code for Mozilla, Firefox, Opera, etc.
-		else {
-			var str = (new XMLSerializer()).serializeToString(xmlDoc);
-			return str;
-		}
-	}
-
 })
