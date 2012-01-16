@@ -68,11 +68,14 @@ $(function() {
 				return cell.get('value') === undefined;
 			}, this);
 
-			var map = Object
+			var map = new Object();
 			_.each(cells, function(cell) {
 				map[cell.get('field')] = cell.get('value');
 			});
-			return map;
+			/* using a data to put the data to avoid underscore 'variable is not defined' error */
+			return {
+				data : map
+			};
 		}
 	});
 
