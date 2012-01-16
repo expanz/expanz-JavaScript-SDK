@@ -377,17 +377,42 @@ $(function() {
 		};
 	};
 
+	function parseProcessAreas(xmlElement) {
+		var processAreas = [];
+		$(xmlElement).children('processarea').each(function() {
+			var processArea = new ProcessArea($(this).attr('id'), $(this).attr('title'));
+			var subProcessAreas = parseProcessAreas($(this));
+			if (subProcessAreas.length > 0) {
+				processArea.pa = subProcessAreas;
+			}
+			$(this).children('activity').each(function() {
+				processArea.activities.push(new ActivityInfo($(this).attr('name'), $(this).attr('title'), '#', $(this).attr('style'), $(this).attr('image')));
+			});
+			processAreas.push(processArea);
+		});
+		return processAreas;
+	}
+
+	function fillActivityData(processAreas, url, name, style, gridviewList) {
+		$.each(processAreas, function(i, processArea) {
+			$.each(processArea.activities, function(j, activity) {
+				if (activity.name == name && activity.style == style) {
+					activity.url = url;
+					activity.gridviews = gridviewList;
+				}
+			});
+
+			/* do it for sub process activity */
+			fillActivityData(processArea.pa, url, name, style, gridviewList);
+
+		});
+
+	}
+
 	function parseGetSessionDataResponse(callbacks) {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseGetSessionDataResponse");
-			var processAreas = [];
-			$(xml).find('processarea').each(function() {
-				var processArea = new ProcessArea($(this).attr('id'), $(this).attr('title'));
-				$(this).find('activity').each(function() {
-					processArea.activities.push(new ActivityInfo($(this).attr('name'), $(this).attr('title'), '#', $(this).attr('style')));
-				});
-				processAreas.push(processArea);
-			});
+			var processAreas = parseProcessAreas($(xml).find("Menu"));
 
 			$.get('./formmapping.xml', function(data) {
 
@@ -401,14 +426,8 @@ $(function() {
 						gridviewList.push(gridview);
 					});
 
-					$.each(processAreas, function(i, processArea) {
-						$.each(processArea.activities, function(j, activity) {
-							if (activity.name == name && activity.style == style) {
-								activity.url = url;
-								activity.gridviews = gridviewList;
-							}
-						});
-					});
+					fillActivityData(processAreas, url, name, style, gridviewList);
+
 				});
 
 				expanz.Storage.setProcessAreaList(processAreas);
@@ -588,9 +607,12 @@ $(function() {
 							window.expanz.logToConsole("Url of activity not found");
 						}
 
+						/* an activity request shouldn't be reloaded from any state -> clean an eventual cookie */
+						window.expanz.Storage.clearActivityCookie(id, style);
+
 						var clientMessage = new expanz.Model.ClientMessage({
 							id : 'ActivityRequest',
-							url : url,
+							url : url + "?random=" + new Date().getTime(),
 							parent : activity
 						});
 
@@ -905,18 +927,20 @@ $(function() {
 
 	// GetSessionData Stub Objects
 	//
-
+	// TODO reduce name length because store in cookies as json string and take bandwiths (limitation on cookie size can be reached as well)
 	function ProcessArea(id, title) {
 		this.id = id;
 		this.title = title;
 		this.activities = [];
+		this.pa = []; /* sub process area */
 	}
 
-	function ActivityInfo(name, title, url, style) {
+	function ActivityInfo(name, title, url, style, image) {
 		this.name = name;
 		this.title = title;
 		this.url = url;
 		this.style = style;
+		this.img = image;
 		this.gridviews = [];
 	}
 

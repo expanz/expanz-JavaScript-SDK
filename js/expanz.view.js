@@ -189,7 +189,7 @@ $(function() {
 					if (i == (lastItem - 1))
 						result = $(result).addClass('last');
 
-					/* add row id to eventual user inputs */
+					/* add row id to prefix id for eventual user inputs */
 					$(result).find("[id*='userinput_']").each(function() {
 						$(this).attr('id', row.getAttr('id') + "_" + $(this).attr('id'));
 					})
@@ -197,7 +197,7 @@ $(function() {
 					hostEl.append(result);
 
 					var that = this;
-					hostEl.find("#" + itemId + " > [methodName]").each(function(index, element) {
+					hostEl.find("#" + itemId + " [methodName]").each(function(index, element) {
 						var action = that.model.getAction($(element).attr('methodName'));
 						if (action && action.length > 0) {
 							$(element).click(function() {
@@ -521,7 +521,8 @@ $(function() {
 					var that = this;
 					button.click(function() {
 						if (that.model.getAttr('title') == "Order Submitted") {
-							/* reload the page to clear the cart */
+							/* clear activity cookies and reload the page */
+							window.expanz.Storage.clearActivityCookies();
 							window.location.reload();
 						}
 
