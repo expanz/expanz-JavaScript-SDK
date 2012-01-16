@@ -53,3 +53,19 @@ boolString = function(val) {
 function isNumber(n) {
 	return !isNaN(parseFloat(n)) && isFinite(n);
 }
+
+isImageValid = function(imagePath) {
+	if (!imagePath)
+		return false;
+
+	imagePath = imagePath.replace(/\\/, '/');
+	var idx = imagePath.lastIndexOf(".");
+	if (idx >= 0) {
+		imagePath = imagePath.substring(idx);
+		if (imagePath.indexOf("/") > 0)
+			return false;
+		return true;
+	}
+
+	return false;
+}

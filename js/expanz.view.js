@@ -360,6 +360,7 @@ $(function() {
 				this.key = attrs.key;
 			}
 			this.collection.bind("error", this.updateError, this);
+			this.collection.bind("loading", this.loading, this);
 		},
 
 		updateError : function(model, error) {
@@ -373,6 +374,10 @@ $(function() {
 		update : function() {
 			// perform full activity validation after a field updates ... if
 			// necessary
+		},
+
+		loading : function() {
+			window.expanz.logToConsole("Activity loading: " + this.collection.loading);
 		}
 
 	});

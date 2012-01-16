@@ -44,6 +44,10 @@ $(function() {
 				});
 			}
 
+			activity.setAttr({
+				loading : true
+			});
+
 			SendRequest(RequestObject.CreateActivity(activity, expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callbacks));
 
 		},
@@ -56,6 +60,10 @@ $(function() {
 				expanz.Views.redirect(expanz.Storage.getLoginURL())
 				return;
 			}
+
+			activity.setAttr({
+				loading : true
+			});
 
 			SendRequest(RequestObject.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
 		},
@@ -545,6 +553,11 @@ $(function() {
 					callbacks.error('Server gave an empty response to a CreateActivity request: ' + xml);
 				}
 			}
+
+			activity.setAttr({
+				loading : false
+			});
+
 			return;
 		}
 	}
@@ -554,7 +567,7 @@ $(function() {
 			window.expanz.logToConsole("start parseDeltaResponse");
 			/* bug fix for IE style attribute is removed when using jquery find... */
 			xml = xml.replace(/style=/g, "activityStyle=");
-			
+
 			var execResults = $(xml).find("ExecXResult");
 			if (execResults) {
 				var errors = new Array();
@@ -652,7 +665,7 @@ $(function() {
 						}
 
 						/* remove error message if field is valid */
-						if ( boolValue($(this).attr('valid')) && field.get('errorMessage') != undefined) {
+						if (boolValue($(this).attr('valid')) && field.get('errorMessage') != undefined) {
 							field.set({
 								'errorMessage' : undefined
 							});
@@ -795,6 +808,10 @@ $(function() {
 					callbacks.success('Delta handled: ' + execResults);
 				}
 			}
+
+			activity.setAttr({
+				loading : false
+			});
 			return;
 		}
 	}
