@@ -17,7 +17,9 @@ $(function() {
 	};
 
 	// Load the Expanz Process Area menu without empty items
-	loadMenu($('[bind=menu]'), false);
+	_.each($('[bind=menu]'), function(el) {
+		loadMenu($(el), false);
+	});
 
 	window.expanz.logToConsole = function(message) {
 		if (typeof (console) != "undefined" && console.log) {
@@ -212,6 +214,11 @@ $(function() {
 
 		expanz._info = fn;
 	};
+	
+	window.expanz.SetHomePage = function(homepage) {
+
+		expanz._home = homepage;
+	};
 
 	//
 	// Helper Functions
@@ -290,17 +297,33 @@ $(function() {
 
 		// Load Menu & insert it into #menu
 		var menu = new expanz.Storage.AppSiteMenu();
-		_.each(expanz.Storage.getProcessAreaList(), function(processArea) {
-			if (displayEmptyItems || processArea.activities.length > 0) {
+		var processAreas = loadProcessArea(expanz.Storage.getProcessAreaList(), displayEmptyItems);
+		if (processAreas.length > 0)
+			menu.processAreas = processAreas;
+		menu.load(el);
+	}
+
+	function loadProcessArea(processAreas, displayEmptyItems, parentProcessAreaMenu) {
+		var processAreasMenu = [];
+		_.each(processAreas, function(processArea) {
+			if (displayEmptyItems || processArea.activities.length > 0 || processArea.pa.length > 0) {
 				var menuItem = new expanz.Storage.ProcessAreaMenu(processArea.id, processArea.title);
-				menu.processAreas.push(menuItem);
+
+				if (parentProcessAreaMenu)
+					menuItem.parent = parentProcessAreaMenu;
 
 				_.each(processArea.activities, function(activity) {
-					menuItem.activities.push(new expanz.Storage.ActivityMenu(activity.name, activity.title, activity.url));
+					menuItem.activities.push(new expanz.Storage.ActivityMenu(activity.name, activity.title, activity.url, activity.img));
 				});
+
+				if (processArea.pa.length > 0) {
+					menuItem.pa = loadProcessArea(processArea.pa, displayEmptyItems, menuItem);
+				}
+
+				processAreasMenu.push(menuItem);
 			}
 		});
+		return processAreasMenu;
+	}
 
-		menu.load(el);
-	};
 })
