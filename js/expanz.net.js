@@ -386,7 +386,7 @@ $(function() {
 				processArea.pa = subProcessAreas;
 			}
 			$(this).children('activity').each(function() {
-				processArea.activities.push(new ActivityInfo($(this).attr('name'), $(this).attr('title'), '#', $(this).attr('style'), $(this).attr('image')));
+				processArea.activities.push(new ActivityInfo($(this).attr('name'), $(this).attr('title'), '#', $(this).attr('activityStyle'), $(this).attr('image')));
 			});
 			processAreas.push(processArea);
 		});
@@ -411,6 +411,8 @@ $(function() {
 
 	function parseGetSessionDataResponse(callbacks) {
 		return function apply(xml) {
+			/* bug fix for IE style attribute is removed when using jquery find... */
+			xml = xml.replace(/style/g, "activityStyle");
 			window.expanz.logToConsole("start parseGetSessionDataResponse");
 			var processAreas = parseProcessAreas($(xml).find("Menu"));
 
