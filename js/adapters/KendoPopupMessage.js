@@ -8,8 +8,8 @@ function useKendoPopups() {
 			visible : false,
 			title : this.model.getAttr('title') ? this.model.getAttr('title') : "",
 			modal : true,
+			width : this.width
 		});
-		this.el.data("kendoWindow").open();
 	},
 
 	/* must be overriden depending on the pluggin used */
@@ -20,5 +20,6 @@ function useKendoPopups() {
 	/* may be redifined depending on the pluggin used */
 	window.expanz.Views.PopupView.prototype.center = function() {
 		this.el.data("kendoWindow").center();
+		this.el.data("kendoWindow").open();
 	}
 };

@@ -24,7 +24,7 @@ $(function() {
 
 		displayError : function() {
 			return function() {
-				var errorId = 'error' + this.model.get('id');
+				var errorId = 'error' + this.model.get('id').replace(/\./g, "_");
 				if (this.model.get('errorMessage') != undefined) {
 					var errorEl = this.el.find('#' + errorId);
 					if (errorEl.length < 1) {
@@ -492,7 +492,7 @@ $(function() {
 
 	window.expanz.Views.UIMessage = window.expanz.Views.PopupView.extend({
 
-		width : '500',
+		width : '500px',
 
 		renderActions : function() {
 			this.model.each(function(action) {

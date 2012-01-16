@@ -412,7 +412,7 @@ $(function() {
 	function parseGetSessionDataResponse(callbacks) {
 		return function apply(xml) {
 			/* bug fix for IE style attribute is removed when using jquery find... */
-			xml = xml.replace(/style/g, "activityStyle");
+			xml = xml.replace(/style=/g, "activityStyle=");
 			window.expanz.logToConsole("start parseGetSessionDataResponse");
 			var processAreas = parseProcessAreas($(xml).find("Menu"));
 
@@ -552,6 +552,9 @@ $(function() {
 	function parseDeltaResponse(activity, callbacks) {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseDeltaResponse");
+			/* bug fix for IE style attribute is removed when using jquery find... */
+			xml = xml.replace(/style=/g, "activityStyle=");
+			
 			var execResults = $(xml).find("ExecXResult");
 			if (execResults) {
 				var errors = new Array();
@@ -599,7 +602,7 @@ $(function() {
 				/* Activity Request CASE */
 				$(execResults).find('ActivityRequest').each(function() {
 					var id = $(this).attr('id');
-					var style = $(this).attr('style');
+					var style = $(this).attr('activityStyle');
 
 					var callback = function(url) {
 						if (url != null) {
@@ -649,7 +652,7 @@ $(function() {
 						}
 
 						/* remove error message if field is valid */
-						if ($(this).attr('valid') == "1" && field.get('errorMessage') != undefined) {
+						if ( boolValue($(this).attr('valid')) && field.get('errorMessage') != undefined) {
 							field.set({
 								'errorMessage' : undefined
 							});
