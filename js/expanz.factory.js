@@ -125,16 +125,33 @@ $(function() {
 			var methodModels = [];
 			_.each(DOMObjects, function(methodEl) {
 				// create a model for each method
-				var method = new modelNamespace.Method({
-					id : $(methodEl).attr('name'),
-					contextObject : $(methodEl).attr('contextObject')
-				});
-				var view = new viewNamespace.MethodView({
-					el : $(methodEl),
-					id : $(methodEl).attr('id'),
-					className : $(methodEl).attr('class'),
-					model : method
-				});
+				var method;
+				if ($(methodEl).attr('type') == 'ContextMenu') {
+					method = new modelNamespace.ContextMenu({
+						id : $(methodEl).attr('name'),
+						contextObject : $(methodEl).attr('contextObject')
+					});
+
+					var ctxMenuview = new viewNamespace.ContextMenuView({
+						el : $(methodEl),
+						id : $(methodEl).attr('id'),
+						className : $(methodEl).attr('class'),
+						model : method
+					});
+				}
+				else {
+					method = new modelNamespace.Method({
+						id : $(methodEl).attr('name'),
+						contextObject : $(methodEl).attr('contextObject')
+					});
+
+					var view = new viewNamespace.MethodView({
+						el : $(methodEl),
+						id : $(methodEl).attr('id'),
+						className : $(methodEl).attr('class'),
+						model : method
+					});
+				}
 
 				methodModels.push(method);
 			});
@@ -156,7 +173,7 @@ $(function() {
 					el : $(gridEl),
 					id : $(gridEl).attr('id'),
 					className : $(gridEl).attr('class'),
-					itemsPerPage :  $(gridEl).attr('itemsPerPage'),
+					itemsPerPage : $(gridEl).attr('itemsPerPage'),
 					model : gridModel
 				});
 

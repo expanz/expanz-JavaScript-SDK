@@ -214,7 +214,7 @@ $(function() {
 
 		expanz._info = fn;
 	};
-	
+
 	window.expanz.SetHomePage = function(homepage) {
 
 		expanz._home = homepage;

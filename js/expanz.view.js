@@ -7,7 +7,7 @@ $(function() {
 	window.expanz.Views = {};
 
 	window.expanz.Views.FieldView = Backbone.View.extend({
-
+ 
 		initialize : function() {
 			this.model.bind("change:label", this.modelUpdate('label'), this);
 			this.model.bind("change:value", this.modelUpdate('value'), this);
@@ -99,13 +99,106 @@ $(function() {
 			"click [attribute=submit]" : "submit"
 		},
 
-		submit : function() {
+		submit  : function() {
 			this.model.submit();
 			this.el.trigger('submit:' + this.model.get('id'));
 		}
 
 	});
 
+	window.expanz.Views.ContextMenuView = window.expanz.Views.MethodView.extend({
+		initialize : function() {
+			this.model.bind("change:data", this.modelUpdate, this);
+		},
+
+		_createMenu : function(xml, parentUL) {
+			var that = this;
+			var i = 0;
+			xml.children("Menu").each(
+				function() {
+					var ulId = parentUL.id + "_" + i++;
+					parentUL
+					.append("<li>" + $(this).attr('name') + "<ul id='" + ulId + "'><ul></li>");
+					that._createMenu($(this), parentUL.find("#" + ulId));
+				});
+
+			var j = 0;
+			xml.children("MenuItem").each(
+				function() {
+					var liId = parentUL.id + "_li_" + j++;
+					parentUL
+					.append("<li id='"+liId+"' action='" + $(this).attr('action') + "'>" + $(this).attr('text') + "</li>");
+					var liEL =parentUL.find("#" + liId);
+					liEL.click(function(){
+						console.log($(this).attr("action"));
+						that.model.menuItemSelected($(this).attr("action"));
+						that.contextMenuEl.hide();
+					})
+				});
+		},
+
+		modelUpdate : function() {
+			/* retrieve or create a div to host the context menu */
+			window.expanz.logToConsole("modelUpdated");
+
+			if (this.contextMenuEl == null) {
+				var contextMenuId = this.model.get('id').replace(/\./g, "_") + "_contextMenu";
+				this.el
+				.append("<div class='contextMenu' id='" + contextMenuId + "' />");
+				this.contextMenuEl = this.el.find("#" + contextMenuId);
+			}
+			this.contextMenuEl.hide();
+			this.contextMenuEl.html("");
+
+			var data = this.model.get('data');
+			if (data == null) return;
+
+			/* position menu below button */
+			var pos = this.el.find("button").offset();
+			this.contextMenuEl.css(
+				{position:"absolute",
+					top:(pos.top + this.el.find("button").height()+ 10 )+"px",
+					left:(pos.left)+"px"
+				});	
+
+			/* append data to the menu */
+
+			this.contextMenuEl.append("<ul id='" + this.contextMenuEl.id + "_ul'></ul>")
+			this._createMenu(data, this.contextMenuEl.find("ul"));
+			this.createContextMenu();
+
+			/* hide if clicked outside */
+			var that = this;
+
+			this.mouseInside = true;
+			this.contextMenuEl.hover(function() {
+				that.mouseInside = true;
+			}, function() {
+				that.mouseInside = false;
+			});
+
+			$("body").bind('mouseup.' + that.contextMenuEl.id, function() {
+				if (!that.mouseInside) {
+					that.contextMenuEl.hide();
+					$("body").unbind('mouseup.' + that.contextMenuEl.id);
+				}
+			});
+		},
+		
+		submit : function() {
+			/* register current context menu */
+			window.expanz.logToConsole("Registering current context menu");
+			window.expanz.currentContextMenu = this.model;
+			this.model.submit();
+			this.el.trigger('submit:' + this.model.get('id'));
+		},
+
+		/* must be overidden if a custom context menu is wanted */
+		createContextMenu : function() {
+			this.contextMenuEl.show();
+		}
+	});
+	
 	window.expanz.Views.GridView = Backbone.View.extend({
 
 		initialize : function() {

@@ -123,9 +123,9 @@ $(function() {
 
 			SendNormalRequest(RequestObject.GetBlob(blobId, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks), true);
 		},
+		
 
-		/* call when selecting something from the tree view (file) */
-		CreateMenuActionRequest : function(activity, contextId, contextType, menuAction, callbacks) {
+		GetFileRequest : function(filename, activity, callbacks) {
 			if (callbacks == undefined)
 				callbacks = activity.callbacks;
 
@@ -134,7 +134,20 @@ $(function() {
 				return;
 			}
 
-			SendRequest(RequestObject.CreateMenuAction(activity, contextId, contextType, menuAction, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
+			SendNormalRequest(RequestObject.GetFile(filename, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks), true);
+		},		
+
+		/* call when selecting something from the tree view (file) */
+		CreateMenuActionRequest : function(activity, contextId, contextType, menuAction, defaultAction, callbacks) {
+			if (callbacks == undefined)
+				callbacks = activity.callbacks;
+
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
+				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				return;
+			}
+
+			SendRequest(RequestObject.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
 		},
 
 	};
@@ -200,6 +213,15 @@ $(function() {
 				url : 'GetBlob'
 			};
 		},
+		
+
+		GetFile : function(filename, activity, sessionHandle) {
+			return {
+				data : buildRequestWithoutESA('GetFile', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.GetFile(filename, activity)),
+				url : 'GetFile'
+			};
+		},
+		
 
 		DataRefresh : function(dataId, activity, sessionHandle) {
 			return {
@@ -208,9 +230,9 @@ $(function() {
 			};
 		},
 
-		CreateMenuAction : function(activity, contextId, contextType, menuAction, sessionHandle) {
+		CreateMenuAction : function(activity, contextId, contextType, menuAction, defaultAction, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateMenuAction(activity, contextId, contextType, menuAction)),
+				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction)),
 				url : 'ExecX'
 			};
 		},
@@ -324,8 +346,21 @@ $(function() {
 			return body;
 		},
 
-		CreateMenuAction : function(activity, contextId, contextType, menuAction) {
-			return '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Context id="' + contextId + '" contextObject="' + contextType + '"/>' + '<MenuAction defaultAction="' + menuAction + '"  contextObject="' + contextType + '"/>' + '</Activity>';
+		CreateMenuAction : function(activity, contextId, contextType, menuAction, defaultAction) {
+			var mnuActionStr = '<Activity activityHandle="' + activity.getAttr('handle') + '">';
+			var contextObjectStr = contextType ? ' contextObject="' + contextType + '"' : '';
+			if (contextId) {
+				mnuActionStr += '<Context id="' + contextId + '"' + contextObjectStr + '/>';
+			}
+			mnuActionStr += '<MenuAction ';
+			if (menuAction) {
+				mnuActionStr += ' action="' + menuAction + '" ';
+			}
+			else {
+				mnuActionStr += ' defaultAction="' + defaultAction + '" ';
+			}
+			mnuActionStr += contextObjectStr + '/>' + '</Activity>';
+			return mnuActionStr;
 		},
 
 		DestroyActivity : function(activity, sessionHandle) {
@@ -339,6 +374,10 @@ $(function() {
 		GetBlob : function(blobId, activity) {
 			return '<activityHandle>' + activity.getAttr('handle') + '</activityHandle><blobId>' + blobId + '</blobId><isbyteArray>false</isbyteArray>';
 		},
+		
+		GetFile : function(filename, activity) {
+			return '<activityHandle>' + activity.getAttr('handle') + '</activityHandle><fileName>' + filename + '</fileName><isbyteArray>false</isbyteArray>';
+		},		
 
 		DataRefresh : function(dataId, activity) {
 			return '<activityHandle>' + activity.getAttr('handle') + '</activityHandle><DataPublication id="' + dataId + '" refresh="1" />';
@@ -644,6 +683,21 @@ $(function() {
 					window.expanz.helper.findActivityURL(id, style, callback);
 
 				});
+				
+				/* Activity Request CASE */
+				$(execResults).find('ContextMenu').each(function() {
+					window.expanz.logToConsole('ContextMenu received');
+					var caller = window.expanz.currentContextMenu;
+					if(caller != null){
+						window.expanz.logToConsole('Caller found');
+						caller.set({
+							data : null
+						});
+						caller.set({
+							data : $(this)
+						});
+					}
+				});			
 
 				/* FIELD CASE */
 				$(execResults).find('Field').each(function() {
@@ -684,16 +738,18 @@ $(function() {
 				$(execResults).find('File').each(function(data) {
 
 					if ($(this).attr('field') != undefined && $(this).attr('path') != undefined) {
+						window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
 						expanz.Net.GetBlobRequest($(this).attr('field'), activity);
 					}
 					else if ($(this).attr('name') != undefined) {
-
+						window.expanz.logToConsole("File found: " + $(this).attr('name'));
+						expanz.Net.GetFileRequest($(this).attr('name'), activity);
 					}
 					else {
 						window.expanz.logToConsole("Not implemented yet");
 					}
 
-					window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
+					
 
 				});
 

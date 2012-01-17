@@ -84,6 +84,17 @@ $(function() {
 
 	});
 
+	window.expanz.Model.ContextMenu = window.expanz.Model.Method.extend({
+
+		menuItemSelected : function(action) {
+
+			expanz.Net.CreateMenuActionRequest(this.get('parent'), null, null, action)
+			return;
+
+		}
+
+	});
+
 	window.expanz.Model.Activity = expanz.Collection.extend({
 
 		model : expanz.Model.Bindable,
@@ -157,18 +168,6 @@ $(function() {
 		initialize : function(attrs) {
 			expanz.Collection.prototype.initialize.call(this, attrs);
 		},
-
-	// submit : function() {
-	//
-	// expanz.Net.MethodRequest(this.get('id'), [
-	// {
-	// name : "contextObject",
-	// value : this.get('contextObject')
-	// }
-	// ], null, this.get('parent'));
-	//			
-	// return;
-	// }
 
 	});
 
