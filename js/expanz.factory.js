@@ -4,6 +4,20 @@ $(function() {
 
 	window.expanz.Factory = {
 
+		Login : function(loginEl) {
+
+			var loginModel = new window.expanz.Model.Login({ 
+				name : $(loginEl).attr('name'),
+			});
+			var loginView = new window.expanz.Views.LoginView({
+				el : $(loginEl),
+				id : $(loginEl).attr('name'),
+				collection : loginModel
+			});
+
+			return loginView;
+		},		
+		
 		Activity : function(viewNamespace, modelNamespace, activityEl) {
 			// create a collection for each activity
 			var activityModel = new modelNamespace.Activity({ // expanz.Model.Login.Activity

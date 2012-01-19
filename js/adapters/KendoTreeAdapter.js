@@ -18,6 +18,7 @@ $.fn.KendoTreeAdapter = function(options) {
 		view.itemSelected(id, selectionCallback);
 	};
 
+	/* handle options */
 	if (options) {
 		if (options['labelAttribute'] != undefined)
 			labelAttribute = options['labelAttribute'];

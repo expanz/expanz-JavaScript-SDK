@@ -33,9 +33,14 @@ $(function() {
 
 		setAttr : function(attrs) {
 			for ( var key in attrs) {
-				if (key === 'id')
+				if (key === 'id') {
 					this.id = attrs[key];
+				}
+				var oldValue = this.attrs[key];
 				this.attrs[key] = attrs[key];
+				if( oldValue != this.attrs[key] ){
+					this.trigger('update:' + key);
+				}
 			}
 			return true;
 		},
@@ -95,6 +100,51 @@ $(function() {
 
 	});
 
+	window.expanz.Model.Login = expanz.Collection.extend({
+
+		collection : expanz.Model.Bindable,
+
+		initialize : function(attrs) {
+			expanz.Collection.prototype.initialize.call(this, attrs);
+		},
+
+		validate : function() {
+			if (!this.get('username').get('error') && !this.get('password').get('error')) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		},
+
+		login : function() {
+			if (this.validate()) {
+				expanz.Net.CreateSessionRequest(this.get('username').get('value'), this.get('password').get('value'), {
+					success : this.loginCallback,
+					error : expanz._error
+				});
+			}
+			;
+		},
+
+		loginCallback : function(error) {
+			if (error && error.length > 0) {
+				this.get('error').set({
+					value : error
+				});
+			}
+			else {
+				expanz.Net.GetSessionDataRequest({
+					success : function(url) {
+						// redirect to default activity
+						expanz.Views.redirect(url);
+					}
+				});
+			}
+		},
+
+	});
+
 	window.expanz.Model.Activity = expanz.Collection.extend({
 
 		model : expanz.Model.Bindable,
@@ -113,6 +163,7 @@ $(function() {
 		initialize : function(attrs) {
 			this.grids = {};
 			this.dataControls = {};
+			this.loading = false;
 			expanz.Collection.prototype.initialize.call(this, attrs);
 		},
 

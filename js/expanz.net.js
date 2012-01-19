@@ -62,7 +62,7 @@ $(function() {
 			}
 
 			activity.setAttr({
-				loading : true
+				deltaLoading : true
 			});
 
 			SendRequest(RequestObject.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
@@ -123,7 +123,6 @@ $(function() {
 
 			SendNormalRequest(RequestObject.GetBlob(blobId, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks), true);
 		},
-		
 
 		GetFileRequest : function(filename, activity, callbacks) {
 			if (callbacks == undefined)
@@ -135,7 +134,7 @@ $(function() {
 			}
 
 			SendNormalRequest(RequestObject.GetFile(filename, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks), true);
-		},		
+		},
 
 		/* call when selecting something from the tree view (file) */
 		CreateMenuActionRequest : function(activity, contextId, contextType, menuAction, defaultAction, callbacks) {
@@ -213,7 +212,6 @@ $(function() {
 				url : 'GetBlob'
 			};
 		},
-		
 
 		GetFile : function(filename, activity, sessionHandle) {
 			return {
@@ -221,7 +219,6 @@ $(function() {
 				url : 'GetFile'
 			};
 		},
-		
 
 		DataRefresh : function(dataId, activity, sessionHandle) {
 			return {
@@ -374,10 +371,10 @@ $(function() {
 		GetBlob : function(blobId, activity) {
 			return '<activityHandle>' + activity.getAttr('handle') + '</activityHandle><blobId>' + blobId + '</blobId><isbyteArray>false</isbyteArray>';
 		},
-		
+
 		GetFile : function(filename, activity) {
 			return '<activityHandle>' + activity.getAttr('handle') + '</activityHandle><fileName>' + filename + '</fileName><isbyteArray>false</isbyteArray>';
-		},		
+		},
 
 		DataRefresh : function(dataId, activity) {
 			return '<activityHandle>' + activity.getAttr('handle') + '</activityHandle><DataPublication id="' + dataId + '" refresh="1" />';
@@ -614,6 +611,12 @@ $(function() {
 				/* MESSAGE CASE */
 				$(execResults).find('Message').each(function() {
 					if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
+						var sessionLost = /Session .* not found/.test($(this).text());
+						if (sessionLost) {
+							window.expanz.showLoginPopup(activity, true);
+							return;
+						}
+
 						var source = $(this).attr('source');
 						if (source && source != undefined) {
 							var field = activity.get(source);
@@ -665,7 +668,7 @@ $(function() {
 						}
 
 						/* an activity request shouldn't be reloaded from any state -> clean an eventual cookie */
-						window.expanz.Storage.clearActivityCookie(id, style);
+						window.expanz.Storage.clearActivityHandle(id, style);
 
 						var clientMessage = new expanz.Model.ClientMessage({
 							id : 'ActivityRequest',
@@ -677,18 +680,23 @@ $(function() {
 							id : clientMessage.id,
 							model : clientMessage
 						}, $('body'));
+
+						popup.bind('contentLoaded', function() {
+							expanz.CreateActivity($(popup.el).find("[bind=activity]"));
+						});
+
 					};
 
 					/* find url of activity */
 					window.expanz.helper.findActivityURL(id, style, callback);
 
 				});
-				
+
 				/* Activity Request CASE */
 				$(execResults).find('ContextMenu').each(function() {
 					window.expanz.logToConsole('ContextMenu received');
 					var caller = window.expanz.currentContextMenu;
-					if(caller != null){
+					if (caller != null) {
 						window.expanz.logToConsole('Caller found');
 						caller.set({
 							data : null
@@ -697,7 +705,7 @@ $(function() {
 							data : $(this)
 						});
 					}
-				});			
+				});
 
 				/* FIELD CASE */
 				$(execResults).find('Field').each(function() {
@@ -748,8 +756,6 @@ $(function() {
 					else {
 						window.expanz.logToConsole("Not implemented yet");
 					}
-
-					
 
 				});
 
@@ -866,7 +872,7 @@ $(function() {
 			}
 
 			activity.setAttr({
-				loading : false
+				deltaLoading : false
 			});
 			return;
 		}

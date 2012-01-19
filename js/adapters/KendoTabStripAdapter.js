@@ -1,35 +1,27 @@
 function createActivityWithKendoTabs(tabElement, ajaxTabContents, callbacks) {
+	/* array updated each time a tab is loaded */
 	var tabLoaded = new Array();
 
 	var nbDynamicTabs = ajaxTabContents.length;
 
+	/* once a tab is loaded we check if it was the last on, if so we create the activity */
 	var onContentLoad = function(e) {
 		tabLoaded[e.item.textContent] = true;
-		window.expanz.logToConsole(e.item.textContent + " loaded");
 		if (Object.size(tabLoaded) == nbDynamicTabs) {
 			tabLoaded = new Array();
-			window.expanz.logToConsole("load the activity");
 			expanz.CreateActivity($(e.item).parents('[bind=activity]'), callbacks);
 		}
 	};
 
+	/* create kendo ui tab element specifying the url and a callback function when the content is loaded */
 	$(tabElement).kendoTabStrip({
 		contentUrls : ajaxTabContents,
 		contentLoad : onContentLoad
 	});
 
-	/* load all unloaded tabs */
+	/* force load of all unloaded tabs */
 	_.each(tabElement.data("kendoTabStrip").tabGroup.children().not('[class*=k-state-active]').not('[class*=k-tab-on-top]'), function(child) {
 		tabElement.data("kendoTabStrip").reload($(child));
 	});
 
-};
-
-Object.size = function(obj) {
-	var size = 0, key;
-	for (key in obj) {
-		if (obj.hasOwnProperty(key))
-			size++;
-	}
-	return size;
 };

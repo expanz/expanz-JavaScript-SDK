@@ -445,6 +445,39 @@ $(function() {
 
 	});
 
+	window.expanz.Views.LoginView = Backbone.View.extend({
+
+		initialize : function() {
+		},
+
+		events : {
+			"click button" : "attemptLogin",
+		},
+
+		attemptLogin : function() {
+			var usernameEl = this.el.find("#username input");
+			var passwordEl = this.el.find("#password input");
+			
+			if(usernameEl.length == 0 || passwordEl.length == 0 ){
+				expanz._error("username or password field cannot be found on the page");
+			}
+			else{
+				this.collection.add({
+					id : "username",
+					value : usernameEl.val()
+				});
+				this.collection.add({
+					id : "password", 
+					value : passwordEl.val() 
+				});
+				this.collection.login();
+			}
+			
+		},
+
+
+	});	
+	
 	window.expanz.Views.ActivityView = Backbone.View.extend({
 
 		initialize : function(attrs) {
@@ -453,7 +486,7 @@ $(function() {
 				this.key = attrs.key;
 			}
 			this.collection.bind("error", this.updateError, this);
-			this.collection.bind("loading", this.loading, this);
+			this.collection.bind("update:loading", this.loading, this);
 		},
 
 		updateError : function(model, error) {
@@ -470,7 +503,31 @@ $(function() {
 		},
 
 		loading : function() {
-			window.expanz.logToConsole("Activity loading: " + this.collection.loading);
+			var loadingId = "Loading_" + this.id.replace(/\./g,"_"); 
+			var loadingEL = $("body").find("#" + loadingId);
+			if( loadingEL.length == 0 ){
+				$("body").append('<div class="loading" id="'+loadingId+'">Loading content, please wait.. <img src="assets/images/loading.gif" alt="loading.." /></div>');  
+				loadingEL = $("body").find("#" + loadingId);
+			}
+			
+			var isLoading = this.collection.getAttr('loading');
+			if (isLoading) {
+				$(this.el).find("input").attr('disabled', 'disabled');
+				$(this.el).find("button").attr('disabled', 'disabled');
+				$(this.el).addClass('activityLoading');
+				loadingEL.css("position","absolute");
+				var off = this.el.offset();
+				loadingEL.css("top", off.top + ( $(this.el).height()) + "px");
+				loadingEL.css("left", off.left + ( $(this.el).width() / 2 - loadingEL.width() / 2)  + "px");
+				loadingEL.show();
+			}
+			else{
+				$(this.el).find("input:not(.readonlyInput)").removeAttr('disabled');
+				$(this.el).find("button").removeAttr('disabled');
+				$(this.el).removeClass('activityLoading');
+				loadingEL.hide();
+			}
+				
 		}
 
 	});
@@ -551,6 +608,7 @@ $(function() {
 				var that = this;
 				this.el.load(url, function() {
 					that.center();
+					that.trigger('contentLoaded');
 				});
 			}
 			else {
@@ -620,7 +678,7 @@ $(function() {
 					button.click(function() {
 						if (that.model.getAttr('title') == "Order Submitted") {
 							/* clear activity cookies and reload the page */
-							window.expanz.Storage.clearActivityCookies();
+							window.expanz.Storage.clearActivityHandles();
 							window.location.reload();
 						}
 

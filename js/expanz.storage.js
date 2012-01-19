@@ -10,50 +10,57 @@ $(function() {
 
 		// functions
 
-		_getCookiesGlobalName : function() {
+		_getBestStorage : function() {
+			if (window.localStorage)
+				return this.localStorage;
+			else
+				return this.cookies;
+		},
+
+		_getStorageGlobalName : function() {
 			return "_expanz_" + config._AppSite + "_";
 		},
 
 		getSessionHandle : function() {
-			var cookie = $.cookies.get(expanz.Storage._getCookiesGlobalName() + '.session.handle');
-			if (cookie == 'undefined')
+			var sessionHandle = this._getBestStorage().get('session.handle');
+			if (sessionHandle == 'undefined')
 				return undefined;
-			return cookie;
+			return sessionHandle;
 		},
 
 		setSessionHandle : function(sessionHandle) {
-			$.cookies.set(expanz.Storage._getCookiesGlobalName() + '.session.handle', sessionHandle);
-			if ($.cookies.get(expanz.Storage._getCookiesGlobalName() + '.login.url') == null) {
-				setLoginURL(document.location.pathname);
+			this._getBestStorage().set('session.handle', sessionHandle);
+			if (this._getBestStorage().get('login.url') == null) {
+				this.setLoginURL(document.location.pathname);
 			}
 			return true;
 		},
 
 		getActivityHandle : function(activityName, activityStyle) {
-			var cookie = $.cookies.get(expanz.Storage._getCookiesGlobalName() + '.activity.handle.' + activityName + activityStyle);
-			if (cookie == 'undefined')
+			var activityHandle = this._getBestStorage().get('activity.handle.' + activityName + activityStyle);
+			if (activityHandle == 'undefined')
 				return undefined;
-			if (cookie)
-				cookie = cookie.replace('_', '.');
-			return cookie;
+			if (activityHandle)
+				activityHandle = activityHandle.replace('_', '.');
+			return activityHandle;
 		},
 
 		setActivityHandle : function(activityHandle, activityName, activityStyle) {
-			$.cookies.set(expanz.Storage._getCookiesGlobalName() + '.activity.handle.' + activityName + activityStyle, activityHandle.replace('.', '_'));
+			this._getBestStorage().set('activity.handle.' + activityName + activityStyle, activityHandle.replace('.', '_'));
 			return true;
 		},
 
 		getProcessAreaList : function() {
-			return $.cookies.get(expanz.Storage._getCookiesGlobalName() + '.processarea.list');
+			return JSON.parse(this._getBestStorage().get('processarea.list'));
 		},
 
 		setProcessAreaList : function(list) {
-			$.cookies.set(expanz.Storage._getCookiesGlobalName() + '.processarea.list', JSON.stringify(list));
+			this._getBestStorage().set('processarea.list', JSON.stringify(list));
 			return true;
 		},
 
 		getLoginURL : function() {
-			var loginUrl = $.cookies.get(expanz.Storage._getCookiesGlobalName() + '.login.url');
+			var loginUrl = this._getBestStorage().get('login.url');
 			/* if login url is null try to guess it by removing the filename */
 			if (loginUrl == null) {
 				loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
@@ -62,19 +69,85 @@ $(function() {
 		},
 
 		clearSession : function() {
-			$.cookies.del(expanz.Storage._getCookiesGlobalName() + '.session.handle');
-			this.clearActivityCookies();
+			this._getBestStorage().remove('session.handle');
+			this.clearActivityHandles();
 			return true;
 		},
 
-		clearActivityCookies : function(activityName, activityStyle) {
-			_.each($.cookies.filter(expanz.Storage._getCookiesGlobalName() + '.activity.handle'), function(value, name) {
-				$.cookies.del(name);
+		clearActivityHandles : function(activityName, activityStyle) {
+			var storage = this._getBestStorage();
+			var keys = storage.getKeys('activity.handle');
+			_.each(keys, function(key) {
+				storage.remove(key);
 			});
 		},
 
-		clearActivityCookie : function(activityName, activityStyle) {
-			$.cookies.del(expanz.Storage._getCookiesGlobalName() + '.activity.handle.' + activityName + activityStyle);
+		clearActivityHandle : function(activityName, activityStyle) {
+			this._getBestStorage().remove('activity.handle.' + activityName + activityStyle);
+		},
+
+		setLoginURL : function(url) {
+			this._getBestStorage().set('login.url', url);
+			return true;
+		},
+
+		/* storage implementations */
+		/* cookies */
+		cookies : {
+			name : 'cookie',
+			set : function(key, data) {
+				$.cookies.set(expanz.Storage._getStorageGlobalName() + key, data);
+			},
+
+			get : function(key) {
+				return $.cookies.get(expanz.Storage._getStorageGlobalName() + key);
+			},
+
+			getKeys : function(pattern) {
+				var keys = [];
+				_.each($.cookies.filter(pattern), function(value, key) {
+					keys.push(key);
+				});
+				return keys;
+			},
+
+			remove : function(key) {
+				$.cookies.del(expanz.Storage._getStorageGlobalName() + key);
+			},
+		},
+
+		/* localStorage */
+		localStorage : {
+			name : 'localStorage',
+			set : function(key, data) {
+				window.localStorage.setItem(expanz.Storage._getStorageGlobalName() + key, data);
+			},
+
+			get : function(key) {
+				return window.localStorage.getItem(expanz.Storage._getStorageGlobalName() + key);
+			},
+
+			getKeys : function(pattern) {
+				var keys = [];
+				for (i = 0; i < window.localStorage.length; i++) {
+					key = window.localStorage.key(i).substring(expanz.Storage._getStorageGlobalName().length);
+					if (pattern) {
+						if (key.indexOf(pattern) >= 0) {
+							keys.push(key);
+						}
+
+					}
+					else {
+						keys.push(key);
+					}
+				}
+
+				return keys;
+			},
+
+			remove : function(key) {
+				return window.localStorage.removeItem(expanz.Storage._getStorageGlobalName() + key);
+			},
 		},
 
 		// objects
@@ -187,11 +260,6 @@ $(function() {
 
 		}
 
-	};
-
-	var setLoginURL = function(url) {
-		$.cookies.set(expanz.Storage._getCookiesGlobalName() + '.login.url', url);
-		return true;
 	};
 
 });

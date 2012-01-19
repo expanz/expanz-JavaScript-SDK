@@ -1,7 +1,9 @@
 function useKendo() {
 	useKendoPopups();
-	if ($('#ExpanzMenu > ul'))
-		$('#ExpanzMenu > ul').kendoMenu();
+	
+	/* bind menus to kendo ui menu */
+	if ($('[bind=menu] > ul'))
+		$('[bind=menu] > ul').kendoMenu();
 
 	/* context menu overriding creation method */
 	window.expanz.Views.ContextMenuView.prototype.createContextMenu = function() {

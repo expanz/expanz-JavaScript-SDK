@@ -8,6 +8,7 @@ $(function() {
 	//
 	window.App = [];
 	window.expanz = window.expanz || {};
+
 	window.expanz._error = window.expanz._error || function(error) {
 		window.expanz.logToConsole("Expanz JavaScript SDK has encountered an error: " + error);
 	};
@@ -15,11 +16,6 @@ $(function() {
 	window.expanz._info = window.expanz._info || function(info) {
 		window.expanz.logToConsole("Info received: " + info);
 	};
-
-	// Load the Expanz Process Area menu without empty items
-	_.each($('[bind=menu]'), function(el) {
-		loadMenu($(el), false);
-	});
 
 	window.expanz.logToConsole = function(message) {
 		if (typeof (console) != "undefined" && console.log) {
@@ -44,37 +40,11 @@ $(function() {
 		return;
 	};
 
-	//
-	// Public Functions & Objects in the Expanz Namespace
-	//
-	window.expanz.CreateLoginActivity = function(DOMObject, callbacks) {
+	window.expanz.CreateLogin = function(DOMObject, callbacks) {
 
-		//
 		DOMObject || (DOMObject = $('body'));
-		var viewNamespace = expanz.Views.Login;
-		var modelNamespace = expanz.Model.Login;
 
-		var activities = createLoginActivity(viewNamespace, modelNamespace, DOMObject, callbacks);
-		_.each(activities, function(activity) {
-			window.App.push(activity);
-		});
-		return;
-	};
-
-	//
-	// Public Functions & Objects in the Expanz Namespace
-	//
-	window.expanz.CreateLoginActivity = function(DOMObject, callbacks) {
-
-		//
-		DOMObject || (DOMObject = $('body'));
-		var viewNamespace = expanz.Views.Login;
-		var modelNamespace = expanz.Model.Login;
-
-		var activities = createLoginActivity(viewNamespace, modelNamespace, DOMObject, callbacks);
-		_.each(activities, function(activity) {
-			window.App.push(activity);
-		});
+		var login = createLogin(DOMObject, callbacks);
 		return;
 	};
 
@@ -123,20 +93,20 @@ $(function() {
 		}
 
 		content += "<br/><br/>";
-		content += '<section bind="activity" name="login" id="login">';
-		content += '<div bind="field" name="username" id="username">';
+		content += '<form bind="login" name="login" action="javascript:">';
+		content += '<div name="username" id="username">';
 		content += '<input attribute="value" type="text" placeholder="Username"/>';
 		content += '</div>';
-		content += '<div bind="field" name="password" id="password">';
+		content += '<div name="password" id="password">';
 		content += '<input attribute="value" type="password" placeholder="Password"/>';
 		content += '</div>';
-		content += '<div style="margin-top:10px" bind="method" name="login" id="login">';
+		content += '<div style="margin-top:10px" name="login" id="login">';
 		content += '<button type="submit" attribute="submit">login</button>';
 		content += '</div>';
-		content += '<div bind="dependant" name="error" id="error">';
+		content += '<div bind="message" type="error" class="error">';
 		content += '<span attribute="value"></span>';
 		content += '</div>';
-		content += '</section>';
+		content += '</form>';
 
 		var clientMessage = new expanz.Model.ClientMessage({
 			id : 'ExpanzLoginPopup',
@@ -154,10 +124,10 @@ $(function() {
 			window.expanz.logToConsole('callbackLogin');
 		}
 
-		createLoginActivity(expanz.Views.Login, expanz.Model.Login, loginPopup.el);
+		createLogin(loginPopup.el.find('[bind=login]'));
 
 		window.expanz.logToConsole("sessionLost");
-		// expanz.Views.redirect( expanz.Storage.getLoginURL() + "?error=" + encodeURIComponent($(this).text()));
+
 		return;
 
 	}
@@ -272,25 +242,15 @@ $(function() {
 		}
 		return activities;
 	}
-	;
 
-	function createLoginActivity(viewNamespace, modelNamespace, dom) {
+	function createLogin(dom, callbacks) {
 
-		var activities = [];
-		if ($(dom).attr('bind') && ($(dom).attr('bind').toLowerCase() === 'activity')) {
-
-			var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
-			activities.push(activityView);
-
+		var loginView;
+		if ($(dom).attr('bind') && ($(dom).attr('bind').toLowerCase() === 'login')) {
+			loginView = expanz.Factory.Login(dom);
 		}
-		else {
-			// search through DOM body, looking for elements with 'bind' attribute
-			_.each($(dom).find('[bind=activity]'), function(activityEl) {
-				var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
-				activities.push(activityView);
-			}); // _.each activity
-		}
-		return activities;
+		
+		return loginView;
 	}
 
 	function loadMenu(el, displayEmptyItems) {
@@ -325,5 +285,22 @@ $(function() {
 		});
 		return processAreasMenu;
 	}
+
+	window.expanz.logToConsole("Loading menu, setting callbacks and creating activities");
+
+	/* Load the Expanz Process Area menu without empty items */
+	_.each($('[bind=menu]'), function(el) {
+		loadMenu($(el), false);
+	});
+
+	/* registering callback for error/info messages */
+	expanz.SetErrorCallback(expanz.basicMsgDisplay('[bind=message][type=error]'));
+	expanz.SetInfoCallback(expanz.basicMsgDisplay('[bind=message][type=info]'));
+
+	/* create login if exists */
+	expanz.CreateLogin($('[bind=login]'));
+
+	/* create all activities where autoLoad attribute is not set to false */
+	expanz.CreateActivity($('[bind=activity][autoLoad!="false"]'));
 
 })
