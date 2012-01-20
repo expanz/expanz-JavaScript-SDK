@@ -22,6 +22,10 @@ $(function() {
 			miniCartContextObject : "StockTranItem",
 
 			searchMethodName : "StockTranItem.listMatchingItems",
+			
+			shoppingCartPage : "shoppingCart.html",
+			
+			shoppingCartCheckoutPage : "shoppingCartCheckout.html",
 
 			components : [
 				'Search', 'Cart', 'Tree', 'List', 'Checkout'
@@ -94,7 +98,7 @@ $(function() {
 				html += '</div>';
 				html += '</script>';
 
-				html += '<div id="productListDiv" itemsPerPage="1000" name="' + this.productListName + '" bind="grid" populateMethod="' + this.productListPopMethod + '" contextObject="' + this.productListContextObject + '"></div>';
+				html += '<div id="productListDiv"  itemsPerPage="1000" name="' + this.productListName + '" bind="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 
 				html += "</div>";
 				return html;
@@ -120,17 +124,18 @@ $(function() {
 			},
 
 			_executeAfterRenderTreeComponent : function() {
+				var that = this;
 				$("#categoriesTree").KendoTreeAdapter({
 					labelAttribute : 'value',
 					expandedOnLoad : true,
 					selectionCallback : {
 						success : function() {
-							expanz.Net.MethodRequest('listItemsForCategoryFiltered', [
+							/*expanz.Net.MethodRequest(that.productListPopMethod, [
 								{
 									name : "contextObject",
 									value : 'StockTranItem.ItemForSale'
 								}
-							], null, window.App[0].collection);
+							], null, window.App[0].collection);*/
 						},
 						error : function(e) {
 							window.expanz.logToConsole('error: ' + e);
@@ -159,7 +164,7 @@ $(function() {
 				html += this._renderReadOnlyField("Total", true);
 				html += this._renderReadOnlyField("Freight", true);
 				html += "<br/>";
-				html += '<button onclick="window.location=\'shoppingCartCheckout.html\'">Go to Checkout</button>';
+				html += '<button onclick="window.location=\''+this.shoppingCartCheckoutPage+'\'">Go to Checkout</button>';
 				html += "</div>";
 
 				html += "</div>";
@@ -172,7 +177,7 @@ $(function() {
 					$("#lvMiniCart").find("[id*='_userinput_'][format='numeric']").each(function() {
 						$(this).kendoNumericTextBox({
 							min : 1,
-							max : 10,
+							max : 100,
 							step : 1,
 							format : "n0"
 						});
@@ -251,7 +256,7 @@ $(function() {
 				html += this._clearBoth();
 				html += "<br/><div>";
 
-				html += '<span><button id="gotoCart" type="button" onclick="window.location=\'shoppingCart.html\'">Edit cart</button></span>';
+				html += '<span><button id="gotoCart" type="button" onclick="window.location=\''+this.shoppingCartPage+'\'">Edit cart</button></span>';
 				html += this._renderMethod("Checkout", "Pay now");
 
 				return html;
@@ -262,7 +267,7 @@ $(function() {
 					$("#checkoutCart").find("[id*='_userinput_'][format='numeric']").each(function() {
 						$(this).kendoNumericTextBox({
 							min : 1,
-							max : 10,
+							max : 100,
 							step : 1,
 							format : "n0"
 						});

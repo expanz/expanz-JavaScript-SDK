@@ -181,6 +181,7 @@ $(function() {
 				var gridModel = new modelNamespace.Data.Grid({
 					id : $(gridEl).attr('name'),
 					populateMethod : $(gridEl).attr('populateMethod'),
+					autoPopulate : $(gridEl).attr('autoPopulate'),
 					contextObject : $(gridEl).attr('contextObject')
 				});
 				var view = new viewNamespace.GridView({

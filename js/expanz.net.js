@@ -294,7 +294,8 @@ $(function() {
 			if (activity.hasGrid()) {
 				_.each(activity.getGrids(), function(grid, gridId) {
 					var populateMethod = grid.getAttr('populateMethod') ? ' populateMethod="' + grid.getAttr('populateMethod') + '"' : '';
-					center += '<DataPublication id="' + gridId + '"' + populateMethod;
+					var autoPopulate = grid.getAttr('autoPopulate') ? ' autoPopulate="' + grid.getAttr('autoPopulate') + '"' : '';
+					center += '<DataPublication id="' + gridId + '"' + populateMethod + autoPopulate;
 					grid.getAttr('contextObject') ? center += ' contextObject="' + grid.getAttr('contextObject') + '"' : '';
 					center += '/>';
 				});
@@ -303,7 +304,7 @@ $(function() {
 			if (activity.hasDataControl()) {
 				_.each(activity.getDataControls(), function(dataControl, dataControlId) {
 					var populateMethod = dataControl.get('populateMethod') ? ' populateMethod="' + dataControl.get('populateMethod') + '"' : '';
-					center += '<DataPublication id="' + dataControlId + '"' + populateMethod + ' Type="' + dataControl.get('type') + '"';
+					center += '<DataPublication id="' + dataControlId + '"' + populateMethod  + ' Type="' + dataControl.get('type') + '"';
 					dataControl.get('contextObject') ? center += ' contextObject="' + dataControl.get('contextObject') + '"' : '';
 					center += '/>';
 				});

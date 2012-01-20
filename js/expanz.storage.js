@@ -211,16 +211,15 @@ $(function() {
 				else {
 					var ulId = this.id + '_' + level;
 					if (this.activities.length > 0) {
-						/* replace the link of the div a if only one activity in the menu */
+						/* replace the link of the parent if only one activity in the menu */
 						if (this.activities.length == 1) {
-							// el.find("class='menuTitle'").html(this.activities[0].title);
 							var url = this.activities[0].url;
 							el.find("[class='menuTitle']").attr('href', url);
 						}
 						else {
 							el.append('<ul style="display:none" id="' + ulId + '"></ul>');
 							el.click(function() {
-								el.find("#" + ulId).toggle();
+								//el.find("#" + ulId).toggle();
 							});
 							_.each(this.activities, function(activity) {
 								activity.load(el.find("#" + ulId), false);
@@ -229,12 +228,13 @@ $(function() {
 					}
 
 					if (this.pa && this.pa.length > 0) {
-						if (el.find("#" + ulId).find().length == 0) {
+						if (el.find("#" + ulId).length == 0) {
 							el.append('<ul style="display:none" id="' + ulId + '"></ul>');
 						}
 						var i = 0;
 						_.each(this.pa, function(subprocess) {
-							var liID = subprocess.id + '_li_' + i++;
+							var liID = ulId + '_li_' + i++;
+							if(subprocess.id == undefined) subprocess.id = liID;
 							el.find("#" + ulId).append('<li class="processarea menuitem" id="' + liID + '"><a class="menuTitle" href="#">' + subprocess.title + '</a></li>');
 							subprocess.load(el.find('#' + liID + '.processarea.menuitem'), level + 1);
 						});
