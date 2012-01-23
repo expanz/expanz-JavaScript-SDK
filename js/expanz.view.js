@@ -512,6 +512,9 @@ $(function() {
 			
 			var isLoading = this.collection.getAttr('loading');
 			if (isLoading) {
+				/* disabling all inputs and button */
+				$(this.el).find("input").attr('loading','true');
+				$(this.el).find("button").attr('loading','true');
 				$(this.el).find("input").attr('disabled', 'disabled');
 				$(this.el).find("button").attr('disabled', 'disabled');
 				$(this.el).addClass('activityLoading');
@@ -522,8 +525,11 @@ $(function() {
 				loadingEL.show();
 			}
 			else{
-				$(this.el).find("input:not(.readonlyInput)").removeAttr('disabled');
-				$(this.el).find("button").removeAttr('disabled');
+				/* enabling all inputs and button except those having the readonlyInput class or  added dynamically */
+				$(this.el).find("input:not(.readonlyInput):[loading='true']").removeAttr('disabled');
+				$(this.el).find("button[loading='true']").removeAttr('disabled');
+				$(this.el).find("input[loading='true']").removeAttr('loading');
+				$(this.el).find("button[loading='true']").removeAttr('loading');
 				$(this.el).removeClass('activityLoading');
 				loadingEL.hide();
 			}

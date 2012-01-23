@@ -501,7 +501,8 @@ $(function() {
 				$(execResults).find('Message').each(function() {
 					if ($(this).attr('type') == 'Error') {
 						var sessionLost = /Session .* not found/.test($(this).text());
-						if (sessionLost) {
+						var activityNotFound = /Activity .* not found/.test($(this).text());
+						if (sessionLost || activityNotFound) {
 							window.expanz.showLoginPopup(activity, true);
 							return;
 						}
@@ -1067,7 +1068,7 @@ $(function() {
 
 			// add cells to this row
 			_.each($(row).find('Cell'), function(cell) {
-				gridModel.addCell(rowId, $(cell).attr('id'), $(cell).html(), columnMap[$(cell).attr('id')]);
+				gridModel.addCell(rowId, $(cell).attr('id'), $(cell).html(), columnMap[$(cell).attr('id')],$(cell).attr('sortValue'));
 			});
 		});
 		gridModel.trigger("update:grid");

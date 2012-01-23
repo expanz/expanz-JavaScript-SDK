@@ -249,7 +249,7 @@ $(function() {
 		if ($(dom).attr('bind') && ($(dom).attr('bind').toLowerCase() === 'login')) {
 			loginView = expanz.Factory.Login(dom);
 		}
-		
+
 		return loginView;
 	}
 
@@ -273,14 +273,18 @@ $(function() {
 					menuItem.parent = parentProcessAreaMenu;
 
 				_.each(processArea.activities, function(activity) {
-					menuItem.activities.push(new expanz.Storage.ActivityMenu(activity.name, activity.title, activity.url, activity.img));
+					if (displayEmptyItems || (activity.url != '' && activity.url.length > 1)) {
+						menuItem.activities.push(new expanz.Storage.ActivityMenu(activity.name, activity.title, activity.url, activity.img));
+					}
 				});
 
 				if (processArea.pa.length > 0) {
 					menuItem.pa = loadProcessArea(processArea.pa, displayEmptyItems, menuItem);
 				}
 
-				processAreasMenu.push(menuItem);
+				if (displayEmptyItems || menuItem.activities.length > 0) {
+					processAreasMenu.push(menuItem);
+				}
 			}
 		});
 		return processAreasMenu;
@@ -288,6 +292,18 @@ $(function() {
 
 	window.expanz.logToConsole("Loading menu, setting callbacks and creating activities");
 
+	
+	/* load resource bundle */
+	jQuery.i18n.properties({
+	    name:'Messages', 
+	    path:'assets/bundle/', 
+	    mode:'map',
+	    cache: true,
+	    callback: function() {
+	   	 window.expanz.logToConsole("Bundle loaded");
+	    }
+	});
+	
 	/* Load the Expanz Process Area menu without empty items */
 	_.each($('[bind=menu]'), function(el) {
 		loadMenu($(el), false);

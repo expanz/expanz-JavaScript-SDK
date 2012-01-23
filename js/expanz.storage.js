@@ -22,22 +22,22 @@ $(function() {
 		},
 
 		getSessionHandle : function() {
-			var sessionHandle = this._getBestStorage().get('session.handle');
+			var sessionHandle = this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'session.handle');
 			if (sessionHandle == 'undefined')
 				return undefined;
 			return sessionHandle;
 		},
 
 		setSessionHandle : function(sessionHandle) {
-			this._getBestStorage().set('session.handle', sessionHandle);
-			if (this._getBestStorage().get('login.url') == null) {
+			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'session.handle', sessionHandle);
+			if (this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'login.url') == null) {
 				this.setLoginURL(document.location.pathname);
 			}
 			return true;
 		},
 
 		getActivityHandle : function(activityName, activityStyle) {
-			var activityHandle = this._getBestStorage().get('activity.handle.' + activityName + activityStyle);
+			var activityHandle = this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle);
 			if (activityHandle == 'undefined')
 				return undefined;
 			if (activityHandle)
@@ -46,21 +46,24 @@ $(function() {
 		},
 
 		setActivityHandle : function(activityHandle, activityName, activityStyle) {
-			this._getBestStorage().set('activity.handle.' + activityName + activityStyle, activityHandle.replace('.', '_'));
+			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle, activityHandle.replace('.', '_'));
 			return true;
 		},
 
 		getProcessAreaList : function() {
-			return JSON.parse(this._getBestStorage().get('processarea.list'));
+			if (typeof this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'processarea.list') == "object") {
+				return this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'processarea.list');
+			}
+			return JSON.parse(this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'processarea.list'));
 		},
 
 		setProcessAreaList : function(list) {
-			this._getBestStorage().set('processarea.list', JSON.stringify(list));
+			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'processarea.list', JSON.stringify(list));
 			return true;
 		},
 
 		getLoginURL : function() {
-			var loginUrl = this._getBestStorage().get('login.url');
+			var loginUrl = this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'login.url');
 			/* if login url is null try to guess it by removing the filename */
 			if (loginUrl == null) {
 				loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
@@ -69,25 +72,25 @@ $(function() {
 		},
 
 		clearSession : function() {
-			this._getBestStorage().remove('session.handle');
+			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'session.handle');
 			this.clearActivityHandles();
 			return true;
 		},
 
 		clearActivityHandles : function(activityName, activityStyle) {
 			var storage = this._getBestStorage();
-			var keys = storage.getKeys('activity.handle');
+			var keys = storage.getKeys(expanz.Storage._getStorageGlobalName() + 'activity.handle');
 			_.each(keys, function(key) {
 				storage.remove(key);
 			});
 		},
 
 		clearActivityHandle : function(activityName, activityStyle) {
-			this._getBestStorage().remove('activity.handle.' + activityName + activityStyle);
+			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle);
 		},
 
 		setLoginURL : function(url) {
-			this._getBestStorage().set('login.url', url);
+			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'login.url', url);
 			return true;
 		},
 
@@ -96,11 +99,11 @@ $(function() {
 		cookies : {
 			name : 'cookie',
 			set : function(key, data) {
-				$.cookies.set(expanz.Storage._getStorageGlobalName() + key, data);
+				$.cookies.set(key, data);
 			},
 
 			get : function(key) {
-				return $.cookies.get(expanz.Storage._getStorageGlobalName() + key);
+				return $.cookies.get(key);
 			},
 
 			getKeys : function(pattern) {
@@ -112,7 +115,7 @@ $(function() {
 			},
 
 			remove : function(key) {
-				$.cookies.del(expanz.Storage._getStorageGlobalName() + key);
+				$.cookies.del(key);
 			},
 		},
 
@@ -120,17 +123,17 @@ $(function() {
 		localStorage : {
 			name : 'localStorage',
 			set : function(key, data) {
-				window.localStorage.setItem(expanz.Storage._getStorageGlobalName() + key, data);
+				window.localStorage.setItem(key, data);
 			},
 
 			get : function(key) {
-				return window.localStorage.getItem(expanz.Storage._getStorageGlobalName() + key);
+				return window.localStorage.getItem(key);
 			},
 
 			getKeys : function(pattern) {
 				var keys = [];
 				for (i = 0; i < window.localStorage.length; i++) {
-					key = window.localStorage.key(i).substring(expanz.Storage._getStorageGlobalName().length);
+					key = window.localStorage.key(i);
 					if (pattern) {
 						if (key.indexOf(pattern) >= 0) {
 							keys.push(key);
@@ -146,7 +149,7 @@ $(function() {
 			},
 
 			remove : function(key) {
-				return window.localStorage.removeItem(expanz.Storage._getStorageGlobalName() + key);
+				return window.localStorage.removeItem(key);
 			},
 		},
 
@@ -155,11 +158,20 @@ $(function() {
 		AppSiteMenu : function() {
 			this.processAreas = [];
 
-			this.load = function(el) {
+			this.load = function(el, level, parentSubProcesses) {
 				el.html("");
 				if (el.attr('type') == 'icon') {
+					if (level > 0) {
+						el.append('<div id="backOneLevel" class="icon"><img src="assets/images/home.png">Back</div>');
+						el.find("#backOneLevel").click(function() {
+							var menu = new expanz.Storage.AppSiteMenu();
+							menu.processAreas = parentSubProcesses;
+							menu.load(el.closest("[bind=menu]"), level - 1);
+						});
+					}
+					var that = this;
 					_.each(this.processAreas, function(pA) {
-						pA.load(el, 0, true);
+						pA.load(el, 0, true, that.processAreas);
 					});
 				}
 				else {
@@ -195,7 +207,7 @@ $(function() {
 			this.activities = [];
 			this.pa = []; /* sub process area */
 
-			this.load = function(el, level, displayAsIcons) {
+			this.load = function(el, level, displayAsIcons, parentSubProcesses) {
 				if (displayAsIcons === true) {
 
 					_.each(this.activities, function(activity) {
@@ -203,8 +215,19 @@ $(function() {
 					});
 
 					if (this.pa && this.pa.length > 0) {
+						var i = 0;
+						var j = new Date().getTime();
 						_.each(this.pa, function(subprocess) {
-							subprocess.load(el, level + 1, true);
+							var subId = 'subprocess' + j + "_" + i++;
+							el.append('<div id="' + subId + '" class="icon"><img src="' + subprocess.img + '"/><br/> ' + subprocess.title + '</div>');
+
+							el.find("#" + subId).click(function() {
+								var menu = new expanz.Storage.AppSiteMenu();
+								menu.processAreas = [
+									subprocess
+								];
+								menu.load(el.closest("[bind=menu]"), level + 1, parentSubProcesses);
+							});
 						});
 					}
 				}
@@ -219,7 +242,7 @@ $(function() {
 						else {
 							el.append('<ul style="display:none" id="' + ulId + '"></ul>');
 							el.click(function() {
-								//el.find("#" + ulId).toggle();
+								// el.find("#" + ulId).toggle();
 							});
 							_.each(this.activities, function(activity) {
 								activity.load(el.find("#" + ulId), false);
@@ -234,7 +257,8 @@ $(function() {
 						var i = 0;
 						_.each(this.pa, function(subprocess) {
 							var liID = ulId + '_li_' + i++;
-							if(subprocess.id == undefined) subprocess.id = liID;
+							if (subprocess.id == undefined)
+								subprocess.id = liID;
 							el.find("#" + ulId).append('<li class="processarea menuitem" id="' + liID + '"><a class="menuTitle" href="#">' + subprocess.title + '</a></li>');
 							subprocess.load(el.find('#' + liID + '.processarea.menuitem'), level + 1);
 						});

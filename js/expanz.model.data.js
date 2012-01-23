@@ -70,6 +70,9 @@ $(function() {
 
 			var map = new Object();
 			_.each(cells, function(cell) {
+				/*
+				 * map[cell.get('field')] = { value : cell.get('value'), sortValue : cell.get('sortValue'), };
+				 */
 				map[cell.get('field')] = cell.get('value');
 			});
 			/* using a data to put the data to avoid underscore 'variable is not defined' error */
@@ -168,12 +171,13 @@ $(function() {
 			});
 		},
 
-		addCell : function(_rowId, _cellId, _value, _field) {
+		addCell : function(_rowId, _cellId, _value, _field, _sortValue) {
 
 			this.get(_rowId).add({
 				id : _cellId,
 				value : _value,
-				field : _field
+				field : _field,
+				sortValue : _sortValue
 			});
 		},
 
