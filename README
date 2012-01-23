@@ -6,22 +6,29 @@ SDK Usage Examples:
 
 <html>
 <head>
-<script type='text/javascript' src='/js/expanz.login.js' />
-<script type='text/javascript'>
-     function error( result ){
-          // display error to user
-     }
-</script>
+<script type='text/javascript' src='js/config.js'></script>
+<script type="text/javascript" src="[..]/Expanz-JavaScript-SDK/js/min/expanz.sdk.js"></script>
 </head>
 
 <body>
-     <span>Username</span>
-     <input type='text' data-bind='value: username'></input>
-     
-     <span>Password</span>
-     <input type='text' data-bind='value: password'></input>
+	<form bind="login" name="login" class="login" action="javascript:">
 
-     <button data-bind='click: login'>login</button>
+		<div name="username" id="username" class="textinput">
+			<input attribute="value" type="text" placeholder="Username" value="cennis" />
+		</div>
+
+		<div name="password" id="password" class="textinput">
+			<input attribute="value" type="password" placeholder="Password" value="1" />
+		</div>
+		<br />
+		<div style="width: 240px;" id="login">
+			<button type='submit' attribute="submit">login</button>
+		</div>
+
+		<div bind="message" type="error" class="error">
+			<span attribute="value"></span>
+		</div>
+	</form>
 </body>
 </html>
 
@@ -32,26 +39,47 @@ SDK Usage Examples:
 
 <html>
 <head>
-<script type='text/javascript' src='/js/expanz.js' />
-<script type='text/javascript'>
-     function error( result ){
-          // display error to user
-     }
-</script>
+<script type='text/javascript' src='js/config.js'></script>
+<script type="text/javascript" src="[..]/Expanz-JavaScript-SDK/js/min/expanz.sdk.js"></script>
 </head>
 
 <body>
-     <div id='Activity' name='MyExpanzApp'>
+<section bind="menu" class='menu' id="ExpanzMenu"></section>
 
-          <span data-bind='text: myFieldNameA.label'></span>
-          <input type='text' data-bind='value: myFieldNameA.value'></input>
-     
-          <span data-bind='text: myFieldNameB.label'></span>
-          <input type='text' data-bind='value: myFieldNameB.value'></input>
+	<section bind="activity" name='MyExpanzActivity' activityStyle='MyExpanzStyle' class='container'>
 
-          <button id='submit' method-name='myMethodName' data-bind='click: callMethod' >myMethodName</button>
+			<div bind="field" name="field1" class='textinput'>
+				<label attribute="label"></label>
+				<input  type='text' attribute='value' />
+			</div>
+			
+			<div bind="field" name="field2" class='textinput'>
+				<label attribute="label"></label>
+				<input  type='text' attribute='value' />
+			</div>			
 
-     </div>
+			<div bind="method" name="add">
+				<button attribute="submit">add field1 and field2</button>
+			</div>
+			
+			<div bind="field" name="result" class='textinput'>
+				<label attribute="label"></label>
+				<input  type='text' attribute='value' />
+			</div>				
+
+		</div>
+
+		<div style='clear: both' />
+
+		<div bind="message" type="error" class="error">
+			<span attribute="value"></span>
+		</div>
+
+		<div bind="message" type="info" class="info">
+			<span attribute="value"></span>
+		</div>
+
+	</section>
 </body>
 </html>
 
