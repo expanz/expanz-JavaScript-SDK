@@ -379,7 +379,8 @@ $(function() {
 			</Activity> \
 			';
 		window.expanz.Net.CreateAnonymousRequest(xml, {
-			error : expanz._error
+			error : expanz._error,
+			info : expanz._info
 		});
 	}
 

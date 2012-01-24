@@ -491,8 +491,15 @@ $(function() {
 				window.expanz.logToConsole("Success:" + success);
 
 				if (serverMessage != null && serverMessage.length > 0) {
-					if (callbacks && callbacks.error) {
-						callbacks.error(serverMessage);
+					if (success) {
+						if (callbacks && callbacks.info) {
+							callbacks.info(serverMessage);
+						}
+					}
+					else {
+						if (callbacks && callbacks.error) {
+							callbacks.error(serverMessage);
+						}
 					}
 				}
 
