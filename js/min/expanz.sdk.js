@@ -11184,7 +11184,7 @@ $(function() {
 				}
 				var oldValue = this.attrs[key];
 				this.attrs[key] = attrs[key];
-				if( oldValue != this.attrs[key] ){
+				if (oldValue != this.attrs[key]) {
 					this.trigger('update:' + key);
 				}
 			}
@@ -11200,6 +11200,8 @@ $(function() {
 	});
 
 	window.expanz.Model.Field = expanz.Model.Bindable.extend({
+
+		_type : 'Field',
 
 		defaults : function() {
 			return {
@@ -11220,6 +11222,8 @@ $(function() {
 	});
 
 	window.expanz.Model.Method = expanz.Model.Bindable.extend({
+
+		_type : 'Method',
 
 		submit : function() {
 
@@ -11528,6 +11532,11 @@ $(function() {
 			SendRequest(RequestObject.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
 		},
 
+		/* create an anonymous request */
+		CreateAnonymousRequest : function(xmlData, callbacks) {
+			SendRequest(RequestObject.CreateAnonymousRequest(xmlData), parseExecAnonymousResponse(callbacks));
+		},
+
 	};
 
 	//
@@ -11613,15 +11622,22 @@ $(function() {
 			};
 		},
 
+		CreateAnonymousRequest : function(xmlData) {
+			return {
+				data : buildRequest('ExecAnonymousX', 'http://www.expanz.com/ESAService', null, true)(xmlData),
+				url : 'ExecAnonymousX'
+			};
+		},
+
 	};
 
 	//
 	// XML Message Contruction Functions
 	//
-	var buildRequest = function(requestType, xmlns, sessionHandle) {
+	var buildRequest = function(requestType, xmlns, sessionHandle, includeSite) {
 		return function insertBody(body) {
-
-			var head = '<' + requestType + ' xmlns="' + xmlns + '">' + '<xml>' + '<ESA>';
+			var site = includeSite ? '<site>' + config._AppSite + '</site>' : '';
+			var head = '<' + requestType + ' xmlns="' + xmlns + '">' + site + '<xml><ESA>';
 			var tail = '</ESA>' + '</xml>';
 			tail += sessionHandle ? '<sessionHandle>' + sessionHandle + '</sessionHandle>' : '';
 			tail += '</' + requestType + '>';
@@ -11670,6 +11686,18 @@ $(function() {
 				center += activity.getAttr('key') ? ' initialKey="' + activity.getAttr('key') + '">' : '>';
 			}
 
+			/* ask for fields we want to avoid getting everything */
+			var fields = activity.getAll();
+			if (fields) {
+				_.each(fields, function(field) {
+					if (field._type == 'Field') {
+						// console.log(field);
+						center += '<Field id="' + field.get('id') + '" />';
+					}
+				})
+			}
+
+			/* add datapublication for grids */
 			if (activity.hasGrid()) {
 				_.each(activity.getGrids(), function(grid, gridId) {
 					var populateMethod = grid.getAttr('populateMethod') ? ' populateMethod="' + grid.getAttr('populateMethod') + '"' : '';
@@ -11680,10 +11708,11 @@ $(function() {
 				});
 			}
 
+			/* add datapublication for data controls */
 			if (activity.hasDataControl()) {
 				_.each(activity.getDataControls(), function(dataControl, dataControlId) {
 					var populateMethod = dataControl.get('populateMethod') ? ' populateMethod="' + dataControl.get('populateMethod') + '"' : '';
-					center += '<DataPublication id="' + dataControlId + '"' + populateMethod  + ' Type="' + dataControl.get('type') + '"';
+					center += '<DataPublication id="' + dataControlId + '"' + populateMethod + ' Type="' + dataControl.get('type') + '"';
 					dataControl.get('contextObject') ? center += ' contextObject="' + dataControl.get('contextObject') + '"' : '';
 					center += '/>';
 				});
@@ -11831,6 +11860,27 @@ $(function() {
 
 		});
 
+	}
+
+	function parseExecAnonymousResponse(callbacks) {
+		return function apply(xml) {
+			window.expanz.logToConsole("start parseExecAnonymousResponse");
+			var execResults = $(xml).find('ExecAnonymousXResult')
+			var success = false;
+			if (execResults.length > 0) {
+				var esaResult = $(execResults).find('ESA');
+				success = boolValue(esaResult.attr('success'));
+				var serverMessage = esaResult.attr('serverMessage');
+				window.expanz.logToConsole("Success:" + success);
+
+				if (serverMessage != null && serverMessage.length > 0) {
+					if (callbacks && callbacks.error) {
+						callbacks.error(serverMessage);
+					}
+				}
+
+			}
+		}
 	}
 
 	function parseGetSessionDataResponse(callbacks) {
@@ -12447,7 +12497,7 @@ $(function() {
 
 			// add cells to this row
 			_.each($(row).find('Cell'), function(cell) {
-				gridModel.addCell(rowId, $(cell).attr('id'), $(cell).html(), columnMap[$(cell).attr('id')],$(cell).attr('sortValue'));
+				gridModel.addCell(rowId, $(cell).attr('id'), $(cell).html(), columnMap[$(cell).attr('id')], $(cell).attr('sortValue'));
 			});
 		});
 		gridModel.trigger("update:grid");

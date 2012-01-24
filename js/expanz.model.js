@@ -38,7 +38,7 @@ $(function() {
 				}
 				var oldValue = this.attrs[key];
 				this.attrs[key] = attrs[key];
-				if( oldValue != this.attrs[key] ){
+				if (oldValue != this.attrs[key]) {
 					this.trigger('update:' + key);
 				}
 			}
@@ -54,6 +54,8 @@ $(function() {
 	});
 
 	window.expanz.Model.Field = expanz.Model.Bindable.extend({
+
+		_type : 'Field',
 
 		defaults : function() {
 			return {
@@ -74,6 +76,8 @@ $(function() {
 	});
 
 	window.expanz.Model.Method = expanz.Model.Bindable.extend({
+
+		_type : 'Method',
 
 		submit : function() {
 

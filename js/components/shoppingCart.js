@@ -369,4 +369,31 @@ $(function() {
 		return discount;
 	};
 
+	window.expanz.html.submitLostPasswordForm = function(loginCode, EmailAdress) {
+		var xml = '\
+			<Activity id="ERP.Person"> \
+				<Delta id="LoginCode" value="' + loginCode + '" /> \
+				<Delta id="EmailAddress" value="' + EmailAdress + '" /> \
+				<Method name="resetMyPasswordAnon"> \
+				</Method> \
+			</Activity> \
+			';
+		window.expanz.Net.CreateAnonymousRequest(xml, {
+			error : expanz._error
+		});
+	}
+
+	window.expanz.html.showLostPasswordPopup = function() {
+		var clientMessage = new expanz.Model.ClientMessage({
+			id : 'lostPasswordPopup',
+			title : 'Lost password',
+			url : 'lostPassword.html'
+		});
+
+		var lostPwdPopup = new window.expanz.Views.UIMessage({
+			id : clientMessage.id,
+			model : clientMessage
+		}, $('body'));
+	}
+
 });
