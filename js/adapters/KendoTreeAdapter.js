@@ -7,6 +7,7 @@ $.fn.KendoTreeAdapter = function(options) {
 	var labelAttribute = 'title';
 	var idAttribute = 'id';
 	var expandedOnLoad = false;
+	var filteringInput = []; /* array of input element */
 
 	/* function called after the delta has been sent and the response has been handle by the client */
 	/* format is selectionCallback = { success : function(){ <doing some actions> } } */
@@ -31,7 +32,9 @@ $.fn.KendoTreeAdapter = function(options) {
 		if (options['parentSelectable'] != undefined)
 			parentSelectable = options['parentSelectable'];
 		if (options['expandedOnLoad'] != undefined)
-			expandedOnLoad = options['expandedOnLoad'];		
+			expandedOnLoad = options['expandedOnLoad'];
+		if (options['filteringInput'] != undefined)
+			filteringInput = options['filteringInput'];
 	}
 
 	/**
@@ -75,6 +78,7 @@ $.fn.KendoTreeAdapter = function(options) {
 			dataSource : data
 		});
 
+		/* bind the selection of tree item */
 		treeView.data("kendoTreeView").bind("select", function(event) {
 			/*
 			 * unfortunately we cannot attach any data/id to the tree items -> we need to do a lookup based on the child label in the xml datasource to retrieve the child id
@@ -85,9 +89,74 @@ $.fn.KendoTreeAdapter = function(options) {
 				onSelection(view, elem.attr('id'), elem.is(childTag));
 			}
 		});
+
+		/* if there is a filtering input field or button we bind the on change/click event to and filter the tree */
+		if (filteringInput && filteringInput.length > 0) {
+			/* for input we take the value set by the user */
+			var filterInputs = function(event) {
+				filterData(event, $(this).val(), data);
+			}
+
+			/* for button we look for a filter attribute in the button */
+			var filterButtons = function(event) {
+				filterData(event, $(this).attr('filter'), data);
+			}
+
+			_.each(filteringInput, function(el) {
+				if ($(el).is("input")) {
+					$(el).val("");
+					$(el).bind("change", filterInputs);
+				}
+				else if ($(el).is("button")) {
+					$(el).bind("click", filterButtons);
+				}
+			});
+
+		}
+
 	};
 
-	/* bind listenners */
+	/* filter data */
+	var filterData = function(event, filter, originalData) {
+		var newData;
+
+		if (filter instanceof Array) {
+			filter = str.join("|");
+		}
+
+		if (filter == null || filter == '') {
+			newData = originalData;
+		}
+		else {
+			/* creating a filtered array of data */
+			var regExp = new RegExp(filter, "i");
+			var newData = new Array();
+			_.each(originalData, function(subData) {
+				var parentObj = new Object();
+				parentObj.text = subData.text;
+				parentObj.expanded = subData.expanded;
+				var items = new Array();
+				_.each(subData.items, function(subItem) {
+					if (subItem.text.match(regExp)) {
+						items.push(subItem);
+					}
+				});
+				if (items.length > 0) {
+					parentObj.items = items;
+					newData.push(parentObj);
+				}
+			});
+		}
+		/* cleaning the treeview and removing kendo classes and then create a new treeview */
+		treeView.html("");
+		treeView.removeClass("k-widget k-treeview k-reset");
+		treeView.kendoTreeView({
+			dataSource : newData
+		});
+	}
+
+	/* bind listenner */
 	$(this).bind("publishData", publishData);
+	(this).bind("filterData", filterData);
 
 }
