@@ -25,7 +25,8 @@ $(function() {
 				title : $(activityEl).attr('title'),
 				url : $(activityEl).attr('url'),
 				key : $(activityEl).attr('key'),
-				style : $(activityEl).attr('activityStyle')
+				style : $(activityEl).attr('activityStyle'),
+				optimisation : $(activityEl).attr('optimisation') ? boolValue($(activityEl).attr('optimisation')) : true
 			});
 			var activityView = new viewNamespace.ActivityView({
 				el : $(activityEl),

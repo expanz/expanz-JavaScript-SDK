@@ -10909,7 +10909,8 @@ $(function() {
 				title : $(activityEl).attr('title'),
 				url : $(activityEl).attr('url'),
 				key : $(activityEl).attr('key'),
-				style : $(activityEl).attr('activityStyle')
+				style : $(activityEl).attr('activityStyle'),
+				optimisation : $(activityEl).attr('optimisation') ? boolValue($(activityEl).attr('optimisation')) : true
 			});
 			var activityView = new viewNamespace.ActivityView({
 				el : $(activityEl),
@@ -11676,25 +11677,39 @@ $(function() {
 		CreateActivity : function(activity) {
 			var handle = activity.getAttr('handle');
 			var center = '';
-			if (handle) {
-				center = '<PublishSchema activityHandle="' + handle + '"> ';
-			}
-			else {
-				center = '<CreateActivity ';
-				center += 'name="' + activity.getAttr('name') + '"';
-				activity.getAttr('style') ? center += ' style="' + activity.getAttr('style') + '"' : '';
-				center += activity.getAttr('key') ? ' initialKey="' + activity.getAttr('key') + '">' : '>';
+
+			var unmaskedFields = '';
+			/* if optimisation is true, ask for fields we want to avoid getting everything */
+			if (activity.getAttr('optimisation') === true) {
+				var fields = activity.getAll();
+				if (fields) {
+					_.each(fields, function(field) {
+						if (field._type == 'Field') {
+							// console.log(field);
+							unmaskedFields += '<Field id="' + field.get('id') + '" masked="0" />';
+						}
+					})
+				}
 			}
 
-			/* ask for fields we want to avoid getting everything */
-			var fields = activity.getAll();
-			if (fields) {
-				_.each(fields, function(field) {
-					if (field._type == 'Field') {
-						// console.log(field);
-						center += '<Field id="' + field.get('id') + '" />';
-					}
-				})
+			center = '';
+			if (handle) {
+
+				if (activity.getAttr('optimisation') === true) {
+					center += '<Activity activityHandle="' + handle + '">' + unmaskedFields + '</Activity> ';
+				}
+				center += '<PublishSchema activityHandle="' + handle + '"> ';
+			}
+			else {
+				center += '<CreateActivity ';
+				center += 'name="' + activity.getAttr('name') + '"';
+				activity.getAttr('style') ? center += ' style="' + activity.getAttr('style') + '"' : '';
+				activity.getAttr('optimisation') ? center += ' suppressFields="1"' : '';
+				center += activity.getAttr('key') ? ' initialKey="' + activity.getAttr('key') + '">' : '>';
+
+				if (activity.getAttr('optimisation') === true) {
+					center += unmaskedFields;
+				}
 			}
 
 			/* add datapublication for grids */
