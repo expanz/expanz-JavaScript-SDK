@@ -328,23 +328,13 @@ $(function() {
 				}
 			}
 
-			/* add datapublication for grids */
-			if (activity.hasGrid()) {
-				_.each(activity.getGrids(), function(grid, gridId) {
-					var populateMethod = grid.getAttr('populateMethod') ? ' populateMethod="' + grid.getAttr('populateMethod') + '"' : '';
-					var autoPopulate = grid.getAttr('autoPopulate') ? ' autoPopulate="' + grid.getAttr('autoPopulate') + '"' : '';
-					center += '<DataPublication id="' + gridId + '"' + populateMethod + autoPopulate;
-					grid.getAttr('contextObject') ? center += ' contextObject="' + grid.getAttr('contextObject') + '"' : '';
-					center += '/>';
-				});
-			}
-
 			/* add datapublication for data controls */
 			if (activity.hasDataControl()) {
 				_.each(activity.getDataControls(), function(dataControl, dataControlId) {
-					var populateMethod = dataControl.get('populateMethod') ? ' populateMethod="' + dataControl.get('populateMethod') + '"' : '';
-					center += '<DataPublication id="' + dataControlId + '"' + populateMethod + ' Type="' + dataControl.get('type') + '"';
-					dataControl.get('contextObject') ? center += ' contextObject="' + dataControl.get('contextObject') + '"' : '';
+					var populateMethod = dataControl.getAttr('populateMethod') ? ' populateMethod="' + dataControl.getAttr('populateMethod') + '"' : '';
+					var autoPopulate = dataControl.getAttr('autoPopulate') ? ' autoPopulate="' + dataControl.getAttr('autoPopulate') + '"' : '';
+					center += '<DataPublication id="' + dataControlId + '"' + populateMethod + autoPopulate + ' Type="' + dataControl.getAttr('type') + '"';
+					dataControl.getAttr('contextObject') ? center += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
 					center += '/>';
 				});
 			}
@@ -623,28 +613,28 @@ $(function() {
 
 				_.each($(execResults).find('Data'), function(data) {
 
-					var gridId = $(data).attr('id');
-					var gridModel = activity.getGrid(gridId);
-
-					if (gridModel !== undefined) {
-						fillGridModel(gridModel, data);
-
-						/* add a method handler for each action button */
-						gridModel.actionSelected = function(selectedId, methodName, methodParam) {
-
-							expanz.Net.MethodRequest(methodName, methodParam, null, activity);
-							window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParam:' + JSON.stringify(methodParam));
-						};
-					}
-
 					var dataControlId = $(data).attr('id');
 					var dataControlModel = activity.getDataControl(dataControlId);
 
-					/* push the data to the view */
 					if (dataControlModel !== undefined) {
-						dataControlModel.set({
-							xml : $(data)
-						});
+						/* grid case */
+						if (dataControlModel.getAttr('renderingType') == 'grid') {
+							fillGridModel(dataControlModel, data);
+
+							/* add a method handler for each action button */
+							dataControlModel.actionSelected = function(selectedId, methodName, methodParam) {
+
+								expanz.Net.MethodRequest(methodName, methodParam, null, activity);
+								window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParam:' + JSON.stringify(methodParam));
+							};
+						}
+						/* others cases (tree, combobox) */
+						else {
+							/* update the xml data in the model, view will get a event if bound */
+							dataControlModel.setAttr({
+								xml : $(data)
+							});
+						}
 					}
 
 				}); // foreach 'Data'
@@ -887,9 +877,9 @@ $(function() {
 							model : clientMessage
 						}, $('body'));
 
-						expanz.Factory.bindGrids(activity, expanz.Views, expanz.Model, picklistWindow.el.parent());
+						expanz.Factory.bindDataControls(activity, picklistWindow.el.parent());
 
-						var gridModel = activity.getGrid(elId);
+						var gridModel = activity.getDataControl(elId);
 
 						if (gridModel !== undefined) {
 							fillGridModel(gridModel, $(this));
@@ -921,16 +911,21 @@ $(function() {
 
 					}
 					else {
-						var gridModel = activity.getGrid(id);
-						if (gridModel !== undefined) {
-							fillGridModel(gridModel, $(this));
+						var dataControlModel = activity.getDataControl(id);
+						if (dataControlModel !== undefined) {
+							if (dataControlModel.getAttr('renderingType') == 'grid') {
+						
+								fillGridModel(dataControlModel, $(this));
 
-							/* add a method handler for each action button */
-							gridModel.actionSelected = function(selectedId, methodName, methodParam) {
-
-								expanz.Net.MethodRequest(methodName, methodParam, null, activity);
-								window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParam:' + JSON.stringify(methodParam));
-							};
+								/* add a method handler for each action button */
+								dataControlModel.actionSelected = function(selectedId, methodName, methodParam) {
+									expanz.Net.MethodRequest(methodName, methodParam, null, activity);
+									window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParam:' + JSON.stringify(methodParam));
+								};
+							}
+							else{
+								//TODO implement update of other datacontrolsF
+							}
 						}
 					}
 				});

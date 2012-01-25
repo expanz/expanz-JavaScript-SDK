@@ -154,15 +154,14 @@ $(function() {
 			if (data == null) return;
 
 			/* position menu below button */
-			var pos = this.el.find("button").offset();
+			var pos = this.el.find("button").position();
 			this.contextMenuEl.css(
 				{position:"absolute",
-					top:(pos.top + this.el.find("button").height()+ 10 )+"px",
-					left:(pos.left)+"px"
+					top:(pos.top + this.el.find("button").outerHeight() + 2 )+"px",
+					left:(pos.left + 10 )+"px"
 				});	
 
 			/* append data to the menu */
-
 			this.contextMenuEl.append("<ul id='" + this.contextMenuEl.id + "_ul'></ul>")
 			this._createMenu(data, this.contextMenuEl.find("ul"));
 			this.createContextMenu();
@@ -504,32 +503,29 @@ $(function() {
 
 		loading : function() {
 			var loadingId = "Loading_" + this.id.replace(/\./g,"_"); 
-			var loadingEL = $("body").find("#" + loadingId);
+			var loadingEL = $(this.el).find("#" + loadingId);
 			if( loadingEL.length == 0 ){
-				$("body").append('<div class="loading" id="'+loadingId+'">Loading content, please wait.. <img src="assets/images/loading.gif" alt="loading.." /></div>');  
-				loadingEL = $("body").find("#" + loadingId);
+				$(this.el).append('<div class="loading" id="'+loadingId+'"><span>Loading content, please wait.. <img src="assets/images/loading.gif" alt="loading.." /></span></div>');  
+				loadingEL = $(this.el).find("#" + loadingId);
 			}
 			
 			var isLoading = this.collection.getAttr('loading');
 			if (isLoading) {
-				/* disabling all inputs and button */
-				$(this.el).find("input").attr('loading','true');
-				$(this.el).find("button").attr('loading','true');
-				$(this.el).find("input").attr('disabled', 'disabled');
-				$(this.el).find("button").attr('disabled', 'disabled');
-				$(this.el).addClass('activityLoading');
-				loadingEL.css("position","absolute");
 				var off = this.el.offset();
-				loadingEL.css("top", off.top + ( $(this.el).height()) + "px");
-				loadingEL.css("left", off.left + ( $(this.el).width() / 2 - loadingEL.width() / 2)  + "px");
+				/* set the loading element as a mask on top of the div to avoid user doing any action */
+				$(this.el).addClass('activityLoading');
+				loadingEL.css("position","absolute"); /* parent need to be relative //todo enfore it ? */
+				loadingEL.css('width','100%');
+				loadingEL.css('height','100%');
+				loadingEL.css('top', '0px');
+				loadingEL.css('left','0px');
+				loadingEL.css('z-index', '999');
+				loadingEL.find("span").center();
+				loadingEL.css('background', 'url(data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==) center');
+				
 				loadingEL.show();
 			}
 			else{
-				/* enabling all inputs and button except those having the readonlyInput class or  added dynamically */
-				$(this.el).find("input:not(.readonlyInput):[loading='true']").removeAttr('disabled');
-				$(this.el).find("button[loading='true']").removeAttr('disabled');
-				$(this.el).find("input[loading='true']").removeAttr('loading');
-				$(this.el).find("button[loading='true']").removeAttr('loading');
 				$(this.el).removeClass('activityLoading');
 				loadingEL.hide();
 			}
@@ -542,7 +538,7 @@ $(function() {
 
 		initialize : function(attrs) {
 			Backbone.View.prototype.initialize.call(attrs);
-			this.model.bind("change:xml", this.publishData, this);
+			this.model.bind("update:xml", this.publishData, this);
 		},
 
 		itemSelected : function(itemId, callbacks) {
@@ -551,7 +547,7 @@ $(function() {
 
 		publishData : function() {
 			this.el.trigger("publishData", [
-				this.model.get('xml'), this
+				this.model.getAttr('xml'), this
 			]);
 		}
 
@@ -649,7 +645,7 @@ $(function() {
 	});
 
 	window.expanz.Views.PicklistWindowView = window.expanz.Views.PopupView.extend({
-		divAttributes : " bind='grid'"
+		divAttributes : " bind='DataControl' renderingType='grid' "
 	});
 
 	window.expanz.Views.UIMessage = window.expanz.Views.PopupView.extend({

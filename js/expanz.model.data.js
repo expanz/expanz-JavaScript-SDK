@@ -4,11 +4,15 @@ $(function() {
 	window.expanz.Model = window.expanz.Model || {};
 	window.expanz.Model.Data = {};
 
-	window.expanz.Model.Data.DataControl = expanz.Model.Bindable.extend({
+	window.expanz.Model.Data.DataControl = expanz.Collection.extend({
+
+		initialize : function(attrs) {
+			expanz.Collection.prototype.initialize.call(this, attrs);
+		},
 
 		update : function(attrs) {
 
-			expanz.Net.DeltaRequest(this.get('id'), attrs.value, this.get('parent'));
+			expanz.Net.DeltaRequest(this.getAttr('id'), attrs.value, this.getAttr('parent'));
 			return;
 		},
 
@@ -16,12 +20,12 @@ $(function() {
 			window.expanz.logToConsole("DataControl:updateItemSelected id:" + selectedId);
 
 			/* exception for documents we have to send a MenuAction request */
-			if (this.get('id') == 'documents') {
-				expanz.Net.CreateMenuActionRequest(this.get('parent'), selectedId, "File", null, "1", callbacks);
+			if (this.getAttr('id') == 'documents') {
+				expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, "File", null, "1", callbacks);
 			}
 			/* normal case we send a delta request */
 			else {
-				expanz.Net.DeltaRequest(this.get('id'), selectedId, this.get('parent'), callbacks);
+				expanz.Net.DeltaRequest(this.getAttr('id'), selectedId, this.getAttr('parent'), callbacks);
 			}
 		},
 	});

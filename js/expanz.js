@@ -30,10 +30,8 @@ $(function() {
 
 		//
 		DOMObject || (DOMObject = $('body'));
-		var viewNamespace = expanz.Views;
-		var modelNamespace = expanz.Model;
 
-		var activities = createActivity(viewNamespace, modelNamespace, DOMObject, callbacks);
+		var activities = createActivity( DOMObject, callbacks);
 		_.each(activities, function(activity) {
 			window.App.push(activity);
 		});
@@ -222,12 +220,12 @@ $(function() {
 	//
 	// Private Functions
 	//
-	function createActivity(viewNamespace, modelNamespace, dom, callbacks) {
+	function createActivity(dom, callbacks) {
 
 		var activities = [];
 		if ($(dom).attr('bind') && ($(dom).attr('bind').toLowerCase() === 'activity')) {
 
-			var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
+			var activityView = expanz.Factory.Activity(dom);
 			activityView.collection.load(callbacks);
 			activities.push(activityView);
 
@@ -235,7 +233,7 @@ $(function() {
 		else {
 			// search through DOM body, looking for elements with 'bind' attribute
 			_.each($(dom).find('[bind=activity]'), function(activityEl) {
-				var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
+				var activityView = expanz.Factory.Activity(dom);
 				activityView.collection.load(callbacks);
 				activities.push(activityView);
 			}); // _.each activity

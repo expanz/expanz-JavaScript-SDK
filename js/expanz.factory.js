@@ -6,7 +6,7 @@ $(function() {
 
 		Login : function(loginEl) {
 
-			var loginModel = new window.expanz.Model.Login({ 
+			var loginModel = new window.expanz.Model.Login({
 				name : $(loginEl).attr('name'),
 			});
 			var loginView = new window.expanz.Views.LoginView({
@@ -16,11 +16,11 @@ $(function() {
 			});
 
 			return loginView;
-		},		
-		
-		Activity : function(viewNamespace, modelNamespace, activityEl) {
+		},
+
+		Activity : function(activityEl) {
 			// create a collection for each activity
-			var activityModel = new modelNamespace.Activity({ // expanz.Model.Login.Activity
+			var activityModel = new expanz.Model.Activity({ // expanz.Model.Login.Activity
 				name : $(activityEl).attr('name'),
 				title : $(activityEl).attr('title'),
 				url : $(activityEl).attr('url'),
@@ -28,23 +28,21 @@ $(function() {
 				style : $(activityEl).attr('activityStyle'),
 				optimisation : $(activityEl).attr('optimisation') ? boolValue($(activityEl).attr('optimisation')) : true
 			});
-			var activityView = new viewNamespace.ActivityView({
+			var activityView = new expanz.Views.ActivityView({
 				el : $(activityEl),
 				id : $(activityEl).attr('name'),
 				key : $(activityEl).attr('key'),
 				collection : activityModel
 			});
 
-			expanz.Factory.bindDataControls(activityModel, viewNamespace, modelNamespace, activityEl);
-			expanz.Factory.bindFields(activityModel, viewNamespace, modelNamespace, activityEl);
-			expanz.Factory.bindMethods(activityModel, viewNamespace, modelNamespace, activityEl);
-			expanz.Factory.bindGrids(activityModel, viewNamespace, modelNamespace, activityEl);
-
+			expanz.Factory.bindDataControls(activityModel, activityEl);
+			expanz.Factory.bindFields(activityModel, activityEl);
+			expanz.Factory.bindMethods(activityModel, activityEl);
 			return activityView;
 		},
 
-		bindFields : function(activityModel, viewNamespace, modelNamespace, el) {
-			_.each(expanz.Factory.Field(viewNamespace, modelNamespace, $(el).find('[bind=field]')), function(fieldModel) {
+		bindFields : function(activityModel, el) {
+			_.each(expanz.Factory.Field($(el).find('[bind=field]')), function(fieldModel) {
 				fieldModel.set({
 					parent : activityModel
 				}, {
@@ -53,7 +51,7 @@ $(function() {
 				activityModel.add(fieldModel);
 			});
 
-			_.each(expanz.Factory.DependantField(viewNamespace, modelNamespace, $(el).find('[bind=dependant]')), function(dependantFieldModel) {
+			_.each(expanz.Factory.DependantField($(el).find('[bind=dependant]')), function(dependantFieldModel) {
 				dependantFieldModel.set({
 					parent : activityModel
 				}, {
@@ -63,8 +61,8 @@ $(function() {
 			});
 		},
 
-		bindMethods : function(activityModel, viewNamespace, modelNamespace, el) {
-			_.each(expanz.Factory.Method(viewNamespace, modelNamespace, $(el).find('[bind=method]')), function(methodModel) {
+		bindMethods : function(activityModel, el) {
+			_.each(expanz.Factory.Method($(el).find('[bind=method]')), function(methodModel) {
 				methodModel.set({
 					parent : activityModel
 				}, {
@@ -74,9 +72,9 @@ $(function() {
 			});
 		},
 
-		bindDataControls : function(activityModel, viewNamespace, modelNamespace, el) {
-			_.each(expanz.Factory.DataControl(viewNamespace, modelNamespace, $(el).find('[bind=DataControl]')), function(DataControlModel) {
-				DataControlModel.set({
+		bindDataControls : function(activityModel, el) {
+			_.each(expanz.Factory.DataControl(activityModel.getAttr('name'), activityModel.getAttr('style'), $(el).find('[bind=DataControl]')), function(DataControlModel) {
+				DataControlModel.setAttr({
 					parent : activityModel,
 					activityId : activityModel.getAttr('name')
 				});
@@ -84,26 +82,15 @@ $(function() {
 			});
 		},
 
-		bindGrids : function(activityModel, viewNamespace, modelNamespace, el) {
-			_.each(expanz.Factory.Grid(viewNamespace, modelNamespace, activityModel.getAttr('name'), activityModel.getAttr('style'), $(el).find('[bind=grid]')), function(gridModel) {
-				gridModel.setAttr({
-					parent : activityModel,
-					activityId : activityModel.getAttr('name')
-				});
-				activityModel.addGrid(gridModel);
-			});
-
-		},
-
-		Field : function(viewNamespace, modelNamespace, DOMObjects) {
+		Field : function(DOMObjects) {
 
 			var fieldModels = [];
 			_.each(DOMObjects, function(fieldEl) {
 				// create a model for each field
-				var field = new modelNamespace.Field({
+				var field = new expanz.Model.Field({
 					id : $(fieldEl).attr('name')
 				});
-				var view = new viewNamespace.FieldView({
+				var view = new expanz.Views.FieldView({
 					el : $(fieldEl),
 					id : $(fieldEl).attr('id'),
 					className : $(fieldEl).attr('class'),
@@ -115,15 +102,15 @@ $(function() {
 			return fieldModels;
 		},
 
-		DependantField : function(viewNamespace, modelNamespace, DOMObjects) {
+		DependantField : function(DOMObjects) {
 
 			var fieldModels = [];
 			_.each(DOMObjects, function(fieldEl) {
 				// create a model for each field
-				var field = new modelNamespace.Bindable({
+				var field = new expanz.Model.Bindable({
 					id : $(fieldEl).attr('name')
 				});
-				var view = new viewNamespace.DependantFieldView({
+				var view = new expanz.Views.DependantFieldView({
 					el : $(fieldEl),
 					id : $(fieldEl).attr('id'),
 					className : $(fieldEl).attr('class'),
@@ -135,19 +122,19 @@ $(function() {
 			return fieldModels;
 		},
 
-		Method : function(viewNamespace, modelNamespace, DOMObjects) {
+		Method : function(DOMObjects) {
 
 			var methodModels = [];
 			_.each(DOMObjects, function(methodEl) {
 				// create a model for each method
 				var method;
 				if ($(methodEl).attr('type') == 'ContextMenu') {
-					method = new modelNamespace.ContextMenu({
+					method = new expanz.Model.ContextMenu({
 						id : $(methodEl).attr('name'),
 						contextObject : $(methodEl).attr('contextObject')
 					});
 
-					var ctxMenuview = new viewNamespace.ContextMenuView({
+					var ctxMenuview = new expanz.Views.ContextMenuView({
 						el : $(methodEl),
 						id : $(methodEl).attr('id'),
 						className : $(methodEl).attr('class'),
@@ -155,12 +142,12 @@ $(function() {
 					});
 				}
 				else {
-					method = new modelNamespace.Method({
+					method = new expanz.Model.Method({
 						id : $(methodEl).attr('name'),
 						contextObject : $(methodEl).attr('contextObject')
 					});
 
-					var view = new viewNamespace.MethodView({
+					var view = new expanz.Views.MethodView({
 						el : $(methodEl),
 						id : $(methodEl).attr('id'),
 						className : $(methodEl).attr('class'),
@@ -173,77 +160,80 @@ $(function() {
 			return methodModels;
 		},
 
-		Grid : function(viewNamespace, modelNamespace, activityName, activityStyle, DOMObjects) {
-
-			var gridModels = [];
-
-			_.each(DOMObjects, function(gridEl) {
-				// create a model for each GridView
-				var gridModel = new modelNamespace.Data.Grid({
-					id : $(gridEl).attr('name'),
-					populateMethod : $(gridEl).attr('populateMethod'),
-					autoPopulate : $(gridEl).attr('autoPopulate'),
-					contextObject : $(gridEl).attr('contextObject')
-				});
-				var view = new viewNamespace.GridView({
-					el : $(gridEl),
-					id : $(gridEl).attr('id'),
-					className : $(gridEl).attr('class'),
-					itemsPerPage : $(gridEl).attr('itemsPerPage'),
-					model : gridModel
-				});
-
-				// load pre-defined gridview information from formmapping.xml
-				$.get('./formmapping.xml', function(defaultsXML) {
-					var activityInfo = _.find($(defaultsXML).find('activity'), function(activityXML) {
-						return $(activityXML).attr('name') === activityName && $(activityXML).attr('style') === activityStyle;
-					});
-					if (activityInfo) {
-						var gridviewInfo = _.find($(activityInfo).find('gridview'), function(gridviewXML) {
-							return $(gridviewXML).attr('id') === gridModel.getAttr('id');
-						});
-						if (gridviewInfo) {
-							// add actions
-							_.each($(gridviewInfo).find('action'), function(action) {
-								var methodParams = new Array();
-								_.each($(action).find('methodParam'), function(methodParam) {
-									methodParams.push({
-										name : $(methodParam).attr('name'),
-										value : $(methodParam).attr('value'),
-										label : $(methodParam).attr('label'),
-										bindValueFromCellId : $(methodParam).attr('bindValueFromCellId'),
-									});
-								});
-								gridModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'), methodParams);
-							});
-						}
-					}
-				});
-
-				gridModels.push(gridModel);
-			});
-			return gridModels;
-		},
-
-		DataControl : function(viewNamespace, modelNamespace, DOMObjects) {
+		DataControl : function(activityName, activityStyle, DOMObjects) {
 
 			var DataControlModels = [];
 
 			_.each(DOMObjects, function(dataControlEl) {
-				// create a model for each DataControl
-				var dataControlModel = new modelNamespace.Data.DataControl({
-					id : $(dataControlEl).attr('name'),
-					populateMethod : $(dataControlEl).attr('populateMethod'),
-					type : $(dataControlEl).attr('type'),
-					contextObject : $(dataControlEl).attr('contextObject')
-				});
 
-				var view = new viewNamespace.DataControlView({
-					el : $(dataControlEl),
-					id : $(dataControlEl).attr('id'),
-					className : $(dataControlEl).attr('class'),
-					model : dataControlModel
-				});
+				/* case rendering as a grid */
+				if ($(dataControlEl).attr('renderingType') == 'grid') {
+					var dataControlModel = new expanz.Model.Data.Grid({
+						id : $(dataControlEl).attr('name'),
+						populateMethod : $(dataControlEl).attr('populateMethod'),
+						autoPopulate : $(dataControlEl).attr('autoPopulate'),
+						contextObject : $(dataControlEl).attr('contextObject'),
+						renderingType : $(dataControlEl).attr('renderingType')
+					});
+
+					var view = new expanz.Views.GridView({
+						el : $(dataControlEl),
+						id : $(dataControlEl).attr('id'),
+						className : $(dataControlEl).attr('class'),
+						itemsPerPage : $(dataControlEl).attr('itemsPerPage'),
+						model : dataControlModel
+					});
+
+					// load pre-defined gridview information from formmapping.xml
+					$.ajax({
+						url : './formmapping.xml',
+						async : false,
+						success : function(defaultsXML) {
+							var activityInfo = _.find($(defaultsXML).find('activity'), function(activityXML) {
+								return $(activityXML).attr('name') === activityName && $(activityXML).attr('style') === activityStyle;
+							});
+							if (activityInfo) {
+								var gridviewInfo = _.find($(activityInfo).find('gridview'), function(gridviewXML) {
+									return $(gridviewXML).attr('id') === dataControlModel.getAttr('id');
+								});
+								if (gridviewInfo) {
+									// add actions
+									_.each($(gridviewInfo).find('action'), function(action) {
+										var methodParams = new Array();
+										_.each($(action).find('methodParam'), function(methodParam) {
+											methodParams.push({
+												name : $(methodParam).attr('name'),
+												value : $(methodParam).attr('value'),
+												label : $(methodParam).attr('label'),
+												bindValueFromCellId : $(methodParam).attr('bindValueFromCellId'),
+											});
+										});
+										dataControlModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'), methodParams);
+									});
+								}
+							}
+						}
+					});
+
+				}
+				/* renderingType is not grid: 'tree' or 'combobox' or empty */
+				else {
+					var dataControlModel = new expanz.Model.Data.DataControl({
+						id : $(dataControlEl).attr('name'),
+						populateMethod : $(dataControlEl).attr('populateMethod'),
+						type : $(dataControlEl).attr('type'),
+						contextObject : $(dataControlEl).attr('contextObject'),
+						autoPopulate : $(dataControlEl).attr('autoPopulate'),
+						renderingType : $(dataControlEl).attr('renderingType')
+					});
+
+					var view = new expanz.Views.DataControlView({
+						el : $(dataControlEl),
+						id : $(dataControlEl).attr('id'),
+						className : $(dataControlEl).attr('class'),
+						model : dataControlModel
+					});
+				}
 
 				DataControlModels.push(dataControlModel);
 			});

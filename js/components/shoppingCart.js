@@ -101,7 +101,7 @@ $(function() {
 				html += '</div>';
 				html += '</script>';
 
-				html += '<div id="productListDiv"  itemsPerPage="9" name="' + this.productListName + '" bind="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
+				html += '<div id="productListDiv"  itemsPerPage="9" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 
 				html += "</div>";
 				return html;
@@ -123,7 +123,7 @@ $(function() {
 			},
 
 			renderTreeComponent : function() {
-				return '<div id="categoriesTree" name="' + this.categoryTreeName + '"  bind="DataControl" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="tree"></div>';
+				return '<div id="categoriesTree" name="' + this.categoryTreeName + '"  bind="DataControl" renderingType="tree" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="tree"></div>';
 			},
 
 			_executeAfterRenderTreeComponent : function() {
@@ -158,7 +158,7 @@ $(function() {
 
 				html += "<div class='cart'>";
 				html += "<div class='title'>Shopping cart</div>";
-				html += "<div bind='grid' id='lvMiniCart' name='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
+				html += "<div bind='DataControl' renderingType='grid' id='lvMiniCart' name='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
 				html += "<br/>";
 				html += "<div style='display:none' id='cartCheckout' class='cartCheckout'>";
 				html += window.expanz.html.renderReadOnlyField("Total", true);
@@ -244,7 +244,7 @@ $(function() {
 				html += window.expanz.html.renderHeaderGridField('Total', 100);
 				html += window.expanz.html.clearBoth();
 
-				html += "<div bind='grid' id='checkoutCart' name='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
+				html += "<div bind='DataControl' renderingType='grid' id='checkoutCart' name='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
 				html += "<br/>";
 
 				html += "<div style='display:none' id='cartCheckout' class='checkout'>";
@@ -329,7 +329,7 @@ $(function() {
 	window.expanz.html.renderGridTemplateField = function(fieldName, width) {
 		if (!width)
 			width = 100;
-		return '<div style="width:' + width + 'px;float:left"><%= data.' + fieldName + ' %> </div>';
+		return '<div style="width:' + width + 'px;float:left"><%= data.' + fieldName + ' %>&nbsp;</div>';
 	};
 
 	window.expanz.html.renderField = function(fieldName, showLabel) {

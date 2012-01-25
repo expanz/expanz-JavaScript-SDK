@@ -10874,6 +10874,65 @@ Object.size = function(obj) {
 	return size;
 };
 
+/**
+ * Center a element with jQuery
+ */
+jQuery.fn.center = function(params) {
+
+	var options = {
+
+		vertical : true,
+		horizontal : true
+
+	}
+	op = jQuery.extend(options, params);
+
+	return this.each(function() {
+
+		// initializing variables
+		var $self = jQuery(this);
+		// get the dimensions using dimensions plugin
+		var width = $self.width();
+		var height = $self.height();
+		// get the paddings
+		var paddingTop = parseInt($self.css("padding-top"));
+		var paddingBottom = parseInt($self.css("padding-bottom"));
+		// get the borders
+		var borderTop = parseInt($self.css("border-top-width"));
+		var borderBottom = parseInt($self.css("border-bottom-width"));
+		// get the media of padding and borders
+		var mediaBorder = (borderTop + borderBottom) / 2;
+		var mediaPadding = (paddingTop + paddingBottom) / 2;
+		// get the type of positioning
+		var positionType = $self.parent().css("position");
+		// get the half minus of width and height
+		var halfWidth = (width / 2) * (-1);
+		var halfHeight = ((height / 2) * (-1)) - mediaPadding - mediaBorder;
+		// initializing the css properties
+		var cssProp = {
+			position : 'absolute'
+		};
+
+		if (op.vertical) {
+			cssProp.height = height;
+			cssProp.top = '50%';
+			cssProp.marginTop = halfHeight;
+		}
+		if (op.horizontal) {
+			cssProp.width = width;
+			cssProp.left = '50%';
+			cssProp.marginLeft = halfWidth;
+		}
+		// check the current position
+		if (positionType == 'static') {
+			$self.parent().css("position", "relative");
+		}
+		// aplying the css
+		$self.css(cssProp);
+
+	});
+
+};
 
 /*
  * END OF FILE - /expanz-JavaScript-SDK/js/expanz.util.js
@@ -10890,7 +10949,7 @@ $(function() {
 
 		Login : function(loginEl) {
 
-			var loginModel = new window.expanz.Model.Login({ 
+			var loginModel = new window.expanz.Model.Login({
 				name : $(loginEl).attr('name'),
 			});
 			var loginView = new window.expanz.Views.LoginView({
@@ -10900,11 +10959,11 @@ $(function() {
 			});
 
 			return loginView;
-		},		
-		
-		Activity : function(viewNamespace, modelNamespace, activityEl) {
+		},
+
+		Activity : function(activityEl) {
 			// create a collection for each activity
-			var activityModel = new modelNamespace.Activity({ // expanz.Model.Login.Activity
+			var activityModel = new expanz.Model.Activity({ // expanz.Model.Login.Activity
 				name : $(activityEl).attr('name'),
 				title : $(activityEl).attr('title'),
 				url : $(activityEl).attr('url'),
@@ -10912,23 +10971,21 @@ $(function() {
 				style : $(activityEl).attr('activityStyle'),
 				optimisation : $(activityEl).attr('optimisation') ? boolValue($(activityEl).attr('optimisation')) : true
 			});
-			var activityView = new viewNamespace.ActivityView({
+			var activityView = new expanz.Views.ActivityView({
 				el : $(activityEl),
 				id : $(activityEl).attr('name'),
 				key : $(activityEl).attr('key'),
 				collection : activityModel
 			});
 
-			expanz.Factory.bindDataControls(activityModel, viewNamespace, modelNamespace, activityEl);
-			expanz.Factory.bindFields(activityModel, viewNamespace, modelNamespace, activityEl);
-			expanz.Factory.bindMethods(activityModel, viewNamespace, modelNamespace, activityEl);
-			expanz.Factory.bindGrids(activityModel, viewNamespace, modelNamespace, activityEl);
-
+			expanz.Factory.bindDataControls(activityModel, activityEl);
+			expanz.Factory.bindFields(activityModel, activityEl);
+			expanz.Factory.bindMethods(activityModel, activityEl);
 			return activityView;
 		},
 
-		bindFields : function(activityModel, viewNamespace, modelNamespace, el) {
-			_.each(expanz.Factory.Field(viewNamespace, modelNamespace, $(el).find('[bind=field]')), function(fieldModel) {
+		bindFields : function(activityModel, el) {
+			_.each(expanz.Factory.Field($(el).find('[bind=field]')), function(fieldModel) {
 				fieldModel.set({
 					parent : activityModel
 				}, {
@@ -10937,7 +10994,7 @@ $(function() {
 				activityModel.add(fieldModel);
 			});
 
-			_.each(expanz.Factory.DependantField(viewNamespace, modelNamespace, $(el).find('[bind=dependant]')), function(dependantFieldModel) {
+			_.each(expanz.Factory.DependantField($(el).find('[bind=dependant]')), function(dependantFieldModel) {
 				dependantFieldModel.set({
 					parent : activityModel
 				}, {
@@ -10947,8 +11004,8 @@ $(function() {
 			});
 		},
 
-		bindMethods : function(activityModel, viewNamespace, modelNamespace, el) {
-			_.each(expanz.Factory.Method(viewNamespace, modelNamespace, $(el).find('[bind=method]')), function(methodModel) {
+		bindMethods : function(activityModel, el) {
+			_.each(expanz.Factory.Method($(el).find('[bind=method]')), function(methodModel) {
 				methodModel.set({
 					parent : activityModel
 				}, {
@@ -10958,9 +11015,9 @@ $(function() {
 			});
 		},
 
-		bindDataControls : function(activityModel, viewNamespace, modelNamespace, el) {
-			_.each(expanz.Factory.DataControl(viewNamespace, modelNamespace, $(el).find('[bind=DataControl]')), function(DataControlModel) {
-				DataControlModel.set({
+		bindDataControls : function(activityModel, el) {
+			_.each(expanz.Factory.DataControl(activityModel.getAttr('name'), activityModel.getAttr('style'), $(el).find('[bind=DataControl]')), function(DataControlModel) {
+				DataControlModel.setAttr({
 					parent : activityModel,
 					activityId : activityModel.getAttr('name')
 				});
@@ -10968,26 +11025,15 @@ $(function() {
 			});
 		},
 
-		bindGrids : function(activityModel, viewNamespace, modelNamespace, el) {
-			_.each(expanz.Factory.Grid(viewNamespace, modelNamespace, activityModel.getAttr('name'), activityModel.getAttr('style'), $(el).find('[bind=grid]')), function(gridModel) {
-				gridModel.setAttr({
-					parent : activityModel,
-					activityId : activityModel.getAttr('name')
-				});
-				activityModel.addGrid(gridModel);
-			});
-
-		},
-
-		Field : function(viewNamespace, modelNamespace, DOMObjects) {
+		Field : function(DOMObjects) {
 
 			var fieldModels = [];
 			_.each(DOMObjects, function(fieldEl) {
 				// create a model for each field
-				var field = new modelNamespace.Field({
+				var field = new expanz.Model.Field({
 					id : $(fieldEl).attr('name')
 				});
-				var view = new viewNamespace.FieldView({
+				var view = new expanz.Views.FieldView({
 					el : $(fieldEl),
 					id : $(fieldEl).attr('id'),
 					className : $(fieldEl).attr('class'),
@@ -10999,15 +11045,15 @@ $(function() {
 			return fieldModels;
 		},
 
-		DependantField : function(viewNamespace, modelNamespace, DOMObjects) {
+		DependantField : function(DOMObjects) {
 
 			var fieldModels = [];
 			_.each(DOMObjects, function(fieldEl) {
 				// create a model for each field
-				var field = new modelNamespace.Bindable({
+				var field = new expanz.Model.Bindable({
 					id : $(fieldEl).attr('name')
 				});
-				var view = new viewNamespace.DependantFieldView({
+				var view = new expanz.Views.DependantFieldView({
 					el : $(fieldEl),
 					id : $(fieldEl).attr('id'),
 					className : $(fieldEl).attr('class'),
@@ -11019,19 +11065,19 @@ $(function() {
 			return fieldModels;
 		},
 
-		Method : function(viewNamespace, modelNamespace, DOMObjects) {
+		Method : function(DOMObjects) {
 
 			var methodModels = [];
 			_.each(DOMObjects, function(methodEl) {
 				// create a model for each method
 				var method;
 				if ($(methodEl).attr('type') == 'ContextMenu') {
-					method = new modelNamespace.ContextMenu({
+					method = new expanz.Model.ContextMenu({
 						id : $(methodEl).attr('name'),
 						contextObject : $(methodEl).attr('contextObject')
 					});
 
-					var ctxMenuview = new viewNamespace.ContextMenuView({
+					var ctxMenuview = new expanz.Views.ContextMenuView({
 						el : $(methodEl),
 						id : $(methodEl).attr('id'),
 						className : $(methodEl).attr('class'),
@@ -11039,12 +11085,12 @@ $(function() {
 					});
 				}
 				else {
-					method = new modelNamespace.Method({
+					method = new expanz.Model.Method({
 						id : $(methodEl).attr('name'),
 						contextObject : $(methodEl).attr('contextObject')
 					});
 
-					var view = new viewNamespace.MethodView({
+					var view = new expanz.Views.MethodView({
 						el : $(methodEl),
 						id : $(methodEl).attr('id'),
 						className : $(methodEl).attr('class'),
@@ -11057,77 +11103,80 @@ $(function() {
 			return methodModels;
 		},
 
-		Grid : function(viewNamespace, modelNamespace, activityName, activityStyle, DOMObjects) {
-
-			var gridModels = [];
-
-			_.each(DOMObjects, function(gridEl) {
-				// create a model for each GridView
-				var gridModel = new modelNamespace.Data.Grid({
-					id : $(gridEl).attr('name'),
-					populateMethod : $(gridEl).attr('populateMethod'),
-					autoPopulate : $(gridEl).attr('autoPopulate'),
-					contextObject : $(gridEl).attr('contextObject')
-				});
-				var view = new viewNamespace.GridView({
-					el : $(gridEl),
-					id : $(gridEl).attr('id'),
-					className : $(gridEl).attr('class'),
-					itemsPerPage : $(gridEl).attr('itemsPerPage'),
-					model : gridModel
-				});
-
-				// load pre-defined gridview information from formmapping.xml
-				$.get('./formmapping.xml', function(defaultsXML) {
-					var activityInfo = _.find($(defaultsXML).find('activity'), function(activityXML) {
-						return $(activityXML).attr('name') === activityName && $(activityXML).attr('style') === activityStyle;
-					});
-					if (activityInfo) {
-						var gridviewInfo = _.find($(activityInfo).find('gridview'), function(gridviewXML) {
-							return $(gridviewXML).attr('id') === gridModel.getAttr('id');
-						});
-						if (gridviewInfo) {
-							// add actions
-							_.each($(gridviewInfo).find('action'), function(action) {
-								var methodParams = new Array();
-								_.each($(action).find('methodParam'), function(methodParam) {
-									methodParams.push({
-										name : $(methodParam).attr('name'),
-										value : $(methodParam).attr('value'),
-										label : $(methodParam).attr('label'),
-										bindValueFromCellId : $(methodParam).attr('bindValueFromCellId'),
-									});
-								});
-								gridModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'), methodParams);
-							});
-						}
-					}
-				});
-
-				gridModels.push(gridModel);
-			});
-			return gridModels;
-		},
-
-		DataControl : function(viewNamespace, modelNamespace, DOMObjects) {
+		DataControl : function(activityName, activityStyle, DOMObjects) {
 
 			var DataControlModels = [];
 
 			_.each(DOMObjects, function(dataControlEl) {
-				// create a model for each DataControl
-				var dataControlModel = new modelNamespace.Data.DataControl({
-					id : $(dataControlEl).attr('name'),
-					populateMethod : $(dataControlEl).attr('populateMethod'),
-					type : $(dataControlEl).attr('type'),
-					contextObject : $(dataControlEl).attr('contextObject')
-				});
 
-				var view = new viewNamespace.DataControlView({
-					el : $(dataControlEl),
-					id : $(dataControlEl).attr('id'),
-					className : $(dataControlEl).attr('class'),
-					model : dataControlModel
-				});
+				/* case rendering as a grid */
+				if ($(dataControlEl).attr('renderingType') == 'grid') {
+					var dataControlModel = new expanz.Model.Data.Grid({
+						id : $(dataControlEl).attr('name'),
+						populateMethod : $(dataControlEl).attr('populateMethod'),
+						autoPopulate : $(dataControlEl).attr('autoPopulate'),
+						contextObject : $(dataControlEl).attr('contextObject'),
+						renderingType : $(dataControlEl).attr('renderingType')
+					});
+
+					var view = new expanz.Views.GridView({
+						el : $(dataControlEl),
+						id : $(dataControlEl).attr('id'),
+						className : $(dataControlEl).attr('class'),
+						itemsPerPage : $(dataControlEl).attr('itemsPerPage'),
+						model : dataControlModel
+					});
+
+					// load pre-defined gridview information from formmapping.xml
+					$.ajax({
+						url : './formmapping.xml',
+						async : false,
+						success : function(defaultsXML) {
+							var activityInfo = _.find($(defaultsXML).find('activity'), function(activityXML) {
+								return $(activityXML).attr('name') === activityName && $(activityXML).attr('style') === activityStyle;
+							});
+							if (activityInfo) {
+								var gridviewInfo = _.find($(activityInfo).find('gridview'), function(gridviewXML) {
+									return $(gridviewXML).attr('id') === dataControlModel.getAttr('id');
+								});
+								if (gridviewInfo) {
+									// add actions
+									_.each($(gridviewInfo).find('action'), function(action) {
+										var methodParams = new Array();
+										_.each($(action).find('methodParam'), function(methodParam) {
+											methodParams.push({
+												name : $(methodParam).attr('name'),
+												value : $(methodParam).attr('value'),
+												label : $(methodParam).attr('label'),
+												bindValueFromCellId : $(methodParam).attr('bindValueFromCellId'),
+											});
+										});
+										dataControlModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'), methodParams);
+									});
+								}
+							}
+						}
+					});
+
+				}
+				/* renderingType is not grid: 'tree' or 'combobox' or empty */
+				else {
+					var dataControlModel = new expanz.Model.Data.DataControl({
+						id : $(dataControlEl).attr('name'),
+						populateMethod : $(dataControlEl).attr('populateMethod'),
+						type : $(dataControlEl).attr('type'),
+						contextObject : $(dataControlEl).attr('contextObject'),
+						autoPopulate : $(dataControlEl).attr('autoPopulate'),
+						renderingType : $(dataControlEl).attr('renderingType')
+					});
+
+					var view = new expanz.Views.DataControlView({
+						el : $(dataControlEl),
+						id : $(dataControlEl).attr('id'),
+						className : $(dataControlEl).attr('class'),
+						model : dataControlModel
+					});
+				}
 
 				DataControlModels.push(dataControlModel);
 			});
@@ -11312,7 +11361,6 @@ $(function() {
 		},
 
 		initialize : function(attrs) {
-			this.grids = {};
 			this.dataControls = {};
 			this.loading = false;
 			expanz.Collection.prototype.initialize.call(this, attrs);
@@ -11323,20 +11371,6 @@ $(function() {
 				// NOTE: 'this' has been set as expanz.Model.Activity
 				return (field.get('id') === 'error') || (field.getAttr && field.getAttr('name'));
 			}, this);
-		},
-
-		addGrid : function(grid) {
-			this.grids[grid.id] = grid;
-			return;
-		},
-		getGrid : function(id) {
-			return this.grids[id];
-		},
-		getGrids : function() {
-			return this.grids;
-		},
-		hasGrid : function() {
-			return this.grids != {};
 		},
 
 		addDataControl : function(DataControl) {
@@ -11712,23 +11746,13 @@ $(function() {
 				}
 			}
 
-			/* add datapublication for grids */
-			if (activity.hasGrid()) {
-				_.each(activity.getGrids(), function(grid, gridId) {
-					var populateMethod = grid.getAttr('populateMethod') ? ' populateMethod="' + grid.getAttr('populateMethod') + '"' : '';
-					var autoPopulate = grid.getAttr('autoPopulate') ? ' autoPopulate="' + grid.getAttr('autoPopulate') + '"' : '';
-					center += '<DataPublication id="' + gridId + '"' + populateMethod + autoPopulate;
-					grid.getAttr('contextObject') ? center += ' contextObject="' + grid.getAttr('contextObject') + '"' : '';
-					center += '/>';
-				});
-			}
-
 			/* add datapublication for data controls */
 			if (activity.hasDataControl()) {
 				_.each(activity.getDataControls(), function(dataControl, dataControlId) {
-					var populateMethod = dataControl.get('populateMethod') ? ' populateMethod="' + dataControl.get('populateMethod') + '"' : '';
-					center += '<DataPublication id="' + dataControlId + '"' + populateMethod + ' Type="' + dataControl.get('type') + '"';
-					dataControl.get('contextObject') ? center += ' contextObject="' + dataControl.get('contextObject') + '"' : '';
+					var populateMethod = dataControl.getAttr('populateMethod') ? ' populateMethod="' + dataControl.getAttr('populateMethod') + '"' : '';
+					var autoPopulate = dataControl.getAttr('autoPopulate') ? ' autoPopulate="' + dataControl.getAttr('autoPopulate') + '"' : '';
+					center += '<DataPublication id="' + dataControlId + '"' + populateMethod + autoPopulate + ' Type="' + dataControl.getAttr('type') + '"';
+					dataControl.getAttr('contextObject') ? center += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
 					center += '/>';
 				});
 			}
@@ -12007,28 +12031,28 @@ $(function() {
 
 				_.each($(execResults).find('Data'), function(data) {
 
-					var gridId = $(data).attr('id');
-					var gridModel = activity.getGrid(gridId);
-
-					if (gridModel !== undefined) {
-						fillGridModel(gridModel, data);
-
-						/* add a method handler for each action button */
-						gridModel.actionSelected = function(selectedId, methodName, methodParam) {
-
-							expanz.Net.MethodRequest(methodName, methodParam, null, activity);
-							window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParam:' + JSON.stringify(methodParam));
-						};
-					}
-
 					var dataControlId = $(data).attr('id');
 					var dataControlModel = activity.getDataControl(dataControlId);
 
-					/* push the data to the view */
 					if (dataControlModel !== undefined) {
-						dataControlModel.set({
-							xml : $(data)
-						});
+						/* grid case */
+						if (dataControlModel.getAttr('renderingType') == 'grid') {
+							fillGridModel(dataControlModel, data);
+
+							/* add a method handler for each action button */
+							dataControlModel.actionSelected = function(selectedId, methodName, methodParam) {
+
+								expanz.Net.MethodRequest(methodName, methodParam, null, activity);
+								window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParam:' + JSON.stringify(methodParam));
+							};
+						}
+						/* others cases (tree, combobox) */
+						else {
+							/* update the xml data in the model, view will get a event if bound */
+							dataControlModel.setAttr({
+								xml : $(data)
+							});
+						}
 					}
 
 				}); // foreach 'Data'
@@ -12271,9 +12295,9 @@ $(function() {
 							model : clientMessage
 						}, $('body'));
 
-						expanz.Factory.bindGrids(activity, expanz.Views, expanz.Model, picklistWindow.el.parent());
+						expanz.Factory.bindDataControls(activity, picklistWindow.el.parent());
 
-						var gridModel = activity.getGrid(elId);
+						var gridModel = activity.getDataControl(elId);
 
 						if (gridModel !== undefined) {
 							fillGridModel(gridModel, $(this));
@@ -12305,16 +12329,21 @@ $(function() {
 
 					}
 					else {
-						var gridModel = activity.getGrid(id);
-						if (gridModel !== undefined) {
-							fillGridModel(gridModel, $(this));
+						var dataControlModel = activity.getDataControl(id);
+						if (dataControlModel !== undefined) {
+							if (dataControlModel.getAttr('renderingType') == 'grid') {
+						
+								fillGridModel(dataControlModel, $(this));
 
-							/* add a method handler for each action button */
-							gridModel.actionSelected = function(selectedId, methodName, methodParam) {
-
-								expanz.Net.MethodRequest(methodName, methodParam, null, activity);
-								window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParam:' + JSON.stringify(methodParam));
-							};
+								/* add a method handler for each action button */
+								dataControlModel.actionSelected = function(selectedId, methodName, methodParam) {
+									expanz.Net.MethodRequest(methodName, methodParam, null, activity);
+									window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParam:' + JSON.stringify(methodParam));
+								};
+							}
+							else{
+								//TODO implement update of other datacontrolsF
+							}
 						}
 					}
 				});
@@ -12837,11 +12866,15 @@ $(function() {
 	window.expanz.Model = window.expanz.Model || {};
 	window.expanz.Model.Data = {};
 
-	window.expanz.Model.Data.DataControl = expanz.Model.Bindable.extend({
+	window.expanz.Model.Data.DataControl = expanz.Collection.extend({
+
+		initialize : function(attrs) {
+			expanz.Collection.prototype.initialize.call(this, attrs);
+		},
 
 		update : function(attrs) {
 
-			expanz.Net.DeltaRequest(this.get('id'), attrs.value, this.get('parent'));
+			expanz.Net.DeltaRequest(this.getAttr('id'), attrs.value, this.getAttr('parent'));
 			return;
 		},
 
@@ -12849,12 +12882,12 @@ $(function() {
 			window.expanz.logToConsole("DataControl:updateItemSelected id:" + selectedId);
 
 			/* exception for documents we have to send a MenuAction request */
-			if (this.get('id') == 'documents') {
-				expanz.Net.CreateMenuActionRequest(this.get('parent'), selectedId, "File", null, "1", callbacks);
+			if (this.getAttr('id') == 'documents') {
+				expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, "File", null, "1", callbacks);
 			}
 			/* normal case we send a delta request */
 			else {
-				expanz.Net.DeltaRequest(this.get('id'), selectedId, this.get('parent'), callbacks);
+				expanz.Net.DeltaRequest(this.getAttr('id'), selectedId, this.getAttr('parent'), callbacks);
 			}
 		},
 	});
@@ -13193,15 +13226,14 @@ $(function() {
 			if (data == null) return;
 
 			/* position menu below button */
-			var pos = this.el.find("button").offset();
+			var pos = this.el.find("button").position();
 			this.contextMenuEl.css(
 				{position:"absolute",
-					top:(pos.top + this.el.find("button").height()+ 10 )+"px",
-					left:(pos.left)+"px"
+					top:(pos.top + this.el.find("button").outerHeight() + 2 )+"px",
+					left:(pos.left + 10 )+"px"
 				});	
 
 			/* append data to the menu */
-
 			this.contextMenuEl.append("<ul id='" + this.contextMenuEl.id + "_ul'></ul>")
 			this._createMenu(data, this.contextMenuEl.find("ul"));
 			this.createContextMenu();
@@ -13543,32 +13575,29 @@ $(function() {
 
 		loading : function() {
 			var loadingId = "Loading_" + this.id.replace(/\./g,"_"); 
-			var loadingEL = $("body").find("#" + loadingId);
+			var loadingEL = $(this.el).find("#" + loadingId);
 			if( loadingEL.length == 0 ){
-				$("body").append('<div class="loading" id="'+loadingId+'">Loading content, please wait.. <img src="assets/images/loading.gif" alt="loading.." /></div>');  
-				loadingEL = $("body").find("#" + loadingId);
+				$(this.el).append('<div class="loading" id="'+loadingId+'"><span>Loading content, please wait.. <img src="assets/images/loading.gif" alt="loading.." /></span></div>');  
+				loadingEL = $(this.el).find("#" + loadingId);
 			}
 			
 			var isLoading = this.collection.getAttr('loading');
 			if (isLoading) {
-				/* disabling all inputs and button */
-				$(this.el).find("input").attr('loading','true');
-				$(this.el).find("button").attr('loading','true');
-				$(this.el).find("input").attr('disabled', 'disabled');
-				$(this.el).find("button").attr('disabled', 'disabled');
-				$(this.el).addClass('activityLoading');
-				loadingEL.css("position","absolute");
 				var off = this.el.offset();
-				loadingEL.css("top", off.top + ( $(this.el).height()) + "px");
-				loadingEL.css("left", off.left + ( $(this.el).width() / 2 - loadingEL.width() / 2)  + "px");
+				/* set the loading element as a mask on top of the div to avoid user doing any action */
+				$(this.el).addClass('activityLoading');
+				loadingEL.css("position","absolute"); /* parent need to be relative //todo enfore it ? */
+				loadingEL.css('width','100%');
+				loadingEL.css('height','100%');
+				loadingEL.css('top', '0px');
+				loadingEL.css('left','0px');
+				loadingEL.css('z-index', '999');
+				loadingEL.find("span").center();
+				loadingEL.css('background', 'url(data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==) center');
+				
 				loadingEL.show();
 			}
 			else{
-				/* enabling all inputs and button except those having the readonlyInput class or  added dynamically */
-				$(this.el).find("input:not(.readonlyInput):[loading='true']").removeAttr('disabled');
-				$(this.el).find("button[loading='true']").removeAttr('disabled');
-				$(this.el).find("input[loading='true']").removeAttr('loading');
-				$(this.el).find("button[loading='true']").removeAttr('loading');
 				$(this.el).removeClass('activityLoading');
 				loadingEL.hide();
 			}
@@ -13581,7 +13610,7 @@ $(function() {
 
 		initialize : function(attrs) {
 			Backbone.View.prototype.initialize.call(attrs);
-			this.model.bind("change:xml", this.publishData, this);
+			this.model.bind("update:xml", this.publishData, this);
 		},
 
 		itemSelected : function(itemId, callbacks) {
@@ -13590,7 +13619,7 @@ $(function() {
 
 		publishData : function() {
 			this.el.trigger("publishData", [
-				this.model.get('xml'), this
+				this.model.getAttr('xml'), this
 			]);
 		}
 
@@ -13688,7 +13717,7 @@ $(function() {
 	});
 
 	window.expanz.Views.PicklistWindowView = window.expanz.Views.PopupView.extend({
-		divAttributes : " bind='grid'"
+		divAttributes : " bind='DataControl' renderingType='grid' "
 	});
 
 	window.expanz.Views.UIMessage = window.expanz.Views.PopupView.extend({
@@ -13852,10 +13881,8 @@ $(function() {
 
 		//
 		DOMObject || (DOMObject = $('body'));
-		var viewNamespace = expanz.Views;
-		var modelNamespace = expanz.Model;
 
-		var activities = createActivity(viewNamespace, modelNamespace, DOMObject, callbacks);
+		var activities = createActivity( DOMObject, callbacks);
 		_.each(activities, function(activity) {
 			window.App.push(activity);
 		});
@@ -14044,12 +14071,12 @@ $(function() {
 	//
 	// Private Functions
 	//
-	function createActivity(viewNamespace, modelNamespace, dom, callbacks) {
+	function createActivity(dom, callbacks) {
 
 		var activities = [];
 		if ($(dom).attr('bind') && ($(dom).attr('bind').toLowerCase() === 'activity')) {
 
-			var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
+			var activityView = expanz.Factory.Activity(dom);
 			activityView.collection.load(callbacks);
 			activities.push(activityView);
 
@@ -14057,7 +14084,7 @@ $(function() {
 		else {
 			// search through DOM body, looking for elements with 'bind' attribute
 			_.each($(dom).find('[bind=activity]'), function(activityEl) {
-				var activityView = expanz.Factory.Activity(viewNamespace, modelNamespace, dom);
+				var activityView = expanz.Factory.Activity(dom);
 				activityView.collection.load(callbacks);
 				activities.push(activityView);
 			}); // _.each activity

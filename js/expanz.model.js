@@ -165,7 +165,6 @@ $(function() {
 		},
 
 		initialize : function(attrs) {
-			this.grids = {};
 			this.dataControls = {};
 			this.loading = false;
 			expanz.Collection.prototype.initialize.call(this, attrs);
@@ -176,20 +175,6 @@ $(function() {
 				// NOTE: 'this' has been set as expanz.Model.Activity
 				return (field.get('id') === 'error') || (field.getAttr && field.getAttr('name'));
 			}, this);
-		},
-
-		addGrid : function(grid) {
-			this.grids[grid.id] = grid;
-			return;
-		},
-		getGrid : function(id) {
-			return this.grids[id];
-		},
-		getGrids : function() {
-			return this.grids;
-		},
-		hasGrid : function() {
-			return this.grids != {};
 		},
 
 		addDataControl : function(DataControl) {

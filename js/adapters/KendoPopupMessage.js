@@ -5,7 +5,7 @@ function useKendoPopups() {
 	/* must be overriden depending on the pluggin used */
 	window.expanz.Views.PopupView.prototype.createWindowObject = function() {
 		this.el.kendoWindow({
-			visible : false,
+			visible : true,
 			title : this.model.getAttr('title') ? this.model.getAttr('title') : "",
 			modal : true,
 			width : this.width

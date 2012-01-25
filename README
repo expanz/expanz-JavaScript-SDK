@@ -44,7 +44,7 @@ SDK Usage Examples:
 </head>
 
 <body>
-<section bind="menu" class='menu' id="ExpanzMenu"></section>
+<section bind="menu" class='menu'></section>
 
 	<section bind="activity" name='MyExpanzActivity' activityStyle='MyExpanzStyle' class='container'>
 
