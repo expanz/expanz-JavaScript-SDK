@@ -74,7 +74,7 @@ $(function() {
 						<img class="thumbnail" src="' + window.config._URLblobs + '<%= data.ThumbImage_FileContents %>' + '"/> \
 					<% } %>  \
 					<% if ( !isImageValid(data.ThumbImage_FileContents) ){ %>  \
-						<div class="noThumbnail">&nbsp;</div> \
+						<img class="noThumbnail" src="assets/images/no_image_available.png"/> \
 					<% } %> \
 					<div style="min-height:100px"> \
 						<label><%= data.Name %></label><br/> \
