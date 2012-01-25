@@ -6,7 +6,7 @@ $.fn.KendoTreeAdapter = function(options) {
 	var childType = 'File';
 	var labelAttribute = 'title';
 	var idAttribute = 'id';
-	var expandedOnLoad = false;
+	var expandedOnLoad = true;
 	var filteringInput = []; /* array of input element */
 
 	/* function called after the delta has been sent and the response has been handle by the client */

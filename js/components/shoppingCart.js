@@ -129,18 +129,7 @@ $(function() {
 			_executeAfterRenderTreeComponent : function() {
 				var that = this;
 				$("#categoriesTree").KendoTreeAdapter({
-					labelAttribute : 'value',
-					expandedOnLoad : true,
-					selectionCallback : {
-						success : function() {
-							/*
-							 * expanz.Net.MethodRequest(that.productListPopMethod, [ { name : "contextObject", value : 'StockTranItem.ItemForSale' } ], null, window.App[0].collection);
-							 */
-						},
-						error : function(e) {
-							window.expanz.logToConsole('error: ' + e);
-						}
-					}
+					labelAttribute : 'value'
 				});
 			},
 

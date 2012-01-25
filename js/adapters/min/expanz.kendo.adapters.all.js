@@ -6,8 +6,14 @@
  * START OF FILE - /expanz-JavaScript-SDK/js/adapters/KendoAdapter.js
  */
 function useKendo() {
+
+	expanz.UIplugin = 'kendo';
+
+	renderKendoComponents();
+
+	/* using kendo windows */
 	useKendoPopups();
-	
+
 	/* bind menus to kendo ui menu */
 	if ($('[bind=menu] > ul'))
 		$('[bind=menu] > ul').kendoMenu();
@@ -19,6 +25,21 @@ function useKendo() {
 		});
 		this.contextMenuEl.show();
 	}
+
+}
+
+function renderKendoComponents(el) {
+
+	if (el == null)
+		el = $("body");
+
+		/* rendering combo boxes and dropdown */
+	el.find("[renderingType=combobox]").KendoComboBoxAdapter();
+	el.find("[renderingType='dropdownlist']").KendoDropDownListAdapter();
+
+	/* bind menus to kendo ui menu */
+	if (el.find('[bind=menu] > ul'))
+		el.find('[bind=menu] > ul').kendoMenu();
 }
 /*
  * END OF FILE - /expanz-JavaScript-SDK/js/adapters/KendoAdapter.js
@@ -207,7 +228,7 @@ $.fn.KendoTreeAdapter = function(options) {
 	var childType = 'File';
 	var labelAttribute = 'title';
 	var idAttribute = 'id';
-	var expandedOnLoad = false;
+	var expandedOnLoad = true;
 	var filteringInput = []; /* array of input element */
 
 	/* function called after the delta has been sent and the response has been handle by the client */
