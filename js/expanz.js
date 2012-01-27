@@ -46,28 +46,28 @@ $(function() {
 		return;
 	};
 
-//	window.expanz.DestroyActivity = function(DOMObject) {
-//
-//		// find the given activity in list from the DOMObject
-//		if ($(DOMObject).attr('bind').toLowerCase() === 'activity') {
-//			var activityEl = DOMObject;
-//			var activity = pop(window.App, {
-//				name : $(activityEl).attr('name'),
-//				key : $(activityEl).attr('key')
-//			});
-//			activity.collection.destroy();
-//			activity.remove(); // remove from DOM
-//		}
-//		else {
-//			// top-level DOMObject wasn't an activity, let's go through the entire DOMObject looking for activities
-//			_.each($(dom).find('[bind=activity]'), function(activityEl) {
-//				var activity = popActivity(window.App, $(activityEl).attr('name'), $(activityEl).attr('key'));
-//				activity.model.destroy();
-//				activity.remove(); // remove from DOM
-//			});
-//		}
-//		return;
-//	};
+	// window.expanz.DestroyActivity = function(DOMObject) {
+	//
+	// // find the given activity in list from the DOMObject
+	// if ($(DOMObject).attr('bind').toLowerCase() === 'activity') {
+	// var activityEl = DOMObject;
+	// var activity = pop(window.App, {
+	// name : $(activityEl).attr('name'),
+	// key : $(activityEl).attr('key')
+	// });
+	// activity.collection.destroy();
+	// activity.remove(); // remove from DOM
+	// }
+	// else {
+	// // top-level DOMObject wasn't an activity, let's go through the entire DOMObject looking for activities
+	// _.each($(dom).find('[bind=activity]'), function(activityEl) {
+	// var activity = popActivity(window.App, $(activityEl).attr('name'), $(activityEl).attr('key'));
+	// activity.model.destroy();
+	// activity.remove(); // remove from DOM
+	// });
+	// }
+	// return;
+	// };
 
 	window.expanz.Logout = function() {
 		function redirect() {
@@ -315,18 +315,28 @@ $(function() {
 	expanz.CreateLogin($('[bind=login]'));
 
 	/* create all activities where autoLoad attribute is not set to false */
-	expanz.CreateActivity($('[bind=activity][autoLoad!="false"]'));
-	
+	_.each($('[bind=activity][autoLoad!="false"]'), function(el) {
+		expanz.CreateActivity($(el));
+	});
+
 	/* load UI plugin */
 	var expanzPlugin = $("body").attr("expanzPlugin");
-	if(expanzPlugin){
+	if (expanzPlugin) {
 		switch (expanzPlugin) {
 			case "kendo":
-				if(useKendo)
+				if (typeof useKendo == 'function')
 					useKendo();
 				else
 					window.expanz.logToConsole("useKendo method is undefined");
 				break;
+				
+			case "kendoMobile":
+				if (typeof useKendoMobile == 'function')
+					useKendoMobile();
+				else
+					window.expanz.logToConsole("useKendoMobile method is undefined");
+				break;
+				
 
 			default:
 				break;

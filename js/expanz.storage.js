@@ -244,8 +244,8 @@ $(function() {
 						if (this.activities.length == 1) {
 							var url = this.activities[0].url;
 							el.find("[class='menuTitle']").attr('href', url);
-							/* workaround for kendo issue : add a onclick attribute as well */
-							el.find("[class='menuTitle']").click(function(e) {
+							/* workaround for kendo issue : bind touchend */
+							el.find("[class='menuTitle']").bind("touchend", function(e) {
 								window.location.href = url;
 							});
 						}

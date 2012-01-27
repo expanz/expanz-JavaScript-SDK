@@ -7,10 +7,6 @@ function useKendo() {
 	/* using kendo windows */
 	useKendoPopups();
 
-	/* bind menus to kendo ui menu */
-	if ($('[bind=menu] > ul'))
-		$('[bind=menu] > ul').kendoMenu();
-
 	/* context menu overriding creation method */
 	window.expanz.Views.ContextMenuView.prototype.createContextMenu = function() {
 		this.contextMenuEl.find("ul").kendoMenu({
@@ -26,11 +22,20 @@ function renderKendoComponents(el) {
 	if (el == null)
 		el = $("body");
 
-		/* rendering combo boxes and dropdown */
-	el.find("[renderingType=combobox]").KendoComboBoxAdapter();
-	el.find("[renderingType='dropdownlist']").KendoDropDownListAdapter();
+	/* rendering combo boxes and dropdown */
+	if (el.find("[renderingType=combobox]").length > 0)
+		el.find("[renderingType=combobox]").KendoComboBoxAdapter();
+
+	if (el.find("[renderingType=dropdownlist]").length > 0)
+		el.find("[renderingType=dropdownlist]").KendoDropDownListAdapter();
 
 	/* bind menus to kendo ui menu */
-	if (el.find('[bind=menu] > ul'))
+	if (el.find('[bind=menu] > ul').length > 0)
 		el.find('[bind=menu] > ul').kendoMenu();
+}
+
+function useKendoMobile() {
+
+	expanz.UIplugin = 'kendoMobile';
+
 }
