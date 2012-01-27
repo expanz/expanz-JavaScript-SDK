@@ -11,10 +11,16 @@ $(function() {
 		// functions
 
 		_getBestStorage : function() {
-			if (window.localStorage)
+			if (window['localStorage'] !== null) {
+				/*
+				 * length is unused but please leave it I don't know why but sometimes firefox get an empty window.localStorage by mistake Doing this force it to evaluate the window.localStorage object and it seems to work
+				 */
+				window.localStorage.length;
 				return this.localStorage;
-			else
+			}
+			else {
 				return this.cookies;
+			}
 		},
 
 		_getStorageGlobalName : function() {
@@ -238,6 +244,10 @@ $(function() {
 						if (this.activities.length == 1) {
 							var url = this.activities[0].url;
 							el.find("[class='menuTitle']").attr('href', url);
+							/* workaround for kendo issue : add a onclick attribute as well */
+							el.find("[class='menuTitle']").click(function(e) {
+								window.location.href = url;
+							});
 						}
 						else {
 							el.append('<ul style="display:none" id="' + ulId + '"></ul>');

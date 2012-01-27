@@ -31,7 +31,7 @@ $(function() {
 		//
 		DOMObject || (DOMObject = $('body'));
 
-		var activities = createActivity( DOMObject, callbacks);
+		var activities = createActivity(DOMObject, callbacks);
 		_.each(activities, function(activity) {
 			window.App.push(activity);
 		});
@@ -46,28 +46,28 @@ $(function() {
 		return;
 	};
 
-	window.expanz.DestroyActivity = function(DOMObject) {
-
-		// find the given activity in list from the DOMObject
-		if ($(DOMObject).attr('bind').toLowerCase() === 'activity') {
-			var activityEl = DOMObject;
-			var activity = pop(window.App, {
-				name : $(activityEl).attr('name'),
-				key : $(activityEl).attr('key')
-			});
-			activity.collection.destroy();
-			activity.remove(); // remove from DOM
-		}
-		else {
-			// top-level DOMObject wasn't an activity, let's go through the entire DOMObject looking for activities
-			_.each($(dom).find('[bind=activity]'), function(activityEl) {
-				var activity = popActivity(window.App, $(activityEl).attr('name'), $(activityEl).attr('key'));
-				activity.model.destroy();
-				activity.remove(); // remove from DOM
-			});
-		}
-		return;
-	};
+//	window.expanz.DestroyActivity = function(DOMObject) {
+//
+//		// find the given activity in list from the DOMObject
+//		if ($(DOMObject).attr('bind').toLowerCase() === 'activity') {
+//			var activityEl = DOMObject;
+//			var activity = pop(window.App, {
+//				name : $(activityEl).attr('name'),
+//				key : $(activityEl).attr('key')
+//			});
+//			activity.collection.destroy();
+//			activity.remove(); // remove from DOM
+//		}
+//		else {
+//			// top-level DOMObject wasn't an activity, let's go through the entire DOMObject looking for activities
+//			_.each($(dom).find('[bind=activity]'), function(activityEl) {
+//				var activity = popActivity(window.App, $(activityEl).attr('name'), $(activityEl).attr('key'));
+//				activity.model.destroy();
+//				activity.remove(); // remove from DOM
+//			});
+//		}
+//		return;
+//	};
 
 	window.expanz.Logout = function() {
 		function redirect() {
@@ -290,18 +290,18 @@ $(function() {
 
 	window.expanz.logToConsole("Loading menu, setting callbacks and creating activities");
 
-	
 	/* load resource bundle */
 	jQuery.i18n.properties({
-	    name:'Messages', 
-	    path:'assets/bundle/', 
-	    mode:'map',
-	    cache: true,
-	    callback: function() {
-	   	 window.expanz.logToConsole("Bundle loaded");
-	    }
+		name : 'Messages',
+		path : 'assets/bundle/',
+		mode : 'map',
+		language : ' ', /* set to en to load Messages-en.properties as well, set to '' to load as well Messages-en-XX.properties - add to config.js if different for some customers */
+		cache : true,
+		callback : function() {
+			window.expanz.logToConsole("Bundle loaded");
+		}
 	});
-	
+
 	/* Load the Expanz Process Area menu without empty items */
 	_.each($('[bind=menu]'), function(el) {
 		loadMenu($(el), false);
@@ -316,5 +316,21 @@ $(function() {
 
 	/* create all activities where autoLoad attribute is not set to false */
 	expanz.CreateActivity($('[bind=activity][autoLoad!="false"]'));
+	
+	/* load UI plugin */
+	var expanzPlugin = $("body").attr("expanzPlugin");
+	if(expanzPlugin){
+		switch (expanzPlugin) {
+			case "kendo":
+				if(useKendo)
+					useKendo();
+				else
+					window.expanz.logToConsole("useKendo method is undefined");
+				break;
+
+			default:
+				break;
+		}
+	}
 
 })

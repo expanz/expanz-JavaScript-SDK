@@ -11429,6 +11429,7 @@ $(function() {
 
 		// Request Objects -> to be passed to SendRequest
 		CreateSessionRequest : function(username, password, callbacks) {
+			expanz.Storage.clearSession(); /* clear previous existing sessions */
 			var appsite = config._AppSite;
 			var authenticationMode = config._AuthenticationMode;
 			SendRequest(RequestObject.CreateSession(username, password, appsite, authenticationMode), parseCreateSessionResponse(callbacks));
@@ -11719,7 +11720,6 @@ $(function() {
 				if (fields) {
 					_.each(fields, function(field) {
 						if (field._type == 'Field') {
-							// console.log(field);
 							unmaskedFields += '<Field id="' + field.get('id') + '" masked="0" />';
 						}
 					})
@@ -11728,7 +11728,6 @@ $(function() {
 
 			center = '';
 			if (handle) {
-
 				if (activity.getAttr('optimisation') === true) {
 					center += '<Activity activityHandle="' + handle + '">' + unmaskedFields + '</Activity> ';
 				}
@@ -11837,7 +11836,6 @@ $(function() {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseCreateSessionResponse");
 			if ($(xml).find('CreateSessionXResult').length > 0) {
-				expanz.Storage.clearSession();
 				expanz.Storage.setSessionHandle($(xml).find('CreateSessionXResult').text());
 			}
 			else {
@@ -11978,6 +11976,7 @@ $(function() {
 						var sessionLost = /Session .* not found/.test($(this).text());
 						var activityNotFound = /Activity .* not found/.test($(this).text());
 						if (sessionLost || activityNotFound) {
+							expanz.Storage.clearSession();
 							window.expanz.showLoginPopup(activity, true);
 							return;
 						}
@@ -12576,10 +12575,16 @@ $(function() {
 		// functions
 
 		_getBestStorage : function() {
-			if (window.localStorage)
+			if (window['localStorage'] !== null) {
+				/*
+				 * length is unused but please leave it I don't know why but sometimes firefox get an empty window.localStorage by mistake Doing this force it to evaluate the window.localStorage object and it seems to work
+				 */
+				window.localStorage.length;
 				return this.localStorage;
-			else
+			}
+			else {
 				return this.cookies;
+			}
 		},
 
 		_getStorageGlobalName : function() {
@@ -12803,6 +12808,10 @@ $(function() {
 						if (this.activities.length == 1) {
 							var url = this.activities[0].url;
 							el.find("[class='menuTitle']").attr('href', url);
+							/* workaround for kendo issue : add a onclick attribute as well */
+							el.find("[class='menuTitle']").click(function(e) {
+								window.location.href = url;
+							});
 						}
 						else {
 							el.append('<ul style="display:none" id="' + ulId + '"></ul>');
@@ -13202,7 +13211,6 @@ $(function() {
 					.append("<li id='"+liId+"' action='" + $(this).attr('action') + "'>" + $(this).attr('text') + "</li>");
 					var liEL =parentUL.find("#" + liId);
 					liEL.click(function(){
-						console.log($(this).attr("action"));
 						that.model.menuItemSelected($(this).attr("action"));
 						that.contextMenuEl.hide();
 					})
@@ -13882,7 +13890,7 @@ $(function() {
 		//
 		DOMObject || (DOMObject = $('body'));
 
-		var activities = createActivity( DOMObject, callbacks);
+		var activities = createActivity(DOMObject, callbacks);
 		_.each(activities, function(activity) {
 			window.App.push(activity);
 		});
@@ -13897,28 +13905,28 @@ $(function() {
 		return;
 	};
 
-	window.expanz.DestroyActivity = function(DOMObject) {
-
-		// find the given activity in list from the DOMObject
-		if ($(DOMObject).attr('bind').toLowerCase() === 'activity') {
-			var activityEl = DOMObject;
-			var activity = pop(window.App, {
-				name : $(activityEl).attr('name'),
-				key : $(activityEl).attr('key')
-			});
-			activity.collection.destroy();
-			activity.remove(); // remove from DOM
-		}
-		else {
-			// top-level DOMObject wasn't an activity, let's go through the entire DOMObject looking for activities
-			_.each($(dom).find('[bind=activity]'), function(activityEl) {
-				var activity = popActivity(window.App, $(activityEl).attr('name'), $(activityEl).attr('key'));
-				activity.model.destroy();
-				activity.remove(); // remove from DOM
-			});
-		}
-		return;
-	};
+//	window.expanz.DestroyActivity = function(DOMObject) {
+//
+//		// find the given activity in list from the DOMObject
+//		if ($(DOMObject).attr('bind').toLowerCase() === 'activity') {
+//			var activityEl = DOMObject;
+//			var activity = pop(window.App, {
+//				name : $(activityEl).attr('name'),
+//				key : $(activityEl).attr('key')
+//			});
+//			activity.collection.destroy();
+//			activity.remove(); // remove from DOM
+//		}
+//		else {
+//			// top-level DOMObject wasn't an activity, let's go through the entire DOMObject looking for activities
+//			_.each($(dom).find('[bind=activity]'), function(activityEl) {
+//				var activity = popActivity(window.App, $(activityEl).attr('name'), $(activityEl).attr('key'));
+//				activity.model.destroy();
+//				activity.remove(); // remove from DOM
+//			});
+//		}
+//		return;
+//	};
 
 	window.expanz.Logout = function() {
 		function redirect() {
@@ -14141,18 +14149,18 @@ $(function() {
 
 	window.expanz.logToConsole("Loading menu, setting callbacks and creating activities");
 
-	
 	/* load resource bundle */
 	jQuery.i18n.properties({
-	    name:'Messages', 
-	    path:'assets/bundle/', 
-	    mode:'map',
-	    cache: true,
-	    callback: function() {
-	   	 window.expanz.logToConsole("Bundle loaded");
-	    }
+		name : 'Messages',
+		path : 'assets/bundle/',
+		mode : 'map',
+		language : ' ', /* set to en to load Messages-en.properties as well, set to '' to load as well Messages-en-XX.properties - add to config.js if different for some customers */
+		cache : true,
+		callback : function() {
+			window.expanz.logToConsole("Bundle loaded");
+		}
 	});
-	
+
 	/* Load the Expanz Process Area menu without empty items */
 	_.each($('[bind=menu]'), function(el) {
 		loadMenu($(el), false);
@@ -14167,6 +14175,22 @@ $(function() {
 
 	/* create all activities where autoLoad attribute is not set to false */
 	expanz.CreateActivity($('[bind=activity][autoLoad!="false"]'));
+	
+	/* load UI plugin */
+	var expanzPlugin = $("body").attr("expanzPlugin");
+	if(expanzPlugin){
+		switch (expanzPlugin) {
+			case "kendo":
+				if(useKendo)
+					useKendo();
+				else
+					window.expanz.logToConsole("useKendo method is undefined");
+				break;
+
+			default:
+				break;
+		}
+	}
 
 })
 

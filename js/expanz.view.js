@@ -130,7 +130,6 @@ $(function() {
 					.append("<li id='"+liId+"' action='" + $(this).attr('action') + "'>" + $(this).attr('text') + "</li>");
 					var liEL =parentUL.find("#" + liId);
 					liEL.click(function(){
-						console.log($(this).attr("action"));
 						that.model.menuItemSelected($(this).attr("action"));
 						that.contextMenuEl.hide();
 					})

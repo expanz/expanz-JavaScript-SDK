@@ -11,6 +11,7 @@ $(function() {
 
 		// Request Objects -> to be passed to SendRequest
 		CreateSessionRequest : function(username, password, callbacks) {
+			expanz.Storage.clearSession(); /* clear previous existing sessions */
 			var appsite = config._AppSite;
 			var authenticationMode = config._AuthenticationMode;
 			SendRequest(RequestObject.CreateSession(username, password, appsite, authenticationMode), parseCreateSessionResponse(callbacks));
@@ -301,7 +302,6 @@ $(function() {
 				if (fields) {
 					_.each(fields, function(field) {
 						if (field._type == 'Field') {
-							// console.log(field);
 							unmaskedFields += '<Field id="' + field.get('id') + '" masked="0" />';
 						}
 					})
@@ -310,7 +310,6 @@ $(function() {
 
 			center = '';
 			if (handle) {
-
 				if (activity.getAttr('optimisation') === true) {
 					center += '<Activity activityHandle="' + handle + '">' + unmaskedFields + '</Activity> ';
 				}
@@ -419,7 +418,6 @@ $(function() {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseCreateSessionResponse");
 			if ($(xml).find('CreateSessionXResult').length > 0) {
-				expanz.Storage.clearSession();
 				expanz.Storage.setSessionHandle($(xml).find('CreateSessionXResult').text());
 			}
 			else {
@@ -560,6 +558,7 @@ $(function() {
 						var sessionLost = /Session .* not found/.test($(this).text());
 						var activityNotFound = /Activity .* not found/.test($(this).text());
 						if (sessionLost || activityNotFound) {
+							expanz.Storage.clearSession();
 							window.expanz.showLoginPopup(activity, true);
 							return;
 						}
