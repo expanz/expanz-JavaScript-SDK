@@ -1061,7 +1061,7 @@ $(function() {
 		}
 
 		var form = ''
-		form += "<form method='post' id='formFile' target='content_frame' action='" + config._URLproxy + "'>";
+		form += "<form method='post' id='formFile' target='_self' action='" + config._URLproxy + "'>";
 		form += "<input type='hidden' name='url' value='" + config._URLprefix + request.url + "'>"
 
 		form += "<input type='hidden' name='data' value='" + request.data + "'>"
