@@ -1,10 +1,20 @@
-/* Author: Adam Tait
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
 
- */
 $(function() {
-
+		
 	window.expanz = window.expanz || {};
-
+	
+	window.expanz.clientVersion = "1.0";
+	
 	window.expanz.helper = window.expanz.helper || {};
 
 	window.expanz.Net = {
@@ -160,7 +170,7 @@ $(function() {
 	//
 	// Request Objects (used when passed to SendRequest( ... )
 	//
-	var XMLNamespace = window.config._XMLNamespace || 'http://www.expanz.com/ESAService'; // TODO: throw an error here, saying that window.config._XMLNamespace is required
+	var XMLNamespace = window.config._XMLNamespace || XMLNamespace; // TODO: throw an error here, saying that window.config._XMLNamespace is required
 	var RequestObject = {
 
 		CreateSession : function(username, password, appsite, authenticationMode) {
@@ -172,77 +182,77 @@ $(function() {
 
 		GetSessionData : function(sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.GetSessionData()),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.GetSessionData()),
 				url : 'ExecX'
 			};
 		},
 
 		CreateActivity : function(activity, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateActivity(activity)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateActivity(activity)),
 				url : 'ExecX'
 			};
 		},
 
 		Delta : function(id, value, activity, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.Delta(id, value, activity)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.Delta(id, value, activity)),
 				url : 'ExecX'
 			};
 		},
 
 		Method : function(name, methodAttributes, context, activity, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateMethod(name, methodAttributes, context, activity)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateMethod(name, methodAttributes, context, activity)),
 				url : 'ExecX'
 			};
 		},
 
 		DestroyActivity : function(activity, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.DestroyActivity(activity)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.DestroyActivity(activity)),
 				url : 'ExecX'
 			};
 		},
 
 		ReleaseSession : function(sessionHandle) {
 			return {
-				data : buildRequest('ReleaseSession', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateReleaseSession()),
+				data : buildRequest('ReleaseSession', XMLNamespace, sessionHandle)(RequestBody.CreateReleaseSession()),
 				url : 'ReleaseSession'
 			};
 		},
 
 		GetBlob : function(blobId, activity, sessionHandle) {
 			return {
-				data : buildRequestWithoutESA('GetBlob', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.GetBlob(blobId, activity)),
+				data : buildRequestWithoutESA('GetBlob', XMLNamespace, sessionHandle)(RequestBody.GetBlob(blobId, activity)),
 				url : 'GetBlob'
 			};
 		},
 
 		GetFile : function(filename, activity, sessionHandle) {
 			return {
-				data : buildRequestWithoutESA('GetFile', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.GetFile(filename, activity)),
+				data : buildRequestWithoutESA('GetFile', XMLNamespace, sessionHandle)(RequestBody.GetFile(filename, activity)),
 				url : 'GetFile'
 			};
 		},
 
 		DataRefresh : function(dataId, activity, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.DataRefresh(dataId, activity)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.DataRefresh(dataId, activity)),
 				url : 'ExecX'
 			};
 		},
 
 		CreateMenuAction : function(activity, contextId, contextType, menuAction, defaultAction, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction)),
 				url : 'ExecX'
 			};
 		},
 
 		CreateAnonymousRequest : function(xmlData) {
 			return {
-				data : buildRequest('ExecAnonymousX', 'http://www.expanz.com/ESAService', null, true)(xmlData),
+				data : buildRequest('ExecAnonymousX', XMLNamespace, null, true)(xmlData),
 				url : 'ExecAnonymousX'
 			};
 		},
@@ -250,7 +260,7 @@ $(function() {
 	};
 
 	//
-	// XML Message Contruction Functions
+	// XML Message Construction Functions
 	//
 	var buildRequest = function(requestType, xmlns, sessionHandle, includeSite) {
 		return function insertBody(body) {
@@ -265,7 +275,7 @@ $(function() {
 	}
 
 	//
-	// XML Message Contruction Functions
+	// XML Message Construction Functions
 	//
 	var buildRequestWithoutESA = function(requestType, xmlns, sessionHandle) {
 		return function insertBody(body) {
@@ -284,7 +294,7 @@ $(function() {
 		CreateSession : function(username, password, appsite, authenticationMode) {
 			if (authenticationMode == undefined)
 				authenticationMode = "Primary"
-			return '<CreateSession user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + authenticationMode + '" clientVersion="Flex 1.0" schemaVersion="2.0"/>';
+			return '<CreateSession user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + authenticationMode + '" clientVersion="' + window.expanz.clientVersion + '" schemaVersion="2.0"/>';
 		},
 
 		GetSessionData : function() {
