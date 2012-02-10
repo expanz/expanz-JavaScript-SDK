@@ -36,9 +36,10 @@ $(function() {
 
 		setSessionHandle : function(sessionHandle) {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'session.handle', sessionHandle);
-			if (this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'login.url') == null) {
-				this.setLoginURL(document.location.pathname);
-			}
+			
+			//Set the login URL as it could be a different entry point or URL changed and needs to be updated
+			this.setLoginURL(document.location.pathname);
+			
 			return true;
 		},
 
@@ -95,6 +96,7 @@ $(function() {
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle);
 		},
 
+		/* sets the URL where the user authenticates. This is retrieved when the user needs to be redirected to the login page */
 		setLoginURL : function(url) {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'login.url', url);
 			return true;
