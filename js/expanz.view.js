@@ -1,6 +1,14 @@
-/* Author: Adam Tait
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
 
- */
 $(function() {
 
 	window.expanz = window.expanz || {};
@@ -449,7 +457,7 @@ $(function() {
 		},
 
 		events : {
-			"click button" : "attemptLogin",
+			"click button[type*='submit']" : "attemptLogin",
 		},
 
 		attemptLogin : function() {
@@ -458,6 +466,11 @@ $(function() {
 			
 			if(usernameEl.length == 0 || passwordEl.length == 0 ){
 				expanz._error("username or password field cannot be found on the page");
+				return;
+			}
+			if(usernameEl.val().length == 0 || passwordEl.val().length == 0 ){
+				expanz._error("username or password are empty");
+				return;				
 			}
 			else{
 				this.collection.add({
