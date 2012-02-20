@@ -1687,7 +1687,7 @@ $(function() {
 		Login : function(loginEl) {
 
 			var loginModel = new window.expanz.Model.Login({
-				name : $(loginEl).attr('name'),
+				name : $(loginEl).attr('name')
 			});
 			var loginView = new window.expanz.Views.LoginView({
 				el : $(loginEl),
@@ -1885,7 +1885,7 @@ $(function() {
 												name : $(methodParam).attr('name'),
 												value : $(methodParam).attr('value'),
 												label : $(methodParam).attr('label'),
-												bindValueFromCellId : $(methodParam).attr('bindValueFromCellId'),
+												bindValueFromCellId : $(methodParam).attr('bindValueFromCellId')
 											});
 										});
 										dataControlModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'), methodParams);
@@ -2078,7 +2078,7 @@ $(function() {
 					}
 				});
 			}
-		},
+		}
 
 	});
 
@@ -2140,7 +2140,7 @@ $(function() {
 
 		initialize : function(attrs) {
 			expanz.Collection.prototype.initialize.call(this, attrs);
-		},
+		}
 
 	});
 
@@ -2153,13 +2153,23 @@ $(function() {
 /*
  * START OF FILE - /expanz-JavaScript-SDK/js/expanz.net.js
  */
-/* Author: Adam Tait
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
 
- */
 $(function() {
-
+		
 	window.expanz = window.expanz || {};
-
+	
+	window.expanz.clientVersion = "1.0";
+	
 	window.expanz.helper = window.expanz.helper || {};
 
 	window.expanz.Net = {
@@ -2308,14 +2318,14 @@ $(function() {
 		/* create an anonymous request */
 		CreateAnonymousRequest : function(xmlData, callbacks) {
 			SendRequest(RequestObject.CreateAnonymousRequest(xmlData), parseExecAnonymousResponse(callbacks));
-		},
+		}
 
 	};
 
 	//
 	// Request Objects (used when passed to SendRequest( ... )
 	//
-	var XMLNamespace = window.config._XMLNamespace || 'http://www.expanz.com/ESAService'; // TODO: throw an error here, saying that window.config._XMLNamespace is required
+	var XMLNamespace = window.config._XMLNamespace || XMLNamespace; // TODO: throw an error here, saying that window.config._XMLNamespace is required
 	var RequestObject = {
 
 		CreateSession : function(username, password, appsite, authenticationMode) {
@@ -2327,85 +2337,85 @@ $(function() {
 
 		GetSessionData : function(sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.GetSessionData()),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.GetSessionData()),
 				url : 'ExecX'
 			};
 		},
 
 		CreateActivity : function(activity, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateActivity(activity)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateActivity(activity)),
 				url : 'ExecX'
 			};
 		},
 
 		Delta : function(id, value, activity, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.Delta(id, value, activity)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.Delta(id, value, activity)),
 				url : 'ExecX'
 			};
 		},
 
 		Method : function(name, methodAttributes, context, activity, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateMethod(name, methodAttributes, context, activity)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateMethod(name, methodAttributes, context, activity)),
 				url : 'ExecX'
 			};
 		},
 
 		DestroyActivity : function(activity, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.DestroyActivity(activity)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.DestroyActivity(activity)),
 				url : 'ExecX'
 			};
 		},
 
 		ReleaseSession : function(sessionHandle) {
 			return {
-				data : buildRequest('ReleaseSession', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateReleaseSession()),
+				data : buildRequest('ReleaseSession', XMLNamespace, sessionHandle)(RequestBody.CreateReleaseSession()),
 				url : 'ReleaseSession'
 			};
 		},
 
 		GetBlob : function(blobId, activity, sessionHandle) {
 			return {
-				data : buildRequestWithoutESA('GetBlob', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.GetBlob(blobId, activity)),
+				data : buildRequestWithoutESA('GetBlob', XMLNamespace, sessionHandle)(RequestBody.GetBlob(blobId, activity)),
 				url : 'GetBlob'
 			};
 		},
 
 		GetFile : function(filename, activity, sessionHandle) {
 			return {
-				data : buildRequestWithoutESA('GetFile', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.GetFile(filename, activity)),
+				data : buildRequestWithoutESA('GetFile', XMLNamespace, sessionHandle)(RequestBody.GetFile(filename, activity)),
 				url : 'GetFile'
 			};
 		},
 
 		DataRefresh : function(dataId, activity, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.DataRefresh(dataId, activity)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.DataRefresh(dataId, activity)),
 				url : 'ExecX'
 			};
 		},
 
 		CreateMenuAction : function(activity, contextId, contextType, menuAction, defaultAction, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', 'http://www.expanz.com/ESAService', sessionHandle)(RequestBody.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction)),
 				url : 'ExecX'
 			};
 		},
 
 		CreateAnonymousRequest : function(xmlData) {
 			return {
-				data : buildRequest('ExecAnonymousX', 'http://www.expanz.com/ESAService', null, true)(xmlData),
+				data : buildRequest('ExecAnonymousX', XMLNamespace, null, true)(xmlData),
 				url : 'ExecAnonymousX'
 			};
-		},
+		}
 
 	};
 
 	//
-	// XML Message Contruction Functions
+	// XML Message Construction Functions
 	//
 	var buildRequest = function(requestType, xmlns, sessionHandle, includeSite) {
 		return function insertBody(body) {
@@ -2420,7 +2430,7 @@ $(function() {
 	}
 
 	//
-	// XML Message Contruction Functions
+	// XML Message Construction Functions
 	//
 	var buildRequestWithoutESA = function(requestType, xmlns, sessionHandle) {
 		return function insertBody(body) {
@@ -2439,7 +2449,7 @@ $(function() {
 		CreateSession : function(username, password, appsite, authenticationMode) {
 			if (authenticationMode == undefined)
 				authenticationMode = "Primary"
-			return '<CreateSession user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + authenticationMode + '" clientVersion="Flex 1.0" schemaVersion="2.0"/>';
+			return '<CreateSession user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + authenticationMode + '" clientVersion="' + window.expanz.clientVersion + '" schemaVersion="2.0"/>';
 		},
 
 		GetSessionData : function() {
@@ -2572,6 +2582,7 @@ $(function() {
 	var parseCreateSessionResponse = function(callbacks) {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseCreateSessionResponse");
+			
 			if ($(xml).find('CreateSessionXResult').length > 0) {
 				expanz.Storage.setSessionHandle($(xml).find('CreateSessionXResult').text());
 			}
@@ -2605,6 +2616,7 @@ $(function() {
 	};
 
 	function parseProcessAreas(xmlElement) {
+		window.expanz.logToConsole("start parseProcessAreas");
 		var processAreas = [];
 		$(xmlElement).children('processarea').each(function() {
 			var processArea = new ProcessArea($(this).attr('id'), $(this).attr('title'));
@@ -2613,7 +2625,7 @@ $(function() {
 				processArea.pa = subProcessAreas;
 			}
 			$(this).children('activity').each(function() {
-				processArea.activities.push(new ActivityInfo($(this).attr('name'), $(this).attr('title'), '#', $(this).attr('activityStyle'), $(this).attr('image')));
+				processArea.activities.push(new ActivityInfo($(this).attr('name'), $(this).attr('title'), '#', $(this).attr('style'), $(this).attr('image')));
 			});
 			processAreas.push(processArea);
 		});
@@ -2666,9 +2678,8 @@ $(function() {
 
 	function parseGetSessionDataResponse(callbacks) {
 		return function apply(xml) {
-			/* bug fix for IE style attribute is removed when using jquery find... */
-			xml = xml.replace(/style=/g, "activityStyle=");
 			window.expanz.logToConsole("start parseGetSessionDataResponse");
+			
 			var processAreas = parseProcessAreas($(xml).find("Menu"));
 
 			$.get('./formmapping.xml', function(data) {
@@ -2814,8 +2825,6 @@ $(function() {
 	function parseDeltaResponse(activity, callbacks) {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseDeltaResponse");
-			/* bug fix for IE style attribute is removed when using jquery find... */
-			xml = xml.replace(/style=/g, "activityStyle=");
 
 			var execResults = $(xml).find("ExecXResult");
 			if (execResults) {
@@ -2870,7 +2879,7 @@ $(function() {
 				/* Activity Request CASE */
 				$(execResults).find('ActivityRequest').each(function() {
 					var id = $(this).attr('id');
-					var style = $(this).attr('activityStyle');
+					var style = $(this).attr('style');
 
 					var callback = function(url) {
 						if (url != null) {
@@ -2929,13 +2938,13 @@ $(function() {
 
 							if ($(this).attr('disabled')) {
 								field.set({
-									disabled : boolValue(this.getAttribute('disabled')),
+									disabled : boolValue(this.getAttribute('disabled'))
 								});
 							}
 
 							field.set({
 								text : $(this).attr('text'),
-								value : $(this).attr('value'),
+								value : $(this).attr('value')
 							});
 						}
 
@@ -3150,24 +3159,22 @@ $(function() {
 					url : config._URLprefix + request.url,
 					data : request.data
 				},
-				dataType : 'string',
+				dataType : 'XML',
 				processData : true,
 				complete : function(HTTPrequest) {
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
 					}
-					else {
-						var response = HTTPrequest.responseText;
+					else {						
 						if (isPopup != undefined && isPopup == true) {
 							var WinId = window.open('', 'newwin', 'width=400,height=500');
 							WinId.document.open();
-							WinId.document.write(response);
+							WinId.document.write(HTTPrequest.responseText);
 							WinId.document.close();
 						}
 						else {
-							if (responseHandler) {
-								var xml = response.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-								eval(responseHandler)(xml);
+							if (responseHandler) {								
+								eval(responseHandler)(HTTPrequest.responseXML);
 							}
 						}
 					}
@@ -3179,24 +3186,22 @@ $(function() {
 				type : 'POST',
 				url : config._URLprefix + request.url,
 				data : request.data,
-				dataType : 'xml',
+				dataType : 'XML',
 				processData : true,
 				complete : function(HTTPrequest) {
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
 					}
-					else {
-						var response = HTTPrequest.responseText;
+					else {						
 						if (isPopup != undefined && isPopup == true) {
 							var WinId = window.open('', 'newwin', 'width=400,height=500');
 							WinId.document.open();
-							WinId.document.write(response);
+							WinId.document.write(HTTPrequest.responseText);
 							WinId.document.close();
 						}
 						else {
-							if (responseHandler) {
-								var xml = response.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-								eval(responseHandler)(xml);
+							if (responseHandler) {								
+								eval(responseHandler)(HTTPrequest.responseXML);
 							}
 						}
 					}
@@ -3284,7 +3289,7 @@ $(function() {
 
 			// add cells to this row
 			_.each($(row).find('Cell'), function(cell) {
-				gridModel.addCell(rowId, $(cell).attr('id'), $(cell).html(), columnMap[$(cell).attr('id')], $(cell).attr('sortValue'));
+				gridModel.addCell(rowId, $(cell).attr('id'), $(cell).text(), columnMap[$(cell).attr('id')], $(cell).attr('sortValue'));
 			});
 		});
 		gridModel.trigger("update:grid");
@@ -3337,9 +3342,10 @@ $(function() {
 
 		setSessionHandle : function(sessionHandle) {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'session.handle', sessionHandle);
-			if (this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'login.url') == null) {
-				this.setLoginURL(document.location.pathname);
-			}
+			
+			//Set the login URL as it could be a different entry point or URL changed and needs to be updated
+			this.setLoginURL(document.location.pathname);
+			
 			return true;
 		},
 
@@ -3396,6 +3402,7 @@ $(function() {
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle);
 		},
 
+		/* sets the URL where the user authenticates. This is retrieved when the user needs to be redirected to the login page */
 		setLoginURL : function(url) {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'login.url', url);
 			return true;
@@ -3423,7 +3430,7 @@ $(function() {
 
 			remove : function(key) {
 				$.cookies.del(key);
-			},
+			}
 		},
 
 		/* localStorage */
@@ -3457,7 +3464,7 @@ $(function() {
 
 			remove : function(key) {
 				return window.localStorage.removeItem(key);
-			},
+			}
 		},
 
 		// objects
@@ -3635,7 +3642,7 @@ $(function() {
 			else {
 				expanz.Net.DeltaRequest(this.getAttr('id'), selectedId, this.getAttr('parent'), callbacks);
 			}
-		},
+		}
 	});
 
 	window.expanz.Model.Data.Cell = expanz.Model.Bindable.extend({
@@ -3816,9 +3823,17 @@ $(function() {
 /*
  * START OF FILE - /expanz-JavaScript-SDK/js/expanz.view.js
  */
-/* Author: Adam Tait
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
 
- */
 $(function() {
 
 	window.expanz = window.expanz || {};
@@ -4267,7 +4282,7 @@ $(function() {
 		},
 
 		events : {
-			"click button" : "attemptLogin",
+			"click [type*='submit']" : "attemptLogin"
 		},
 
 		attemptLogin : function() {
@@ -4276,6 +4291,11 @@ $(function() {
 			
 			if(usernameEl.length == 0 || passwordEl.length == 0 ){
 				expanz._error("username or password field cannot be found on the page");
+				return;
+			}
+			if(usernameEl.val().length == 0 || passwordEl.val().length == 0 ){
+				expanz._error("username or password are empty");
+				return;				
 			}
 			else{
 				this.collection.add({
@@ -4289,7 +4309,7 @@ $(function() {
 				this.collection.login();
 			}
 			
-		},
+		}
 
 
 	});	
