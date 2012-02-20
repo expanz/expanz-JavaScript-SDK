@@ -27,7 +27,7 @@ $(function() {
 			else {
 				expanz.Net.DeltaRequest(this.getAttr('id'), selectedId, this.getAttr('parent'), callbacks);
 			}
-		},
+		}
 	});
 
 	window.expanz.Model.Data.Cell = expanz.Model.Bindable.extend({

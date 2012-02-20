@@ -55,8 +55,8 @@ $(function() {
 			renderSearchComponent : function() {
 				var html = '';
 				html += '<div id="shoppingCartSearch" class="search">';
-				html += window.expanz.html.renderField('ItemSearch');
-				html += window.expanz.html.renderMethod(this.searchMethodName, 'Search');
+				html += window.expanz.html.renderField('ItemSearch', '', 'Search');
+				html += window.expanz.html.renderMethod(this.searchMethodName, '');
 				html += "</div>";
 				return html;
 			},
@@ -82,14 +82,14 @@ $(function() {
 						<label><%= window.expanz.html.getDisplayableDiscount(data.UdefString1) %></label> \
 					</div> \ \
 					<% if ( data.AvailableQuantity <= 0 ) { %>  \
-						<% if ( data.SellRateCalcNotes == "message.itemForSale.notAvailableBefore" ) { %>  \
+						<% if ( data.SellRateCalcNotes == "No stock available" ) { %>  \
 						<i><%= $.i18n.prop(data.SellRateCalcNotes,data.Available_From)%></i> \
 						<% } %>  \
-						<% if ( data.SellRateCalcNotes != "message.itemForSale.notAvailableBefore" ) { %>  \
+						<% if ( data.SellRateCalcNotes != "Not available before" ) { %>  \
 							<i><%= $.i18n.prop(data.SellRateCalcNotes)%></i> \
 							<% } %>  \
 					<% } %>  \
-					<% if ( data.AvailableQuantity > 0 ) { %>  \
+					<% if ( true ) { %>  \
 						<button methodName="saveItemFromCart">Add to cart</button> \
 					<% } %></div> \
 			';
@@ -321,12 +321,12 @@ $(function() {
 		return '<div style="width:' + width + 'px;float:left"><%= data.' + fieldName + ' %>&nbsp;</div>';
 	};
 
-	window.expanz.html.renderField = function(fieldName, showLabel) {
+	window.expanz.html.renderField = function(fieldName, showLabel, prompt) {
 		var field = '';
 		field += '<div id="' + fieldName + '"  bind="field" name="' + fieldName + '" class="field">';
 		if (showLabel === true)
 			field += '<label attribute="label"></label>';
-		field += '<input type="text" attribute="value"  class="k-textbox"/>';
+		field += '<input type="text" attribute="value"  class="k-textbox" placeholder="' + prompt + '"/>';
 		field += '</div>';
 		return field;
 	};

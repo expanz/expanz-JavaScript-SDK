@@ -52,7 +52,7 @@ $.fn.KendoMobileListAdapter = function(options) {
 				data.push({
 					name : $(childXml).attr(labelAttribute),
 					category : $(parentXml).attr(labelAttribute),
-					id : $(childXml).attr(idAttribute),
+					id : $(childXml).attr(idAttribute)
 				});
 			});
 

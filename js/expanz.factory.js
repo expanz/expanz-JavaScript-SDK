@@ -7,7 +7,7 @@ $(function() {
 		Login : function(loginEl) {
 
 			var loginModel = new window.expanz.Model.Login({
-				name : $(loginEl).attr('name'),
+				name : $(loginEl).attr('name')
 			});
 			var loginView = new window.expanz.Views.LoginView({
 				el : $(loginEl),
@@ -205,7 +205,7 @@ $(function() {
 												name : $(methodParam).attr('name'),
 												value : $(methodParam).attr('value'),
 												label : $(methodParam).attr('label'),
-												bindValueFromCellId : $(methodParam).attr('bindValueFromCellId'),
+												bindValueFromCellId : $(methodParam).attr('bindValueFromCellId')
 											});
 										});
 										dataControlModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'), methodParams);
