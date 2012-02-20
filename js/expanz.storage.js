@@ -124,7 +124,7 @@ $(function() {
 
 			remove : function(key) {
 				$.cookies.del(key);
-			},
+			}
 		},
 
 		/* localStorage */
@@ -158,7 +158,7 @@ $(function() {
 
 			remove : function(key) {
 				return window.localStorage.removeItem(key);
-			},
+			}
 		},
 
 		// objects

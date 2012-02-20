@@ -163,7 +163,7 @@ $(function() {
 		/* create an anonymous request */
 		CreateAnonymousRequest : function(xmlData, callbacks) {
 			SendRequest(RequestObject.CreateAnonymousRequest(xmlData), parseExecAnonymousResponse(callbacks));
-		},
+		}
 
 	};
 
@@ -255,7 +255,7 @@ $(function() {
 				data : buildRequest('ExecAnonymousX', XMLNamespace, null, true)(xmlData),
 				url : 'ExecAnonymousX'
 			};
-		},
+		}
 
 	};
 
@@ -427,6 +427,7 @@ $(function() {
 	var parseCreateSessionResponse = function(callbacks) {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseCreateSessionResponse");
+			
 			if ($(xml).find('CreateSessionXResult').length > 0) {
 				expanz.Storage.setSessionHandle($(xml).find('CreateSessionXResult').text());
 			}
@@ -460,6 +461,7 @@ $(function() {
 	};
 
 	function parseProcessAreas(xmlElement) {
+		window.expanz.logToConsole("start parseProcessAreas");
 		var processAreas = [];
 		$(xmlElement).children('processarea').each(function() {
 			var processArea = new ProcessArea($(this).attr('id'), $(this).attr('title'));
@@ -468,7 +470,7 @@ $(function() {
 				processArea.pa = subProcessAreas;
 			}
 			$(this).children('activity').each(function() {
-				processArea.activities.push(new ActivityInfo($(this).attr('name'), $(this).attr('title'), '#', $(this).attr('activityStyle'), $(this).attr('image')));
+				processArea.activities.push(new ActivityInfo($(this).attr('name'), $(this).attr('title'), '#', $(this).attr('style'), $(this).attr('image')));
 			});
 			processAreas.push(processArea);
 		});
@@ -521,9 +523,8 @@ $(function() {
 
 	function parseGetSessionDataResponse(callbacks) {
 		return function apply(xml) {
-			/* bug fix for IE style attribute is removed when using jquery find... */
-			xml = xml.replace(/style=/g, "activityStyle=");
 			window.expanz.logToConsole("start parseGetSessionDataResponse");
+			
 			var processAreas = parseProcessAreas($(xml).find("Menu"));
 
 			$.get('./formmapping.xml', function(data) {
@@ -669,8 +670,6 @@ $(function() {
 	function parseDeltaResponse(activity, callbacks) {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseDeltaResponse");
-			/* bug fix for IE style attribute is removed when using jquery find... */
-			xml = xml.replace(/style=/g, "activityStyle=");
 
 			var execResults = $(xml).find("ExecXResult");
 			if (execResults) {
@@ -725,7 +724,7 @@ $(function() {
 				/* Activity Request CASE */
 				$(execResults).find('ActivityRequest').each(function() {
 					var id = $(this).attr('id');
-					var style = $(this).attr('activityStyle');
+					var style = $(this).attr('style');
 
 					var callback = function(url) {
 						if (url != null) {
@@ -784,13 +783,13 @@ $(function() {
 
 							if ($(this).attr('disabled')) {
 								field.set({
-									disabled : boolValue(this.getAttribute('disabled')),
+									disabled : boolValue(this.getAttribute('disabled'))
 								});
 							}
 
 							field.set({
 								text : $(this).attr('text'),
-								value : $(this).attr('value'),
+								value : $(this).attr('value')
 							});
 						}
 
@@ -1005,24 +1004,22 @@ $(function() {
 					url : config._URLprefix + request.url,
 					data : request.data
 				},
-				dataType : 'string',
+				dataType : 'XML',
 				processData : true,
 				complete : function(HTTPrequest) {
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
 					}
-					else {
-						var response = HTTPrequest.responseText;
+					else {						
 						if (isPopup != undefined && isPopup == true) {
 							var WinId = window.open('', 'newwin', 'width=400,height=500');
 							WinId.document.open();
-							WinId.document.write(response);
+							WinId.document.write(HTTPrequest.responseText);
 							WinId.document.close();
 						}
 						else {
-							if (responseHandler) {
-								var xml = response.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-								eval(responseHandler)(xml);
+							if (responseHandler) {								
+								eval(responseHandler)(HTTPrequest.responseXML);
 							}
 						}
 					}
@@ -1034,24 +1031,22 @@ $(function() {
 				type : 'POST',
 				url : config._URLprefix + request.url,
 				data : request.data,
-				dataType : 'xml',
+				dataType : 'XML',
 				processData : true,
 				complete : function(HTTPrequest) {
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
 					}
-					else {
-						var response = HTTPrequest.responseText;
+					else {						
 						if (isPopup != undefined && isPopup == true) {
 							var WinId = window.open('', 'newwin', 'width=400,height=500');
 							WinId.document.open();
-							WinId.document.write(response);
+							WinId.document.write(HTTPrequest.responseText);
 							WinId.document.close();
 						}
 						else {
-							if (responseHandler) {
-								var xml = response.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-								eval(responseHandler)(xml);
+							if (responseHandler) {								
+								eval(responseHandler)(HTTPrequest.responseXML);
 							}
 						}
 					}
@@ -1139,7 +1134,7 @@ $(function() {
 
 			// add cells to this row
 			_.each($(row).find('Cell'), function(cell) {
-				gridModel.addCell(rowId, $(cell).attr('id'), $(cell).html(), columnMap[$(cell).attr('id')], $(cell).attr('sortValue'));
+				gridModel.addCell(rowId, $(cell).attr('id'), $(cell).text(), columnMap[$(cell).attr('id')], $(cell).attr('sortValue'));
 			});
 		});
 		gridModel.trigger("update:grid");

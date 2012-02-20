@@ -457,7 +457,7 @@ $(function() {
 		},
 
 		events : {
-			"click button[type*='submit']" : "attemptLogin",
+			"click [type*='submit']" : "attemptLogin"
 		},
 
 		attemptLogin : function() {
@@ -484,7 +484,7 @@ $(function() {
 				this.collection.login();
 			}
 			
-		},
+		}
 
 
 	});	

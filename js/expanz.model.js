@@ -145,7 +145,7 @@ $(function() {
 					}
 				});
 			}
-		},
+		}
 
 	});
 
@@ -207,7 +207,7 @@ $(function() {
 
 		initialize : function(attrs) {
 			expanz.Collection.prototype.initialize.call(this, attrs);
-		},
+		}
 
 	});
 
