@@ -200,8 +200,10 @@ function createActivityWithKendoTabs(tabElement, ajaxTabContents, callbacks) {
 
 	/* once a tab is loaded we check if it was the last on, if so we create the activity */
 	var onContentLoad = function(e) {
-		tabLoaded[e.item.textContent] = true;
+		var itemName = (e.item.innerText || e.item.textContent);
+		tabLoaded[itemName] = true;
 		if (Object.size(tabLoaded) == nbDynamicTabs) {
+			
 			tabLoaded = new Array();
 			expanz.CreateActivity($(e.item).parents('[bind=activity]'), callbacks);
 		}
@@ -311,7 +313,7 @@ $.fn.KendoTreeAdapter = function(options) {
 			/*
 			 * unfortunately we cannot attach any data/id to the tree items -> we need to do a lookup based on the child label in the xml datasource to retrieve the child id
 			 */
-			var elem = $(xmlData).find('[' + labelAttribute + '="' + event.node.firstChild.textContent + '"]');
+			var elem = $(xmlData).find('[' + labelAttribute + '="' + (event.node.firstChild.textContent || event.node.firstChild.innerText ) + '"]');
 
 			if (onSelection) {
 				onSelection(view, elem.attr('id'), elem.is(childTag));
@@ -464,7 +466,7 @@ $.fn.KendoMobileListAdapter = function(options) {
 			 template: "${name}",
 			 
 			 click: function(e) {
-		         console.log(e.dataItem.id);
+				 	window.expanz.logToConsole(e.dataItem.id);
 		    }
 
 		});

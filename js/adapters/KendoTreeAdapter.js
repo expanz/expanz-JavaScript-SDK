@@ -83,7 +83,7 @@ $.fn.KendoTreeAdapter = function(options) {
 			/*
 			 * unfortunately we cannot attach any data/id to the tree items -> we need to do a lookup based on the child label in the xml datasource to retrieve the child id
 			 */
-			var elem = $(xmlData).find('[' + labelAttribute + '="' + event.node.firstChild.textContent + '"]');
+			var elem = $(xmlData).find('[' + labelAttribute + '="' + (event.node.firstChild.textContent || event.node.firstChild.innerText ) + '"]');
 
 			if (onSelection) {
 				onSelection(view, elem.attr('id'), elem.is(childTag));

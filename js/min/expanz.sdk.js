@@ -2844,7 +2844,7 @@ $(function() {
 							var field = activity.get(source);
 							if (field && field != undefined) {
 								field.set({
-									errorMessage : this.textContent,
+									errorMessage : (this.textContent || this.innerText),
 									error : true
 								});
 							}
