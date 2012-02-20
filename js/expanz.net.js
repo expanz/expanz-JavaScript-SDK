@@ -20,7 +20,7 @@ $(function() {
 		GetSessionDataRequest : function(callbacks) {
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -32,7 +32,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -58,7 +58,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -74,7 +74,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -86,7 +86,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -98,7 +98,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -107,7 +107,7 @@ $(function() {
 
 		ReleaseSessionRequest : function(callbacks) {
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 			SendRequest(RequestObject.ReleaseSession(expanz.Storage.getSessionHandle()), parseReleaseSessionResponse(callbacks));
@@ -118,7 +118,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -130,7 +130,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -143,7 +143,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
