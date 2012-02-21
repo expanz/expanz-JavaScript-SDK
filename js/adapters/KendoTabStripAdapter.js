@@ -6,8 +6,10 @@ function createActivityWithKendoTabs(tabElement, ajaxTabContents, callbacks) {
 
 	/* once a tab is loaded we check if it was the last on, if so we create the activity */
 	var onContentLoad = function(e) {
-		tabLoaded[e.item.textContent] = true;
+		var itemName = (e.item.innerText || e.item.textContent);
+		tabLoaded[itemName] = true;
 		if (Object.size(tabLoaded) == nbDynamicTabs) {
+			
 			tabLoaded = new Array();
 			expanz.CreateActivity($(e.item).parents('[bind=activity]'), callbacks);
 		}

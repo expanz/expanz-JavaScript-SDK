@@ -22,6 +22,16 @@ $(function() {
 			console.log(message);
 		}
 	}
+	
+	window.expanz.getLoginURL = function(){
+		var loginUrl = window.config._loginpage;
+		/* if login url is null try to guess it by removing the filename */
+		if (loginUrl == null) {
+			loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
+		}
+		window.expanz.logToConsole("getLoginURL : " + loginUrl);
+		return loginUrl;
+	}
 
 	//
 	// Public Functions & Objects in the Expanz Namespace
@@ -72,7 +82,7 @@ $(function() {
 	window.expanz.Logout = function() {
 		function redirect() {
 			expanz.Storage.clearSession();
-			expanz.Views.redirect(expanz.Storage.getLoginURL())
+			expanz.Views.redirect(expanz.getLoginURL());
 		}
 		;
 		expanz.Net.ReleaseSessionRequest({

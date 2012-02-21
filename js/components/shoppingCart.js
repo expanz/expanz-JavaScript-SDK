@@ -34,7 +34,6 @@ $(function() {
 			initialize : function() {
 				var that = this;
 				/* render component if present in the page */
-
 				_.each(this.components, function(component) {
 					/* search the tag in the page */
 					if ($("shoppingCart\\:" + component).length > 0) {
@@ -45,7 +44,16 @@ $(function() {
 							that['_executeAfterRender' + component + 'Component']();
 						}
 					}
-					;
+					/* search for class (old browser) */
+					if ($(".shoppingCart-"+component).length > 0) {
+						var componentContent = that['render' + component + 'Component']();
+						$(".shoppingCart-" + component).append(componentContent);
+						/* execute script after adding to content to the dom */
+						if (that['_executeAfterRender' + component + 'Component']) {
+							that['_executeAfterRender' + component + 'Component']();
+						}
+						
+					}
 				});
 
 				expanz.CreateActivity($('[bind=activity]'));
@@ -271,7 +279,7 @@ $(function() {
 						$("#cartCheckout").show();
 					}
 				});
-			},
+			}
 		});
 
 	/*

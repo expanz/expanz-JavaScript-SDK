@@ -66,7 +66,7 @@ $.fn.KendoMobileListAdapter = function(options) {
 			 template: "${name}",
 			 
 			 click: function(e) {
-		         console.log(e.dataItem.id);
+				 	window.expanz.logToConsole(e.dataItem.id);
 		    }
 
 		});

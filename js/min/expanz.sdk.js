@@ -2186,7 +2186,7 @@ $(function() {
 		GetSessionDataRequest : function(callbacks) {
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -2198,7 +2198,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -2224,7 +2224,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -2240,7 +2240,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -2252,7 +2252,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -2264,7 +2264,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -2273,7 +2273,7 @@ $(function() {
 
 		ReleaseSessionRequest : function(callbacks) {
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 			SendRequest(RequestObject.ReleaseSession(expanz.Storage.getSessionHandle()), parseReleaseSessionResponse(callbacks));
@@ -2284,7 +2284,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -2296,7 +2296,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -2309,7 +2309,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.Storage.getLoginURL())
+				expanz.Views.redirect(expanz.getLoginURL())
 				return;
 			}
 
@@ -2848,7 +2848,7 @@ $(function() {
 							var field = activity.get(source);
 							if (field && field != undefined) {
 								field.set({
-									errorMessage : this.textContent,
+									errorMessage : (this.textContent || this.innerText),
 									error : true
 								});
 							}
@@ -3323,7 +3323,8 @@ $(function() {
 		_getBestStorage : function() {
 			if (window['localStorage'] !== null) {
 				/*
-				 * length is unused but please leave it I don't know why but sometimes firefox get an empty window.localStorage by mistake Doing this force it to evaluate the window.localStorage object and it seems to work
+				 * length is unused but please leave it. I don't know why but sometimes firefox get an empty window.localStorage by mistake 
+				 * Doing this force it to evaluate the window.localStorage object and it seems to work
 				 */
 				window.localStorage.length;
 				return this.localStorage;
@@ -3346,10 +3347,6 @@ $(function() {
 
 		setSessionHandle : function(sessionHandle) {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'session.handle', sessionHandle);
-			
-			//Set the login URL as it could be a different entry point or URL changed and needs to be updated
-			this.setLoginURL(document.location.pathname);
-			
 			return true;
 		},
 
@@ -3379,15 +3376,6 @@ $(function() {
 			return true;
 		},
 
-		getLoginURL : function() {
-			var loginUrl = this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'login.url');
-			/* if login url is null try to guess it by removing the filename */
-			if (loginUrl == null) {
-				loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
-			}
-			return loginUrl;
-		},
-
 		clearSession : function() {
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'session.handle');
 			this.clearActivityHandles();
@@ -3406,11 +3394,6 @@ $(function() {
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle);
 		},
 
-		/* sets the URL where the user authenticates. This is retrieved when the user needs to be redirected to the login page */
-		setLoginURL : function(url) {
-			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'login.url', url);
-			return true;
-		},
 
 		/* storage implementations */
 		/* cookies */
@@ -4642,6 +4625,16 @@ $(function() {
 			console.log(message);
 		}
 	}
+	
+	window.expanz.getLoginURL = function(){
+		var loginUrl = window.config._loginpage;
+		/* if login url is null try to guess it by removing the filename */
+		if (loginUrl == null) {
+			loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
+		}
+		window.expanz.logToConsole("getLoginURL : " + loginUrl);
+		return loginUrl;
+	}
 
 	//
 	// Public Functions & Objects in the Expanz Namespace
@@ -4692,7 +4685,7 @@ $(function() {
 	window.expanz.Logout = function() {
 		function redirect() {
 			expanz.Storage.clearSession();
-			expanz.Views.redirect(expanz.Storage.getLoginURL())
+			expanz.Views.redirect(expanz.getLoginURL());
 		}
 		;
 		expanz.Net.ReleaseSessionRequest({
