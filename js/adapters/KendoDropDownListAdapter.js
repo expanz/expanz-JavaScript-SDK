@@ -14,7 +14,7 @@ $.fn.KendoDropDownListAdapter = function() {
 			var rowId = $(row).attr('id');
 			_.each($(row).find('Cell'), function(cell) {
 				data.push({
-					text : $(cell).html(),
+					text : $(cell).text(),
 					value : rowId
 				});
 			});
