@@ -1115,13 +1115,13 @@ $(function() {
 		this.name = name;
 		this.title = title;
 		this.url = url;
-		this.style = style;
-		/* if the image if not defined we look for the activity name.png instead */
+		this.style = style || "";
+		/* if the image if not defined we look for the activity name + style .png instead */
 		if (image != undefined) {
 			this.img = image;
 		}
 		else {
-			this.img = name + ".png";
+			this.img = "assets/images/" + name + style + ".png";
 		}
 		this.gridviews = [];
 	}
