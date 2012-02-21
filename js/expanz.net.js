@@ -1116,7 +1116,13 @@ $(function() {
 		this.title = title;
 		this.url = url;
 		this.style = style;
-		this.img = image;
+		/* if the image if not defined we look for the activity name.png instead */
+		if (image != undefined) {
+			this.img = image;
+		}
+		else {
+			this.img = name + ".png";
+		}
 		this.gridviews = [];
 	}
 
