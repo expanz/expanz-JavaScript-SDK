@@ -170,6 +170,7 @@ $(function() {
 				if ($(dataControlEl).attr('renderingType') == 'grid') {
 					var dataControlModel = new expanz.Model.Data.Grid({
 						id : $(dataControlEl).attr('name'),
+						query : $(dataControlEl).attr('query'),
 						populateMethod : $(dataControlEl).attr('populateMethod'),
 						autoPopulate : $(dataControlEl).attr('autoPopulate'),
 						contextObject : $(dataControlEl).attr('contextObject'),

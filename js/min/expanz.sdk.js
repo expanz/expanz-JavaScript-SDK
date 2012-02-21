@@ -1850,6 +1850,7 @@ $(function() {
 				if ($(dataControlEl).attr('renderingType') == 'grid') {
 					var dataControlModel = new expanz.Model.Data.Grid({
 						id : $(dataControlEl).attr('name'),
+						query : $(dataControlEl).attr('query'),
 						populateMethod : $(dataControlEl).attr('populateMethod'),
 						autoPopulate : $(dataControlEl).attr('autoPopulate'),
 						contextObject : $(dataControlEl).attr('contextObject'),
@@ -2496,8 +2497,11 @@ $(function() {
 			if (activity.hasDataControl()) {
 				_.each(activity.getDataControls(), function(dataControl, dataControlId) {
 					var populateMethod = dataControl.getAttr('populateMethod') ? ' populateMethod="' + dataControl.getAttr('populateMethod') + '"' : '';
-					var autoPopulate = dataControl.getAttr('autoPopulate') ? ' autoPopulate="' + dataControl.getAttr('autoPopulate') + '"' : '';
-					center += '<DataPublication id="' + dataControlId + '"' + populateMethod + autoPopulate + ' Type="' + dataControl.getAttr('type') + '"';
+					var query = dataControl.getAttr('query') ? ' query="' + dataControl.getAttr('query') + '"' : '';
+					var autoPopulate = dataControl.getAttr('autoPopulate') ? ' autoPopulate="' + dataControl.getAttr('autoPopulate') + '"' : '';					
+					var type = dataControl.getAttr('type') ? ' type="' + dataControl.getAttr('type') + '"' : '';					
+					
+					center += '<DataPublication id="' + dataControlId + '"' + query + populateMethod + autoPopulate + type;
 					dataControl.getAttr('contextObject') ? center += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
 					center += '/>';
 				});
