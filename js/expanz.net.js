@@ -10,11 +10,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 $(function() {
-		
+
 	window.expanz = window.expanz || {};
-	
+
 	window.expanz.clientVersion = "1.0";
-	
+
 	window.expanz.helper = window.expanz.helper || {};
 
 	window.expanz.Net = {
@@ -148,7 +148,7 @@ $(function() {
 		},
 
 		/* call when selecting something from the tree view (file) */
-		CreateMenuActionRequest : function(activity, contextId, contextType, menuAction, defaultAction, callbacks) {
+		CreateMenuActionRequest : function(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, callbacks) {
 			if (callbacks == undefined)
 				callbacks = activity.callbacks;
 
@@ -157,7 +157,7 @@ $(function() {
 				return;
 			}
 
-			SendRequest(RequestObject.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
+			SendRequest(RequestObject.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
 		},
 
 		/* create an anonymous request */
@@ -243,9 +243,9 @@ $(function() {
 			};
 		},
 
-		CreateMenuAction : function(activity, contextId, contextType, menuAction, defaultAction, sessionHandle) {
+		CreateMenuAction : function(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext)),
 				url : 'ExecX'
 			};
 		},
@@ -342,9 +342,9 @@ $(function() {
 				_.each(activity.getDataControls(), function(dataControl, dataControlId) {
 					var populateMethod = dataControl.getAttr('populateMethod') ? ' populateMethod="' + dataControl.getAttr('populateMethod') + '"' : '';
 					var query = dataControl.getAttr('query') ? ' query="' + dataControl.getAttr('query') + '"' : '';
-					var autoPopulate = dataControl.getAttr('autoPopulate') ? ' autoPopulate="' + dataControl.getAttr('autoPopulate') + '"' : '';					
-					var type = dataControl.getAttr('type') ? ' type="' + dataControl.getAttr('type') + '"' : '';					
-					
+					var autoPopulate = dataControl.getAttr('autoPopulate') ? ' autoPopulate="' + dataControl.getAttr('autoPopulate') + '"' : '';
+					var type = dataControl.getAttr('type') ? ' type="' + dataControl.getAttr('type') + '"' : '';
+
 					center += '<DataPublication id="' + dataControlId + '"' + query + populateMethod + autoPopulate + type;
 					dataControl.getAttr('contextObject') ? center += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
 					center += '/>';
@@ -385,11 +385,14 @@ $(function() {
 			return body;
 		},
 
-		CreateMenuAction : function(activity, contextId, contextType, menuAction, defaultAction) {
+		CreateMenuAction : function(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext) {
 			var mnuActionStr = '<Activity activityHandle="' + activity.getAttr('handle') + '">';
 			var contextObjectStr = contextType ? ' contextObject="' + contextType + '"' : '';
+
 			if (contextId) {
-				mnuActionStr += '<Context id="' + contextId + '"' + contextObjectStr + '/>';
+				mnuActionStr += '<Context id="' + contextId + '"' + contextObjectStr;
+				mnuActionStr += setIdFromContext ? " setIdFromContext='1' " : "";
+				mnuActionStr += '/>';
 			}
 			mnuActionStr += '<MenuAction ';
 			if (menuAction) {
@@ -430,7 +433,7 @@ $(function() {
 	var parseCreateSessionResponse = function(callbacks) {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseCreateSessionResponse");
-			
+
 			if ($(xml).find('CreateSessionXResult').length > 0) {
 				expanz.Storage.setSessionHandle($(xml).find('CreateSessionXResult').text());
 			}
@@ -527,7 +530,7 @@ $(function() {
 	function parseGetSessionDataResponse(callbacks) {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseGetSessionDataResponse");
-			
+
 			var processAreas = parseProcessAreas($(xml).find("Menu"));
 
 			$.get('./formmapping.xml', function(data) {
@@ -635,10 +638,14 @@ $(function() {
 							fillGridModel(dataControlModel, data);
 
 							/* add a method handler for each action button */
-							dataControlModel.actionSelected = function(selectedId, methodName, methodParam) {
+							dataControlModel.actionSelected = function(selectedId, name, params) {
+								expanz.Net.MethodRequest(name, params, null, activity);
+								window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + name + ' ,methodParam:' + JSON.stringify(params));
+							};
 
-								expanz.Net.MethodRequest(methodName, methodParam, null, activity);
-								window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParam:' + JSON.stringify(methodParam));
+							/* override a method handler for each menuaction button */
+							dataControlModel.menuActionSelected = function(selectedId, name, params) {
+								expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
 							};
 						}
 						/* others cases (tree, combobox) */
@@ -727,9 +734,10 @@ $(function() {
 				/* Activity Request CASE */
 				$(execResults).find('ActivityRequest').each(function() {
 					var id = $(this).attr('id');
-					var style = $(this).attr('style');
+					var key = $(this).attr('key');
+					var style = $(this).attr('style') || "";
 
-					var callback = function(url) {
+					var callback = function(url, onRequest) {
 						if (url != null) {
 							window.expanz.logToConsole(url);
 						}
@@ -737,28 +745,36 @@ $(function() {
 							window.expanz.logToConsole("Url of activity not found");
 						}
 
-						/* an activity request shouldn't be reloaded from any state -> clean an eventual cookie */
-						window.expanz.Storage.clearActivityHandle(id, style);
+						/* case 'popup' */
+						if (onRequest == 'popup') {
 
-						var clientMessage = new expanz.Model.ClientMessage({
-							id : 'ActivityRequest',
-							url : url + "?random=" + new Date().getTime(),
-							parent : activity
-						});
+							/* an activity request shouldn't be reloaded from any state -> clean an eventual cookie */
+							window.expanz.Storage.clearActivityHandle(id, style);
 
-						var popup = new window.expanz.Views.ManuallyClosedPopup({
-							id : clientMessage.id,
-							model : clientMessage
-						}, $('body'));
+							var clientMessage = new expanz.Model.ClientMessage({
+								id : 'ActivityRequest',
+								url : url + "?random=" + new Date().getTime(),
+								parent : activity
+							});
 
-						popup.bind('contentLoaded', function() {
-							expanz.CreateActivity($(popup.el).find("[bind=activity]"));
-						});
+							var popup = new window.expanz.Views.ManuallyClosedPopup({
+								id : clientMessage.id,
+								model : clientMessage
+							}, $('body'));
+
+							popup.bind('contentLoaded', function() {
+								expanz.CreateActivity($(popup.el).find("[bind=activity]"));
+							});
+						}
+						/* case 'navigate' or default */
+						else {
+							window.location = url + "?random=" + new Date().getTime() + "&" + id + style + "initialKey=" + key;
+						}
 
 					};
 
 					/* find url of activity */
-					window.expanz.helper.findActivityURL(id, style, callback);
+					window.expanz.helper.findActivityMetadata(id, style, callback);
 
 				});
 
@@ -925,17 +941,22 @@ $(function() {
 						var dataControlModel = activity.getDataControl(id);
 						if (dataControlModel !== undefined) {
 							if (dataControlModel.getAttr('renderingType') == 'grid') {
-						
+
 								fillGridModel(dataControlModel, $(this));
 
-								/* add a method handler for each action button */
-								dataControlModel.actionSelected = function(selectedId, methodName, methodParam) {
-									expanz.Net.MethodRequest(methodName, methodParam, null, activity);
-									window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParam:' + JSON.stringify(methodParam));
+								/* override the method handler for each action button */
+								dataControlModel.actionSelected = function(selectedId, name, params) {
+									expanz.Net.MethodRequest(name, params, null, activity);
+									window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + name + ' ,params:' + JSON.stringify(params));
+								};
+
+								/* override a method handler for each menuaction button */
+								dataControlModel.menuActionSelected = function(selectedId, name, params) {
+									expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
 								};
 							}
-							else{
-								//TODO implement update of other datacontrolsF
+							else {
+								// TODO implement update of other datacontrolsF
 							}
 						}
 					}
@@ -1013,7 +1034,7 @@ $(function() {
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
 					}
-					else {						
+					else {
 						if (isPopup != undefined && isPopup == true) {
 							var WinId = window.open('', 'newwin', 'width=400,height=500');
 							WinId.document.open();
@@ -1021,7 +1042,7 @@ $(function() {
 							WinId.document.close();
 						}
 						else {
-							if (responseHandler) {								
+							if (responseHandler) {
 								eval(responseHandler)(HTTPrequest.responseXML);
 							}
 						}
@@ -1040,7 +1061,7 @@ $(function() {
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
 					}
-					else {						
+					else {
 						if (isPopup != undefined && isPopup == true) {
 							var WinId = window.open('', 'newwin', 'width=400,height=500');
 							WinId.document.open();
@@ -1048,7 +1069,7 @@ $(function() {
 							WinId.document.close();
 						}
 						else {
-							if (responseHandler) {								
+							if (responseHandler) {
 								eval(responseHandler)(HTTPrequest.responseXML);
 							}
 						}

@@ -210,7 +210,9 @@ $(function() {
 		initialize : function() {
 			this.model.bind("update:grid", this.render, this);
 			this.bind("rowClicked", this.rowClicked, this);
+			this.bind("rowDoubleClicked", this.rowDoubleClicked, this);
 			this.bind("actionClicked", this.actionClicked, this);
+			this.bind("menuActionClicked", this.menuActionClicked, this);
 		},
 
 		rowClicked : function(row) {
@@ -219,10 +221,18 @@ $(function() {
 				this.model.updateRowSelected(this.selectedId, row.attr('type'));
 			}
 		},
-
-		actionClicked : function(id, methodName, methodParams) {
-			this.model.actionSelected(id, methodName, methodParams);
+		
+		rowDoubleClicked : function(row) {
+			this.model.updateRowDoubleClicked(row.attr('id'), row.attr('type'));
 		},
+
+		actionClicked : function(id, name, params) {
+			this.model.actionSelected(id, name, params);
+		},
+		
+		menuActionClicked : function(id, name, params) {
+			this.model.menuActionSelected(id, name, params);
+		},		
 
 		renderPagingBar : function(currentPage, itemsPerPage, hostEl) {
 			var pagingBar = "";
@@ -295,19 +305,33 @@ $(function() {
 
 					hostEl.append(result);
 
+					/* binding method from template */
 					var that = this;
-					hostEl.find("#" + itemId + " [methodName]").each(function(index, element) {
+					hostEl.find("#" + itemId + " [methodName] ").each(function(index, element) {
 						var action = that.model.getAction($(element).attr('methodName'));
 						if (action && action.length > 0) {
 							$(element).click(function() {
 								var rowId = $(this).closest("[rowId]").attr('rowId');
-								var methodParams = action[0].get('methodParams').clone();
-
-								that._handleActionClick(rowId, action[0].get('methodName'), methodParams, $(this).closest("[rowId]"));
+								var actionParams = action[0].get('actionParams').clone();
+								
+								that._handleActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
 							});
 						}
 					});
-				}
+					}
+					/* binding menuAction from template */
+					hostEl.find("#" + itemId + " [menuAction] ").each(function(index, element) {
+						var action = that.model.getAction($(element).attr('menuAction'));
+						if (action && action.length > 0) {
+							$(element).click(function() {
+								var rowId = $(this).closest("[rowId]").attr('rowId');
+								var actionParams = action[0].get('actionParams').clone();
+
+								that._handleMenuActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+					
+							});
+						}
+					});
 
 			}
 			/* else normal table display */
@@ -358,19 +382,18 @@ $(function() {
 					if (this.model.getAttr('hasActions')) {
 						html += '<td>';
 						_.each(this.model.getActions(), function(cell) {
-							var buttonId = model.getAttr('id') + "_" + row.getAttr('id') + "_" + cell.get('methodName');
-							// var methodParamsReplaced = new Array();
-							var methodParams = cell.get('methodParams');
+							var buttonId = model.getAttr('id') + "_" + row.getAttr('id') + "_" +  cell.get('actionName');
+							var actionParams = cell.get('actionParams');
 
 							var userInputs = "";
-							_.each(methodParams, function(methodParam) {
-								var name = methodParam.name;
-								var value = methodParam.value;
-								var label = methodParam.label;
+							_.each(actionParams, function(actionParams) {
+								var name = actionParams.name;
+								var value = actionParams.value;
+								var label = actionParams.label;
 
 								if (value == '@userInput.textinput' || value == '@userInput.numericinput') {
 									var format = (value == '@userInput.numericinput') ? 'numeric' : 'text';
-									var bindValueFromCellId = methodParam.bindValueFromCellId;
+									var bindValueFromCellId = actionParams.bindValueFromCellId;
 									var inputValue = '';
 									if (bindValueFromCellId) {
 										inputValue = " value='" + values[bindValueFromCellId] + "' ";
@@ -378,7 +401,7 @@ $(function() {
 									userInputs += "<label for='" + row.getAttr('id') + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.getAttr('id') + "_userinput_" + name + "'/>";
 								}
 							});
-							html += "<div style='display:inline' name='" + cell.get('methodName') + "' methodParams='" + JSON.stringify(methodParams) + "' bind='method'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button>";
+							html += "<div style='display:inline' name='" + cell.get('actionName') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='"+ cell.get('type')+"'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
 
 						});
 						html += '</td>';
@@ -391,8 +414,14 @@ $(function() {
 				var onRowClick = function(event) {
 					event.data.trigger("rowClicked", $(this));
 				};
+				
+				/* handle double row click event */
+				var onRowDoubleClick = function(event) {
+					event.data.trigger("rowDoubleClicked", $(this));
+				};
 
 				$('table#' + hostId + ' tr').click(this, onRowClick);
+				$('table#' + hostId + ' tr').dblclick(this, onRowDoubleClick);
 
 				var that = this;
 				/* handle button/actions click event */
@@ -400,11 +429,22 @@ $(function() {
 					var rowId = $(this).closest("tr").attr('id');
 					var parentDiv = $(this).parent();
 					var methodName = parentDiv.attr('name');
-					var methodParams = JSON.parse(parentDiv.attr('methodParams'));
-					that._handleActionClick(rowId, methodName, methodParams, parentDiv);
+					var actionParams = JSON.parse(parentDiv.attr('actionParams'));
+					that._handleActionClick(rowId, methodName, actionParams, parentDiv);
 				};
 
 				$('table#' + hostId + ' tr [bind=method] > button').click(this, onActionClick);
+				
+				/* handle menuAction click event */
+				var onMenuActionClick = function(event) {
+					var rowId = $(this).closest("tr").attr('id');
+					var parentDiv = $(this).parent();
+					var menuActionName = parentDiv.attr('name');
+					var actionParams = JSON.parse(parentDiv.attr('actionParams'));
+					that._handleMenuActionClick(rowId, menuActionName, actionParams, parentDiv);
+				};
+
+				$('table#' + hostId + ' tr [bind=menuAction] > button').click(this, onMenuActionClick);				
 			}
 
 			this.renderPagingBar(currentPage, itemsPerPage, hostEl);
@@ -426,28 +466,40 @@ $(function() {
 			return this;
 		},
 
-		_handleActionClick : function(rowId, methodName, methodParams, divEl) {
+		_handleActionClick : function(rowId, methodName, actionParams, divEl) {
 			var inputValid = true;
 			/* handle user input */
-			_.each(methodParams, function(methodParam) {
-				var name = methodParam.name;
-				if (methodParam.value == '@userInput.textinput' || methodParam.value == '@userInput.numericinput') {
+			_.each(actionParams, function(actionParam) {
+				var name = actionParam.name;
+				if (actionParam.value == '@userInput.textinput' || actionParam.value == '@userInput.numericinput') {
 					var valueInput = divEl.find("#" + rowId + "_userinput_" + name);
 					if (valueInput.length > 0 && valueInput.val().length > 0) {
-						methodParam.value = valueInput.val();
+						actionParam.value = valueInput.val();
 					}
 					else {
 						inputValid = false;
 					}
 				}
-				else if (methodParam.value == '@contextId') {
-					methodParam.value = rowId;
+				else if (actionParam.value == '@contextId') {
+					actionParam.value = rowId;
 				}
 			});
 
 			if (inputValid)
-				this.trigger("actionClicked", rowId, methodName, methodParams);
-		}
+				this.trigger("actionClicked", rowId, methodName, actionParams);
+		},
+		
+		_handleMenuActionClick : function(rowId, menuAction, actionParams, divEl) {
+			/* handle user input */
+			_.each(actionParams, function(actionParam) {
+				var name = actionParam.name;
+				if (actionParam.value == '@contextId') {
+					actionParam.value = rowId;
+				}
+			});
+
+				this.trigger("menuActionClicked", rowId, menuAction, actionParams);
+			}
 
 	});
 

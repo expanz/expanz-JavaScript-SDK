@@ -200,16 +200,18 @@ $(function() {
 								if (gridviewInfo) {
 									// add actions
 									_.each($(gridviewInfo).find('action'), function(action) {
-										var methodParams = new Array();
-										_.each($(action).find('methodParam'), function(methodParam) {
-											methodParams.push({
-												name : $(methodParam).attr('name'),
-												value : $(methodParam).attr('value'),
-												label : $(methodParam).attr('label'),
-												bindValueFromCellId : $(methodParam).attr('bindValueFromCellId')
+										var params = new Array();
+										_.each($(action).find('param'), function(param) {
+											params.push({
+												name : $(param).attr('name'),
+												value : $(param).attr('value'),
+												label : $(param).attr('label'),
+												bindValueFromCellId : $(param).attr('bindValueFromCellId')
 											});
 										});
-										dataControlModel.addAction($(action).attr('id'), $(action).attr('label'), $(action).attr('width'), $(action).attr('methodName'), methodParams);
+										var actionName = $(action).attr('methodName') || $(action).attr('menuAction');
+										var type = $(action).attr('methodName') ? 'method' : 'menuAction';
+										dataControlModel.addAction(type,$(action).attr('id'), $(action).attr('label'), $(action).attr('width'), actionName, params);
 									});
 								}
 							}

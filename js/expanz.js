@@ -22,8 +22,8 @@ $(function() {
 			console.log(message);
 		}
 	}
-	
-	window.expanz.getLoginURL = function(){
+
+	window.expanz.getLoginURL = function() {
 		var loginUrl = window.config._loginpage;
 		/* if login url is null try to guess it by removing the filename */
 		if (loginUrl == null) {
@@ -213,14 +213,15 @@ $(function() {
 		return null;
 	}
 
-	window.expanz.helper.findActivityURL = function(activityName, activityStyle, callback) {
+	window.expanz.helper.findActivityMetadata = function(activityName, activityStyle, callback) {
 		var jqxhr = $.get('./formmapping.xml', function(data) {
 			$(data).find('activity').each(function() {
 				var name = $(this).attr('name');
 				var url = $(this).attr('form');
+				var onRequest = $(this).attr('onRequest');
 				var style = $(this).attr('style');
 				if (name == activityName && style == activityStyle) {
-					callback(url);
+					callback(url, onRequest);
 					return;
 				}
 			});
@@ -233,21 +234,33 @@ $(function() {
 	function createActivity(dom, callbacks) {
 
 		var activities = [];
+
+		var domActivities = [];
+
 		if ($(dom).attr('bind') && ($(dom).attr('bind').toLowerCase() === 'activity')) {
-
-			var activityView = expanz.Factory.Activity(dom);
-			activityView.collection.load(callbacks);
-			activities.push(activityView);
-
+			domActivities.push(dom);
 		}
 		else {
 			// search through DOM body, looking for elements with 'bind' attribute
 			_.each($(dom).find('[bind=activity]'), function(activityEl) {
-				var activityView = expanz.Factory.Activity(dom);
-				activityView.collection.load(callbacks);
-				activities.push(activityView);
-			}); // _.each activity
+				domActivities.push(activityEl);
+			});
 		}
+
+		_.each(domActivities, function(activityEl) {
+
+			var activityView = expanz.Factory.Activity(dom);
+
+			/* look for initial key in the query parameters */
+			var initialKey = getQueryParameterByName(activityView.collection.getAttr('name') + (activityView.collection.getAttr('style') || '') + 'initialKey');
+			activityView.collection.setAttr({
+				'key' : initialKey
+			});
+
+			activityView.collection.load(callbacks);
+			activities.push(activityView);
+		});
+
 		return activities;
 	}
 
@@ -339,14 +352,13 @@ $(function() {
 				else
 					window.expanz.logToConsole("useKendo method is undefined");
 				break;
-				
+
 			case "kendoMobile":
 				if (typeof useKendoMobile == 'function')
 					useKendoMobile();
 				else
 					window.expanz.logToConsole("useKendoMobile method is undefined");
 				break;
-				
 
 			default:
 				break;

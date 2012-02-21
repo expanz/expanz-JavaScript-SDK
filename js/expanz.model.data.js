@@ -132,22 +132,23 @@ $(function() {
 				return cell.get('id') === '_actions';
 			}, this);
 		},
-		getAction : function(methodName) {
+		getAction : function(actionName) {
 			return this.get('_actions').reject(function(cell) {
-				return cell.get('id') === '_actions' || cell.get('methodName') != methodName;
+				return cell.get('id') === '_actions' || cell.get('actionName') != actionName;
 			}, this);
 		},
-		addAction : function(_id, _label, _width, _methodName, _methodParams) {
+		addAction : function(_type, _id, _label, _width, _name, _params) {
 			this.setAttr({
 				hasActions : true
 			});
 
 			this.get('_actions').add({
 				id : _id,
+				type : _type,
 				label : _label,
 				width : _width,
-				methodName : _methodName,
-				methodParams : _methodParams
+				actionName : _name,
+				actionParams : _params
 			});
 		},
 		addColumn : function(_id, _field, _label, _datatype, _width) {
@@ -188,10 +189,18 @@ $(function() {
 		updateRowSelected : function(selectedId, type) {
 			window.expanz.logToConsole("GridModel:updateRowSelected id:" + selectedId + ' ,type:' + type);
 		},
+		
+		updateRowDoubleClicked: function(selectedId, type) {
+			window.expanz.logToConsole("GridModel:updateRowDoubleClicked id:" + selectedId + ' ,type:' + type);
+		},		
 
-		actionSelected : function(selectedId, methodName, methodParams) {
-			window.expanz.logToConsole("GridModel:actionSelected id:" + selectedId + ' ,methodName:' + methodName + ' ,methodParams:' + JSON.stringify(methodParams));
+		actionSelected : function(selectedId, name, params) {
+			window.expanz.logToConsole("GridModel:actionSelected id:" + selectedId + ' ,methodName:' + name + ' ,methodParams:' + JSON.stringify(params));
 		},
+		
+		menuActionSelected : function(selectedId, name, params) {
+			window.expanz.logToConsole("GridModel:menuActionSelected id:" + selectedId + ' ,menuActionName:' + name + ' , menuActionParams:' + JSON.stringify(params));
+		},		
 
 		refresh : function() {
 			expanz.Net.DataRefreshRequest(this.getAttr('id'), this.getAttr('parent'));

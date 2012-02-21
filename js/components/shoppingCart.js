@@ -37,22 +37,22 @@ $(function() {
 				_.each(this.components, function(component) {
 					/* search the tag in the page */
 					if ($("shoppingCart\\:" + component).length > 0) {
-						var componentContent = that['render' + component + 'Component']();
+						var componentContent = that['render' + component + 'Component']($("shoppingCart\\:" + component));
 						$("shoppingCart\\:" + component).append(componentContent);
 						/* execute script after adding to content to the dom */
 						if (that['_executeAfterRender' + component + 'Component']) {
-							that['_executeAfterRender' + component + 'Component']();
+							that['_executeAfterRender' + component + 'Component']($("shoppingCart\\:" + component));
 						}
 					}
-					/* search for class (old browser) */
-					if ($(".shoppingCart-"+component).length > 0) {
-						var componentContent = that['render' + component + 'Component']();
+					/* search for class (old browsers support) */
+					if ($(".shoppingCart-" + component).length > 0) {
+						var componentContent = that['render' + component + 'Component']($(".shoppingCart-" + component));
 						$(".shoppingCart-" + component).append(componentContent);
 						/* execute script after adding to content to the dom */
 						if (that['_executeAfterRender' + component + 'Component']) {
-							that['_executeAfterRender' + component + 'Component']();
+							that['_executeAfterRender' + component + 'Component']($(".shoppingCart-" + component));
 						}
-						
+
 					}
 				});
 
@@ -60,11 +60,13 @@ $(function() {
 
 			},
 
-			renderSearchComponent : function() {
+			renderSearchComponent : function(searchEl) {
+				var displayButton = boolValue(searchEl.attr('buttonVisible')) || true;
+				var buttonLabel = searchEl.attr('buttonLabel') || 'Search';
 				var html = '';
 				html += '<div id="shoppingCartSearch" class="search">';
 				html += window.expanz.html.renderField('ItemSearch', '', 'Search');
-				html += window.expanz.html.renderMethod(this.searchMethodName, '');
+				html += window.expanz.html.renderMethod(this.searchMethodName, buttonLabel, null, !displayButton);
 				html += "</div>";
 				return html;
 			},
@@ -279,7 +281,21 @@ $(function() {
 						$("#cartCheckout").show();
 					}
 				});
+			},
+
+			_executeAfterRenderSearchComponent : function() {
+				$("#shoppingCartSearch #ItemSearch input").keypress(function(e) {
+					if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+						$("#shoppingCartSearch #ItemSearch input").blur(); /* send the search value to the server */
+						$('#shoppingCartSearch button').click();
+						return false;
+					}
+					else {
+						return true;
+					}
+				});
 			}
+
 		});
 
 	/*
@@ -351,10 +367,11 @@ $(function() {
 		return field;
 	};
 
-	window.expanz.html.renderMethod = function(methodName, buttonLabel, contextObject) {
+	window.expanz.html.renderMethod = function(methodName, buttonLabel, contextObject, hidden) {
 		var method = '';
-		var ctx = contextObject ? 'contextObject = "' + contextObject + '"' : '';
-		method += '<span bind="method" id="' + methodName + '" name="' + methodName + '" ' + ctx + ' class="method">';
+		var ctx = contextObject ? ' contextObject = "' + contextObject + '" ' : '';
+		var visible = hidden ? ' style="display:none" ' : '';
+		method += '<span bind="method" id="' + methodName + '" name="' + methodName + '" ' + ctx + visible + ' class="method">';
 		method += '<button type="button" attribute="submit" >' + buttonLabel + '</button>';
 		method += '</span>';
 		return method;
