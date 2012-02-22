@@ -35,8 +35,10 @@ $(function() {
 				var that = this;
 				/* render component if present in the page */
 				_.each(this.components, function(component) {
+					var namespaceTagFound = false;
 					/* search the tag in the page */
 					if ($("shoppingCart\\:" + component).length > 0) {
+						namespaceTagFound = true;
 						var componentContent = that['render' + component + 'Component']($("shoppingCart\\:" + component));
 						$("shoppingCart\\:" + component).append(componentContent);
 						/* execute script after adding to content to the dom */
@@ -45,7 +47,7 @@ $(function() {
 						}
 					}
 					/* search for class (old browsers support) */
-					if ($(".shoppingCart-" + component).length > 0) {
+					if (!namespaceTagFound && $(".shoppingCart-" + component).length > 0) {
 						var componentContent = that['render' + component + 'Component']($(".shoppingCart-" + component));
 						$(".shoppingCart-" + component).append(componentContent);
 						/* execute script after adding to content to the dom */
@@ -61,8 +63,10 @@ $(function() {
 			},
 
 			renderSearchComponent : function(searchEl) {
-				var displayButton = boolValue(searchEl.attr('buttonVisible')) || true;
-				var buttonLabel = searchEl.attr('buttonLabel') || 'Search';
+				var displayButton = searchEl.attr('buttonVisible') != undefined ? boolValue(searchEl.attr('buttonVisible')) : true;
+				var buttonLabel = searchEl.attr('buttonLabel') != undefined ? searchEl.attr('buttonLabel') : 'Search';
+				if (buttonLabel.length == 0)
+					buttonLabel = '&nbsp;';
 				var html = '';
 				html += '<div id="shoppingCartSearch" class="search">';
 				html += window.expanz.html.renderField('ItemSearch', '', 'Search');
