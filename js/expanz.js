@@ -313,6 +313,16 @@ $(function() {
 
 	window.expanz.logToConsole("Loading menu, setting callbacks and creating activities");
 
+	/* prompt the user to install chrome frame for IE6 */
+	if ($.browser.msie && $.browser.version == "6.0") {
+		loadjscssfile("//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js", "js");
+		window.attachEvent('onload', function() {
+			CFInstall.check({
+				mode : 'overlay'
+			})
+		});
+	}
+
 	/* load resource bundle */
 	jQuery.i18n.properties({
 		name : 'Messages',
