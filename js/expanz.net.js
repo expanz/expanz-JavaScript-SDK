@@ -538,7 +538,7 @@ $(function() {
 				$(data).find('activity').each(function() {
 					var name = $(this).attr('name');
 					var url = $(this).attr('form');
-					var style = $(this).attr('style');
+					var style = $(this).attr('style') || "";
 					var gridviewList = [];
 					$(this).find('gridview').each(function() {
 						var gridview = new GridViewInfo($(this).attr('id'));
