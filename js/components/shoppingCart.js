@@ -62,20 +62,53 @@ $(function() {
 
 			},
 
+			/**
+			 * Renders the Search component
+			 * 
+			 * <pre>
+			 * 	Used directly in html by either &lt;shoppingCart:search&gt; or &lt;div class='shoppingCart-Search'&gt;
+			 * </pre>
+			 * 
+			 * Tag parameters:
+			 * 
+			 * @param buttonVisible
+			 *           boolean, display or not the search button (Default is true)
+			 * @param buttonLabel
+			 *           string, label of the search button (Default is Search)
+			 * @param buttonLabel
+			 *           string, prompt of the search input (Default is Search)
+			 * @return html code
+			 */
 			renderSearchComponent : function(searchEl) {
 				var displayButton = searchEl.attr('buttonVisible') != undefined ? boolValue(searchEl.attr('buttonVisible')) : true;
+				var inputPrompt = searchEl.attr('inputPrompt') != undefined ? searchEl.attr('inputPrompt') : 'Search';
 				var buttonLabel = searchEl.attr('buttonLabel') != undefined ? searchEl.attr('buttonLabel') : 'Search';
 				if (buttonLabel.length == 0)
 					buttonLabel = '&nbsp;';
 				var html = '';
 				html += '<div id="shoppingCartSearch" class="search">';
-				html += window.expanz.html.renderField('ItemSearch', '', 'Search');
+				html += window.expanz.html.renderField('ItemSearch', '', inputPrompt);
 				html += window.expanz.html.renderMethod(this.searchMethodName, buttonLabel, null, !displayButton);
 				html += "</div>";
 				return html;
 			},
 
-			renderListComponent : function() {
+			/**
+			 * Renders the Items list component
+			 * 
+			 * <pre>
+			 * 	Used directly in html by either &lt;shoppingCart:list&gt; or &lt;div class='shoppingCart-List'&gt;
+			 * </pre>
+			 * 
+			 * Tag parameters:
+			 * 
+			 * @param addToCartLabel
+			 *           string, label of the search button (Default is Add to cart)
+			 * @return html code
+			 */
+			renderListComponent : function(listEl) {
+				var addToCartLabel = listEl.attr('addToCartLabel') != undefined ? listEl.attr('addToCartLabel') : 'Add to cart';
+
 				var html = '';
 				html += '<div id="shoppingCartList" class="list">';
 				html += window.expanz.html.renderMethod(this.listItemsOnSpecialMethodName, 'List Items On Special', this.listItemsOnSpecialMethodContextObject);
@@ -104,7 +137,7 @@ $(function() {
 							<% } %>  \
 					<% } %>  \
 					<% if ( true ) { %>  \
-						<button methodName="saveItemFromCart">Add to cart</button> \
+						<button methodName="saveItemFromCart">' + addToCartLabel + '</button> \
 					<% } %></div> \
 			';
 
@@ -136,7 +169,18 @@ $(function() {
 				});
 			},
 
-			renderTreeComponent : function() {
+			/**
+			 * Renders the Categories tree component
+			 * 
+			 * <pre>
+			 * 	Used directly in html by either &lt;shoppingCart:tree&gt; or &lt;div class='shoppingCart-Tree'&gt;
+			 * </pre>
+			 * 
+			 * Tag parameters:
+			 * 
+			 * @return html code
+			 */
+			renderTreeComponent : function(treeEl) {
 				return '<div id="categoriesTree" name="' + this.categoryTreeName + '"  bind="DataControl" renderingType="tree" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="tree"></div>';
 			},
 
@@ -147,7 +191,18 @@ $(function() {
 				});
 			},
 
-			renderCartComponent : function() {
+			/**
+			 * Renders the Cart component
+			 * 
+			 * <pre>
+			 * 	Used directly in html by either &lt;shoppingCart:cart&gt; or &lt;div class='shoppingCart-Cart'&gt;
+			 * </pre>
+			 * 
+			 * Tag parameters:
+			 * 
+			 * @return html code
+			 */
+			renderCartComponent : function(cartEl) {
 				var html = '';
 				html += '<script type="text/template" id="lvMiniCartItemTemplate">';
 				html += window.expanz.html.startDiv("item");
@@ -197,7 +252,18 @@ $(function() {
 				});
 			},
 
-			renderCheckoutComponent : function() {
+			/**
+			 * Renders the checkout component
+			 * 
+			 * <pre>
+			 * 	Used directly in html by either &lt;shoppingCart:checkout&gt; or &lt;div class='shoppingCart-Checkout'&gt;
+			 * </pre>
+			 * 
+			 * Tag parameters:
+			 * 
+			 * @return html code
+			 */
+			renderCheckoutComponent : function(checkoutEl) {
 				var html = '';
 				html += window.expanz.html.renderBasicGridTemplate('lvMiniCartItemTemplate', [
 					{
