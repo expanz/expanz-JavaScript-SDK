@@ -295,7 +295,7 @@ $(function() {
 
 				_.each(processArea.activities, function(activity) {
 					if (displayEmptyItems || (activity.url != '' && activity.url.length > 1)) {
-						menuItem.activities.push(new expanz.Storage.ActivityMenu(activity.name, activity.title, activity.url, activity.img));
+						menuItem.activities.push(new expanz.Storage.ActivityMenu(activity.name, activity.style, activity.title, activity.url, activity.img));
 					}
 				});
 
