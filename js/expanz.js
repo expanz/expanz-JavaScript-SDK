@@ -101,7 +101,7 @@ $(function() {
 		}
 
 		content += "<br/><br/>";
-		content += '<form bind="login" name="login" action="javascript:">';
+		content += '<form bind="login" type="popup" name="login" action="javascript:">';
 		content += '<div name="username" id="username">';
 		content += '<input attribute="value" type="text" placeholder="Username"/>';
 		content += '</div>';
@@ -193,10 +193,10 @@ $(function() {
 		expanz._info = fn;
 	};
 
-	window.expanz.SetHomePage = function(homepage) {
-
-		expanz._home = homepage;
-	};
+	// window.expanz.SetHomePage = function(homepage) {
+	//
+	// expanz._home = homepage;
+	// };
 
 	//
 	// Helper Functions

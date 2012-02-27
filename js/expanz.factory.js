@@ -7,7 +7,8 @@ $(function() {
 		Login : function(loginEl) {
 
 			var loginModel = new window.expanz.Model.Login({
-				name : $(loginEl).attr('name')
+				name : $(loginEl).attr('name'),
+				type: $(loginEl).attr('type'),
 			});
 			var loginView = new window.expanz.Views.LoginView({
 				el : $(loginEl),

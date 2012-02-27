@@ -123,30 +123,39 @@ $(function() {
 
 		login : function() {
 			if (this.validate()) {
+				var that = this;
+				var loginCallback = function(error) {
+					if (error && error.length > 0) {
+						this.get('error').set({
+							value : error
+						});
+					}
+					else {
+						expanz.Net.GetSessionDataRequest({
+							success : function(url) {
+								if (that.getAttr('type') == 'popup') {
+									console.log('popup');
+									// reload the page
+									window.location.reload();
+								}
+								else {
+									console.log('normal');
+									// redirect to default activity
+									expanz.Views.redirect(url);
+								}
+
+
+							}
+						});
+					}
+				}
 				expanz.Net.CreateSessionRequest(this.get('username').get('value'), this.get('password').get('value'), {
-					success : this.loginCallback,
+					success : loginCallback,
 					error : expanz._error
 				});
 			}
 			;
 		},
-
-		loginCallback : function(error) {
-			if (error && error.length > 0) {
-				this.get('error').set({
-					value : error
-				});
-			}
-			else {
-				expanz.Net.GetSessionDataRequest({
-					success : function(url) {
-						// redirect to default activity
-						expanz.Views.redirect(url);
-					}
-				});
-			}
-		}
-
 	});
 
 	window.expanz.Model.Activity = expanz.Collection.extend({
