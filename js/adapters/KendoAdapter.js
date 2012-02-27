@@ -30,8 +30,8 @@ function renderKendoComponents(el) {
 		el.find("[renderingType=dropdownlist]").KendoDropDownListAdapter();
 
 	/* bind menus to kendo ui menu */
-	if (el.find('[bind=menu] > ul').length > 0)
-		el.find('[bind=menu] > ul').kendoMenu();
+	if (el.find('[bind=menu] > ul.menu').length > 0)
+		el.find('[bind=menu] > ul.menu').kendoMenu();
 }
 
 function useKendoMobile() {
