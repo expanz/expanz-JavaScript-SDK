@@ -23,6 +23,11 @@ Array.prototype.clone = function() {
 	return JSON.parse(JSON.stringify(this));
 }
 
+String.prototype.endsWith = function(suffix) {
+   return this.indexOf(suffix, this.length - suffix.length) !== -1;
+};
+
+
 XMLDocumentsToXMLString = function(xmlDoc) {
 	if (window.ActiveXObject) {
 		var str = xmlDoc.xml;
