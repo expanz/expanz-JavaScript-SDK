@@ -179,7 +179,7 @@ $(function() {
 					if (window.config._homepage) {
 						var homeClass = "";
 						if (window.config._homepage.endsWith(currentPage)) {
-							homeClass = "selected ";
+							homeClass = "selected selectedNew ";
 						}
 						el.find("#menuUL").append('<li class="' + homeClass + ' processarea menuitem" id="home"><a href="' + window.config._homepage + '" class="home menuTitle">' + homeLabel + '</a></li>');
 					}
@@ -247,7 +247,7 @@ $(function() {
 
 							/* add selected class if current */
 							if (url.endsWith(currentPage)) {
-								el.addClass("selected");
+								el.addClass("selected selectedNew");
 							}
 						}
 						else {
