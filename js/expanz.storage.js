@@ -13,8 +13,7 @@ $(function() {
 		_getBestStorage : function() {
 			if (window['localStorage'] !== null) {
 				/*
-				 * length is unused but please leave it. I don't know why but sometimes firefox get an empty window.localStorage by mistake 
-				 * Doing this force it to evaluate the window.localStorage object and it seems to work
+				 * length is unused but please leave it. I don't know why but sometimes firefox get an empty window.localStorage by mistake Doing this force it to evaluate the window.localStorage object and it seems to work
 				 */
 				window.localStorage.length;
 				return this.localStorage;
@@ -83,7 +82,6 @@ $(function() {
 		clearActivityHandle : function(activityName, activityStyle) {
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle);
 		},
-
 
 		/* storage implementations */
 		/* cookies */
@@ -168,12 +166,22 @@ $(function() {
 				else {
 					// clear the DOM menu
 
+					var url = window.location.pathname;
+					var currentPage = url.substring(url.lastIndexOf('/') + 1);
+
 					// load process areas into DOM menu
-					el.append('<ul id="menuUL"></ul>');
+					el.append('<ul id="menuUL" class="menu"></ul>');
+
+					var homeLabel = el.attr('homeLabel') || 'Home';
+					var logoutLabel = el.attr('logoutLabel') || 'Logout';
 
 					// add home page if defined
 					if (window.config._homepage) {
-						el.find("#menuUL").append('<li class="processarea menuitem" id="home"><a href="' + window.config._homepage + '" class="menuTitle">Home</a></li>');
+						var homeClass = "";
+						if (window.config._homepage.endsWith(currentPage)) {
+							homeClass = "selected ";
+						}
+						el.find("#menuUL").append('<li class="' + homeClass + ' processarea menuitem" id="home"><a href="' + window.config._homepage + '" class="home menuTitle">' + homeLabel + '</a></li>');
 					}
 
 					_.each(this.processAreas, function(pA) {
@@ -181,7 +189,7 @@ $(function() {
 						pA.load(el.find('#' + pA.id + '.processarea.menuitem'), 0, false);
 					});
 					// add html and click handler to DOM
-					el.find("#menuUL").append('<li class="processarea menuitem" id="logout"><a class="menuTitle">logout</a></li>');
+					el.append('<ul class="right logoutContainer"><li class="processarea" id="logout"><a class="logout menuTitle">' + logoutLabel + '</a></li></ul>');
 					el.append('<div style="clear:both"></div>');
 
 					$(el.find('#logout')[0]).click(function(e) {
@@ -199,6 +207,9 @@ $(function() {
 			this.pa = []; /* sub process area */
 
 			this.load = function(el, level, displayAsIcons, parentSubProcesses) {
+				var url = window.location.pathname;
+				var currentPage = url.substring(url.lastIndexOf('/') + 1);
+
 				if (displayAsIcons === true) {
 
 					_.each(this.activities, function(activity) {
@@ -233,6 +244,11 @@ $(function() {
 							el.find("[class='menuTitle']").bind("touchend", function(e) {
 								window.location.href = url;
 							});
+
+							/* add selected class if current */
+							if (url.endsWith(currentPage)) {
+								el.addClass("selected");
+							}
 						}
 						else {
 							el.append('<ul style="display:none" id="' + ulId + '"></ul>');
@@ -262,15 +278,16 @@ $(function() {
 			};
 		},
 
-		ActivityMenu : function(name, title, url, img) {
+		ActivityMenu : function(name, style, title, url, img) {
 			this.name = name;
+			this.style = style;
 			this.title = title;
 			this.url = url;
 			this.img = img;
 
 			this.load = function(el, displayAsIcons) {
 				if (displayAsIcons === true) {
-					el.append('<div class="icon"><a href="' + this.url + '"><img src="' + this.img + '"/></a><br/> ' + this.title + '</div>');
+					el.append('<li><div class="icon navContainer"><a class="nav-' + this.name.replace(/\./g, "-") + "-" + this.style.replace(/\./g, "-") + ' navItem" href="' + this.url + '"></a><a class="navText" href="' + this.url + '">' + this.title + '</a></div></li>');
 				}
 				else {
 					el.append('<li class="activity">' + '<a href=\'' + this.url + '\'>' + this.title + '</a>' + '</li>');
