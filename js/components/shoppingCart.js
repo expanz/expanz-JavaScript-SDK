@@ -80,10 +80,10 @@ $(function() {
 			 * @return html code
 			 */
 			renderSearchComponent : function(searchEl) {
-				var displayButton = searchEl.attr('buttonVisible') != undefined ? boolValue(searchEl.attr('buttonVisible')) : true;
-				var inputPrompt = searchEl.attr('inputPrompt') != undefined ? searchEl.attr('inputPrompt') : 'Search';
-				var buttonLabel = searchEl.attr('buttonLabel') != undefined ? searchEl.attr('buttonLabel') : 'Search';
-				if (buttonLabel.length == 0)
+				var displayButton = searchEl.attr('buttonVisible') !== undefined ? boolValue(searchEl.attr('buttonVisible')) : true;
+				var inputPrompt = searchEl.attr('inputPrompt') !== undefined ? searchEl.attr('inputPrompt') : 'Search';
+				var buttonLabel = searchEl.attr('buttonLabel') !== undefined ? searchEl.attr('buttonLabel') : 'Search';
+				if (buttonLabel.length === 0)
 					buttonLabel = '&nbsp;';
 				var html = '';
 				html += '<div id="shoppingCartSearch" class="search">';
@@ -107,7 +107,7 @@ $(function() {
 			 * @return html code
 			 */
 			renderListComponent : function(listEl) {
-				var addToCartLabel = listEl.attr('addToCartLabel') != undefined ? listEl.attr('addToCartLabel') : 'Add to cart';
+				var addToCartLabel = listEl.attr('addToCartLabel') !== undefined ? listEl.attr('addToCartLabel') : 'Add to cart';
 
 				var html = '';
 				html += '<div id="shoppingCartList" class="list">';
@@ -243,7 +243,7 @@ $(function() {
 					});
 
 					/* hiding the checkout part if no items */
-					if ($("#lvMiniCart > [nbItems]").attr("nbItems") == 0) {
+					if ($("#lvMiniCart > [nbItems]").attr("nbItems")  === 0) {
 						$("#cartCheckout").hide();
 					}
 					else {
@@ -344,7 +344,7 @@ $(function() {
 					});
 
 					/* hiding the checkout part if no items */
-					if ($("#checkoutCart > [nbItems]").attr("nbItems") == 0) {
+					if ($("#checkoutCart > [nbItems]").attr("nbItems")  === 0) {
 						$("#cartCheckout").hide();
 					}
 					else {

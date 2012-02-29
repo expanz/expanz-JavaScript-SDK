@@ -8,7 +8,7 @@ $(function() {
 
 			var loginModel = new window.expanz.Model.Login({
 				name : $(loginEl).attr('name'),
-				type: $(loginEl).attr('type'),
+				type: $(loginEl).attr('type')
 			});
 			var loginView = new window.expanz.Views.LoginView({
 				el : $(loginEl),
@@ -201,7 +201,7 @@ $(function() {
 								if (gridviewInfo) {
 									// add actions
 									_.each($(gridviewInfo).find('action'), function(action) {
-										var params = new Array();
+										var params = [];
 										_.each($(action).find('param'), function(param) {
 											params.push({
 												name : $(param).attr('name'),

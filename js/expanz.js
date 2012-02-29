@@ -21,17 +21,17 @@ $(function() {
 		if (typeof (console) != "undefined" && console.log) {
 			console.log(message);
 		}
-	}
+	};
 
 	window.expanz.getLoginURL = function() {
 		var loginUrl = window.config._loginpage;
 		/* if login url is null try to guess it by removing the filename */
-		if (loginUrl == null) {
+		if (loginUrl === null) {
 			loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
 		}
 		window.expanz.logToConsole("getLoginURL : " + loginUrl);
 		return loginUrl;
-	}
+	};
 
 	//
 	// Public Functions & Objects in the Expanz Namespace
@@ -84,7 +84,6 @@ $(function() {
 			expanz.Storage.clearSession();
 			expanz.Views.redirect(expanz.getLoginURL());
 		}
-		;
 		expanz.Net.ReleaseSessionRequest({
 			success : redirect,
 			error : redirect
@@ -130,7 +129,7 @@ $(function() {
 
 		var callbackLogin = function() {
 			window.expanz.logToConsole('callbackLogin');
-		}
+		};
 
 		createLogin(loginPopup.el.find('[bind=login]'));
 
@@ -138,7 +137,7 @@ $(function() {
 
 		return;
 
-	}
+	};
 
 	window.expanz.SetErrorCallback = function(fn) {
 
@@ -155,7 +154,7 @@ $(function() {
 				$(el).show('slow');
 			}
 		};
-	}
+	};
 
 	window.expanz.basicMsgDisplay = function(el) {
 		return function display(str) {
@@ -165,7 +164,7 @@ $(function() {
 			}
 
 			/* display the message in the popup as well if visible */
-			if (window.expanz.currentPopup != undefined && $(window.expanz.currentPopup.el).is(":visible")) {
+			if (window.expanz.currentPopup !== undefined && $(window.expanz.currentPopup.el).is(":visible")) {
 				var popupEl = window.expanz.currentPopup.el.find(el);
 				if (popupEl) {
 					popupEl.find('[attribute=value]').html(str);
@@ -186,7 +185,7 @@ $(function() {
 				$(el).show('slow');
 			}
 		};
-	}
+	};
 
 	window.expanz.SetInfoCallback = function(fn) {
 
@@ -211,7 +210,7 @@ $(function() {
 			}
 		}
 		return null;
-	}
+	};
 
 	window.expanz.helper.findActivityMetadata = function(activityName, activityStyle, callback) {
 		var jqxhr = $.get('./formmapping.xml', function(data) {
@@ -226,7 +225,7 @@ $(function() {
 				}
 			});
 		});
-	}
+	};
 
 	//
 	// Private Functions
@@ -294,7 +293,7 @@ $(function() {
 					menuItem.parent = parentProcessAreaMenu;
 
 				_.each(processArea.activities, function(activity) {
-					if (displayEmptyItems || (activity.url != '' && activity.url.length > 1)) {
+					if (displayEmptyItems || (activity.url !== '' && activity.url.length > 1)) {
 						menuItem.activities.push(new expanz.Storage.ActivityMenu(activity.name, activity.style, activity.title, activity.url, activity.img));
 					}
 				});
@@ -322,6 +321,7 @@ $(function() {
 			})
 		});
 	}
+	;
 
 	/* load resource bundle */
 	jQuery.i18n.properties({
@@ -375,4 +375,4 @@ $(function() {
 		}
 	}
 
-})
+});

@@ -8,7 +8,7 @@ $.fn.KendoDropDownListAdapter = function() {
 	 * define publishData which is called when list of data is ready, xml data is passed as argument after the event
 	 */
 	var publishData = function(event, xml) {
-		var data = new Array();
+		var data = [];
 
 		_.each($(xml).find('Row'), function(row) {
 			var rowId = $(row).attr('id');
@@ -28,7 +28,7 @@ $.fn.KendoDropDownListAdapter = function() {
 		ds.read();
 		list.refresh();
 		/* set initial value if existing */
-		if (cb.val() != undefined) {
+		if (cb.val() !== undefined) {
 			list.value(cb.val());
 		}
 
@@ -43,4 +43,4 @@ $.fn.KendoDropDownListAdapter = function() {
 	cb.bind("publishData", publishData);
 	cb.bind("valueUpdated", onValueUpdated);
 
-}
+};

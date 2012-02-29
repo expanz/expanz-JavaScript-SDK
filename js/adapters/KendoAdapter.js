@@ -13,13 +13,13 @@ function useKendo() {
 			orientation : 'vertical'
 		});
 		this.contextMenuEl.show();
-	}
+	};
 
 }
 
 function renderKendoComponents(el) {
 
-	if (el == null)
+	if (el === undefined)
 		el = $("body");
 
 	/* rendering combo boxes and dropdown */

@@ -33,7 +33,7 @@ $(function() {
 		displayError : function() {
 			return function() {
 				var errorId = 'error' + this.model.get('id').replace(/\./g, "_");
-				if (this.model.get('errorMessage') != undefined) {
+				if (this.model.get('errorMessage') !== undefined) {
 					var errorEl = this.el.find('#' + errorId);
 					if (errorEl.length < 1) {
 						this.el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="' + errorId + '"></p>');
@@ -51,7 +51,7 @@ $(function() {
 						errorEl.hide();
 					}
 					this.el.removeClass("errorField");
-					window.expanz.logToConsole("hiding error message")
+					window.expanz.logToConsole("hiding error message");
 				}
 
 			};
@@ -140,7 +140,7 @@ $(function() {
 					liEL.click(function(){
 						that.model.menuItemSelected($(this).attr("action"));
 						that.contextMenuEl.hide();
-					})
+					});
 				});
 		},
 
@@ -148,7 +148,7 @@ $(function() {
 			/* retrieve or create a div to host the context menu */
 			window.expanz.logToConsole("modelUpdated");
 
-			if (this.contextMenuEl == null) {
+			if (this.contextMenuEl === undefined) {
 				var contextMenuId = this.model.get('id').replace(/\./g, "_") + "_contextMenu";
 				this.el
 				.append("<div class='contextMenu' id='" + contextMenuId + "' />");
@@ -158,7 +158,7 @@ $(function() {
 			this.contextMenuEl.html("");
 
 			var data = this.model.get('data');
-			if (data == null) return;
+			if (data === null) return;
 
 			/* position menu below button */
 			var pos = this.el.find("button").position();
@@ -169,7 +169,7 @@ $(function() {
 				});	
 
 			/* append data to the menu */
-			this.contextMenuEl.append("<ul id='" + this.contextMenuEl.id + "_ul'></ul>")
+			this.contextMenuEl.append("<ul id='" + this.contextMenuEl.id + "_ul'></ul>");
 			this._createMenu(data, this.contextMenuEl.find("ul"));
 			this.createContextMenu();
 
@@ -244,7 +244,7 @@ $(function() {
 					hostEl.append("<div style='clear:both'>");
 					for ( var i = 0; i < nbPages; i++) {
 						var inputId = this.model.getAttr('id') + "BtnPage" + i;
-						var disabled = ""
+						var disabled = "";
 						if (i == currentPage)
 							disabled = " disabled='disabled'";
 
@@ -293,7 +293,7 @@ $(function() {
 					var itemId = this.model.getAttr('id') + "_" + row.getAttr('id');
 					result = $(result).attr('id', itemId).attr('rowId', row.getAttr('id'));
 
-					if (i == 0)
+					if (i === 0)
 						result = $(result).addClass('first');
 					if (i == (lastItem - 1))
 						result = $(result).addClass('last');
@@ -301,7 +301,7 @@ $(function() {
 					/* add row id to prefix id for eventual user inputs */
 					$(result).find("[id*='userinput_']").each(function() {
 						$(this).attr('id', row.getAttr('id') + "_" + $(this).attr('id'));
-					})
+					});
 
 					hostEl.append(result);
 
@@ -366,7 +366,7 @@ $(function() {
 					var row = rows[i];
 					var html = '<tr id="' + row.getAttr('id') + '" type="' + row.getAttr('type') + '">';
 
-					var values = new Object();
+					var values = {};
 					_.each(row.getAllCells(), function(cell) {
 						html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="row' + row.getAttr('id') + ' column' + cell.get('id') + '">';
 						if (model.getColumn(cell.get('id')) && model.getColumn(cell.get('id')).get('datatype') === 'BLOB') {
@@ -516,11 +516,12 @@ $(function() {
 			var usernameEl = this.el.find("#username input");
 			var passwordEl = this.el.find("#password input");
 			
-			if(usernameEl.length == 0 || passwordEl.length == 0 ){
+			if(usernameEl.length === 0 || passwordEl.length === 0){
 				expanz._error("username or password field cannot be found on the page");
 				return;
 			}
-			if(usernameEl.val().length == 0 || passwordEl.val().length == 0 ){
+			
+			if(usernameEl.val().length === 0 || passwordEl.val().length === 0 ){
 				expanz._error("username or password are empty");
 				return;				
 			}
@@ -568,7 +569,7 @@ $(function() {
 		loading : function() {
 			var loadingId = "Loading_" + this.id.replace(/\./g,"_"); 
 			var loadingEL = $(this.el).find("#" + loadingId);
-			if( loadingEL.length == 0 ){
+			if( loadingEL.length === 0 ){
 				$(this.el).append('<div class="loading" id="'+loadingId+'"><span>Loading content, please wait.. <img src="assets/images/loading.gif" alt="loading.." /></span></div>');  
 				loadingEL = $(this.el).find("#" + loadingId);
 			}
@@ -630,10 +631,10 @@ $(function() {
 			this.delegateEvents(this.events);
 
 			/* find the parent popup -> it is the first parentPopup visible */
-			if (window.expanz.currentPopup != undefined) {
+			if (window.expanz.currentPopup !== undefined) {
 				this.parentPopup = window.expanz.currentPopup;
 				while (!$(this.parentPopup.el).is(":visible")) {
-					if (this.parentPopup.parentPopup == undefined) {
+					if (this.parentPopup.parentPopup === undefined) {
 						this.parentPopup = undefined;
 						break;
 					}
@@ -661,7 +662,7 @@ $(function() {
 			}
 
 			var content = '';
-			if (this.model.getAttr('text') != undefined && this.model.getAttr('text').length > 0) {
+			if (this.model.getAttr('text') !== undefined && this.model.getAttr('text').length > 0) {
 				content = this.model.getAttr('text');
 			}
 
@@ -669,7 +670,7 @@ $(function() {
 			this.el = containerjQ.find('#' + this.id);
 			this.createWindowObject();
 
-			if (this.model.getAttr('url') != undefined && this.model.getAttr('url').length > 0) {
+			if (this.model.getAttr('url') !== undefined && this.model.getAttr('url').length > 0) {
 				var url = this.model.getAttr('url');
 				var that = this;
 				this.el.load(url, function() {
@@ -718,7 +719,7 @@ $(function() {
 
 		renderActions : function() {
 			this.model.each(function(action) {
-				if (this.el.find("[attribute=submit]").length == 0) {
+				if (this.el.find("[attribute=submit]").length === 0) {
 					this.el.append("<br/>");
 				}
 
@@ -738,7 +739,7 @@ $(function() {
 				}
 
 				/* if response data are present we have to send it during the click event as well */
-				if (action.get('response') != undefined) {
+				if (action.get('response') !== undefined) {
 					var button = this.el.find('#' + divId + ' button');
 					var that = this;
 					button.click(function() {
@@ -749,7 +750,7 @@ $(function() {
 						}
 
 						if (action.get('response').find("closeWindow")) {
-							if (that.parentPopup != undefined) {
+							if (that.parentPopup !== undefined) {
 								that.parentPopup.close();
 							}
 							else {
@@ -816,7 +817,7 @@ $(function() {
 			$(elem).trigger("valueUpdated", value);
 
 			// if the field is disable apply the disabled attribute and style
-			if (allAttrs["disabled"] == true) {
+			if (allAttrs["disabled"] === true) {
 				$(elem).attr('disabled', 'disabled');
 				$(elem).addClass('readonlyInput');
 			}
@@ -830,6 +831,5 @@ $(function() {
 		}
 		return elem;
 	}
-	;
 
 });

@@ -1,6 +1,6 @@
 function createActivityWithKendoTabs(tabElement, ajaxTabContents, callbacks) {
 	/* array updated each time a tab is loaded */
-	var tabLoaded = new Array();
+	var tabLoaded = [];
 
 	var nbDynamicTabs = ajaxTabContents.length;
 
@@ -10,7 +10,7 @@ function createActivityWithKendoTabs(tabElement, ajaxTabContents, callbacks) {
 		tabLoaded[itemName] = true;
 		if (Object.size(tabLoaded) == nbDynamicTabs) {
 			
-			tabLoaded = new Array();
+			tabLoaded = [];
 			expanz.CreateActivity($(e.item).parents('[bind=activity]'), callbacks);
 		}
 	};
@@ -26,4 +26,4 @@ function createActivityWithKendoTabs(tabElement, ajaxTabContents, callbacks) {
 		tabElement.data("kendoTabStrip").reload($(child));
 	});
 
-};
+}

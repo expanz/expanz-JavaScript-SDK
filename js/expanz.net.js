@@ -29,8 +29,8 @@ $(function() {
 
 		GetSessionDataRequest : function(callbacks) {
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.getLoginURL())
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
 
@@ -38,18 +38,18 @@ $(function() {
 		},
 
 		CreateActivityRequest : function(activity, callbacks) {
-			if (callbacks == undefined)
+			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.getLoginURL())
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
 
 			/* check if an activity has already been created, if so specify it instead of creating a new one */
 			var activityHandle = expanz.Storage.getActivityHandle(activity.getAttr('name'), activity.getAttr('style'));
 
-			if (activityHandle && activityHandle != undefined) {
+			if (activityHandle && activityHandle !== undefined) {
 				activity.setAttr({
 					'handle' : activityHandle
 				});
@@ -64,11 +64,11 @@ $(function() {
 		},
 
 		DeltaRequest : function(id, value, activity, callbacks) {
-			if (callbacks == undefined)
+			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.getLoginURL())
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
 
@@ -80,11 +80,11 @@ $(function() {
 		},
 
 		MethodRequest : function(name, methodAttributes, context, activity, callbacks) {
-			if (callbacks == undefined)
+			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.getLoginURL())
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
 
@@ -92,11 +92,11 @@ $(function() {
 		},
 
 		DestroyActivityRequest : function(activity, callbacks) {
-			if (callbacks == undefined)
+			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.getLoginURL())
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
 
@@ -104,11 +104,11 @@ $(function() {
 		},
 
 		DataRefreshRequest : function(dataId, activity, callbacks) {
-			if (callbacks == undefined)
+			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.getLoginURL())
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
 
@@ -116,19 +116,19 @@ $(function() {
 		},
 
 		ReleaseSessionRequest : function(callbacks) {
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.getLoginURL())
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
 			SendRequest(RequestObject.ReleaseSession(expanz.Storage.getSessionHandle()), parseReleaseSessionResponse(callbacks));
 		},
 
 		GetBlobRequest : function(blobId, activity, callbacks) {
-			if (callbacks == undefined)
+			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.getLoginURL())
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
 
@@ -136,11 +136,11 @@ $(function() {
 		},
 
 		GetFileRequest : function(filename, activity, callbacks) {
-			if (callbacks == undefined)
+			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.getLoginURL())
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
 
@@ -149,11 +149,11 @@ $(function() {
 
 		/* call when selecting something from the tree view (file) */
 		CreateMenuActionRequest : function(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, callbacks) {
-			if (callbacks == undefined)
+			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() == "") {
-				expanz.Views.redirect(expanz.getLoginURL())
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
 
@@ -271,8 +271,8 @@ $(function() {
 			tail += '</' + requestType + '>';
 
 			return head + body + tail;
-		}
-	}
+		};
+	};
 
 	//
 	// XML Message Construction Functions
@@ -286,14 +286,14 @@ $(function() {
 			tail += '</' + requestType + '>';
 
 			return head + body + tail;
-		}
-	}
+		};
+	};
 
 	var RequestBody = {
 
 		CreateSession : function(username, password, appsite, authenticationMode) {
-			if (authenticationMode == undefined)
-				authenticationMode = "Primary"
+			if (authenticationMode === undefined)
+				authenticationMode = "Primary";
 			return '<CreateSession user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + authenticationMode + '" clientVersion="' + window.expanz.clientVersion + '" schemaVersion="2.0"/>';
 		},
 
@@ -314,7 +314,7 @@ $(function() {
 						if (field._type == 'Field') {
 							unmaskedFields += '<Field id="' + field.get('id') + '" masked="0" />';
 						}
-					})
+					});
 				}
 			}
 
@@ -366,14 +366,14 @@ $(function() {
 		CreateMethod : function(name, methodAttributes, context, activity) {
 			var body = '<Activity activityHandle="' + activity.getAttr('handle') + '">';
 
-			if (context != null && context.id) {
-				body += '<Context contextObject="' + context.contextObject + '" id="' + context.id + '" type="' + context.type + '" />'
+			if (context !== null && context.id) {
+				body += '<Context contextObject="' + context.contextObject + '" id="' + context.id + '" type="' + context.type + '" />';
 			}
 
 			body += '<Method name="' + name + '"';
-			if (methodAttributes != undefined && methodAttributes.length > 0) {
+			if (methodAttributes !== undefined && methodAttributes.length > 0) {
 				_.each(methodAttributes, function(attribute) {
-					if (attribute.value != undefined) {
+					if (attribute.value !== undefined) {
 						body += " " + attribute.name + "='" + attribute.value + "' ";
 					}
 				});
@@ -444,7 +444,7 @@ $(function() {
 				return;
 			}
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle().length == 0) {
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle().length === 0) {
 
 				var errorString = '';
 				$(xml).find('errorMessage').each(function() {
@@ -502,7 +502,7 @@ $(function() {
 	function parseExecAnonymousResponse(callbacks) {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseExecAnonymousResponse");
-			var execResults = $(xml).find('ExecAnonymousXResult')
+			var execResults = $(xml).find('ExecAnonymousXResult');
 			var success = false;
 			if (execResults.length > 0) {
 				var esaResult = $(execResults).find('ESA');
@@ -510,7 +510,7 @@ $(function() {
 				var serverMessage = esaResult.attr('serverMessage');
 				window.expanz.logToConsole("Success:" + success);
 
-				if (serverMessage != null && serverMessage.length > 0) {
+				if (serverMessage !== null && serverMessage.length > 0) {
 					if (success) {
 						if (callbacks && callbacks.info) {
 							callbacks.info(serverMessage);
@@ -524,7 +524,7 @@ $(function() {
 				}
 
 			}
-		}
+		};
 	}
 
 	function parseGetSessionDataResponse(callbacks) {
@@ -562,7 +562,6 @@ $(function() {
 			});
 		};
 	}
-	;
 
 	function parseCreateActivityResponse(activity, callbacks) {
 		return function apply(xml) {
@@ -674,7 +673,7 @@ $(function() {
 			});
 
 			return;
-		}
+		};
 	}
 
 	function parseDeltaResponse(activity, callbacks) {
@@ -683,8 +682,8 @@ $(function() {
 
 			var execResults = $(xml).find("ExecXResult");
 			if (execResults) {
-				var errors = new Array();
-				var infos = new Array();
+				var errors = [];
+				var infos = [];
 				/* MESSAGE CASE */
 				$(execResults).find('Message').each(function() {
 					if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
@@ -695,9 +694,9 @@ $(function() {
 						}
 
 						var source = $(this).attr('source');
-						if (source && source != undefined) {
+						if (source && source !== undefined) {
 							var field = activity.get(source);
-							if (field && field != undefined) {
+							if (field && field !== undefined) {
 								field.set({
 									errorMessage : (this.textContent || this.innerText),
 									error : true
@@ -738,7 +737,7 @@ $(function() {
 					var style = $(this).attr('style') || "";
 
 					var callback = function(url, onRequest) {
-						if (url != null) {
+						if (url !== null) {
 							window.expanz.logToConsole(url);
 						}
 						else {
@@ -782,7 +781,7 @@ $(function() {
 				$(execResults).find('ContextMenu').each(function() {
 					window.expanz.logToConsole('ContextMenu received');
 					var caller = window.expanz.currentContextMenu;
-					if (caller != null) {
+					if (caller !== null) {
 						window.expanz.logToConsole('Caller found');
 						caller.set({
 							data : null
@@ -797,7 +796,7 @@ $(function() {
 				$(execResults).find('Field').each(function() {
 					var id = $(this).attr('id');
 					var field = activity.get(id);
-					if (field && field != undefined) {
+					if (field && field !== undefined) {
 						if ((field.get('value') && (field.get('value') != $(this).attr('value'))) || !field.get('value')) {
 
 							if ($(this).attr('disabled')) {
@@ -813,7 +812,7 @@ $(function() {
 						}
 
 						/* remove error message if field is valid */
-						if (boolValue($(this).attr('valid')) && field.get('errorMessage') != undefined) {
+						if (boolValue($(this).attr('valid')) && field.get('errorMessage') !== undefined) {
 							field.set({
 								'errorMessage' : undefined
 							});
@@ -831,11 +830,11 @@ $(function() {
 				/* FILE CASE */
 				$(execResults).find('File').each(function(data) {
 
-					if ($(this).attr('field') != undefined && $(this).attr('path') != undefined) {
+					if ($(this).attr('field') !== undefined && $(this).attr('path') != undefined) {
 						window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
 						expanz.Net.GetBlobRequest($(this).attr('field'), activity);
 					}
-					else if ($(this).attr('name') != undefined) {
+					else if ($(this).attr('name') !== undefined) {
 						window.expanz.logToConsole("File found: " + $(this).attr('name'));
 						expanz.Net.GetFileRequest($(this).attr('name'), activity);
 					}
@@ -884,7 +883,7 @@ $(function() {
 				/* DATA */
 				$(execResults).find('Data').each(function() {
 					var id = $(this).attr('id');
-					var pickfield = $(this).attr('pickfield');
+					var pickfield = $(this).attr('pickField');
 					var contextObject = $(this).attr('contextObject');
 					if (id == 'picklist') {
 						window.expanz.logToConsole("picklist received");
@@ -929,7 +928,7 @@ $(function() {
 
 								expanz.Net.MethodRequest('SetIdFromContext', methodAttributes, context, activity);
 								picklistWindow.close();
-							}
+							};
 
 						}
 						else {
@@ -971,7 +970,7 @@ $(function() {
 				deltaLoading : false
 			});
 			return;
-		}
+		};
 	}
 
 	function parseDestroyActivityResponse(activity, callbacks) {
@@ -993,7 +992,7 @@ $(function() {
 				callbacks.error(true);
 			}
 			return;
-		}
+		};
 	}
 
 	function parseReleaseSessionResponse(callbacks) {
@@ -1011,7 +1010,7 @@ $(function() {
 				callbacks.error(result);
 			}
 			return;
-		}
+		};
 	}
 
 	/*
@@ -1020,7 +1019,7 @@ $(function() {
 
 	var SendRequest = function(request, responseHandler, isPopup) {
 
-		if (config._URLproxy != undefined && config._URLproxy.length > 0) {
+		if (config._URLproxy !== undefined && config._URLproxy.length > 0) {
 			$.ajax({
 				type : 'POST',
 				url : config._URLproxy,
@@ -1035,7 +1034,7 @@ $(function() {
 						eval(responseHandler)('There was a problem with the last request.');
 					}
 					else {
-						if (isPopup != undefined && isPopup == true) {
+						if (isPopup !== undefined && isPopup === true) {
 							var WinId = window.open('', 'newwin', 'width=400,height=500');
 							WinId.document.open();
 							WinId.document.write(HTTPrequest.responseText);
@@ -1062,7 +1061,7 @@ $(function() {
 						eval(responseHandler)('There was a problem with the last request.');
 					}
 					else {
-						if (isPopup != undefined && isPopup == true) {
+						if (isPopup !== undefined && isPopup === true) {
 							var WinId = window.open('', 'newwin', 'width=400,height=500');
 							WinId.document.open();
 							WinId.document.write(HTTPrequest.responseText);
@@ -1089,11 +1088,11 @@ $(function() {
 			$("#formFile").remove();
 		}
 
-		var form = ''
+		var form = '';
 		form += "<form method='post' id='formFile' target='_self' action='" + config._URLproxy + "'>";
-		form += "<input type='hidden' name='url' value='" + config._URLprefix + request.url + "'>"
+		form += "<input type='hidden' name='url' value='" + config._URLprefix + request.url + "'>";
 
-		form += "<input type='hidden' name='data' value='" + request.data + "'>"
+		form += "<input type='hidden' name='data' value='" + request.data + "'>";
 		form += "</form>";
 		$("body").append(form);
 
@@ -1117,7 +1116,7 @@ $(function() {
 		this.url = url;
 		this.style = style || "";
 		/* if the image if not defined we look for the activity name + style .png instead */
-		if (image != undefined) {
+		if (image !== undefined) {
 			this.img = image;
 		}
 		else {
@@ -1132,7 +1131,7 @@ $(function() {
 
 		this.addColumn = function(field, width) {
 			this.columns.push(new ColumnInfo(field, width));
-		}
+		};
 
 		function ColumnInfo(field, width) {
 			this.field = field;

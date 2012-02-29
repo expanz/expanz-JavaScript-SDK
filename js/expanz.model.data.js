@@ -72,7 +72,7 @@ $(function() {
 				return cell.get('value') === undefined;
 			}, this);
 
-			var map = new Object();
+			var map = {};
 			_.each(cells, function(cell) {
 				/*
 				 * map[cell.get('field')] = { value : cell.get('value'), sortValue : cell.get('sortValue'), };

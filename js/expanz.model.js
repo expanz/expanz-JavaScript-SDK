@@ -97,7 +97,7 @@ $(function() {
 
 		menuItemSelected : function(action) {
 
-			expanz.Net.CreateMenuActionRequest(this.get('parent'), null, null, action)
+			expanz.Net.CreateMenuActionRequest(this.get('parent'), null, null, action);
 			return;
 
 		}
@@ -148,14 +148,13 @@ $(function() {
 							}
 						});
 					}
-				}
+				};
 				expanz.Net.CreateSessionRequest(this.get('username').get('value'), this.get('password').get('value'), {
 					success : loginCallback,
 					error : expanz._error
 				});
 			}
-			;
-		},
+		}
 	});
 
 	window.expanz.Model.Activity = expanz.Collection.extend({
