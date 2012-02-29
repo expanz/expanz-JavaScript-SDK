@@ -93,21 +93,20 @@ $(function() {
 	window.expanz.showLoginPopup = function(activity, sessionLost) {
 		var content = '';
 		if (sessionLost === true) {
-			content = 'Session not found or expired, please log in again';
+			content = '<div class="loginMsg">Sorry, your session timed out, please log in again.</div>';
 		}
 		else {
-			content = 'Please log in';
+			content = '<div class="loginMsg">Please log in.</div>';
 		}
 
-		content += "<br/><br/>";
 		content += '<form bind="login" type="popup" name="login" action="javascript:">';
 		content += '<div name="username" id="username">';
-		content += '<input attribute="value" type="text" placeholder="Username"/>';
+		content += '<input class="loginInput"  attribute="value" type="text" placeholder="Username"/>';
 		content += '</div>';
 		content += '<div name="password" id="password">';
-		content += '<input attribute="value" type="password" placeholder="Password"/>';
+		content += '<input class="loginInput" attribute="value" type="password" placeholder="Password"/>';
 		content += '</div>';
-		content += '<div style="margin-top:10px" name="login" id="login">';
+		content += '<div name="login" id="login">';
 		content += '<button type="submit" attribute="submit">login</button>';
 		content += '</div>';
 		content += '<div bind="message" type="error" class="error">';
