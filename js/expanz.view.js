@@ -158,7 +158,7 @@ $(function() {
 			this.contextMenuEl.html("");
 
 			var data = this.model.get('data');
-			if (data === null) return;
+			if (data === undefined) return;
 
 			/* position menu below button */
 			var pos = this.el.find("button").position();

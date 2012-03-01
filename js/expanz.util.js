@@ -57,7 +57,7 @@ XMLDocumentsToXMLString = function(xmlDoc) {
 };
 
 boolValue = function(val) {
-	if (val === null || val === undefined || val.length === 0)
+	if (val ===null || val === undefined || val.length === 0)
 		return false;
 	val = val.toUpperCase();
 	if (val == "1" || val == "TRUE" || val == "Y" || val == "YES" || val == "ON" || val == "1.00" || val == "ENABLED")

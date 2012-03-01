@@ -26,7 +26,7 @@ $(function() {
 	window.expanz.getLoginURL = function() {
 		var loginUrl = window.config._loginpage;
 		/* if login url is null try to guess it by removing the filename */
-		if (loginUrl === null) {
+		if (loginUrl === undefined) {
 			loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
 		}
 		window.expanz.logToConsole("getLoginURL : " + loginUrl);
