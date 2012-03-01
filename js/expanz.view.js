@@ -552,6 +552,7 @@ $(function() {
 			}
 			this.collection.bind("error", this.updateError, this);
 			this.collection.bind("update:loading", this.loading, this);
+			this.collection.bind("update:deltaLoading", this.deltaLoading, this);
 		},
 
 		updateError : function(model, error) {
@@ -596,7 +597,19 @@ $(function() {
 				loadingEL.hide();
 			}
 				
-		}
+		},
+		
+		deltaLoading : function() {
+			var isLoading = this.collection.getAttr('deltaLoading');
+			if (isLoading) {
+				window.expanz.logToConsole("delta loading");	
+			}
+			else{
+				window.expanz.logToConsole("delta not loading");	
+			}
+		}		
+		
+		
 
 	});
 
@@ -650,7 +663,7 @@ $(function() {
 		},
 
 		events : {
-			"click button" : "closeClicked"
+			"click button" : "buttonClicked"
 		},
 
 		renderActions : function() {
@@ -696,9 +709,13 @@ $(function() {
 			});
 		},
 
-		closeClicked : function() {
+		buttonClicked : function() {
 			this.close();
-		},
+		},		
+		
+// closeClicked : function() {
+// this.close();
+// },
 
 		/* may be redifined depending on the pluggin used */
 		close : function() {
@@ -748,12 +765,9 @@ $(function() {
 				if (action.get('response') !== undefined) {
 					var button = this.el.find('#' + divId + ' button');
 					var that = this;
+					
 					button.click(function() {
-						if (that.model.getAttr('title') == "Order Submitted") {
-							/* clear activity cookies and reload the page */
-							window.expanz.Storage.clearActivityHandles();
-							window.location.reload();
-						}
+						that.postCloseActions(that.model.getAttr('title'));
 
 						if (action.get('response').find("closeWindow")) {
 							if (that.parentPopup !== undefined) {
@@ -769,6 +783,13 @@ $(function() {
 
 			}, this);
 
+		},
+		postCloseActions : function(windowTitle){ 
+			if (windowTitle == "Order Submitted") {
+				/* clear activity cookies and reload the page */
+				window.expanz.Storage.clearActivityHandles();
+				window.location.reload();
+			}
 		}
 	});
 
@@ -776,7 +797,7 @@ $(function() {
 		width : 'auto',
 
 		/* do not close on button click */
-		closeClicked : function() {
+		buttonClicked : function() {
 		}
 	});
 

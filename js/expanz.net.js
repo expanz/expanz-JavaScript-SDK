@@ -88,6 +88,10 @@ $(function() {
 				return;
 			}
 
+			activity.setAttr({
+				deltaLoading : true
+			});
+
 			SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
 		},
 
@@ -111,6 +115,10 @@ $(function() {
 				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
+
+			activity.setAttr({
+				deltaLoading : true
+			});
 
 			SendRequest(RequestObject.DataRefresh(dataId, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
 		},
@@ -143,6 +151,10 @@ $(function() {
 				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
+
+			activity.setAttr({
+				deltaLoading : true
+			});
 
 			SendNormalRequest(RequestObject.GetFile(filename, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks), true);
 		},
