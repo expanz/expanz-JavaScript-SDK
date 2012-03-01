@@ -57,7 +57,7 @@ XMLDocumentsToXMLString = function(xmlDoc) {
 };
 
 boolValue = function(val) {
-	if (val ===null || val === undefined || val.length === 0)
+	if (val === null || val === undefined || val.length === 0)
 		return false;
 	val = val.toUpperCase();
 	if (val == "1" || val == "TRUE" || val == "Y" || val == "YES" || val == "ON" || val == "1.00" || val == "ENABLED")
@@ -213,7 +213,9 @@ $(function() {
 				i.val('').removeClass('placeholder');
 				if (i.hasClass('password')) {
 					i.removeClass('password');
-					this.type = 'password';
+					if (!$.browser.msie || ($.browser.msie && $.browser.version.substr(0, 1) > 8)) {
+						this.type = 'password';
+					}
 				}
 			}
 		}).blur(function() {
@@ -221,7 +223,9 @@ $(function() {
 			if (i.val() === '' || i.val() == i.attr('placeholder')) {
 				if (this.type == 'password') {
 					i.addClass('password');
-					this.type = 'text';
+					if (!$.browser.msie || ($.browser.msie && $.browser.version.substr(0, 1) > 8)) {
+						this.type = 'text';
+					}
 				}
 				i.addClass('placeholder').val(i.attr('placeholder'));
 			}
