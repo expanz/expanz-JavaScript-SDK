@@ -134,12 +134,10 @@ $(function() {
 						expanz.Net.GetSessionDataRequest({
 							success : function(url) {
 								if (that.getAttr('type') == 'popup') {
-									console.log('popup');
 									// reload the page
 									window.location.reload();
 								}
 								else {
-									console.log('normal');
 									// redirect to default activity
 									expanz.Views.redirect(url);
 								}
