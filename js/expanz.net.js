@@ -700,7 +700,8 @@ $(function() {
 				$(execResults).find('Message').each(function() {
 					if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
 						var sessionLost = /Session .* not found/.test($(this).text());
-						if (sessionLost) {
+						var activityNotFound = /Activity .* not found/.test($(this).text());
+						if (sessionLost || activityNotFound) {
 							window.expanz.showLoginPopup(activity, true);
 							return;
 						}
