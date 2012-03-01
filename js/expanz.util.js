@@ -12,6 +12,53 @@ function pop(ary, map) { // , name, key ) {
 	return null;
 }
 
+function addPlaceHolderCapabilities() {
+	if (!Modernizr.input.placeholder) {
+
+		$('[placeholder]').focus(function() {
+			var i = $(this);
+			if (i.val() == i.attr('placeholder')) {
+				i.val('').removeClass('placeholder');
+				if (i.hasClass('password')) {
+					i.removeClass('password');
+					if (!$.browser.msie || ($.browser.msie && $.browser.version.substr(0, 1) > 8)) {
+						this.type = 'password';
+					}
+				}
+			}
+		}).blur(function() {
+			var i = $(this);
+			if (i.val() === '' || i.val() == i.attr('placeholder')) {
+				if (this.type == 'password') {
+					i.addClass('password');
+					if (!$.browser.msie || ($.browser.msie && $.browser.version.substr(0, 1) > 8)) {
+						this.type = 'text';
+					}
+				}
+				i.addClass('placeholder').val(i.attr('placeholder'));
+			}
+		}).blur().parents('form').submit(function() {
+			$(this).find('[placeholder]').each(function() {
+				var i = $(this);
+				if (i.val() == i.attr('placeholder'))
+					i.val('');
+			});
+		});
+
+	}
+}
+
+function eliminateDuplicates(arr) {
+	var i, len = arr.length, out = [], obj = {};
+	for (i = 0; i < len; i++) {
+		obj[arr[i]] = 0;
+	}
+	for (i in obj) {
+		out.push(i);
+	}
+	return out;
+}
+
 // Array Remove - By John Resig (MIT Licensed)
 Array.prototype.remove = function(from, to) {
 	var rest = this.slice((to || from) + 1 || this.length);
@@ -205,37 +252,7 @@ jQuery.fn.center = function(params) {
 
 /* Adding placeHolder capabilities if not available */
 $(function() {
-	if (!Modernizr.input.placeholder) {
 
-		$('[placeholder]').focus(function() {
-			var i = $(this);
-			if (i.val() == i.attr('placeholder')) {
-				i.val('').removeClass('placeholder');
-				if (i.hasClass('password')) {
-					i.removeClass('password');
-					if (!$.browser.msie || ($.browser.msie && $.browser.version.substr(0, 1) > 8)) {
-						this.type = 'password';
-					}
-				}
-			}
-		}).blur(function() {
-			var i = $(this);
-			if (i.val() === '' || i.val() == i.attr('placeholder')) {
-				if (this.type == 'password') {
-					i.addClass('password');
-					if (!$.browser.msie || ($.browser.msie && $.browser.version.substr(0, 1) > 8)) {
-						this.type = 'text';
-					}
-				}
-				i.addClass('placeholder').val(i.attr('placeholder'));
-			}
-		}).blur().parents('form').submit(function() {
-			$(this).find('[placeholder]').each(function() {
-				var i = $(this);
-				if (i.val() == i.attr('placeholder'))
-					i.val('');
-			});
-		});
+	addPlaceHolderCapabilities();
 
-	}
 });

@@ -9,6 +9,8 @@ function createActivityWithKendoTabs(tabElement, ajaxTabContents, callbacks) {
 		var itemName = (e.item.innerText || e.item.textContent);
 		tabLoaded[itemName] = true;
 		if (Object.size(tabLoaded) == nbDynamicTabs) {
+			//ie bug fix
+			addPlaceHolderCapabilities();
 			
 			tabLoaded = [];
 			expanz.CreateActivity($(e.item).parents('[bind=activity]'), callbacks);
