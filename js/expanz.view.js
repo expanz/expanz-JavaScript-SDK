@@ -340,7 +340,7 @@ $(function() {
 				// set table scaffold
 				hostEl = this.el.find('table#' + hostId);
 				if (hostEl.length < 1) {
-					this.el.append('<table id="' + hostId + '"></table>');
+					this.el.append('<table class="grid" id="' + hostId + '"></table>');
 					hostEl = this.el.find('table#' + hostId);
 				}
 				$(hostEl).html('<thead><tr></tr></thead><tbody></tbody>');
@@ -364,7 +364,8 @@ $(function() {
 				var i;
 				for (i = firstItem; i < lastItem; i++) {
 					var row = rows[i];
-					var html = '<tr id="' + row.getAttr('id') + '" type="' + row.getAttr('type') + '">';
+					var alternate = ((i-firstItem) % 2 == 1) ? 'class="gridRowAlternate"' : 'class="gridRow"' ;
+					var html = '<tr id="' + row.getAttr('id') + '" type="' + row.getAttr('type') + '" '+ alternate +'>';
 
 					var values = {};
 					_.each(row.getAllCells(), function(cell) {
@@ -621,6 +622,8 @@ $(function() {
 	window.expanz.Views.PopupView = Backbone.View.extend({
 
 		width : 'auto',
+		
+		cssClass : 'popupView',
 
 		divAttributes : '',
 
@@ -666,7 +669,7 @@ $(function() {
 				content = this.model.getAttr('text');
 			}
 
-			containerjQ.append("<div class='popupView' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");
+			containerjQ.append("<div class='" + this.cssClass + "' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");
 			this.el = containerjQ.find('#' + this.id);
 			this.createWindowObject();
 
@@ -710,12 +713,15 @@ $(function() {
 	});
 
 	window.expanz.Views.PicklistWindowView = window.expanz.Views.PopupView.extend({
-		divAttributes : " bind='DataControl' renderingType='grid' "
+		divAttributes : " bind='DataControl' renderingType='grid' ",
+		cssClass : 'pickListPopup popupView'
 	});
 
 	window.expanz.Views.UIMessage = window.expanz.Views.PopupView.extend({
 
 		width : '500px',
+		
+		cssClass : 'uiMessage popupView',
 
 		renderActions : function() {
 			this.model.each(function(action) {
