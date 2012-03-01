@@ -733,10 +733,10 @@ $(function() {
 
 				if (action.id == 'close') {
 					divId += action.get('label').split(' ').join('');
-					this.el.append('<div style="display:inline"  bind="method" name="close" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
+					this.el.append('<div style="float:left"  bind="method" name="close" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
 				}
 				else if (action.id !== this.model.id) {
-					this.el.append('<div style="display:inline" bind="method" name="' + action.id + '" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
+					this.el.append('<div style="float:left" bind="method" name="' + action.id + '" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
 					var methodView = new expanz.Views.MethodView({
 						el : $('div#' + action.id, this.el),
 						id : action.id,
