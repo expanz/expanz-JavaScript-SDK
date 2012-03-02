@@ -695,13 +695,13 @@ $(function() {
 			var execResults = $(xml).find("ExecXResult");
 
 			if (execResults) {
-				/* filter on the selected activity */
-				activityResult = $(execResults).find("[activityHandle='" + activity.getAttr('handle') + "']");
+				/* remove other activities from the xml */
+				$(execResults).find("Activity[activityHandle!='" + activity.getAttr('handle') + "']").remove();
 				
 				var errors = [];
 				var infos = [];
 				/* MESSAGE CASE */
-				$(activityResult).find('Message').each(function() {
+				$(execResults).find('Message').each(function() {
 					if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
 						var sessionLost = /Session .* not found/.test($(this).text());
 						var activityNotFound = /Activity .* not found/.test($(this).text());
@@ -748,7 +748,7 @@ $(function() {
 				}
 
 				/* Activity Request CASE */
-				$(activityResult).find('ActivityRequest').each(function() {
+				$(execResults).find('ActivityRequest').each(function() {
 					var id = $(this).attr('id');
 					var key = $(this).attr('key');
 					var style = $(this).attr('style') || "";
@@ -795,7 +795,7 @@ $(function() {
 				});
 
 				/* Activity Request CASE */
-				$(activityResult).find('ContextMenu').each(function() {
+				$(execResults).find('ContextMenu').each(function() {
 					window.expanz.logToConsole('ContextMenu received');
 					var caller = window.expanz.currentContextMenu;
 					if (caller !== null) {
@@ -810,7 +810,7 @@ $(function() {
 				});
 
 				/* FIELD CASE */
-				$(activityResult).find('Field').each(function() {
+				$(execResults).find('Field').each(function() {
 					var id = $(this).attr('id');
 					var field = activity.get(id);
 					if (field && field !== undefined) {
@@ -862,7 +862,7 @@ $(function() {
 				});
 
 				/* UIMESSAGE CASE */
-				$(activityResult).find('UIMessage').each(function() {
+				$(execResults).find('UIMessage').each(function() {
 
 					var clientMessage = new expanz.Model.ClientMessage({
 						id : 'ExpanzClientMessage',
@@ -898,7 +898,7 @@ $(function() {
 				});
 
 				/* DATA */
-				$(activityResult).find('Data').each(function() {
+				$(execResults).find('Data').each(function() {
 					var id = $(this).attr('id');
 					var pickfield = $(this).attr('pickField');
 					var contextObject = $(this).attr('contextObject');
