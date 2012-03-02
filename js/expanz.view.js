@@ -854,7 +854,8 @@ $(function() {
 			}
 		}
 		else {
-			$(elem).html(value);
+			/* if value is empty put an unbreakable space instead */
+			$(elem).html(value || '&nbsp;');
 		}
 		return elem;
 	}
