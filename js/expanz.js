@@ -143,17 +143,17 @@ $(function() {
 		expanz._error = fn;
 	};
 
-	window.expanz.basicErrorDisplay = function(el) {
-		return function error(str) {
-			$(el).find('[attribute=value]').html(str);
-			if (!str || str.length < 1) {
-				$(el).hide('slow');
-			}
-			else {
-				$(el).show('slow');
-			}
-		};
-	};
+	// window.expanz.basicErrorDisplay = function(el) {
+	// return function error(str) {
+	// $(el).find('[attribute=value]').html(str);
+	// if (!str || str.length < 1) {
+	// $(el).hide('slow');
+	// }
+	// else {
+	// $(el).show('slow');
+	// }
+	// };
+	// };
 
 	window.expanz.basicMsgDisplay = function(el) {
 		return function display(str) {
@@ -162,26 +162,36 @@ $(function() {
 				str = str.join("<br/>");
 			}
 
+			var msgDisplayedInPopup = false;
+
 			/* display the message in the popup as well if visible */
 			if (window.expanz.currentPopup !== undefined && $(window.expanz.currentPopup.el).is(":visible")) {
 				var popupEl = window.expanz.currentPopup.el.find(el);
 				if (popupEl) {
+					msgDisplayedInPopup = true;
 					popupEl.find('[attribute=value]').html(str);
 					if (!str || str.length < 1) {
 						$(popupEl).hide('slow');
 					}
 					else {
-						$(popupEl).show('slow');
+						$(popupEl).slideDown(800, function() {
+							$(popupEl).delay(2000).slideUp(800);
+						});
 					}
 				}
 			}
 
-			$(el).find('[attribute=value]').html(str);
-			if (!str || str.length < 1) {
-				$(el).hide('slow');
-			}
-			else {
-				$(el).show('slow');
+			if (!msgDisplayedInPopup) {
+				$(el).find('[attribute=value]').html(str);
+				if (!str || str.length < 1) {
+					$(el).hide('slow');
+				}
+				else {
+					// $(el).show('slow');
+					$(el).slideDown(800, function() {
+						$(el).delay(2000).slideUp(800);
+					});
+				}
 			}
 		};
 	};
