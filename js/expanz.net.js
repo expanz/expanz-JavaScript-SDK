@@ -693,6 +693,11 @@ $(function() {
 			window.expanz.logToConsole("start parseDeltaResponse");
 
 			var execResults = $(xml).find("ExecXResult");
+			/* filter on the selected activity */
+			if (execResults) {
+				execResults = $(execResults).find("[activityHandle='" + activity.getAttr('handle') + "']");
+			}
+
 			if (execResults) {
 				var errors = [];
 				var infos = [];
@@ -1102,7 +1107,7 @@ $(function() {
 		}
 
 		var form = '';
-		form += "<form method='post' id='formFile' target='_self' action='" + config._URLproxy + "'>";
+		form += "<form method='post' id='formFile' target='_blank' action='" + config._URLproxy + "'>";
 		form += "<input type='hidden' name='url' value='" + config._URLprefix + request.url + "'>";
 
 		form += "<input type='hidden' name='data' value='" + request.data + "'>";
