@@ -693,16 +693,15 @@ $(function() {
 			window.expanz.logToConsole("start parseDeltaResponse");
 
 			var execResults = $(xml).find("ExecXResult");
-			/* filter on the selected activity */
-			if (execResults) {
-				execResults = $(execResults).find("[activityHandle='" + activity.getAttr('handle') + "']");
-			}
 
 			if (execResults) {
+				/* filter on the selected activity */
+				activityResult = $(execResults).find("[activityHandle='" + activity.getAttr('handle') + "']");
+				
 				var errors = [];
 				var infos = [];
 				/* MESSAGE CASE */
-				$(execResults).find('Message').each(function() {
+				$(activityResult).find('Message').each(function() {
 					if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
 						var sessionLost = /Session .* not found/.test($(this).text());
 						var activityNotFound = /Activity .* not found/.test($(this).text());
@@ -749,7 +748,7 @@ $(function() {
 				}
 
 				/* Activity Request CASE */
-				$(execResults).find('ActivityRequest').each(function() {
+				$(activityResult).find('ActivityRequest').each(function() {
 					var id = $(this).attr('id');
 					var key = $(this).attr('key');
 					var style = $(this).attr('style') || "";
@@ -796,7 +795,7 @@ $(function() {
 				});
 
 				/* Activity Request CASE */
-				$(execResults).find('ContextMenu').each(function() {
+				$(activityResult).find('ContextMenu').each(function() {
 					window.expanz.logToConsole('ContextMenu received');
 					var caller = window.expanz.currentContextMenu;
 					if (caller !== null) {
@@ -811,7 +810,7 @@ $(function() {
 				});
 
 				/* FIELD CASE */
-				$(execResults).find('Field').each(function() {
+				$(activityResult).find('Field').each(function() {
 					var id = $(this).attr('id');
 					var field = activity.get(id);
 					if (field && field !== undefined) {
@@ -863,7 +862,7 @@ $(function() {
 				});
 
 				/* UIMESSAGE CASE */
-				$(execResults).find('UIMessage').each(function() {
+				$(activityResult).find('UIMessage').each(function() {
 
 					var clientMessage = new expanz.Model.ClientMessage({
 						id : 'ExpanzClientMessage',
@@ -899,7 +898,7 @@ $(function() {
 				});
 
 				/* DATA */
-				$(execResults).find('Data').each(function() {
+				$(activityResult).find('Data').each(function() {
 					var id = $(this).attr('id');
 					var pickfield = $(this).attr('pickField');
 					var contextObject = $(this).attr('contextObject');
