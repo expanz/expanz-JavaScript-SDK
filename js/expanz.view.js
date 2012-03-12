@@ -584,9 +584,12 @@ $(function() {
 				loadingEL.css("position","absolute"); /* parent need to be relative //todo enfore it ? */
 				loadingEL.css('width','100%');
 				loadingEL.css('height','100%');
+				loadingEL.css('margin','0');
+				loadingEL.css('padding','0');
 				loadingEL.css('top', '0px');
 				loadingEL.css('left','0px');
 				loadingEL.css('z-index', '999');
+				loadingEL.css('overflow', 'hidden');
 				loadingEL.find("span").center();
 				loadingEL.css('background', 'url(data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==) center');
 				
