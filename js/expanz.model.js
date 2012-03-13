@@ -142,7 +142,6 @@ $(function() {
 									expanz.Views.redirect(url);
 								}
 
-
 							}
 						});
 					}
@@ -202,7 +201,7 @@ $(function() {
 		},
 
 		destroy : function() {
-			expanz.Net.DestroyActivityRequest(this);
+			expanz.Net.DestroyActivityRequest(this.getAttr('handle'));
 			expanz.Collection.prototype.destroy.call(this, this.callbacks);
 		}
 	});

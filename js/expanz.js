@@ -36,12 +36,12 @@ $(function() {
 	//
 	// Public Functions & Objects in the Expanz Namespace
 	//
-	window.expanz.CreateActivity = function(DOMObject, callbacks) {
+	window.expanz.CreateActivity = function(DOMObject, callbacks, initialKey) {
 
 		//
 		DOMObject || (DOMObject = $('body'));
 
-		var activities = createActivity(DOMObject, callbacks);
+		var activities = createActivity(DOMObject, callbacks, initialKey);
 		_.each(activities, function(activity) {
 			window.App.push(activity);
 		});
@@ -90,6 +90,26 @@ $(function() {
 		});
 	};
 
+	window.expanz.showManuallyClosedPopup = function(content, title, id, activity) {
+
+		content = unescape(content);
+
+		var clientMessage = new expanz.Model.ClientMessage({
+			id : id,
+			title : title,
+			text : content,
+			parent : activity
+		});
+
+		var loginPopup = new window.expanz.Views.ManuallyClosedPopup({
+			id : clientMessage.id,
+			model : clientMessage
+		}, $('body'));
+
+		return loginPopup;
+
+	};
+
 	window.expanz.showLoginPopup = function(activity, sessionLost) {
 		var content = '';
 		if (sessionLost === true) {
@@ -114,17 +134,7 @@ $(function() {
 		content += '</div>';
 		content += '</form>';
 
-		var clientMessage = new expanz.Model.ClientMessage({
-			id : 'ExpanzLoginPopup',
-			title : 'Login',
-			text : content,
-			parent : activity
-		});
-
-		var loginPopup = new window.expanz.Views.ManuallyClosedPopup({
-			id : clientMessage.id,
-			model : clientMessage
-		}, $('body'));
+		loginPopup = window.expanz.showManuallyClosedPopup(content, 'Login', 'ExpanzLoginPopup', activity);
 
 		var callbackLogin = function() {
 			window.expanz.logToConsole('callbackLogin');
@@ -135,6 +145,53 @@ $(function() {
 		window.expanz.logToConsole("sessionLost");
 
 		return;
+
+	};
+
+	window.expanz.createActivityWindow = function(parentActivity, id, style, key, title) {
+		var callback = function(url, onRequest) {
+			if (url !== null) {
+				window.expanz.logToConsole(url);
+			}
+			else {
+				window.expanz.logToConsole("Url of activity not found");
+			}
+
+			/* case 'popup' */
+			if (onRequest == 'popup') {
+
+				/* an activity request shouldn't be reloaded from any state -> clean an eventual cookie if popup was not closed properly */
+				window.expanz.Storage.clearActivityHandle(id, style);
+
+				var clientMessage = new expanz.Model.ClientMessage({
+					id : 'ActivityRequest',
+					url : url + "?random=" + new Date().getTime(),
+					parent : parentActivity,
+					title : unescape(title || '')
+				});
+
+				var popup = new window.expanz.Views.ManuallyClosedPopup({
+					id : clientMessage.id,
+					model : clientMessage
+				}, $('body'));
+
+				popup.bind('contentLoaded', function() {
+					expanz.CreateActivity($(popup.el).find("[bind=activity]"), null, key);
+				});
+
+				popup.bind('popupClosed', function() {
+					window.expanz.Storage.clearActivityHandle(id, style);
+				});
+			}
+			/* case 'navigate' or default */
+			else {
+				window.location = url + "?random=" + new Date().getTime() + "&" + id + style + "initialKey=" + key;
+			}
+
+		};
+
+		/* find url of activity */
+		window.expanz.helper.findActivityMetadata(id, style, callback);
 
 	};
 
@@ -239,7 +296,7 @@ $(function() {
 	//
 	// Private Functions
 	//
-	function createActivity(dom, callbacks) {
+	function createActivity(dom, callbacks, paramInitialKey) {
 
 		var activities = [];
 
@@ -260,7 +317,7 @@ $(function() {
 			var activityView = expanz.Factory.Activity(dom);
 
 			/* look for initial key in the query parameters */
-			var initialKey = getQueryParameterByName(activityView.collection.getAttr('name') + (activityView.collection.getAttr('style') || '') + 'initialKey');
+			var initialKey = paramInitialKey || getQueryParameterByName(activityView.collection.getAttr('name') + (activityView.collection.getAttr('style') || '') + 'initialKey');
 			activityView.collection.setAttr({
 				'key' : initialKey
 			});
