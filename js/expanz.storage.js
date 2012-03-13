@@ -80,7 +80,14 @@ $(function() {
 		},
 
 		clearActivityHandle : function(activityName, activityStyle) {
-			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle);
+			/* send a request to the servr to remove it as well */
+			var ah = this.getActivityHandle(activityName, activityStyle);
+			if (ah !== undefined) {
+				this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle);
+				expanz.Net.DestroyActivityRequest(ah);
+			}
+			return ah;
+
 		},
 
 		/* storage implementations */
