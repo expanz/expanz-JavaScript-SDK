@@ -95,16 +95,14 @@ $(function() {
 			SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
 		},
 
-		DestroyActivityRequest : function(activity, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
+		DestroyActivityRequest : function(activityHandle, callbacks) {
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
 
-			SendRequest(RequestObject.DestroyActivity(activity, expanz.Storage.getSessionHandle()), parseDestroyActivityResponse(activity, callbacks));
+			SendRequest(RequestObject.DestroyActivity(activityHandle, expanz.Storage.getSessionHandle()), parseDestroyActivityResponse(callbacks));
 		},
 
 		DataRefreshRequest : function(dataId, activity, callbacks) {
@@ -220,9 +218,9 @@ $(function() {
 			};
 		},
 
-		DestroyActivity : function(activity, sessionHandle) {
+		DestroyActivity : function(activityHandle, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.DestroyActivity(activity)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.DestroyActivity(activityHandle)),
 				url : 'ExecX'
 			};
 		},
@@ -417,8 +415,8 @@ $(function() {
 			return mnuActionStr;
 		},
 
-		DestroyActivity : function(activity, sessionHandle) {
-			return '<Close activityHandle="' + activity.getAttr('handle') + '"/>';
+		DestroyActivity : function(activityHandle, sessionHandle) {
+			return '<Close activityHandle="' + activityHandle + '"/>';
 		},
 
 		CreateReleaseSession : function() {
@@ -619,7 +617,7 @@ $(function() {
 							maxLength : $(this).attr('maxLength'),
 							mask : $(this).attr('mask'),
 							label : $(this).attr('label'),
-							value : $(this).attr('value')
+							value : $(this).attr('value') == '$longData$' ? $(this).text() : $(this).attr('value')
 
 						});
 
@@ -697,7 +695,7 @@ $(function() {
 			if (execResults) {
 				/* remove other activities from the xml */
 				$(execResults).find("Activity[activityHandle!='" + activity.getAttr('handle') + "']").remove();
-				
+
 				var errors = [];
 				var infos = [];
 				/* MESSAGE CASE */
@@ -753,44 +751,7 @@ $(function() {
 					var key = $(this).attr('key');
 					var style = $(this).attr('style') || "";
 
-					var callback = function(url, onRequest) {
-						if (url !== null) {
-							window.expanz.logToConsole(url);
-						}
-						else {
-							window.expanz.logToConsole("Url of activity not found");
-						}
-
-						/* case 'popup' */
-						if (onRequest == 'popup') {
-
-							/* an activity request shouldn't be reloaded from any state -> clean an eventual cookie */
-							window.expanz.Storage.clearActivityHandle(id, style);
-
-							var clientMessage = new expanz.Model.ClientMessage({
-								id : 'ActivityRequest',
-								url : url + "?random=" + new Date().getTime(),
-								parent : activity
-							});
-
-							var popup = new window.expanz.Views.ManuallyClosedPopup({
-								id : clientMessage.id,
-								model : clientMessage
-							}, $('body'));
-
-							popup.bind('contentLoaded', function() {
-								expanz.CreateActivity($(popup.el).find("[bind=activity]"));
-							});
-						}
-						/* case 'navigate' or default */
-						else {
-							window.location = url + "?random=" + new Date().getTime() + "&" + id + style + "initialKey=" + key;
-						}
-
-					};
-
-					/* find url of activity */
-					window.expanz.helper.findActivityMetadata(id, style, callback);
+					window.expanz.createActivityWindow(activity, id, style, key);
 
 				});
 
@@ -824,7 +785,7 @@ $(function() {
 
 							field.set({
 								text : $(this).attr('text'),
-								value : $(this).attr('value')
+								value : $(this).attr('value') == '$longData$' ? $(this).text() : $(this).attr('value')
 							});
 						}
 
@@ -990,7 +951,7 @@ $(function() {
 		};
 	}
 
-	function parseDestroyActivityResponse(activity, callbacks) {
+	function parseDestroyActivityResponse(callbacks) {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseDestroyActivityResponse");
 			var execResults = $(xml).find('ExecXResult');
