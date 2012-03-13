@@ -713,12 +713,13 @@ $(function() {
 		},
 
 		buttonClicked : function() {
-			this.close();
+			this.closeWindow();
 		},		
 		
-// closeClicked : function() {
-// this.close();
-// },
+		closeWindow : function() {
+			this.trigger('popupClosed');
+			this.close();
+		},
 
 		/* may be redifined depending on the pluggin used */
 		close : function() {
@@ -815,7 +816,7 @@ $(function() {
 		var datatype = allAttrs['datatype'];
 		if (datatype && datatype.toLowerCase() === 'blob' && attr && attr === 'value') {
 			var width = allAttrs['width'];
-			var imgElem = '<img src="' + allAttrs['value'] + '"';
+			var imgElem = '<img src="' + window.config._URLblobs + allAttrs['value'] + '"';
 			imgElem += width ? ' width="' + width + '"' : '';
 			imgElem += '/>';
 			$(elem).html(imgElem);
