@@ -94,6 +94,56 @@ $(function() {
 			},
 
 			/**
+			 * Method used in the list component to render the items on special button
+			 */
+			renderItemsOnSpecialButton : function() {
+				return window.expanz.html.renderMethod(this.listItemsOnSpecialMethodName, 'List Items On Special', this.listItemsOnSpecialMethodContextObject);
+			},
+
+			/**
+			 * Method used in the list component to render the template of an item in the grid
+			 */
+			renderListItemTemplate : function(addToCartLabel) {
+				var html = '';
+				html += '\
+					<script type="text/template" id="productListItemTemplate"> \
+						<div class="item"> \
+							<div> \
+							<% if ( isImageValid(data.ThumbImage_FileContents) ){ %>  \
+								<img class="thumbnail" src="' + window.config._URLblobs + '<%= data.ThumbImage_FileContents %>' + '"/> \
+							<% } %>  \
+							<% if ( !isImageValid(data.ThumbImage_FileContents) ){ %>  \
+								<img class="noThumbnail" src="assets/images/no_image_available.png"/> \
+							<% } %> \
+							<div style="min-height:100px"> \
+								<label><%= data.Name %></label><br/> \
+								<label><b>$<%= data.DefaultSellPrice %></b></label><br/> \
+								<label><%= window.expanz.html.getDisplayableDiscount(data.UdefString1) %></label> \
+							</div> \ \
+							<% if ( data.AvailableQuantity <= 0 ) { %>  \
+								<% if ( data.SellRateCalcNotes == "No stock available" ) { %>  \
+								<i><%= $.i18n.prop(data.SellRateCalcNotes,data.Available_From)%></i> \
+								<% } %>  \
+								<% if ( data.SellRateCalcNotes != "Not available before" ) { %>  \
+									<i><%= $.i18n.prop(data.SellRateCalcNotes)%></i> \
+									<% } %>  \
+							<% } %>  \
+							<% if ( true ) { %>  \
+								<button methodName="saveItemFromCart">' + addToCartLabel + '</button> \
+							<% } %></div> \
+					';
+
+				html += window.expanz.html.clearBoth();
+
+				html += '<div class="description"><label><%= data.ShortDescription %></label></div>';
+
+				html += '</div>';
+				html += '</script>';
+
+				return html;
+			},
+
+			/**
 			 * Renders the Items list component
 			 * 
 			 * <pre>
@@ -104,51 +154,22 @@ $(function() {
 			 * 
 			 * @param addToCartLabel
 			 *           string, label of the search button (Default is Add to cart)
+			 * @param itemsPerPage
+			 *           integer, number of items per page on the list/grid view (Default is 9)
 			 * @return html code
 			 */
 			renderListComponent : function(listEl) {
 				var addToCartLabel = listEl.attr('addToCartLabel') !== undefined ? listEl.attr('addToCartLabel') : 'Add to cart';
+				var itemsPerPage = listEl.attr('itemsPerPage') !== undefined ? listEl.attr('itemsPerPage') : 9;
 
 				var html = '';
 				html += '<div id="shoppingCartList" class="list">';
-				html += window.expanz.html.renderMethod(this.listItemsOnSpecialMethodName, 'List Items On Special', this.listItemsOnSpecialMethodContextObject);
 
-				html += '\
-			<script type="text/template" id="productListItemTemplate"> \
-				<div class="item"> \
-					<div> \
-					<% if ( isImageValid(data.ThumbImage_FileContents) ){ %>  \
-						<img class="thumbnail" src="' + window.config._URLblobs + '<%= data.ThumbImage_FileContents %>' + '"/> \
-					<% } %>  \
-					<% if ( !isImageValid(data.ThumbImage_FileContents) ){ %>  \
-						<img class="noThumbnail" src="assets/images/no_image_available.png"/> \
-					<% } %> \
-					<div style="min-height:100px"> \
-						<label><%= data.Name %></label><br/> \
-						<label><b>$<%= data.DefaultSellPrice %></b></label><br/> \
-						<label><%= window.expanz.html.getDisplayableDiscount(data.UdefString1) %></label> \
-					</div> \ \
-					<% if ( data.AvailableQuantity <= 0 ) { %>  \
-						<% if ( data.SellRateCalcNotes == "No stock available" ) { %>  \
-						<i><%= $.i18n.prop(data.SellRateCalcNotes,data.Available_From)%></i> \
-						<% } %>  \
-						<% if ( data.SellRateCalcNotes != "Not available before" ) { %>  \
-							<i><%= $.i18n.prop(data.SellRateCalcNotes)%></i> \
-							<% } %>  \
-					<% } %>  \
-					<% if ( true ) { %>  \
-						<button methodName="saveItemFromCart">' + addToCartLabel + '</button> \
-					<% } %></div> \
-			';
+				html += this.renderItemsOnSpecialButton();
 
-				html += window.expanz.html.clearBoth();
+				html += this.renderListItemTemplate(addToCartLabel);
 
-				html += '<div class="description"><label><%= data.ShortDescription %></label></div>';
-
-				html += '</div>';
-				html += '</script>';
-
-				html += '<div id="productListDiv"  itemsPerPage="9" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
+				html += '<div id="productListDiv"  itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 
 				html += "</div>";
 				return html;
@@ -156,11 +177,11 @@ $(function() {
 
 			_executeAfterRenderListComponent : function() {
 				$("#productListDiv").bind("table:rendered", function() {
-					$("#productList").find("[id*='_userinput_'][format='numeric']").each(function() {
+					$("#productList_host").find("[id*='_userinput_'][format='numeric']").each(function() {
 						$(this).kendoNumericTextBox({
 							value : 1,
 							min : 1,
-							max : 10,
+							max : 100,
 							step : 1,
 							format : "n0"
 						});
@@ -243,7 +264,7 @@ $(function() {
 					});
 
 					/* hiding the checkout part if no items */
-					if ($("#lvMiniCart > [nbItems]").attr("nbItems")  === 0) {
+					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === 0) {
 						$("#cartCheckout").hide();
 					}
 					else {
@@ -344,7 +365,7 @@ $(function() {
 					});
 
 					/* hiding the checkout part if no items */
-					if ($("#checkoutCart > [nbItems]").attr("nbItems")  === 0) {
+					if ($("#checkoutCart > [nbItems]").attr("nbItems") === 0) {
 						$("#cartCheckout").hide();
 					}
 					else {
