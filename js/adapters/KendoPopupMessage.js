@@ -12,6 +12,7 @@ function useKendoPopups() {
 			modal : true,
 			width : this.width,
 			close : function() {
+				that.trigger('popupClosed');
 				if (that.postCloseActions)
 					that.postCloseActions(title);
 			}
