@@ -79,6 +79,10 @@ $(function() {
 				 */
 				map[cell.get('field')] = cell.get('value');
 			});
+
+			/* add row id to the map */
+			map['rowId'] = this.getAttr('id');
+
 			/* using a data to put the data to avoid underscore 'variable is not defined' error */
 			return {
 				data : map
@@ -189,18 +193,18 @@ $(function() {
 		updateRowSelected : function(selectedId, type) {
 			window.expanz.logToConsole("GridModel:updateRowSelected id:" + selectedId + ' ,type:' + type);
 		},
-		
-		updateRowDoubleClicked: function(selectedId, type) {
+
+		updateRowDoubleClicked : function(selectedId, type) {
 			window.expanz.logToConsole("GridModel:updateRowDoubleClicked id:" + selectedId + ' ,type:' + type);
-		},		
+		},
 
 		actionSelected : function(selectedId, name, params) {
 			window.expanz.logToConsole("GridModel:actionSelected id:" + selectedId + ' ,methodName:' + name + ' ,methodParams:' + JSON.stringify(params));
 		},
-		
+
 		menuActionSelected : function(selectedId, name, params) {
 			window.expanz.logToConsole("GridModel:menuActionSelected id:" + selectedId + ' ,menuActionName:' + name + ' , menuActionParams:' + JSON.stringify(params));
-		},		
+		},
 
 		refresh : function() {
 			expanz.Net.DataRefreshRequest(this.getAttr('id'), this.getAttr('parent'));
