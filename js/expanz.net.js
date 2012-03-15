@@ -172,6 +172,8 @@ $(function() {
 
 		/* create an anonymous request */
 		CreateAnonymousRequest : function(xmlData, callbacks) {
+			if (callbacks === undefined)
+				callbacks = window.expanz.defaultCallbacks;
 			SendRequest(RequestObject.CreateAnonymousRequest(xmlData), parseExecAnonymousResponse(callbacks));
 		}
 
@@ -517,10 +519,14 @@ $(function() {
 			if (execResults.length > 0) {
 				var esaResult = $(execResults).find('ESA');
 				success = boolValue(esaResult.attr('success'));
-				var serverMessage = esaResult.attr('serverMessage');
+				var serverMessage = esaResult.attr('serverMessage') || "";
+				if (!success && $(xml).find('errors').length > 0) {
+					serverMessage += $(xml).first('errors').text();
+				}
+
 				window.expanz.logToConsole("Success:" + success);
 
-				if (serverMessage !== null && serverMessage.length > 0) {
+				if (serverMessage !== undefined && serverMessage.length > 0) {
 					if (success) {
 						if (callbacks && callbacks.info) {
 							callbacks.info(serverMessage);

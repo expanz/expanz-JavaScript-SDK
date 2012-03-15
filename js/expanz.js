@@ -258,6 +258,16 @@ $(function() {
 		expanz._info = fn;
 	};
 
+	window.expanz.defaultCallbacks = {
+		success : function(message) {
+		},
+		error : function(message) {
+			expanz._error(message);
+		},
+		info : function(message) {
+			expanz._info(message);
+		}
+	};
 	// window.expanz.SetHomePage = function(homepage) {
 	//
 	// expanz._home = homepage;
