@@ -129,7 +129,7 @@ $(function() {
 									<% } %>  \
 							<% } %>  \
 							<% if ( true ) { %>  \
-								<button methodName="saveItemFromCart">' + addToCartLabel + '</button> \
+								<button class="addToCartButton" methodName="saveItemFromCart">' + addToCartLabel + '</button> \
 							<% } %></div> \
 					';
 
@@ -228,7 +228,7 @@ $(function() {
 				html += '<script type="text/template" id="lvMiniCartItemTemplate">';
 				html += window.expanz.html.startDiv("item");
 				html += window.expanz.html.renderGridTemplateField("ItemForSale_Name", 200);
-				html += window.expanz.html.renderGridTemplateField("ValueIncTax", 40);
+				html += window.expanz.html.renderGridTemplateField("ValueIncTax", 55);
 				html += '<input id="userinput_quantity" format="numeric" value="<%= data.PlanQuantity %>" />';
 				html += '<button methodName="saveItemFromCart">Adjust</button>';
 				html += '<button methodName="deleteItemFromCart">X</button>';
@@ -433,12 +433,12 @@ $(function() {
 	window.expanz.html.renderGridTemplateField = function(fieldName, width) {
 		if (!width)
 			width = 100;
-		return '<div style="width:' + width + 'px;float:left"><%= data.' + fieldName + ' %>&nbsp;</div>';
+		return '<div class="' + fieldName + '" style="width:' + width + 'px;float:left"><%= data.' + fieldName + ' %>&nbsp;</div>';
 	};
 
 	window.expanz.html.renderField = function(fieldName, showLabel, prompt) {
 		var field = '';
-		field += '<div id="' + fieldName + '"  bind="field" name="' + fieldName + '" class="field">';
+		field += '<div id="' + fieldName + '"  bind="field" name="' + fieldName + '" class="field ' + fieldName + '">';
 		if (showLabel === true)
 			field += '<label attribute="label"></label>';
 		field += '<input type="text" attribute="value"  class="k-textbox" placeholder="' + prompt + '"/>';
@@ -450,10 +450,10 @@ $(function() {
 		var field = '';
 		var style = sameLine ? 'float:left;' : '';
 		style += width ? 'width:' + width + 'px' : '';
-		field += '<div style="' + style + '" id="' + fieldName + '"  bind="field" name="' + fieldName + '" class="field">';
+		field += '<div style="' + style + '" id="' + fieldName + '"  bind="field" name="' + fieldName + '" class="readonlyField ' + fieldName + '">';
 		if (showLabel === true)
-			field += '<div style="float:left"><label attribute="label"></label></div> ';
-		field += '<div><label attribute="value"></label></div><div style="clear:both" ></div>';
+			field += '<div class="fieldLabel" style="float:left"><label attribute="label"></label></div> ';
+		field += '<div class="fieldValue"><label attribute="value"></label></div><div style="clear:both" ></div>';
 		field += '</div>';
 		return field;
 	};
@@ -483,10 +483,7 @@ $(function() {
 				</Method> \
 			</Activity> \
 			';
-		window.expanz.Net.CreateAnonymousRequest(xml, {
-			error : expanz._error,
-			info : expanz._info
-		});
+		window.expanz.Net.CreateAnonymousRequest(xml);
 	}
 
 	window.expanz.html.showLostPasswordPopup = function() {
