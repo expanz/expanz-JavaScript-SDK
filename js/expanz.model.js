@@ -183,7 +183,9 @@ $(function() {
 		},
 
 		addDataControl : function(DataControl) {
-			this.dataControls[DataControl.id] = DataControl;
+			if (this.dataControls[DataControl.id] === undefined)
+				this.dataControls[DataControl.id] = [];
+			this.dataControls[DataControl.id].push(DataControl);
 			return;
 		},
 		getDataControl : function(id) {

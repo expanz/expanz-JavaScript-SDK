@@ -352,6 +352,8 @@ $(function() {
 			/* add datapublication for data controls */
 			if (activity.hasDataControl()) {
 				_.each(activity.getDataControls(), function(dataControl, dataControlId) {
+					/* dataControl is an array if many UI element are using the same data but they should all be for the same parameters, we take only the first one then */
+					dataControl = dataControl[0];
 					var populateMethod = dataControl.getAttr('populateMethod') ? ' populateMethod="' + dataControl.getAttr('populateMethod') + '"' : '';
 					var query = dataControl.getAttr('query') ? ' query="' + dataControl.getAttr('query') + '"' : '';
 					var autoPopulate = dataControl.getAttr('autoPopulate') ? ' autoPopulate="' + dataControl.getAttr('autoPopulate') + '"' : '';
@@ -645,30 +647,34 @@ $(function() {
 				_.each($(execResults).find('Data'), function(data) {
 
 					var dataControlId = $(data).attr('id');
-					var dataControlModel = activity.getDataControl(dataControlId);
+					var dataControlModels = activity.getDataControl(dataControlId);
 
-					if (dataControlModel !== undefined) {
-						/* grid case */
-						if (dataControlModel.getAttr('renderingType') == 'grid') {
-							fillGridModel(dataControlModel, data);
+					if (dataControlModels !== undefined) {
 
-							/* add a method handler for each action button */
-							dataControlModel.actionSelected = function(selectedId, name, params) {
-								expanz.Net.MethodRequest(name, params, null, activity);
-								window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + name + ' ,methodParam:' + JSON.stringify(params));
-							};
+						for ( var i = 0; i < dataControlModels.length; i++) {
+							dataControlModel = dataControlModels[i];
+							/* grid case */
+							if (dataControlModel.getAttr('renderingType') == 'grid') {
+								fillGridModel(dataControlModel, data);
 
-							/* override a method handler for each menuaction button */
-							dataControlModel.menuActionSelected = function(selectedId, name, params) {
-								expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
-							};
-						}
-						/* others cases (tree, combobox) */
-						else {
-							/* update the xml data in the model, view will get a event if bound */
-							dataControlModel.setAttr({
-								xml : $(data)
-							});
+								/* add a method handler for each action button */
+								dataControlModel.actionSelected = function(selectedId, name, params) {
+									expanz.Net.MethodRequest(name, params, null, activity);
+									window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + name + ' ,methodParam:' + JSON.stringify(params));
+								};
+
+								/* override a method handler for each menuaction button */
+								dataControlModel.menuActionSelected = function(selectedId, name, params) {
+									expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
+								};
+							}
+							/* others cases (tree, combobox) */
+							else {
+								/* update the xml data in the model, view will get a event if bound */
+								dataControlModel.setAttr({
+									xml : $(data)
+								});
+							}
 						}
 					}
 
@@ -889,31 +895,34 @@ $(function() {
 
 						expanz.Factory.bindDataControls(activity, picklistWindow.el.parent());
 
-						var gridModel = activity.getDataControl(elId);
+						var gridModels = activity.getDataControl(elId);
 
-						if (gridModel !== undefined) {
-							fillGridModel(gridModel, $(this));
-							picklistWindow.center();
-							gridModel.updateRowSelected = function(selectedId, type) {
-								window.expanz.logToConsole("From parseDeltaResponse:updateRowSelected id:" + selectedId + ' ,type:' + type);
+						if (gridModels !== undefined) {
+							for ( var i = 0; i < gridModels.length; i++) {
+								gridModel = gridModels[i];
+								fillGridModel(gridModel, $(this));
+								picklistWindow.center();
+								gridModel.updateRowSelected = function(selectedId, type) {
+									window.expanz.logToConsole("From parseDeltaResponse:updateRowSelected id:" + selectedId + ' ,type:' + type);
 
-								var context = {
-									id : selectedId,
-									contextObject : contextObject,
-									type : type
+									var context = {
+										id : selectedId,
+										contextObject : contextObject,
+										type : type
+									};
+
+									var methodAttributes = [
+										{
+											name : "contextObject",
+											value : contextObject
+										}
+									];
+
+									expanz.Net.MethodRequest('SetIdFromContext', methodAttributes, context, activity);
+									picklistWindow.close();
 								};
 
-								var methodAttributes = [
-									{
-										name : "contextObject",
-										value : contextObject
-									}
-								];
-
-								expanz.Net.MethodRequest('SetIdFromContext', methodAttributes, context, activity);
-								picklistWindow.close();
-							};
-
+							}
 						}
 						else {
 							alert("Unexpected error while trying to display the picklist");
@@ -921,25 +930,27 @@ $(function() {
 
 					}
 					else {
-						var dataControlModel = activity.getDataControl(id);
-						if (dataControlModel !== undefined) {
-							if (dataControlModel.getAttr('renderingType') == 'grid') {
+						var dataControlModels = activity.getDataControl(id);
+						if (dataControlModels !== undefined) {
+							for ( var i = 0; i < dataControlModels.length; i++) {
+								dataControlModel = dataControlModels[i];
+								if (dataControlModel.getAttr('renderingType') == 'grid') {
+									fillGridModel(dataControlModel, $(this));
 
-								fillGridModel(dataControlModel, $(this));
+									/* override the method handler for each action button */
+									dataControlModel.actionSelected = function(selectedId, name, params) {
+										expanz.Net.MethodRequest(name, params, null, activity);
+										window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + name + ' ,params:' + JSON.stringify(params));
+									};
 
-								/* override the method handler for each action button */
-								dataControlModel.actionSelected = function(selectedId, name, params) {
-									expanz.Net.MethodRequest(name, params, null, activity);
-									window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + name + ' ,params:' + JSON.stringify(params));
-								};
-
-								/* override a method handler for each menuaction button */
-								dataControlModel.menuActionSelected = function(selectedId, name, params) {
-									expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
-								};
-							}
-							else {
-								// TODO implement update of other datacontrolsF
+									/* override a method handler for each menuaction button */
+									dataControlModel.menuActionSelected = function(selectedId, name, params) {
+										expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
+									};
+								}
+								else {
+									// TODO implement update of other datacontrolsF
+								}
 							}
 						}
 					}
