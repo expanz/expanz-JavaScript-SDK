@@ -272,7 +272,11 @@ $(function() {
 			var hostEl;
 			var hostId = this.model.getAttr('id') + "_host";
 
-			var itemTemplate = $("#" + this.model.getAttr('id') + "ItemTemplate");
+			var templateName =  this.options['templateName'] || this.model.getAttr('id') + "ItemTemplate";
+			
+			
+			var headerTemplate = $("#" + templateName + "Header");
+			var itemTemplate = $("#" + templateName);
 			/* check if an item template has been defined */
 			if (itemTemplate && itemTemplate.length > 0) {
 
@@ -284,6 +288,12 @@ $(function() {
 				}
 				$(hostEl).html('');
 
+				/* header template if defined */
+				if (headerTemplate && headerTemplate.length > 0) {
+					$(hostEl).html(headerTemplate.html());
+				}
+				
+				
 				var compiled = _.template(itemTemplate.html());
 				var i;
 				for (i = firstItem; i < lastItem; i++) {
@@ -817,7 +827,7 @@ $(function() {
 		if (datatype && datatype.toLowerCase() === 'blob' && attr && attr === 'value') {
 			var width = allAttrs['width'];
 			var imgElem = '<img src="' + window.config._URLblobs + allAttrs['value'] + '"';
-			imgElem += width ? ' width="' + width + '"' : '';
+			imgElem += width ? ' width="' + width + '"' : 'width="100%"';
 			imgElem += '/>';
 			$(elem).html(imgElem);
 			return;
