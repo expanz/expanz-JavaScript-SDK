@@ -183,6 +183,7 @@ $(function() {
 						id : $(dataControlEl).attr('id'),
 						className : $(dataControlEl).attr('class'),
 						itemsPerPage : $(dataControlEl).attr('itemsPerPage'),
+						templateName : $(dataControlEl).attr('templateName'),
 						model : dataControlModel
 					});
 
