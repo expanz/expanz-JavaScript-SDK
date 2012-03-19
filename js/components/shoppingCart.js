@@ -17,6 +17,10 @@ $(function() {
 			productListPopMethod : 'listItemsForCategoryFiltered',
 			productListContextObject : "StockTranItem",
 
+			orderHistoryListName : "listOrderHistory",
+			orderHistoryPopMethod : 'listOrderHistory',
+			orderHistoryContextObject : "StockTranItem",
+
 			categoryTreeName : "StockTranItem.ItemForSale.ItemCategory.PersistentId",
 			categoryTreePopMethod : '$custom',
 			categoryTreeContextObject : "StockTranItem.ItemForSale.ItemCategory",
@@ -49,7 +53,8 @@ $(function() {
 				'CheckoutItemsList',
 				'CheckoutEditCartButton',
 				'CheckoutPayNowButton',
-				'CheckoutTotals'
+				'CheckoutTotals',
+				'OrderHistory'
 			],
 
 			initialize : function() {
@@ -194,7 +199,7 @@ $(function() {
 			renderListItemGridTemplate : function() {
 				var html = '';
 				html += '\
-					<script type="text/template" id="productListItemTemplateList"> \
+					<script type="text/template" id="productListItemTemplateGrid"> \
 						<div class="item"> \
 							<div> \
 							<% if ( isImageValid(data.ThumbImage_FileContents) ){ %>  \
@@ -563,7 +568,14 @@ $(function() {
 						return true;
 					}
 				});
-			}
+			},
+
+			renderOrderHistoryComponent : function(el) {
+				var html = "";
+				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
+				html += '<div id="orderHistoryDivList" itemsPerPage="' + itemsPerPage + '" name="' + this.orderHistoryListName + '" bind="DataControl" renderingType="grid" contextObject="' + this.orderHistoryContextObject + '"></div>';
+				return html
+			},
 
 		});
 
