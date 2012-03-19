@@ -277,7 +277,8 @@ $(function() {
 	var buildRequest = function(requestType, xmlns, sessionHandle, includeSite) {
 		return function insertBody(body) {
 			var site = includeSite ? '<site>' + config._AppSite + '</site>' : '';
-			var head = '<' + requestType + ' xmlns="' + xmlns + '">' + site + '<xml><ESA>';
+			var namespace = xmlns ? ' xmlns="' + xmlns + '" ' : '';
+			var head = '<' + requestType + namespace + '>' + site + '<xml><ESA>';
 			var tail = '</ESA>' + '</xml>';
 			tail += sessionHandle ? '<sessionHandle>' + sessionHandle + '</sessionHandle>' : '';
 			tail += '</' + requestType + '>';
@@ -588,7 +589,7 @@ $(function() {
 			if (execResults) {
 
 				$(execResults).find('Message').each(function() {
-					if ($(this).attr('type') == 'Error') {
+					if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
 						var sessionLost = /Session .* not found/.test($(this).text());
 						var activityNotFound = /Activity .* not found/.test($(this).text());
 						if (sessionLost || activityNotFound) {
