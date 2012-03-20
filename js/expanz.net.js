@@ -1020,7 +1020,7 @@ $(function() {
 				type : 'POST',
 				url : config._URLproxy,
 				data : {
-					url : config._URLprefix + request.url,
+					url : getURLRestService(request),
 					data : request.data
 				},
 				dataType : 'XML',
@@ -1048,7 +1048,7 @@ $(function() {
 		else {
 			$.ajax({
 				type : 'POST',
-				url : config._URLprefix + request.url,
+				url : getURLRestService(request),
 				data : request.data,
 				dataType : 'XML',
 				processData : true,
@@ -1086,7 +1086,7 @@ $(function() {
 
 		var form = '';
 		form += "<form method='post' id='formFile' target='_blank' action='" + config._URLproxy + "'>";
-		form += "<input type='hidden' name='url' value='" + config._URLprefix + request.url + "'>";
+		form += "<input type='hidden' name='url' value='" + getURLRestService(request) + "'>";
 
 		form += "<input type='hidden' name='data' value='" + request.data + "'>";
 		form += "</form>";
@@ -1163,6 +1163,13 @@ $(function() {
 			});
 		});
 		gridModel.trigger("update:grid");
+	}
+
+	function getURLRestService(request) {
+		var sep = "";
+		if (!config._URLprefix.endsWith("/"))
+			sep = "/";
+		return config._URLprefix + sep + request.url
 	}
 
 });
