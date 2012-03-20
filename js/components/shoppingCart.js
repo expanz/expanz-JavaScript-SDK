@@ -36,6 +36,7 @@ $(function() {
 
 			components : [
 				'Search',
+				'AdvancedSearch',
 				'Cart',
 				'Tree',
 				'List',
@@ -109,6 +110,23 @@ $(function() {
 				html += '<div id="shoppingCartSearch" class="search">';
 				html += window.expanz.html.renderField('ItemSearch', '', inputPrompt);
 				html += window.expanz.html.renderMethod(this.searchMethodName, buttonLabel, null, !displayButton);
+				html += "</div>";
+				return html;
+			},
+
+			/**
+			 * Renders the Advanced Search component
+			 * 
+			 * <pre>
+			 * 	Used directly in html by either &lt;shoppingCart:AdvancedSearch&gt; or &lt;div class='shoppingCart-AdvancedSearch'&gt;
+			 * </pre>
+			 * 
+			 * @return html code
+			 */
+			renderAdvancedSearchComponent : function(searchEl) {
+				var html = '';
+				html += '<div id="shoppingCartAdvancedSearch" class="advancedSearch">';
+				html += "Not implemented on the default component"
 				html += "</div>";
 				return html;
 			},
