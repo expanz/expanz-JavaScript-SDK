@@ -28,6 +28,9 @@ $(function() {
 		/* if login url is null try to guess it by removing the filename */
 		if (loginUrl === undefined) {
 			loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
+			/* if empty mean we are at the root of the website */
+			if (loginUrl == "")
+				loginUrl = "/";
 		}
 		window.expanz.logToConsole("getLoginURL : " + loginUrl);
 		return loginUrl;
