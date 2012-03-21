@@ -37,6 +37,7 @@ $(function() {
 				var res = ($(data).find("WebServerPingResult"));
 				if (res.length > 0 && res.text() == "true") {
 					window.expanz.pingError = 0;
+					window.expanz.Storage.setPingSuccess();
 					window.expanz.logToConsole("WEB SERVER PING OK");
 				}
 				else {
@@ -1211,7 +1212,7 @@ $(function() {
 		var sep = "";
 		if (!config._URLprefix.endsWith("/"))
 			sep = "/";
-		return config._URLprefix + sep + path
+		return config._URLprefix + sep + path;
 	}
 
 });

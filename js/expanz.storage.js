@@ -65,8 +65,18 @@ $(function() {
 			return true;
 		},
 
+		getLastPingSuccess : function() {
+			return this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess');
+		},
+
+		setPingSuccess : function() {
+			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess', (new Date()).getTime());
+			return true;
+		},
+
 		clearSession : function() {
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'session.handle');
+			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess');
 			this.clearActivityHandles();
 			return true;
 		},

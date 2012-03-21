@@ -53,7 +53,6 @@ $(function() {
 	//
 	window.expanz.CreateActivity = function(DOMObject, callbacks, initialKey) {
 
-		//
 		DOMObject || (DOMObject = $('body'));
 
 		var activities = createActivity(DOMObject, callbacks, initialKey);
@@ -407,8 +406,12 @@ $(function() {
 			expanz.Views.redirect(window.expanz.getMaintenancePage());
 		}
 
-		/* check if web server is down */
-		expanz.Net.WebServerPing(3);
+		/* check if web server is down and last success was more than 15 minutes ago */
+		var currentTime = (new Date()).getTime();
+		var lastSuccess = window.expanz.Storage.getLastPingSuccess();
+		if (lastSuccess === undefined || (currentTime - lastSuccess) > (15 * 60 * 1000)) {
+			expanz.Net.WebServerPing(3);
+		}
 	}
 
 	/* defined a fake console to avoid bug if any console.log have been forgotten in the code */
@@ -428,10 +431,9 @@ $(function() {
 		window.attachEvent('onload', function() {
 			CFInstall.check({
 				mode : 'overlay'
-			})
+			});
 		});
 	}
-	;
 
 	/* load resource bundle */
 	jQuery.i18n.properties({
