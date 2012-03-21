@@ -126,7 +126,7 @@ $(function() {
 			renderAdvancedSearchComponent : function(searchEl) {
 				var html = '';
 				html += '<div id="shoppingCartAdvancedSearch" class="advancedSearch">';
-				html += "Not implemented on the default component"
+				html += "Not implemented on the default component";
 				html += "</div>";
 				return html;
 			},
@@ -138,14 +138,14 @@ $(function() {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'List Items On Special';
 				html += window.expanz.html.renderMethod(this.listItemsOnSpecialMethodName, label, this.listItemsOnSpecialMethodContextObject);
-				return html
+				return html;
 			},
 
 			renderListPreviouslyOrderedButtonComponent : function(el) {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'List Previously Ordered Items';
 				html += window.expanz.html.renderMethod(this.listPreviouslyOrderedMethodName, label, this.listPreviouslyOrderedContextObject);
-				return html
+				return html;
 			},
 
 			renderListItemsAsListComponent : function(el) {
@@ -153,7 +153,7 @@ $(function() {
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
 				html += this.renderListItemTemplate();
 				html += '<div id="productListDivList" templateName="productListItemTemplateList"  itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
-				return html
+				return html;
 			},
 
 			_executeAfterRenderListItemsAsListComponent : function() {
@@ -165,7 +165,7 @@ $(function() {
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
 				html += this.renderListItemGridTemplate();
 				html += '<div id="productListDivGrid" templateName="productListItemTemplateGrid" itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
-				return html
+				return html;
 			},
 
 			_executeAfterRenderListItemsAsGridComponent : function() {
@@ -178,7 +178,7 @@ $(function() {
 				var labelGrid = (el !== undefined && el.attr('labelGrid') !== undefined) ? el.attr('labelGrid') : 'Grid display';
 				html += "<a id='displayAsList' href='#' class='itemsDisplay' >" + labelList + "</a><span class='itemsDisplay' style='margin-left:10px;margin-right:10px'> | </span>";
 				html += "<a id='displayAsGrid' href='#' class='itemsDisplay'>" + labelGrid + "</a>";
-				return html
+				return html;
 			},
 
 			_executeAfterRenderListDisplayChoiceComponent : function() {
@@ -592,8 +592,8 @@ $(function() {
 				var html = "";
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
 				html += '<div id="orderHistoryDivList" itemsPerPage="' + itemsPerPage + '" name="' + this.orderHistoryListName + '" bind="DataControl" renderingType="grid" contextObject="' + this.orderHistoryContextObject + '"></div>';
-				return html
-			},
+				return html;
+			}
 
 		});
 
