@@ -36,6 +36,18 @@ $(function() {
 		return loginUrl;
 	};
 
+	window.expanz.getMaintenancePage = function() {
+		return 'maintenance.html';
+	};
+
+	window.expanz.isOnMaintenance = function() {
+		var maintenance = window.config.maintenance;
+		if (maintenance === true) {
+			return true;
+		}
+		return false;
+	};
+
 	//
 	// Public Functions & Objects in the Expanz Namespace
 	//
@@ -387,6 +399,25 @@ $(function() {
 			}
 		});
 		return processAreasMenu;
+	}
+
+	/* check if website is on maintenance or web server is down except on maintenance page */
+	if (document.location.pathname.indexOf(window.expanz.getMaintenancePage()) === -1) {
+		if (window.expanz.isOnMaintenance()) {
+			expanz.Views.redirect(window.expanz.getMaintenancePage());
+		}
+
+		/* check if web server is down */
+		expanz.Net.WebServerPing(3);
+	}
+
+	/* defined a fake console to avoid bug if any console.log have been forgotten in the code */
+	if (!window.console) {
+		window.console = {
+			log : function(e) {
+				// alert(e);
+			}
+		};
 	}
 
 	window.expanz.logToConsole("Loading menu, setting callbacks and creating activities");
