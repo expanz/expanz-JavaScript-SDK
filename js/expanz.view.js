@@ -1,21 +1,10 @@
-////////////////////////////////////////////////////////////////////////////////
-//
-//  EXPANZ
-//  Copyright 2008-2012 EXPANZ
-//  All Rights Reserved.
-//
-//  NOTICE: expanz permits you to use, modify, and distribute this file
-//  in accordance with the terms of the license agreement accompanying it.
-//
-////////////////////////////////////////////////////////////////////////////////
-
 $(function() {
 
 	window.expanz = window.expanz || {};
 	window.expanz.Views = {};
 
 	window.expanz.Views.FieldView = Backbone.View.extend({
- 
+
 		initialize : function() {
 			this.model.bind("change:label", this.modelUpdate('label'), this);
 			this.model.bind("change:value", this.modelUpdate('value'), this);
@@ -107,7 +96,7 @@ $(function() {
 			"click [attribute=submit]" : "submit"
 		},
 
-		submit  : function() {
+		submit : function() {
 			this.model.submit();
 			this.el.trigger('submit:' + this.model.get('id'));
 		}
@@ -122,51 +111,49 @@ $(function() {
 		_createMenu : function(xml, parentUL) {
 			var that = this;
 			var i = 0;
-			xml.children("Menu").each(
-				function() {
-					var ulId = parentUL.id + "_" + i++;
-					parentUL
-					.append("<li>" + $(this).attr('name') + "<ul id='" + ulId + "'><ul></li>");
-					that._createMenu($(this), parentUL.find("#" + ulId));
-				});
+			xml.children("Menu").each(function() {
+				var ulId = parentUL.id + "_" + i++;
+				parentUL.append("<li>" + $(this).attr('name') + "<ul id='" + ulId + "'><ul></li>");
+				that._createMenu($(this), parentUL.find("#" + ulId));
+			});
 
 			var j = 0;
-			xml.children("MenuItem").each(
-				function() {
-					var liId = parentUL.id + "_li_" + j++;
-					parentUL
-					.append("<li id='"+liId+"' action='" + $(this).attr('action') + "'>" + $(this).attr('text') + "</li>");
-					var liEL =parentUL.find("#" + liId);
-					liEL.click(function(){
-						that.model.menuItemSelected($(this).attr("action"));
-						that.contextMenuEl.hide();
-					});
+			xml.children("MenuItem").each(function() {
+				var liId = parentUL.id + "_li_" + j++;
+				parentUL.append("<li id='" + liId + "' action='" + $(this).attr('action') + "'>" + $(this).attr('text') + "</li>");
+				var liEL = parentUL.find("#" + liId);
+				liEL.click(function() {
+					that.model.menuItemSelected($(this).attr("action"));
+					that.contextMenuEl.hide();
 				});
+			});
 		},
-
 		modelUpdate : function() {
 			/* retrieve or create a div to host the context menu */
 			window.expanz.logToConsole("modelUpdated");
 
 			if (this.contextMenuEl === undefined) {
 				var contextMenuId = this.model.get('id').replace(/\./g, "_") + "_contextMenu";
-				this.el
-				.append("<div class='contextMenu' id='" + contextMenuId + "' />");
+				this.el.append("<div class='contextMenu' id='" + contextMenuId + "' />");
 				this.contextMenuEl = this.el.find("#" + contextMenuId);
 			}
 			this.contextMenuEl.hide();
 			this.contextMenuEl.html("");
 
 			var data = this.model.get('data');
-			if (data === undefined) return;
+			if (data === undefined)
+				return;
 
 			/* position menu below button */
 			var pos = this.el.find("button").position();
-			this.contextMenuEl.css(
-				{position:"absolute",
-					top:(pos.top + this.el.find("button").outerHeight() + 2 )+"px",
-					left:(pos.left + 10 )+"px"
-				});	
+
+			var top = pos.top + this.el.find("button").outerHeight() + 2;
+
+			this.contextMenuEl.css({
+				position : "absolute",
+				top : top + "px",
+				left : (pos.left + 10) + "px"
+			});
 
 			/* append data to the menu */
 			this.contextMenuEl.append("<ul id='" + this.contextMenuEl.id + "_ul'></ul>");
@@ -190,7 +177,6 @@ $(function() {
 				}
 			});
 		},
-		
 		submit : function() {
 			/* register current context menu */
 			window.expanz.logToConsole("Registering current context menu");
@@ -203,8 +189,9 @@ $(function() {
 		createContextMenu : function() {
 			this.contextMenuEl.show();
 		}
+
 	});
-	
+
 	window.expanz.Views.GridView = Backbone.View.extend({
 
 		initialize : function() {
@@ -221,7 +208,7 @@ $(function() {
 				this.model.updateRowSelected(this.selectedId, row.attr('type'));
 			}
 		},
-		
+
 		rowDoubleClicked : function(row) {
 			this.model.updateRowDoubleClicked(row.attr('id'), row.attr('type'));
 		},
@@ -229,10 +216,10 @@ $(function() {
 		actionClicked : function(id, name, params) {
 			this.model.actionSelected(id, name, params);
 		},
-		
+
 		menuActionClicked : function(id, name, params) {
 			this.model.menuActionSelected(id, name, params);
-		},		
+		},
 
 		renderPagingBar : function(currentPage, itemsPerPage, hostEl) {
 			var pagingBar = "";
@@ -272,9 +259,8 @@ $(function() {
 			var hostEl;
 			var hostId = this.model.getAttr('id') + "_host";
 
-			var templateName =  this.options['templateName'] || this.model.getAttr('id') + "ItemTemplate";
-			
-			
+			var templateName = this.options['templateName'] || this.model.getAttr('id') + "ItemTemplate";
+
 			var headerTemplate = $("#" + templateName + "Header");
 			var itemTemplate = $("#" + templateName);
 			/* check if an item template has been defined */
@@ -292,8 +278,7 @@ $(function() {
 				if (headerTemplate && headerTemplate.length > 0) {
 					$(hostEl).html(headerTemplate.html());
 				}
-				
-				
+
 				var compiled = _.template(itemTemplate.html());
 				var i;
 				for (i = firstItem; i < lastItem; i++) {
@@ -323,25 +308,25 @@ $(function() {
 							$(element).click(function() {
 								var rowId = $(this).closest("[rowId]").attr('rowId');
 								var actionParams = action[0].get('actionParams').clone();
-								
+
 								that._handleActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
 							});
 						}
 					});
-					}
-					/* binding menuAction from template */
-					hostEl.find("#" + itemId + " [menuAction] ").each(function(index, element) {
-						var action = that.model.getAction($(element).attr('menuAction'));
-						if (action && action.length > 0) {
-							$(element).click(function() {
-								var rowId = $(this).closest("[rowId]").attr('rowId');
-								var actionParams = action[0].get('actionParams').clone();
+				}
+				/* binding menuAction from template */
+				hostEl.find("#" + itemId + " [menuAction] ").each(function(index, element) {
+					var action = that.model.getAction($(element).attr('menuAction'));
+					if (action && action.length > 0) {
+						$(element).click(function() {
+							var rowId = $(this).closest("[rowId]").attr('rowId');
+							var actionParams = action[0].get('actionParams').clone();
 
-								that._handleMenuActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
-					
-							});
-						}
-					});
+							that._handleMenuActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+
+						});
+					}
+				});
 
 			}
 			/* else normal table display */
@@ -374,8 +359,8 @@ $(function() {
 				var i;
 				for (i = firstItem; i < lastItem; i++) {
 					var row = rows[i];
-					var alternate = ((i-firstItem) % 2 == 1) ? 'class="gridRowAlternate"' : 'class="gridRow"' ;
-					var html = '<tr id="' + row.getAttr('id') + '" type="' + row.getAttr('type') + '" '+ alternate +'>';
+					var alternate = ((i - firstItem) % 2 == 1) ? 'class="gridRowAlternate"' : 'class="gridRow"';
+					var html = '<tr id="' + row.getAttr('id') + '" type="' + row.getAttr('type') + '" ' + alternate + '>';
 
 					var values = {};
 					_.each(row.getAllCells(), function(cell) {
@@ -393,7 +378,7 @@ $(function() {
 					if (this.model.getAttr('hasActions')) {
 						html += '<td>';
 						_.each(this.model.getActions(), function(cell) {
-							var buttonId = model.getAttr('id') + "_" + row.getAttr('id') + "_" +  cell.get('actionName');
+							var buttonId = model.getAttr('id') + "_" + row.getAttr('id') + "_" + cell.get('actionName');
 							var actionParams = cell.get('actionParams');
 
 							var userInputs = "";
@@ -412,7 +397,7 @@ $(function() {
 									userInputs += "<label for='" + row.getAttr('id') + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.getAttr('id') + "_userinput_" + name + "'/>";
 								}
 							});
-							html += "<div style='display:inline' name='" + cell.get('actionName') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='"+ cell.get('type')+"'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
+							html += "<div style='display:inline' name='" + cell.get('actionName') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='" + cell.get('type') + "'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
 
 						});
 						html += '</td>';
@@ -425,7 +410,7 @@ $(function() {
 				var onRowClick = function(event) {
 					event.data.trigger("rowClicked", $(this));
 				};
-				
+
 				/* handle double row click event */
 				var onRowDoubleClick = function(event) {
 					event.data.trigger("rowDoubleClicked", $(this));
@@ -445,7 +430,7 @@ $(function() {
 				};
 
 				$('table#' + hostId + ' tr [bind=method] > button').click(this, onActionClick);
-				
+
 				/* handle menuAction click event */
 				var onMenuActionClick = function(event) {
 					var rowId = $(this).closest("tr").attr('id');
@@ -455,7 +440,7 @@ $(function() {
 					that._handleMenuActionClick(rowId, menuActionName, actionParams, parentDiv);
 				};
 
-				$('table#' + hostId + ' tr [bind=menuAction] > button').click(this, onMenuActionClick);				
+				$('table#' + hostId + ' tr [bind=menuAction] > button').click(this, onMenuActionClick);
 			}
 
 			this.renderPagingBar(currentPage, itemsPerPage, hostEl);
@@ -499,7 +484,7 @@ $(function() {
 			if (inputValid)
 				this.trigger("actionClicked", rowId, methodName, actionParams);
 		},
-		
+
 		_handleMenuActionClick : function(rowId, menuAction, actionParams, divEl) {
 			/* handle user input */
 			_.each(actionParams, function(actionParam) {
@@ -509,8 +494,8 @@ $(function() {
 				}
 			});
 
-				this.trigger("menuActionClicked", rowId, menuAction, actionParams);
-			}
+			this.trigger("menuActionClicked", rowId, menuAction, actionParams);
+		}
 
 	});
 
@@ -526,33 +511,32 @@ $(function() {
 		attemptLogin : function() {
 			var usernameEl = this.el.find("#username input");
 			var passwordEl = this.el.find("#password input");
-			
-			if(usernameEl.length === 0 || passwordEl.length === 0){
+
+			if (usernameEl.length === 0 || passwordEl.length === 0) {
 				expanz._error("username or password field cannot be found on the page");
 				return;
 			}
-			
-			if(usernameEl.val().length === 0 || passwordEl.val().length === 0 ){
+
+			if (usernameEl.val().length === 0 || passwordEl.val().length === 0) {
 				expanz._error("username or password are empty");
-				return;				
+				return;
 			}
-			else{
+			else {
 				this.collection.add({
 					id : "username",
 					value : usernameEl.val()
 				});
 				this.collection.add({
-					id : "password", 
-					value : passwordEl.val() 
+					id : "password",
+					value : passwordEl.val()
 				});
 				this.collection.login();
 			}
-			
+
 		}
 
+	});
 
-	});	
-	
 	window.expanz.Views.ActivityView = Backbone.View.extend({
 
 		initialize : function(attrs) {
@@ -579,50 +563,48 @@ $(function() {
 		},
 
 		loading : function() {
-			var loadingId = "Loading_" + this.id.replace(/\./g,"_"); 
+			var loadingId = "Loading_" + this.id.replace(/\./g, "_");
 			var loadingEL = $(this.el).find("#" + loadingId);
-			if( loadingEL.length === 0 ){
-				$(this.el).append('<div class="loading" id="'+loadingId+'"><span>Loading content, please wait.. <img src="assets/images/loading.gif" alt="loading.." /></span></div>');  
+			if (loadingEL.length === 0) {
+				$(this.el).append('<div class="loading" id="' + loadingId + '"><span>Loading content, please wait.. <img src="assets/images/loading.gif" alt="loading.." /></span></div>');
 				loadingEL = $(this.el).find("#" + loadingId);
 			}
-			
+
 			var isLoading = this.collection.getAttr('loading');
 			if (isLoading) {
 				var off = this.el.offset();
 				/* set the loading element as a mask on top of the div to avoid user doing any action */
 				$(this.el).addClass('activityLoading');
-				loadingEL.css("position","absolute"); /* parent need to be relative //todo enfore it ? */
-				loadingEL.css('width','100%');
-				loadingEL.css('height','100%');
-				loadingEL.css('margin','0');
-				loadingEL.css('padding','0');
+				loadingEL.css("position", "absolute"); /* parent need to be relative //todo enfore it ? */
+				loadingEL.css('width', '100%');
+				loadingEL.css('height', '100%');
+				loadingEL.css('margin', '0');
+				loadingEL.css('padding', '0');
 				loadingEL.css('top', '0px');
-				loadingEL.css('left','0px');
+				loadingEL.css('left', '0px');
 				loadingEL.css('z-index', '999');
 				loadingEL.css('overflow', 'hidden');
 				loadingEL.find("span").center();
 				loadingEL.css('background', 'url(data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==) center');
-				
+
 				loadingEL.show();
 			}
-			else{
+			else {
 				$(this.el).removeClass('activityLoading');
 				loadingEL.hide();
 			}
-				
+
 		},
-		
+
 		deltaLoading : function() {
 			var isLoading = this.collection.getAttr('deltaLoading');
 			if (isLoading) {
-				window.expanz.logToConsole("delta loading");	
+				window.expanz.logToConsole("delta loading");
 			}
-			else{
-				window.expanz.logToConsole("delta not loading");	
+			else {
+				window.expanz.logToConsole("delta not loading");
 			}
-		}		
-		
-		
+		}
 
 	});
 
@@ -648,7 +630,7 @@ $(function() {
 	window.expanz.Views.PopupView = Backbone.View.extend({
 
 		width : 'auto',
-		
+
 		cssClass : 'popupView',
 
 		divAttributes : '',
@@ -724,8 +706,8 @@ $(function() {
 
 		buttonClicked : function() {
 			this.closeWindow();
-		},		
-		
+		},
+
 		closeWindow : function() {
 			this.trigger('popupClosed');
 			this.close();
@@ -751,7 +733,7 @@ $(function() {
 	window.expanz.Views.UIMessage = window.expanz.Views.PopupView.extend({
 
 		width : '500px',
-		
+
 		cssClass : 'uiMessage popupView',
 
 		renderActions : function() {
@@ -779,7 +761,7 @@ $(function() {
 				if (action.get('response') !== undefined) {
 					var button = this.el.find('#' + divId + ' button');
 					var that = this;
-					
+
 					button.click(function() {
 						that.postCloseActions(that.model.getAttr('title'));
 
@@ -798,7 +780,7 @@ $(function() {
 			}, this);
 
 		},
-		postCloseActions : function(windowTitle){ 
+		postCloseActions : function(windowTitle) {
 			if (windowTitle == "Order Submitted") {
 				/* clear activity cookies and reload the page */
 				window.expanz.Storage.clearActivityHandles();
