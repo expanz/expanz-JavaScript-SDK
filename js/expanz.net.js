@@ -27,6 +27,32 @@ $(function() {
 			SendRequest(RequestObject.CreateSession(username, password, appsite, authenticationMode), parseCreateSessionResponse(callbacks));
 		},
 
+		WebServerPing : function(nbAttempts) {
+			if (nbAttempts == undefined)
+				nbAttempts = 3;
+			if (window.expanz.pingError === undefined)
+				window.expanz.pingError = 0;
+
+			SendRequest(RequestObject.WebServerPing(), function(data) {
+				var res = ($(data).find("WebServerPingResult"));
+				if (res.length > 0 && res.text() == "true") {
+					window.expanz.pingError = 0;
+					window.expanz.logToConsole("WEB SERVER PING OK");
+				}
+				else {
+					window.expanz.pingError++;
+					if (window.expanz.pingError === nbAttempts) {
+						expanz.Views.redirect(window.expanz.getMaintenancePage());
+					}
+					else {
+						// ping again
+						window.expanz.Net.WebServerPing(nbAttempts);
+					}
+				}
+			});
+
+		},
+
 		GetSessionDataRequest : function(callbacks) {
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
@@ -189,6 +215,21 @@ $(function() {
 			return {
 				data : buildRequest('CreateSessionX', XMLNamespace)(RequestBody.CreateSession(username, password, appsite, authenticationMode)),
 				url : 'CreateSessionX'
+			};
+		},
+
+		Ping : function() {
+			return {
+				data : buildRequest('Ping', XMLNamespace)(""),
+				url : 'Ping'
+			};
+		},
+
+		WebServerPing : function() {
+			return {
+				data : "",
+				url : 'WebServerPing',
+				method : "GET"
 			};
 		},
 
@@ -1020,8 +1061,9 @@ $(function() {
 				type : 'POST',
 				url : config._URLproxy,
 				data : {
-					url : getURLRestService(request),
-					data : request.data
+					url : getURLRestService(request.url),
+					data : request.data,
+					method : request.method || "POST"
 				},
 				dataType : 'XML',
 				processData : true,
@@ -1047,8 +1089,8 @@ $(function() {
 		}
 		else {
 			$.ajax({
-				type : 'POST',
-				url : getURLRestService(request),
+				type : request.method || "POST",
+				url : getURLRestService(request.url),
 				data : request.data,
 				dataType : 'XML',
 				processData : true,
@@ -1086,7 +1128,7 @@ $(function() {
 
 		var form = '';
 		form += "<form method='post' id='formFile' target='_blank' action='" + config._URLproxy + "'>";
-		form += "<input type='hidden' name='url' value='" + getURLRestService(request) + "'>";
+		form += "<input type='hidden' name='url' value='" + getURLRestService(request.url) + "'>";
 
 		form += "<input type='hidden' name='data' value='" + request.data + "'>";
 		form += "</form>";
@@ -1165,11 +1207,11 @@ $(function() {
 		gridModel.trigger("update:grid");
 	}
 
-	function getURLRestService(request) {
+	function getURLRestService(path) {
 		var sep = "";
 		if (!config._URLprefix.endsWith("/"))
 			sep = "/";
-		return config._URLprefix + sep + request.url
+		return config._URLprefix + sep + path
 	}
 
 });
