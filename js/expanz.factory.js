@@ -184,6 +184,7 @@ $(function() {
 						className : $(dataControlEl).attr('class'),
 						itemsPerPage : $(dataControlEl).attr('itemsPerPage'),
 						templateName : $(dataControlEl).attr('templateName'),
+						isHTMLTable : $(dataControlEl).attr('isHTMLTable'),
 						model : dataControlModel
 					});
 

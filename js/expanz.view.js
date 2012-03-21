@@ -260,6 +260,7 @@ $(function() {
 			var hostId = this.model.getAttr('id') + "_host";
 
 			var templateName = this.options['templateName'] || this.model.getAttr('id') + "ItemTemplate";
+			var wrapperElement = this.options['isHTMLTable'] == "true" ? 'table' : 'div';
 
 			var headerTemplate = $("#" + templateName + "Header");
 			var itemTemplate = $("#" + templateName);
@@ -267,10 +268,10 @@ $(function() {
 			if (itemTemplate && itemTemplate.length > 0) {
 
 				/* create a div to host our grid if not existing yet */
-				hostEl = this.el.find('div#' + hostId);
+				hostEl = this.el.find(wrapperElement + '#' + hostId);
 				if (hostEl.length < 1) {
-					this.el.append('<div id="' + hostId + '"></div>');
-					hostEl = this.el.find('div#' + hostId);
+					this.el.append('<' + wrapperElement + ' id="' + hostId + '"></' + wrapperElement + '>');
+					hostEl = this.el.find(wrapperElement + '#' + hostId);
 				}
 				$(hostEl).html('');
 

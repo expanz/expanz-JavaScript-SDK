@@ -406,10 +406,10 @@ $(function() {
 			expanz.Views.redirect(window.expanz.getMaintenancePage());
 		}
 
-		/* check if web server is down and last success was more than 15 minutes ago */
+		/* check if web server is down and last success was more than 1 minutes ago */
 		var currentTime = (new Date()).getTime();
 		var lastSuccess = window.expanz.Storage.getLastPingSuccess();
-		if (lastSuccess === undefined || (currentTime - lastSuccess) > (15 * 60 * 1000)) {
+		if (lastSuccess === undefined || (currentTime - lastSuccess) > (1 * 60 * 1000)) {
 			expanz.Net.WebServerPing(3);
 		}
 	}

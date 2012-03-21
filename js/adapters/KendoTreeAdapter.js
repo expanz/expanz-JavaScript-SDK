@@ -133,7 +133,7 @@ $.fn.KendoTreeAdapter = function(options) {
 			var selectedText = event.node.firstChild.textContent || event.node.firstChild.innerText;
 			var elem = undefined;
 			$(xmlData).find("[" + labelAttribute + "]").each(function() {
-				if( selectedText === $(this).attr(labelAttribute) ){
+				if (selectedText === $(this).attr(labelAttribute)) {
 					elem = $(this);
 				}
 			});
