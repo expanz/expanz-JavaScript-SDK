@@ -152,6 +152,7 @@ $(function() {
 				var html = "";
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
 				html += this.renderListItemTemplate();
+				html += this.renderListItemTemplateHeader();
 				html += '<div id="productListDivList" noItemText="No item matches your selection" isHTMLTable="true" templateName="productListItemTemplateList"  itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 				return html;
 			},
@@ -255,41 +256,58 @@ $(function() {
 				return html;
 			},
 
+			
+			renderListItemTemplateHeader : function() {
+				var html = ' \
+					<script type="text/template" id="productListItemTemplateListHeader">\
+					<thead><tr class="item listDisplay" style="height:25px;font-size:16px;text-align:center"> \
+					<th class="cell" style="width:65px;">&nbsp;</th> \
+					<th class="cell" style="width:100px;">SKU</th> \
+					<th class="cell">Name</th> \
+					<th class="cell" style="width:60px;">Price</th> \
+					<th class="cell">Note</th> \
+					<th class="cell" style="">Actions</th> \
+					</tr></thead>\
+					</script>';
+				return html;
+			},
+				
 			/**
 			 * Method used in the list component to render the template of an item in the list
 			 */
-			renderListItemTemplate : function(addToCartLabel) {
-				var html = '';
-				html += '\
-					<script type="text/template" id="productListItemTemplateGrid"> \
-						<div class="itemAsList"> \
-							<div> \
-							<% if ( isImageValid(data.ThumbImage_FileContents) ){ %>  \
-								<img class="thumbnail" src="' + window.config._URLblobs + '<%= data.ThumbImage_FileContents %>' + '"/> \
-							<% } %>  \
-							<% if ( !isImageValid(data.ThumbImage_FileContents) ){ %>  \
-								<img class="noThumbnail" src="assets/images/no_image_available.png"/> \
-							<% } %> \
-								<label><%= data.Name %></label><br/> \
-								<label><b>$<%= data.DefaultSellPrice %></b></label><br/> \
-								<label><%= window.expanz.html.getDisplayableDiscount(data.UdefString1) %></label> \
-							<% if ( data.AvailableQuantity <= 0 ) { %>  \
-								<% if ( data.SellRateCalcNotes == "No stock available" ) { %>  \
-								<i><%= $.i18n.prop(data.SellRateCalcNotes,data.Available_From)%></i> \
-								<% } %>  \
-								<% if ( data.SellRateCalcNotes != "Not available before" ) { %>  \
-									<i><%= $.i18n.prop(data.SellRateCalcNotes)%></i> \
-									<% } %>  \
-							<% } %>  \
-							<% if ( true ) { %>  \
-								<button class="addToCartButton" methodName="saveItemFromCart">' + addToCartLabel + '</button> \
-							<% } %></div> \
-					';
-
-				html += '<span class="description"><label><%= data.ShortDescription %></label></span>';
-
-				html += '</div>';
-				html += '</script>';
+			renderListItemTemplate : function() {
+				var html = ' \
+					<script type="text/template" id="productListItemTemplateList"> \
+					<tr class="item listDisplay"> \
+					<td class="cell"> \
+					<% if ( isImageValid(data.ThumbImage_FileContents) ){ %> \
+					<img class="thumbnailList" src="<%= window.config._URLblobs  + data.ThumbImage_FileContents %>"/> \
+					<% } %> \
+					<% if ( !isImageValid(data.ThumbImage_FileContents) ){ %> \
+						<img class="noThumbnailList" src="assets/images/no_image_available.png"/> \
+					<% } %> \
+					</td> \
+					<td class="cell" ><label><%= data.SearchCode %></label></td> \
+					<td class="cell"><label><%= data.Name %></label></td> \
+					<td class="cell"><label><b>$<%= data.DefaultSellPrice %></b></label></td> \
+					<td class="cell">	\
+					<label><%= window.expanz.html.getDisplayableDiscount(data.UdefString1) %></label> \
+					<% if (data.AvailableQuantity <= 0 ) { %> \
+						<% if (  data.SellRateCalcNotes == "No stock available" ) { %> \
+							<i><%= $.i18n.prop(data.SellRateCalcNotes,data.Available_From)%></i> \
+						<% } %> \
+						<% if ( data.SellRateCalcNotes != "Not available before" ) { %> \
+							<i><%= $.i18n.prop("message.itemForSale.noStock")%></i> \
+						<% } %> \
+					<% } %> \
+					</td> \
+					<td class="cell" style="text-align:center"> \
+					<% if ( true ) { %> \
+						<button class="addToCartButton" methodName="saveItemFromCart">Add</button> \
+					<% } %> \
+					</td> \
+				</tr> \
+				</script> ';
 
 				return html;
 			},

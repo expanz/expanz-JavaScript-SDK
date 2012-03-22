@@ -229,21 +229,27 @@ $(function() {
 			if (nbItems > 0) {
 				var nbPages = Math.ceil(nbItems / itemsPerPage);
 				if (nbPages > 1) {
-					hostEl.append("<div style='clear:both'>");
+					if ($(hostEl).is('table')) {
+						hostEl.append("<tr class='paging'><td id='pagingBar' colspan='100%'></td></tr>");
+					}
+					else {
+						hostEl.append("<div id='pagingBar' class='paging'></div>");
+					}
+
+					var pagingBar = hostEl.find("#pagingBar");
 					for ( var i = 0; i < nbPages; i++) {
 						var inputId = this.model.getAttr('id') + "BtnPage" + i;
 						var disabled = "";
 						if (i == currentPage)
 							disabled = " disabled='disabled'";
 
-						hostEl.append("<input id='" + inputId + "' type='button' value='" + (i + 1) + "' " + disabled + " />");
+						pagingBar.append("<input id='" + inputId + "' type='button' value='" + (i + 1) + "' " + disabled + " />");
 
 						var that = this;
-						$(hostEl).find("#" + inputId).click(function() {
+						$(pagingBar).find("#" + inputId).click(function() {
 							that.renderWithPaging(this.value - 1, itemsPerPage);
 						});
 					}
-					hostEl.append("</div>");
 				}
 
 			}
@@ -253,7 +259,6 @@ $(function() {
 			window.expanz.logToConsole("GridView rendered for page  " + currentPage);
 
 			var rows = this.model.getAllRows();
-
 			var firstItem = parseInt(currentPage * itemsPerPage);
 			var lastItem = Math.min(firstItem + parseInt(itemsPerPage), rows.length);
 
