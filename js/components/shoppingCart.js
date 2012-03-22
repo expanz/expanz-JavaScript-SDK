@@ -688,14 +688,16 @@ $(function() {
 	};
 
 	window.expanz.html.submitLostPasswordForm = function(loginCode, EmailAdress) {
-		var xml = '\
-			<Activity id="ERP.Person"> \
-				<Delta id="LoginCode" value="' + loginCode + '" /> \
-				<Delta id="EmailAddress" value="' + EmailAdress + '" /> \
-				<Method name="resetMyPasswordAnon"> \
-				</Method> \
-			</Activity> \
-			';
+		var xml = '<Activity id="ERP.Person">';
+		if (loginCode) {
+			xml += '<Delta id="LoginCode" value="' + loginCode + '" />';
+		}
+		if (EmailAdress) {
+			xml += '<Delta id="EmailAddress" value="' + EmailAdress + '" />';
+		}
+		xml += '<Method name="resetMyPasswordAnon">';
+		xml += '</Method>';
+		xml += '</Activity>';
 		window.expanz.Net.CreateAnonymousRequest(xml);
 	}
 
