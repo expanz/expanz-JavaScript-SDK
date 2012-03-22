@@ -8,7 +8,7 @@ $(function() {
 
 			var loginModel = new window.expanz.Model.Login({
 				name : $(loginEl).attr('name'),
-				type: $(loginEl).attr('type')
+				type : $(loginEl).attr('type')
 			});
 			var loginView = new window.expanz.Views.LoginView({
 				el : $(loginEl),
@@ -96,7 +96,7 @@ $(function() {
 					id : $(fieldEl).attr('id'),
 					className : $(fieldEl).attr('class'),
 					model : field,
-					textTransformFunction: $(fieldEl).attr('textTransformFunction')
+					textTransformFunction : $(fieldEl).attr('textTransformFunction')
 				});
 
 				fieldModels.push(field);
@@ -186,6 +186,7 @@ $(function() {
 						itemsPerPage : $(dataControlEl).attr('itemsPerPage'),
 						templateName : $(dataControlEl).attr('templateName'),
 						isHTMLTable : $(dataControlEl).attr('isHTMLTable'),
+						noItemText : $(dataControlEl).attr('noItemText'),
 						model : dataControlModel
 					});
 
@@ -215,7 +216,7 @@ $(function() {
 										});
 										var actionName = $(action).attr('methodName') || $(action).attr('menuAction');
 										var type = $(action).attr('methodName') ? 'method' : 'menuAction';
-										dataControlModel.addAction(type,$(action).attr('id'), $(action).attr('label'), $(action).attr('width'), actionName, params);
+										dataControlModel.addAction(type, $(action).attr('id'), $(action).attr('label'), $(action).attr('width'), actionName, params);
 									});
 								}
 							}

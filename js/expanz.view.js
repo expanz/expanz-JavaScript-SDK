@@ -257,11 +257,14 @@ $(function() {
 			var firstItem = parseInt(currentPage * itemsPerPage);
 			var lastItem = Math.min(firstItem + parseInt(itemsPerPage), rows.length);
 
+			var hasItem = (lastItem > firstItem);
+
 			var hostEl;
 			var hostId = this.model.getAttr('id') + "_host";
 
 			var templateName = this.options['templateName'] || this.model.getAttr('id') + "ItemTemplate";
 			var wrapperElement = this.options['isHTMLTable'] == "true" ? 'table' : 'div';
+			var noItemText = this.options['noItemText'] || '';
 
 			var headerTemplate = $("#" + templateName + "Header");
 			var itemTemplate = $("#" + templateName);
@@ -276,60 +279,65 @@ $(function() {
 				}
 				$(hostEl).html('');
 
-				/* header template if defined */
-				if (headerTemplate && headerTemplate.length > 0) {
-					$(hostEl).html(headerTemplate.html());
+				if (!hasItem) {
+					$(hostEl).html('<div class="emptyGrid">' + noItemText + '</div>');
 				}
+				else {
 
-				var compiled = _.template(itemTemplate.html());
-				var i;
-				for (i = firstItem; i < lastItem; i++) {
-					var row = rows[i];
+					/* header template if defined */
+					if (headerTemplate && headerTemplate.length > 0) {
+						$(hostEl).html(headerTemplate.html());
+					}
 
-					var result = compiled(row.getCellsMapByField());
-					var itemId = this.model.getAttr('id') + "_" + row.getAttr('id');
-					result = $(result).attr('id', itemId).attr('rowId', row.getAttr('id'));
+					var compiled = _.template(itemTemplate.html());
+					var i;
+					for (i = firstItem; i < lastItem; i++) {
+						var row = rows[i];
 
-					if (i === 0)
-						result = $(result).addClass('first');
-					if (i == (lastItem - 1))
-						result = $(result).addClass('last');
+						var result = compiled(row.getCellsMapByField());
+						var itemId = this.model.getAttr('id') + "_" + row.getAttr('id');
+						result = $(result).attr('id', itemId).attr('rowId', row.getAttr('id'));
 
-					/* add row id to prefix id for eventual user inputs */
-					$(result).find("[id*='userinput_']").each(function() {
-						$(this).attr('id', row.getAttr('id') + "_" + $(this).attr('id'));
-					});
+						if (i === 0)
+							result = $(result).addClass('first');
+						if (i == (lastItem - 1))
+							result = $(result).addClass('last');
 
-					hostEl.append(result);
+						/* add row id to prefix id for eventual user inputs */
+						$(result).find("[id*='userinput_']").each(function() {
+							$(this).attr('id', row.getAttr('id') + "_" + $(this).attr('id'));
+						});
 
-					/* binding method from template */
-					var that = this;
-					hostEl.find("#" + itemId + " [methodName] ").each(function(index, element) {
-						var action = that.model.getAction($(element).attr('methodName'));
+						hostEl.append(result);
+
+						/* binding method from template */
+						var that = this;
+						hostEl.find("#" + itemId + " [methodName] ").each(function(index, element) {
+							var action = that.model.getAction($(element).attr('methodName'));
+							if (action && action.length > 0) {
+								$(element).click(function() {
+									var rowId = $(this).closest("[rowId]").attr('rowId');
+									var actionParams = action[0].get('actionParams').clone();
+
+									that._handleActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+								});
+							}
+						});
+					}
+					/* binding menuAction from template */
+					hostEl.find("#" + itemId + " [menuAction] ").each(function(index, element) {
+						var action = that.model.getAction($(element).attr('menuAction'));
 						if (action && action.length > 0) {
 							$(element).click(function() {
 								var rowId = $(this).closest("[rowId]").attr('rowId');
 								var actionParams = action[0].get('actionParams').clone();
 
-								that._handleActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+								that._handleMenuActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+
 							});
 						}
 					});
 				}
-				/* binding menuAction from template */
-				hostEl.find("#" + itemId + " [menuAction] ").each(function(index, element) {
-					var action = that.model.getAction($(element).attr('menuAction'));
-					if (action && action.length > 0) {
-						$(element).click(function() {
-							var rowId = $(this).closest("[rowId]").attr('rowId');
-							var actionParams = action[0].get('actionParams').clone();
-
-							that._handleMenuActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
-
-						});
-					}
-				});
-
 			}
 			/* else normal table display */
 			else {

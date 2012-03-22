@@ -152,7 +152,7 @@ $(function() {
 				var html = "";
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
 				html += this.renderListItemTemplate();
-				html += '<div id="productListDivList" isHTMLTable="true" templateName="productListItemTemplateList"  itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
+				html += '<div id="productListDivList" noItemText="No item matches your selection" isHTMLTable="true" templateName="productListItemTemplateList"  itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 				return html;
 			},
 
@@ -164,7 +164,7 @@ $(function() {
 				var html = "";
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
 				html += this.renderListItemGridTemplate();
-				html += '<div id="productListDivGrid" templateName="productListItemTemplateGrid" itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
+				html += '<div id="productListDivGrid" noItemText="No item matches your selection" templateName="productListItemTemplateGrid" itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 				return html;
 			},
 
@@ -366,7 +366,7 @@ $(function() {
 				html += '<button methodName="deleteItemFromCart">X</button>';
 				html += window.expanz.html.endDiv();
 				html += '</script>';
-				html += "<div bind='DataControl' renderingType='grid' id='lvMiniCart' name='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
+				html += "<div bind='DataControl' noItemText='Empty' renderingType='grid' id='lvMiniCart' name='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
 				return html
 			},
 
