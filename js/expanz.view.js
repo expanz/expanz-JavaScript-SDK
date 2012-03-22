@@ -12,9 +12,10 @@ $(function() {
 		},
 
 		modelUpdate : function(attr) {
+			var view = this;
 			return function() {
 				var elem = this.el.find('[attribute=' + attr + ']');
-				updateViewElement(elem, this.model.attributes, attr);
+				updateViewElement(view, elem, this.model.attributes, attr);
 				this.el.trigger('update:field');
 			};
 		},
@@ -78,7 +79,7 @@ $(function() {
 
 		toggle : function() {
 			var elem = this.el.find('[attribute=value]');
-			updateViewElement(elem, this.model.get('value'));
+			updateViewElement(this, elem, this.model.get('value'));
 
 			if (this.model.get('value').length > 0) {
 				this.el.show('slow');
@@ -805,7 +806,7 @@ $(function() {
 
 	// Private Functions
 
-	function updateViewElement(elem, allAttrs, attr) {
+	function updateViewElement(view, elem, allAttrs, attr) {
 		var datatype = allAttrs['datatype'];
 		if (datatype && datatype.toLowerCase() === 'blob' && attr && attr === 'value') {
 			var width = allAttrs['width'];
@@ -822,6 +823,15 @@ $(function() {
 		}
 		else {
 			value = allAttrs[attr];
+		}
+
+		if (view.options['textTransformFunction'] && attr === 'value') {
+			try {
+				value = eval(view.options['textTransformFunction'])(value);
+			} catch (err) {
+				console.log("Value could not be transformed with function (check function exists) " + view.options['textTransformFunction']);
+			}
+
 		}
 
 		if ($(elem).is('input')) {

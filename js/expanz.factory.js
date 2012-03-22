@@ -95,7 +95,8 @@ $(function() {
 					el : $(fieldEl),
 					id : $(fieldEl).attr('id'),
 					className : $(fieldEl).attr('class'),
-					model : field
+					model : field,
+					textTransformFunction: $(fieldEl).attr('textTransformFunction')
 				});
 
 				fieldModels.push(field);

@@ -683,6 +683,10 @@ $(function() {
 		return discount;
 	};
 
+	window.expanz.html.addDollar = function(price) {
+		return "$ " + price;
+	};
+
 	window.expanz.html.submitLostPasswordForm = function(loginCode, EmailAdress) {
 		var xml = '\
 			<Activity id="ERP.Person"> \
