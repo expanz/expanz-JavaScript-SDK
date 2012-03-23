@@ -695,7 +695,7 @@ $(function() {
 
 	window.expanz.html.getDisplayableDiscount = function(discount) {
 		discount = discount.replace(/;/g, "<br/>");
-		discount = discount.replace(/(\d*) @(\d*)/g, '<label class="discount">$1 items for &#36;$2</label>')
+		discount = discount.replace(/(\d*) @(\d*\.?\d*)/g, '<label class="discount">$1 items for &#36;$2</label>')
 		return discount;
 	};
 
