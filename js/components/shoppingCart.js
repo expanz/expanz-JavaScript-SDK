@@ -177,7 +177,7 @@ $(function() {
 				var html = "<div class='listHeader'>";
 				var labelList = (el !== undefined && el.attr('labelList') !== undefined) ? el.attr('labelList') : 'List display';
 				var labelGrid = (el !== undefined && el.attr('labelGrid') !== undefined) ? el.attr('labelGrid') : 'Grid display';
-				html += "<a id='displayAsList' href='#' class='itemsDisplay' >" + labelList + "</a><span class='itemsDisplay' style='margin-left:10px;margin-right:10px'> | </span>";
+				html += "<a id='displayAsList' href='#' class='itemsDisplay' >" + labelList + "</a><span class='itemsDisplaySeparator'> | </span>";
 				html += "<a id='displayAsGrid' href='#' class='itemsDisplay'>" + labelGrid + "</a>";
 				html += "</div>"
 				return html;
@@ -262,7 +262,6 @@ $(function() {
 					<script type="text/template" id="productListItemTemplateListHeader">\
 					<thead><tr class="item listDisplay" style="height:25px;font-size:16px;text-align:center"> \
 					<th class="cell" style="width:65px;">&nbsp;</th> \
-					<th class="cell" style="width:100px;">SKU</th> \
 					<th class="cell">Name</th> \
 					<th class="cell" style="width:60px;">Price</th> \
 					<th class="cell">Note</th> \
@@ -287,7 +286,6 @@ $(function() {
 						<img class="noThumbnailList" src="assets/images/no_image_available.png"/> \
 					<% } %> \
 					</td> \
-					<td class="cell" ><label><%= data.SearchCode %></label></td> \
 					<td class="cell"><label><%= data.Name %></label></td> \
 					<td class="cell"><label><b>$<%= data.DefaultSellPrice %></b></label></td> \
 					<td class="cell">	\
