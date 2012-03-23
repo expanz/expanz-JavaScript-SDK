@@ -256,7 +256,6 @@ $(function() {
 				return html;
 			},
 
-			
 			renderListItemTemplateHeader : function() {
 				var html = ' \
 					<script type="text/template" id="productListItemTemplateListHeader">\
@@ -270,7 +269,7 @@ $(function() {
 					</script>';
 				return html;
 			},
-				
+
 			/**
 			 * Method used in the list component to render the template of an item in the list
 			 */
@@ -580,11 +579,11 @@ $(function() {
 
 			_executeAfterRenderCheckoutItemsListComponent : function() {
 				window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent($("#checkoutCart"));
-
+				var that = this;
 				$("#checkoutCart").bind("table:rendered", function() {
 					/* hiding the checkout part if no items */
 					if ($("#checkoutCart > [nbItems]").attr("nbItems") === "0") {
-						$("#cartCheckout").hide();
+						expanz.Views.redirect(that.shoppingCartPage);
 					}
 					else {
 						$("#cartCheckout").show();
