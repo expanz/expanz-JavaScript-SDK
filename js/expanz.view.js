@@ -799,7 +799,13 @@ $(function() {
 			if (windowTitle == "Order Submitted") {
 				/* clear activity cookies and reload the page */
 				window.expanz.Storage.clearActivityHandles();
+				$("body").trigger("CheckoutFinished");
 				window.location.reload();
+			}
+			else if (windowTitle == "Order Saved"){
+				/* clear activity cookies and trigger OrderSaved event */
+				window.expanz.Storage.clearActivityHandles();
+				$("body").trigger("CheckoutFinished");
 			}
 		}
 	});
