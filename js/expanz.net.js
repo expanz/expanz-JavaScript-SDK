@@ -564,6 +564,14 @@ $(function() {
 			if (execResults.length > 0) {
 				var esaResult = $(execResults).find('ESA');
 				success = boolValue(esaResult.attr('success'));
+
+				/* METHOD CASE */
+				$(execResults).find('Method').each(function() {
+					var res = boolValue($(this).attr('result'));
+					var methodName = $(this).attr('name');
+					$("body").trigger(methodName, res);
+				});
+
 				var serverMessage = esaResult.attr('serverMessage') || "";
 				if (!success && $(xml).find('errors').length > 0) {
 					serverMessage += $(xml).first('errors').text();
@@ -584,6 +592,18 @@ $(function() {
 					}
 				}
 
+				$(execResults).find('Message').each(function() {
+					if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
+						if (callbacks && callbacks.error) {
+							callbacks.error($(this).text());
+						}
+					}
+					else if ($(this).attr('type') == 'Info') {
+						if (callbacks && callbacks.info) {
+							callbacks.info($(this).text());
+						}
+					}
+				});
 			}
 		};
 	}
@@ -753,6 +773,7 @@ $(function() {
 
 				var errors = [];
 				var infos = [];
+
 				/* MESSAGE CASE */
 				$(execResults).find('Message').each(function() {
 					if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
