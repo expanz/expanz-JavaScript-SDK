@@ -246,7 +246,7 @@ $(function() {
 					}
 					else {
 						$(popupEl).slideDown(800, function() {
-							$(popupEl).delay(2000).slideUp(800);
+							$(popupEl).delay(5000).slideUp(800);
 						});
 					}
 				}
@@ -260,7 +260,7 @@ $(function() {
 				else {
 					// $(el).show('slow');
 					$(el).slideDown(800, function() {
-						$(el).delay(2000).slideUp(800);
+						$(el).delay(5000).slideUp(800);
 					});
 				}
 			}
