@@ -17,9 +17,9 @@ $(function() {
 			productListPopMethod : 'listItemsForCategoryFiltered',
 			productListContextObject : "StockTranItem",
 
-			orderHistoryListName : "listOrderHistory",
-			orderHistoryPopMethod : 'listOrderHistory',
-			orderHistoryContextObject : "StockTranItem",
+			orderHistoryListName : "orderHistory",
+			orderHistoryPopMethod : 'listMatchingOrders',
+			orderHistoryContextObject : "",
 
 			categoryTreeName : "StockTranItem.ItemForSale.ItemCategory.PersistentId",
 			categoryTreePopMethod : '$custom',
@@ -606,8 +606,18 @@ $(function() {
 
 			renderOrderHistoryComponent : function(el) {
 				var html = "";
-				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
-				html += '<div id="orderHistoryDivList" itemsPerPage="' + itemsPerPage + '" name="' + this.orderHistoryListName + '" bind="DataControl" renderingType="grid" contextObject="' + this.orderHistoryContextObject + '"></div>';
+				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 12;
+
+				html += '<script type="text/template" id="orderHistoryItemTemplateHeader">';
+				html += '<thead><tr class="item"><th style="width:100px">Search code</th><th  style="width:200px">Creation Date</th><th style="width:120px">Amount</th><th>Actions</th></tr></thead>';
+				html += '</script>';
+
+				html += '<script type="text/template" id="orderHistoryItemTemplate">';
+				html += '<tr class="item"><td><%=data.SearchCode%></td><td><%=data.CreationDate%></td><td><%=data.Total%></td>';
+				html += '<td><button methodName="showInvoice">Show Invoice</button></td></tr>';
+				html += '</script>';
+
+				html += '<div id="orderHistoryDivList" class="orderHistory" isHTMLTable="true" populateMethod="' + this.orderHistoryPopMethod + '" itemsPerPage="' + itemsPerPage + '" name="' + this.orderHistoryListName + '" bind="DataControl" renderingType="grid" contextObject="' + this.orderHistoryContextObject + '"></div>';
 				return html;
 			}
 
