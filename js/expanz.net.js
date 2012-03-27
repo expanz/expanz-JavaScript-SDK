@@ -99,11 +99,19 @@ $(function() {
 				return;
 			}
 
+			var initiator = {
+				type : "field",
+				id : id
+			};
+
 			activity.setAttr({
-				deltaLoading : true
+				'deltaLoading' : {
+					isLoading : true,
+					initiator : initiator
+				}
 			});
 
-			SendRequest(RequestObject.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
+			SendRequest(RequestObject.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks));
 		},
 
 		MethodRequest : function(name, methodAttributes, context, activity, callbacks) {
@@ -115,11 +123,19 @@ $(function() {
 				return;
 			}
 
+			var initiator = {
+				type : "method",
+				id : name
+			};
+
 			activity.setAttr({
-				deltaLoading : true
+				'deltaLoading' : {
+					isLoading : true,
+					initiator : initiator
+				}
 			});
 
-			SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
+			SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks));
 		},
 
 		DestroyActivityRequest : function(activityHandle, callbacks) {
@@ -141,11 +157,19 @@ $(function() {
 				return;
 			}
 
+			var initiator = {
+				type : "resfresh",
+				id : dataId
+			};
+
 			activity.setAttr({
-				deltaLoading : true
+				'deltaLoading' : {
+					isLoading : true,
+					initiator : initiator
+				}
 			});
 
-			SendRequest(RequestObject.DataRefresh(dataId, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
+			SendRequest(RequestObject.DataRefresh(dataId, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks));
 		},
 
 		ReleaseSessionRequest : function(callbacks) {
@@ -156,35 +180,43 @@ $(function() {
 			SendRequest(RequestObject.ReleaseSession(expanz.Storage.getSessionHandle()), parseReleaseSessionResponse(callbacks));
 		},
 
-		GetBlobRequest : function(blobId, activity, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
+		GetBlobRequest : function(blobId, activity, initiator) {
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.Views.redirect(expanz.getLoginURL());
 				return;
 			}
 
-			SendNormalRequest(RequestObject.GetBlob(blobId, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks), true);
-		},
-
-		GetFileRequest : function(filename, activity, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-				expanz.Views.redirect(expanz.getLoginURL());
-				return;
-			}
-
+			/* even if the file is not opened yet, we consider the delta loading is finished */
 			activity.setAttr({
-				deltaLoading : true
+				'deltaLoading' : {
+					isLoading : false,
+					initiator : initiator
+				}
 			});
 
-			SendNormalRequest(RequestObject.GetFile(filename, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks), true);
+			SendNormalRequest(RequestObject.GetBlob(blobId, activity, expanz.Storage.getSessionHandle()));
 		},
 
-		/* call when selecting something from the tree view (file) */
+		GetFileRequest : function(filename, activity, initiator) {
+
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+				expanz.Views.redirect(expanz.getLoginURL());
+				return;
+			}
+
+			/* even if the file is not opened yet, we consider the delta loading is finished */
+			activity.setAttr({
+				'deltaLoading' : {
+					isLoading : false,
+					initiator : initiator
+				}
+			});
+
+			SendNormalRequest(RequestObject.GetFile(filename, activity, expanz.Storage.getSessionHandle()));
+		},
+
+		/* call when selecting something from the tree view (file) or menu action*/
 		CreateMenuActionRequest : function(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, callbacks) {
 			if (callbacks === undefined)
 				callbacks = activity.callbacks;
@@ -194,7 +226,19 @@ $(function() {
 				return;
 			}
 
-			SendRequest(RequestObject.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, callbacks));
+			var initiator = {
+				type : "menuaction",
+				id : contextId
+			};
+
+			activity.setAttr({
+				'deltaLoading' : {
+					isLoading : true,
+					initiator : initiator
+				}
+			});
+
+			SendRequest(RequestObject.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks));
 		},
 
 		/* create an anonymous request */
@@ -723,7 +767,6 @@ $(function() {
 								/* add a method handler for each action button */
 								dataControlModel.actionSelected = function(selectedId, name, params) {
 									expanz.Net.MethodRequest(name, params, null, activity);
-									window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + name + ' ,methodParam:' + JSON.stringify(params));
 								};
 
 								/* override a method handler for each menuaction button */
@@ -761,7 +804,7 @@ $(function() {
 		};
 	}
 
-	function parseDeltaResponse(activity, callbacks) {
+	function parseDeltaResponse(activity, initiator, callbacks) {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseDeltaResponse");
 
@@ -886,11 +929,11 @@ $(function() {
 
 					if ($(this).attr('field') !== undefined && $(this).attr('path') != undefined) {
 						window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
-						expanz.Net.GetBlobRequest($(this).attr('field'), activity);
+						expanz.Net.GetBlobRequest($(this).attr('field'), activity, initiator);
 					}
 					else if ($(this).attr('name') !== undefined) {
 						window.expanz.logToConsole("File found: " + $(this).attr('name'));
-						expanz.Net.GetFileRequest($(this).attr('name'), activity);
+						expanz.Net.GetFileRequest($(this).attr('name'), activity, initiator);
 					}
 					else {
 						window.expanz.logToConsole("Not implemented yet");
@@ -1004,7 +1047,6 @@ $(function() {
 									/* override the method handler for each action button */
 									dataControlModel.actionSelected = function(selectedId, name, params) {
 										expanz.Net.MethodRequest(name, params, null, activity);
-										window.expanz.logToConsole(".net:actionSelected id:" + selectedId + ' ,methodName:' + name + ' ,params:' + JSON.stringify(params));
 									};
 
 									/* override a method handler for each menuaction button */
@@ -1013,7 +1055,7 @@ $(function() {
 									};
 								}
 								else {
-									// TODO implement update of other datacontrolsF
+									// TODO implement update of other datacontrols
 								}
 							}
 						}
@@ -1026,8 +1068,12 @@ $(function() {
 			}
 
 			activity.setAttr({
-				deltaLoading : false
+				'deltaLoading' : {
+					isLoading : false,
+					initiator : initiator
+				}
 			});
+
 			return;
 		};
 	}
@@ -1142,7 +1188,7 @@ $(function() {
 	 * Send Request :manage the sending of XML requests to the server, and dispatching of response handlers. Proxy is needed.
 	 */
 
-	var SendNormalRequest = function(request, responseHandler, isPopup) {
+	var SendNormalRequest = function(request) {
 
 		if ($("#formFile")) {
 			$("#formFile").remove();

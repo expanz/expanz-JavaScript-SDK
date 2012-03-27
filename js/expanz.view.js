@@ -9,6 +9,7 @@ $(function() {
 			this.model.bind("change:label", this.modelUpdate('label'), this);
 			this.model.bind("change:value", this.modelUpdate('value'), this);
 			this.model.bind("change:errorMessage", this.displayError(), this);
+			this.model.bind("change:loading", this.loading, this);
 		},
 
 		modelUpdate : function(attr) {
@@ -66,6 +67,10 @@ $(function() {
 			}
 
 			this.el.trigger('update:field');
+		},
+
+		loading : function() {
+			/* nothing special done when a field is loading at the moment */
 		}
 
 	});
@@ -92,6 +97,9 @@ $(function() {
 	});
 
 	window.expanz.Views.MethodView = Backbone.View.extend({
+		initialize : function() {
+			this.model.bind("change:loading", this.loading, this);
+		},
 
 		events : {
 			"click [attribute=submit]" : "submit"
@@ -100,6 +108,19 @@ $(function() {
 		submit : function() {
 			this.model.submit();
 			this.el.trigger('submit:' + this.model.get('id'));
+		},
+
+		loading : function() {
+			window.expanz.logToConsole('method loading ' + this.model.get('id'));
+			if (this.model.get('loading') === true) {
+				this.el.attr('disabled', 'disabled');
+				this.el.addClass('methodLoading');
+			}
+			else {
+				this.el.removeAttr('disabled');
+				this.el.removeClass('methodLoading');
+			}
+
 		}
 
 	});
@@ -214,7 +235,9 @@ $(function() {
 			this.model.updateRowDoubleClicked(row.attr('id'), row.attr('type'));
 		},
 
-		actionClicked : function(id, name, params) {
+		actionClicked : function(id, name, params, actionEl) {
+			actionEl.attr('disabled', 'disabled');
+			actionEl.addClass('actionLoading');
 			this.model.actionSelected(id, name, params);
 		},
 
@@ -307,6 +330,8 @@ $(function() {
 							result = $(result).addClass('first');
 						if (i == (lastItem - 1))
 							result = $(result).addClass('last');
+						if (i % 2 === 1)
+							result = $(result).addClass('alternate');
 
 						/* add row id to prefix id for eventual user inputs */
 						$(result).find("[id*='userinput_']").each(function() {
@@ -324,7 +349,7 @@ $(function() {
 									var rowId = $(this).closest("[rowId]").attr('rowId');
 									var actionParams = action[0].get('actionParams').clone();
 
-									that._handleActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+									that._handleActionClick($(this), rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
 								});
 							}
 						});
@@ -441,7 +466,7 @@ $(function() {
 					var parentDiv = $(this).parent();
 					var methodName = parentDiv.attr('name');
 					var actionParams = JSON.parse(parentDiv.attr('actionParams'));
-					that._handleActionClick(rowId, methodName, actionParams, parentDiv);
+					that._handleActionClick($(this), rowId, methodName, actionParams, parentDiv);
 				};
 
 				$('table#' + hostId + ' tr [bind=method] > button').click(this, onActionClick);
@@ -477,7 +502,7 @@ $(function() {
 			return this;
 		},
 
-		_handleActionClick : function(rowId, methodName, actionParams, divEl) {
+		_handleActionClick : function(actionEl, rowId, methodName, actionParams, divEl) {
 			var inputValid = true;
 			/* handle user input */
 			_.each(actionParams, function(actionParam) {
@@ -497,7 +522,7 @@ $(function() {
 			});
 
 			if (inputValid)
-				this.trigger("actionClicked", rowId, methodName, actionParams);
+				this.trigger("actionClicked", rowId, methodName, actionParams, actionEl);
 		},
 
 		_handleMenuActionClick : function(rowId, menuAction, actionParams, divEl) {
@@ -612,12 +637,30 @@ $(function() {
 		},
 
 		deltaLoading : function() {
-			var isLoading = this.collection.getAttr('deltaLoading');
-			if (isLoading) {
-				window.expanz.logToConsole("delta loading");
+			var deltaLoading = this.collection.getAttr('deltaLoading');
+
+			var initiatorID = deltaLoading.initiator.id;
+			var initiatorType = deltaLoading.initiator.type;
+
+			var initiator = this.collection.get(initiatorID);
+			if (initiator) {
+				window.expanz.logToConsole("delta method loading " + deltaLoading.isLoading + " " + initiatorID);
+				initiator.set({
+					loading : deltaLoading.isLoading
+				});
 			}
 			else {
-				window.expanz.logToConsole("delta not loading");
+				/* most probably coming from a grid/list view */
+				/* in that case the button has already been set in a loading state so we just switch it back to normal when loading is finished */
+				if (initiatorType == 'method' && !deltaLoading.isLoading) {
+					/* can be either a element with methodName or a name */
+					var actionSelector = ".actionLoading[methodName='" + initiatorID + "'], [name='" + initiatorID + "'] .actionLoading";
+					var dataControlEl = this.el.find(actionSelector).first().closest("[bind='DataControl']");
+					if (dataControlEl && dataControlEl.length > 0) {
+						dataControlEl.find(actionSelector).removeAttr('disabled');
+						dataControlEl.find(actionSelector).removeClass('actionLoading');
+					}
+				}
 			}
 		}
 
@@ -802,7 +845,7 @@ $(function() {
 				$("body").trigger("CheckoutFinished");
 				window.location.reload();
 			}
-			else if (windowTitle == "Order Saved"){
+			else if (windowTitle == "Order Saved") {
 				/* clear activity cookies and trigger OrderSaved event */
 				window.expanz.Storage.clearActivityHandles();
 				$("body").trigger("CheckoutFinished");
