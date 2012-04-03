@@ -191,7 +191,13 @@ $(function() {
 
 					var homeLabel = el.attr('homeLabel') || 'Home';
 					var logoutLabel = el.attr('logoutLabel') || 'Logout';
+					var backLabel = el.attr('backLabel') || 'Back';
 
+					// add back button if defined
+					if (window.config._backButton === true) {
+						el.find("#menuUL").append('<li class="processarea menuitem" id="home"><a href="#" onclick="history.go(-1);return true;" class="backbutton menuTitle">' + backLabel + '</a></li>');
+					}
+					
 					// add home page if defined
 					if (window.config._homepage) {
 						var homeClass = "";
