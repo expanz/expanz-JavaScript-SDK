@@ -80,8 +80,9 @@ $(function() {
 				map[cell.get('field')] = cell.get('value');
 			});
 
-			/* add row id to the map */
+			/* add row id and type to the map */
 			map['rowId'] = this.getAttr('id');
+			map['rowType'] = this.getAttr('type');
 
 			/* using a data to put the data to avoid underscore 'variable is not defined' error */
 			return {
