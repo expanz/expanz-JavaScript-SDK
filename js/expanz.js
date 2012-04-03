@@ -32,7 +32,7 @@ $(function() {
 			if (loginUrl == "")
 				loginUrl = "/";
 		}
-		window.expanz.logToConsole("getLoginURL : " + loginUrl);
+		//window.expanz.logToConsole("getLoginURL : " + loginUrl);
 		return loginUrl;
 	};
 
@@ -153,10 +153,6 @@ $(function() {
 		/* set focus on username field */
 		$("#username input").focus()
 		
-		var callbackLogin = function() {
-			window.expanz.logToConsole('callbackLogin');
-		};
-
 		createLogin(loginPopup.el.find('[bind=login]'));
 
 		return;
@@ -166,7 +162,7 @@ $(function() {
 	window.expanz.createActivityWindow = function(parentActivity, id, style, key, title) {
 		var callback = function(url, onRequest) {
 			if (url !== null) {
-				window.expanz.logToConsole(url);
+				//window.expanz.logToConsole(url);
 			}
 			else {
 				window.expanz.logToConsole("Url of activity not found");
@@ -444,7 +440,7 @@ $(function() {
 		language : ' ', /* set to en to load Messages-en.properties as well, set to '' to load as well Messages-en-XX.properties - add to config.js if different for some customers */
 		cache : true,
 		callback : function() {
-			window.expanz.logToConsole("Bundle loaded");
+			//window.expanz.logToConsole("Bundle loaded");
 		}
 	});
 

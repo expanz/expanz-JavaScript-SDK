@@ -87,7 +87,6 @@ $.fn.KendoPanelBarAdapter = function(options) {
 
 		/* add static element at the beginning */
 		_.each(staticElements, function(elem) {
-			console.log('static element' + elem);
 			data.unshift({
 				text : $(elem).attr('label')
 			});
@@ -96,11 +95,11 @@ $.fn.KendoPanelBarAdapter = function(options) {
 		panelView.kendoPanelBar({
 			dataSource : data
 		});
-		
+
 		/* add css class for level 1 / level 2 */
-		/* add css class level 1*/
+		/* add css class level 1 */
 		panelView.children("li").addClass("level1");
-		/* add css class level 2*/
+		/* add css class level 2 */
 		panelView.children("li").find("ul").children("li").addClass("level2");
 
 		/* bind the selection of panel bar item */

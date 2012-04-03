@@ -17,7 +17,7 @@ $(function() {
 		},
 
 		updateItemSelected : function(selectedId, callbacks) {
-			window.expanz.logToConsole("DataControl:updateItemSelected id:" + selectedId);
+			//window.expanz.logToConsole("DataControl:updateItemSelected id:" + selectedId);
 
 			/* exception for documents we have to send a MenuAction request */
 			if (this.getAttr('id') == 'documents') {

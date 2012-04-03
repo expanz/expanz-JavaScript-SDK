@@ -34,7 +34,7 @@ $(function() {
 					errorEl.show();
 					errorEl.css('display', 'inline');
 					this.el.addClass("errorField");
-					window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
+					//window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
 				}
 				else {
 					var errorEl = this.el.find('#' + errorId);
@@ -42,7 +42,7 @@ $(function() {
 						errorEl.hide();
 					}
 					this.el.removeClass("errorField");
-					window.expanz.logToConsole("hiding error message");
+					//window.expanz.logToConsole("hiding error message");
 				}
 
 			};
@@ -111,9 +111,14 @@ $(function() {
 		},
 
 		loading : function() {
-			window.expanz.logToConsole('method loading ' + this.model.get('id'));
+			//window.expanz.logToConsole('method loading ' + this.model.get('id'));
 			if (this.model.get('loading') === true) {
-				this.el.attr('disabled', 'disabled');
+				if(this.el.is(":button")){
+					this.el.attr('disabled', 'disabled');
+				}
+				else{
+					this.el.find("button").attr('disabled','disabled');
+				}
 				this.el.addClass('methodLoading');
 			}
 			else {
@@ -152,7 +157,7 @@ $(function() {
 		},
 		modelUpdate : function() {
 			/* retrieve or create a div to host the context menu */
-			window.expanz.logToConsole("modelUpdated");
+			//window.expanz.logToConsole("modelUpdated");
 
 			if (this.contextMenuEl === undefined) {
 				var contextMenuId = this.model.get('id').replace(/\./g, "_") + "_contextMenu";
@@ -201,7 +206,7 @@ $(function() {
 		},
 		submit : function() {
 			/* register current context menu */
-			window.expanz.logToConsole("Registering current context menu");
+			//window.expanz.logToConsole("Registering current context menu");
 			window.expanz.currentContextMenu = this.model;
 			this.model.submit();
 			this.el.trigger('submit:' + this.model.get('id'));
@@ -279,7 +284,7 @@ $(function() {
 		},
 
 		renderWithPaging : function(currentPage, itemsPerPage) {
-			window.expanz.logToConsole("GridView rendered for page  " + currentPage);
+			//window.expanz.logToConsole("GridView rendered for page  " + currentPage);
 
 			var rows = this.model.getAllRows();
 			var firstItem = parseInt(currentPage * itemsPerPage);
@@ -363,7 +368,7 @@ $(function() {
 								that._handleActionClick($(this), rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
 							}
 							else {
-								window.expanz.logToConsole("autUpdate action not defined in formapping: " + $(this).attr('autoUpdate'));
+								//window.expanz.logToConsole("autUpdate action not defined in formapping: " + $(this).attr('autoUpdate'));
 							}
 						});
 					}
@@ -657,7 +662,7 @@ $(function() {
 
 			var initiator = this.collection.get(initiatorID);
 			if (initiator) {
-				window.expanz.logToConsole("delta method loading " + deltaLoading.isLoading + " " + initiatorID);
+				//window.expanz.logToConsole("delta method loading " + deltaLoading.isLoading + " " + initiatorID);
 				initiator.set({
 					loading : deltaLoading.isLoading
 				});
@@ -716,7 +721,7 @@ $(function() {
 					/* handle checkboxes click */
 					$(that.el).find("#" + id).click(function() {
 						/* send the delta to the server */
-						window.expanz.logToConsole(that.model.id + " filtered with " + $(this).val());
+						//window.expanz.logToConsole(that.model.id + " filtered with " + $(this).val());
 
 						/* send negative value of id to say it has been unselected */
 						var val = $(this).val();
@@ -773,7 +778,7 @@ $(function() {
 		},
 
 		create : function(containerjQ) {
-			window.expanz.logToConsole("render popupWindow");
+			//window.expanz.logToConsole("render popupWindow");
 			var popupWindow = containerjQ.find('#' + this.id);
 			if (popupWindow.length > 0) {
 				popupWindow.remove();
@@ -940,7 +945,7 @@ $(function() {
 			try {
 				value = eval(view.options['textTransformFunction'])(value);
 			} catch (err) {
-				console.log("Value could not be transformed with function (check function exists) " + view.options['textTransformFunction']);
+				window.expanz.logToConsole("Value could not be transformed with function (check function exists) " + view.options['textTransformFunction']);
 			}
 
 		}

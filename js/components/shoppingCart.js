@@ -283,7 +283,7 @@ $(function() {
 									<% } %>  \
 							<% } %>  \
 							<% if ( true ) { %>  \
-								<input class="gridUserInput" type="text" format="numeric"  id="userinput_quantity"></input>\
+								<input class="gridUserInput" style="width:50px !important" type="text" format="numeric"  id="userinput_quantity"></input>\
 								<button class="addToCartButton" methodName="saveItemFromCart">Add</button> \
 							<% } %></div> \
 					';
@@ -343,7 +343,7 @@ $(function() {
 					<td class="cell" style="text-align:center"> \
 					<% if ( true ) { %> \
 						<div> \
-							<input class="gridUserInput" type="text" format="numeric"  id="userinput_quantity"></input>\
+							<input class="gridUserInput" style="width:50px !important" type="text" format="numeric"  id="userinput_quantity"></input>\
 							<button class="addToCartButton" methodName="saveItemFromCart">Add</button> \
 						</div> \
 					<% } %> \
@@ -465,7 +465,7 @@ $(function() {
 				html += window.expanz.html.startDiv("item");
 				html += window.expanz.html.renderGridTemplateField("ItemForSale_Name", 200);
 				html += window.expanz.html.renderGridTemplateField("ValueIncTax", 55);
-				html += '<input id="userinput_quantity" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/>';
+				html += '<input id="userinput_quantity" class="gridUserInput" style="width:50px !important" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/>';
 				html += '<button style="display:none" methodName="saveItemFromCart">Adjust</button>';
 				html += '<button methodName="deleteItemFromCart">X</button>';
 				html += window.expanz.html.endDiv();
@@ -512,8 +512,23 @@ $(function() {
 
 			renderMiniGoToCartBoxComponent : function(el) {
 				var html = "";
-				html += '<div><span class="miniCartBox" onclick="window.location=\'' + this.shoppingCartCheckoutPage + '\'" >Cart <span bind="field" name="nbItems" class="miniCartItemCount" id="nbItems"><span attribute="value"><span></span></span></div>';
+				html += '<div><div id="miniCartBox" style="display:none" class="miniCartBox" onclick="if($(\'#nbItems\').text() != 0) window.location=\'' + this.shoppingCartCheckoutPage + '\'" >Cart  <div class="shoppingCartImage"></div> <div bind="field" name="CartItemsCount" class="CartItemsCount numberCircle"><span  id="nbItems" attribute="value">0</span></div></div></div>';
 				return html;
+			},
+
+			_executeAfterRenderMiniGoToCartBoxComponent : function() {
+				var CartItemsCountField = this.activity.collection.get('CartItemsCount');
+				if (CartItemsCountField) {
+					CartItemsCountField.collection.bind('change:value', function(el) {
+						if (el.get('value') == 0) {
+							$("#miniCartBox").hide();
+						}
+						else {
+							$("#miniCartBox").show();
+						}
+					});
+				}
+
 			},
 
 			/**
@@ -554,13 +569,13 @@ $(function() {
 				html += window.expanz.html.startDiv("item");
 				html += window.expanz.html.renderGridTemplateField("ItemForSale_Name", 300);
 				html += window.expanz.html.renderGridTemplateField("UnitPrice", 100);
-				html += '<div style="width: 100px; float: left;"><input id="userinput_quantity" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/></div>';
+				html += '<div style="width: 100px; float: left;"><input class="gridUserInput" style="width:50px !important" id="userinput_quantity" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/></div>';
 				html += window.expanz.html.renderGridTemplateField("ValueIncTax", 100);
 				html += '<button style="display:none" methodName="saveItemFromCart">Adjust</button>';
 				html += '<button methodName="deleteItemFromCart">X</button>';
 				html += window.expanz.html.endDiv();
 				html += '</script>';
-				
+
 				html += '<script type="text/template" id="lvMiniCartItemTemplateHeader">';
 				html += window.expanz.html.startDiv("header");
 				html += window.expanz.html.renderHeaderGridField("Item", 300);
@@ -570,8 +585,7 @@ $(function() {
 				html += window.expanz.html.endDiv();
 				html += window.expanz.html.clearBoth();
 				html += '</script>';
-								
-				
+
 				html += "<div class='title'>Checkout</div>";
 
 				html += "<div class='checkoutList'>";
@@ -693,7 +707,6 @@ $(function() {
 				/* if button is not visible trigger change on value change after a delay of 100 to be sure the value is takn by the server */
 				if (!displayButton) {
 					$("#shoppingCartSearch #ItemSearch input").change(function(e) {
-						console.log("value changed");
 						$("#shoppingCartSearch #ItemSearch input").blur();
 						var timeoutID = window.setTimeout(function() {
 							$('#shoppingCartSearch button').click();
@@ -863,11 +876,12 @@ $(function() {
 		if (min === undefined)
 			min = 1;
 		if (max === undefined)
-			max = 100;
+			max = 99;
 		$(hostEl).bind("table:rendered", function() {
 			$(hostEl).find("[id*='_userinput_'][format='numeric']").each(function() {
+				var kntb = null;
 				if (initValue === undefined) {
-					$(this).kendoNumericTextBox({
+					kntb = $(this).kendoNumericTextBox({
 						min : min,
 						max : max,
 						step : 1,
@@ -875,7 +889,7 @@ $(function() {
 					});
 				}
 				else {
-					$(this).kendoNumericTextBox({
+					kntb = $(this).kendoNumericTextBox({
 						value : initValue,
 						min : min,
 						max : max,
@@ -883,6 +897,17 @@ $(function() {
 						format : "n0"
 					});
 				}
+
+				kntb.data("kendoNumericTextBox").bind("spin", function(e) {
+					// Call blur on the input field after 1 second of inactivity
+					// (may trigger a delta change automatically)
+					var that = this;
+					if (that.timeOut)
+						clearTimeout(that.timeOut);
+					that.timeOut = setTimeout(function() {
+						that._blur();
+					}, 1000);
+				});
 			});
 
 		});
