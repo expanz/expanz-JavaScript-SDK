@@ -59,7 +59,7 @@ $(function() {
 		_.each(activities, function(activity) {
 			window.App.push(activity);
 		});
-		return;
+		return activities;
 	};
 
 	window.expanz.CreateLogin = function(DOMObject, callbacks) {
@@ -150,13 +150,14 @@ $(function() {
 
 		loginPopup = window.expanz.showManuallyClosedPopup(content, 'Login', 'ExpanzLoginPopup', activity);
 
+		/* set focus on username field */
+		$("#username input").focus()
+		
 		var callbackLogin = function() {
 			window.expanz.logToConsole('callbackLogin');
 		};
 
 		createLogin(loginPopup.el.find('[bind=login]'));
-
-		window.expanz.logToConsole("sessionLost");
 
 		return;
 
