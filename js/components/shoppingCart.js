@@ -7,6 +7,8 @@ $(function() {
 	window.expanz.ShoppingCart = Backbone.View
 		.extend({
 
+			activity : null, /* initialised when the activity is created */
+
 			listItemsOnSpecialMethodName : "listItemsOnSpecial",
 			listItemsOnSpecialMethodContextObject : "StockTranItem.ItemForSale",
 
@@ -38,7 +40,8 @@ $(function() {
 				'Search',
 				'AdvancedSearch',
 				'Cart',
-				'Tree',
+				'CategoriesTree',
+				'CategoriesAccordion',
 				'List',
 				'Checkout',
 				'ListOnSpecialItemsButton',
@@ -50,6 +53,7 @@ $(function() {
 				'CartItemsList',
 				'CartTotals',
 				'CartCheckoutButton',
+				'MiniGoToCartBox',
 				'CheckoutDeliveryAddress',
 				'CheckoutItemsList',
 				'CheckoutEditCartButton',
@@ -69,7 +73,10 @@ $(function() {
 					}
 				});
 
-				expanz.CreateActivity($('[bind=activity]'));
+				var activities = expanz.CreateActivity($('[bind=activity]'));
+				if (activities !== undefined && activities.length > 0) {
+					this.activity = activities[0];
+				}
 
 				_.each(this.components, function(component) {
 					var componentEl = window.expanz.html.findShoppingCartElement(component);
@@ -141,6 +148,13 @@ $(function() {
 				return html;
 			},
 
+			_executeAfterRenderListOnSpecialItemsButtonComponent : function(el) {
+				var that = this;
+				$("#" + this.listItemsOnSpecialMethodName + " button").click(function() {
+					that.lastListAction = 'button';
+				});
+			},
+
 			renderListPreviouslyOrderedButtonComponent : function(el) {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'List Previously Ordered Items';
@@ -148,29 +162,56 @@ $(function() {
 				return html;
 			},
 
+			_executeAfterRenderListPreviouslyOrderedButtonComponent : function(el) {
+				var that = this;
+				$("#" + this.listPreviouslyOrderedMethodName + " button").click(function() {
+					that.lastListAction = 'button';
+				});
+			},
+
 			renderListItemsAsListComponent : function(el) {
 				var html = "";
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
 				html += this.renderListItemTemplate();
 				html += this.renderListItemTemplateHeader();
+				html += "<div id='searchResultTitle' class='searchResultTitle' style='display:none'>Search result</div>";
 				html += '<div id="productListDivList" noItemText="No item matches your selection" isHTMLTable="true" templateName="productListItemTemplateList"  itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 				return html;
 			},
 
 			_executeAfterRenderListItemsAsListComponent : function() {
 				window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent($("#productListDivList"), 1);
+				var that = this;
+				$("#productListDivList").bind("table:rendered", function() {
+					if (that.lastListAction == 'search') {
+						$("#searchResultTitle").show();
+					}
+					else {
+						$("#searchResultTitle").hide();
+					}
+				});
 			},
 
 			renderListItemsAsGridComponent : function(el) {
 				var html = "";
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
 				html += this.renderListItemGridTemplate();
+				html += "<div id='searchResultTitle' class='searchResultTitle' style='display:none'>Search result</div>";
 				html += '<div id="productListDivGrid" noItemText="No item matches your selection" templateName="productListItemTemplateGrid" itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 				return html;
 			},
 
 			_executeAfterRenderListItemsAsGridComponent : function() {
 				window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent($("#productListDivGrid"), 1);
+				var that = this;
+				$("#productListDivGrid").bind("table:rendered", function() {
+					if (that.lastListAction == 'search') {
+						$("#searchResultTitle").show();
+					}
+					else {
+						$("#searchResultTitle").hide();
+					}
+				});
 			},
 
 			renderListDisplayChoiceComponent : function(el) {
@@ -242,6 +283,7 @@ $(function() {
 									<% } %>  \
 							<% } %>  \
 							<% if ( true ) { %>  \
+								<input class="gridUserInput" type="text" format="numeric"  id="userinput_quantity"></input>\
 								<button class="addToCartButton" methodName="saveItemFromCart">Add</button> \
 							<% } %></div> \
 					';
@@ -285,7 +327,7 @@ $(function() {
 						<img class="noThumbnailList" src="assets/images/no_image_available.png"/> \
 					<% } %> \
 					</td> \
-					<td class="cell"><label><%= data.Name %></label></td> \
+					<td class="cell showDetail" ><label onclick="$(this).parent().parent().next().toggle()"><%= data.Name %></label></td> \
 					<td class="cell"><label><b>$<%= data.DefaultSellPrice %></b></label></td> \
 					<td class="cell">	\
 					<label><%= window.expanz.html.getDisplayableDiscount(data.UdefString1) %></label> \
@@ -300,9 +342,15 @@ $(function() {
 					</td> \
 					<td class="cell" style="text-align:center"> \
 					<% if ( true ) { %> \
-						<button class="addToCartButton" methodName="saveItemFromCart">Add</button> \
+						<div> \
+							<input class="gridUserInput" type="text" format="numeric"  id="userinput_quantity"></input>\
+							<button class="addToCartButton" methodName="saveItemFromCart">Add</button> \
+						</div> \
 					<% } %> \
 					</td> \
+				</tr> \
+				<tr class="detail" style="display:none"> \
+					<td colspan="100%"><%= data.ShortDescription || "No detail" %></td> \
 				</tr> \
 				</script> ';
 
@@ -343,25 +391,66 @@ $(function() {
 			},
 
 			/**
-			 * Renders the Categories tree component
+			 * Renders the Categories as a tree component
 			 * 
 			 * <pre>
-			 * 	Used directly in html by either &lt;shoppingCart:tree&gt; or &lt;div class='shoppingCart-Tree'&gt;
+			 * 	Used directly in html by either &lt;shoppingCart:CategoriesTree&gt; or &lt;div class='shoppingCart-CategoriesTree'&gt;
 			 * </pre>
 			 * 
 			 * Tag parameters:
 			 * 
 			 * @return html code
 			 */
-			renderTreeComponent : function(treeEl) {
+			renderCategoriesTreeComponent : function(treeEl) {
 				return '<div id="categoriesTree" name="' + this.categoryTreeName + '"  bind="DataControl" renderingType="tree" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="tree"></div>';
 			},
 
-			_executeAfterRenderTreeComponent : function() {
+			_executeAfterRenderCategoriesTreeComponent : function() {
 				var that = this;
 				$("#categoriesTree").KendoTreeAdapter({
-					labelAttribute : 'value'
+					labelAttribute : 'value',
+					runAfterPublish : function() {
+						$("#categoriesTree").data("kendoTreeView").bind("select", function(event) {
+							that.lastListAction = 'tree';
+						});
+					}
 				});
+
+			},
+
+			/**
+			 * Renders the Categories as an accordion component
+			 * 
+			 * <pre>
+			 * 	Used directly in html by either &lt;shoppingCart:CategoriesAccordion&gt; or &lt;div class='shoppingCart-CategoriesAccordion'&gt;
+			 * </pre>
+			 * 
+			 * Tag parameters:
+			 * 
+			 * @return html code
+			 */
+			renderCategoriesAccordionComponent : function(treeEl) {
+				return '<div id="categoriesAccordion" name="' + this.categoryTreeName + '"  bind="DataControl" renderingType="accordion" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="accordion"></div>';
+			},
+
+			_executeAfterRenderCategoriesAccordionComponent : function() {
+				var that = this;
+				$("#categoriesAccordion").KendoPanelBarAdapter({
+					labelAttribute : 'value',
+					runAfterPublish : function() {
+						$("#categoriesAccordion").data("kendoPanelBar").bind("select", function(event) {
+							that.lastListAction = 'tree';
+						});
+					},
+					staticElements : [
+						{
+							label : 'Specials',
+							method : this.listItemsOnSpecialMethodName,
+							contextObject : this.listItemsOnSpecialMethodContextObject
+						}
+					]
+				});
+
 			},
 
 			renderCartTitleComponent : function(el) {
@@ -376,8 +465,8 @@ $(function() {
 				html += window.expanz.html.startDiv("item");
 				html += window.expanz.html.renderGridTemplateField("ItemForSale_Name", 200);
 				html += window.expanz.html.renderGridTemplateField("ValueIncTax", 55);
-				html += '<input id="userinput_quantity" format="numeric" value="<%= data.PlanQuantity %>" />';
-				html += '<button methodName="saveItemFromCart">Adjust</button>';
+				html += '<input id="userinput_quantity" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/>';
+				html += '<button style="display:none" methodName="saveItemFromCart">Adjust</button>';
 				html += '<button methodName="deleteItemFromCart">X</button>';
 				html += window.expanz.html.endDiv();
 				html += '</script>';
@@ -421,6 +510,12 @@ $(function() {
 				});
 			},
 
+			renderMiniGoToCartBoxComponent : function(el) {
+				var html = "";
+				html += '<div><span class="miniCartBox" onclick="window.location=\'' + this.shoppingCartCheckoutPage + '\'" >Cart <span bind="field" name="nbItems" class="miniCartItemCount" id="nbItems"><span attribute="value"><span></span></span></div>';
+				return html;
+			},
+
 			/**
 			 * Renders the Cart component
 			 * 
@@ -454,35 +549,32 @@ $(function() {
 			},
 
 			renderCheckoutItemsListComponent : function(checkoutEl) {
-				var html = ""
-				html += window.expanz.html.renderBasicGridTemplate('lvMiniCartItemTemplate', [
-					{
-						name : 'ItemForSale_Name',
-						width : 300
-					}, {
-						name : 'UnitPrice',
-						width : 100
-					}, {
-						name : 'PlanQuantity',
-						width : 100
-					}, {
-						name : 'Value',
-						width : 100
-					}, {
-						name : 'ValueIncTax',
-						width : 100
-					}
-				]);
-
+				var html = "";
+				html += '<script type="text/template" id="lvMiniCartItemTemplate">';
+				html += window.expanz.html.startDiv("item");
+				html += window.expanz.html.renderGridTemplateField("ItemForSale_Name", 300);
+				html += window.expanz.html.renderGridTemplateField("UnitPrice", 100);
+				html += '<div style="width: 100px; float: left;"><input id="userinput_quantity" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/></div>';
+				html += window.expanz.html.renderGridTemplateField("ValueIncTax", 100);
+				html += '<button style="display:none" methodName="saveItemFromCart">Adjust</button>';
+				html += '<button methodName="deleteItemFromCart">X</button>';
+				html += window.expanz.html.endDiv();
+				html += '</script>';
+				
+				html += '<script type="text/template" id="lvMiniCartItemTemplateHeader">';
+				html += window.expanz.html.startDiv("header");
+				html += window.expanz.html.renderHeaderGridField("Item", 300);
+				html += window.expanz.html.renderHeaderGridField("Price", 100);
+				html += window.expanz.html.renderHeaderGridField("Qty", 100);
+				html += window.expanz.html.renderHeaderGridField("Total", 100);
+				html += window.expanz.html.endDiv();
+				html += window.expanz.html.clearBoth();
+				html += '</script>';
+								
+				
 				html += "<div class='title'>Checkout</div>";
 
 				html += "<div class='checkoutList'>";
-				html += window.expanz.html.renderHeaderGridField('Item', 300);
-				html += window.expanz.html.renderHeaderGridField('Price', 100);
-				html += window.expanz.html.renderHeaderGridField('Qty', 100);
-				html += window.expanz.html.renderHeaderGridField('Value', 100);
-				html += window.expanz.html.renderHeaderGridField('Total', 100);
-				html += window.expanz.html.clearBoth();
 				html += "<div bind='DataControl' renderingType='grid' id='checkoutCart' name='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
 
 				html += "</div>";
@@ -498,6 +590,10 @@ $(function() {
 				<div class="deliveryAddress"> \
 					<div class="title">Delivery Address</div> \
 					<div bind="field" name="DeliveryAddressStreet" class="textinput"> \
+						<label attribute="label"></label> \
+						<input type="text" attribute="value" class="k-textbox" /> \
+					</div> \
+					<div bind="field" name="DeliveryAddress2" class="textinput"> \
 						<label attribute="label"></label> \
 						<input type="text" attribute="value" class="k-textbox" /> \
 					</div> \
@@ -591,17 +687,40 @@ $(function() {
 				});
 			},
 
-			_executeAfterRenderSearchComponent : function() {
-				$("#shoppingCartSearch #ItemSearch input").keypress(function(e) {
-					if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
-						$("#shoppingCartSearch #ItemSearch input").blur(); /* send the search value to the server */
-						$('#shoppingCartSearch button').click();
-						return false;
-					}
-					else {
-						return true;
-					}
+			_executeAfterRenderSearchComponent : function(el) {
+				var displayButton = el.attr('buttonVisible') !== undefined ? boolValue(el.attr('buttonVisible')) : true;
+				var that = this;
+				/* if button is not visible trigger change on value change after a delay of 100 to be sure the value is takn by the server */
+				if (!displayButton) {
+					$("#shoppingCartSearch #ItemSearch input").change(function(e) {
+						console.log("value changed");
+						$("#shoppingCartSearch #ItemSearch input").blur();
+						var timeoutID = window.setTimeout(function() {
+							$('#shoppingCartSearch button').click();
+						}, 100);
+
+					});
+				}
+				/* else handle the enter key click */
+				else {
+					$("#shoppingCartSearch #ItemSearch input").keypress(function(e) {
+						if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+							$("#shoppingCartSearch #ItemSearch input").blur(); /* send the search value to the server */
+							var timeoutID = window.setTimeout(function() {
+								$('#shoppingCartSearch button').click();
+							}, 100);
+							return false;
+						}
+						else {
+							return true;
+						}
+					});
+				}
+
+				$('#shoppingCartSearch button').click(function() {
+					that.lastListAction = 'search';
 				});
+
 			},
 
 			renderOrderHistoryComponent : function(el) {
