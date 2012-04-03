@@ -1,4 +1,4 @@
-/* Author: Adam Tait
+/* Author: Adam Tait And Kim Damevin
 
  */
 
@@ -68,7 +68,6 @@ $(function() {
 		},
 
 		update : function(attrs) {
-
 			expanz.Net.DeltaRequest(this.get('id'), attrs.value, this.get('parent'));
 			return;
 		}

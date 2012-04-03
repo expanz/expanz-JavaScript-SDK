@@ -224,7 +224,7 @@ $(function() {
 					});
 
 				}
-				/* renderingType is not grid: 'tree' or 'combobox' or empty */
+				/* renderingType is not grid: 'tree' or 'combobox' or checkboxes or empty */
 				else {
 					var dataControlModel = new expanz.Model.Data.DataControl({
 						id : $(dataControlEl).attr('name'),
@@ -235,12 +235,22 @@ $(function() {
 						renderingType : $(dataControlEl).attr('renderingType')
 					});
 
-					var view = new expanz.Views.DataControlView({
-						el : $(dataControlEl),
-						id : $(dataControlEl).attr('id'),
-						className : $(dataControlEl).attr('class'),
-						model : dataControlModel
-					});
+					if ($(dataControlEl).attr('renderingType') == 'checkboxes') {
+						var view = new expanz.Views.CheckboxesView({
+							el : $(dataControlEl),
+							id : $(dataControlEl).attr('id'),
+							className : $(dataControlEl).attr('class'),
+							model : dataControlModel
+						});
+					}
+					else {
+						var view = new expanz.Views.DataControlView({
+							el : $(dataControlEl),
+							id : $(dataControlEl).attr('id'),
+							className : $(dataControlEl).attr('class'),
+							model : dataControlModel
+						});
+					}
 				}
 
 				DataControlModels.push(dataControlModel);

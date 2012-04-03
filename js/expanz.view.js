@@ -353,6 +353,19 @@ $(function() {
 								});
 							}
 						});
+
+						/* trigger a method call if a user field include a change attribute */
+						hostEl.find("#" + itemId + "  [autoUpdate] ").change(function(elem) {
+							var action = that.model.getAction($(this).attr('autoUpdate'));
+							if (action && action.length > 0) {
+								var rowId = $(this).closest("[rowId]").attr('rowId');
+								var actionParams = action[0].get('actionParams').clone();
+								that._handleActionClick($(this), rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+							}
+							else {
+								window.expanz.logToConsole("autUpdate action not defined in formapping: " + $(this).attr('autoUpdate'));
+							}
+						});
 					}
 					/* binding menuAction from template */
 					hostEl.find("#" + itemId + " [menuAction] ").each(function(index, element) {
@@ -681,6 +694,42 @@ $(function() {
 			this.el.trigger("publishData", [
 				this.model.getAttr('xml'), this
 			]);
+		}
+
+	});
+
+	window.expanz.Views.CheckboxesView = expanz.Views.DataControlView.extend({
+		publishData : function() {
+			/* clean elements */
+			this.el.html();
+			var that = this;
+			/* no external component needed just have to draw the checkboxes and handle the clicks */
+
+			_.each(this.model.getAttr('xml').find('Row'), function(row) {
+				var rowId = $(row).attr('id');
+				var selected = boolValue($(row).attr('selected')) === true ? ' checked="checked" ' : '';
+				_.each($(row).find('Cell'), function(cell) {
+					var text = $(cell).text();
+					var id = that.model.id.replace(/\./g, "_") + "_" + rowId;
+					that.el.append("<div><input " + selected + " id='" + id + "' value='" + rowId + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
+
+					/* handle checkboxes click */
+					$(that.el).find("#" + id).click(function() {
+						/* send the delta to the server */
+						window.expanz.logToConsole(that.model.id + " filtered with " + $(this).val());
+
+						/* send negative value of id to say it has been unselected */
+						var val = $(this).val();
+						if (!$(this).is(":checked")) {
+							val = -val;
+						}
+						/* send the delta to the server */
+						that.model.updateItemSelected(val);
+					});
+
+				});
+			});
+
 		}
 
 	});
