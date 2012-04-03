@@ -216,7 +216,7 @@ $(function() {
 			SendNormalRequest(RequestObject.GetFile(filename, activity, expanz.Storage.getSessionHandle()));
 		},
 
-		/* call when selecting something from the tree view (file) or menu action*/
+		/* call when selecting something from the tree view (file) or menu action */
 		CreateMenuActionRequest : function(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, callbacks) {
 			if (callbacks === undefined)
 				callbacks = activity.callbacks;
@@ -691,9 +691,16 @@ $(function() {
 	function parseCreateActivityResponse(activity, callbacks) {
 		return function apply(xml) {
 			window.expanz.logToConsole("start parseCreateActivityResponse");
+
+			/* Errors case -> server is most likely not running */
+			$(xml).find('errors').each(function() {
+				if ($(xml).find('errors').text().indexOf(':Your session cannot be contacted') != -1) {
+					expanz.Views.redirect(window.expanz.getMaintenancePage());
+				}
+			});
+
 			var execResults = $(xml).find("ExecXResult");
 			if (execResults) {
-
 				$(execResults).find('Message').each(function() {
 					if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
 						var sessionLost = /Session .* not found/.test($(this).text());
@@ -1265,7 +1272,7 @@ $(function() {
 		_.each($(data).find('Row'), function(row) {
 
 			var rowId = $(row).attr('id');
-			gridModel.addRow(rowId, $(row).attr('type'));
+			gridModel.addRow(rowId, $(row).attr('type') || $(row).attr('Type'));
 
 			// add cells to this row
 			_.each($(row).find('Cell'), function(cell) {
