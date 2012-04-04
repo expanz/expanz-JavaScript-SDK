@@ -122,7 +122,12 @@ $(function() {
 				this.el.addClass('methodLoading');
 			}
 			else {
-				this.el.removeAttr('disabled');
+				if(this.el.is(":button")){
+					this.el.removeAttr('disabled');
+				}
+				else{
+					this.el.find("button").removeAttr('disabled');
+				}
 				this.el.removeClass('methodLoading');
 			}
 
@@ -368,7 +373,7 @@ $(function() {
 								that._handleActionClick($(this), rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
 							}
 							else {
-								//window.expanz.logToConsole("autUpdate action not defined in formapping: " + $(this).attr('autoUpdate'));
+								window.expanz.logToConsole("autUpdate action not defined in formapping: " + $(this).attr('autoUpdate'));
 							}
 						});
 					}
@@ -672,7 +677,7 @@ $(function() {
 				/* in that case the button has already been set in a loading state so we just switch it back to normal when loading is finished */
 				if (initiatorType == 'method' && !deltaLoading.isLoading) {
 					/* can be either a element with methodName or a name */
-					var actionSelector = ".actionLoading[methodName='" + initiatorID + "'], [name='" + initiatorID + "'] .actionLoading";
+					var actionSelector = ".actionLoading[methodName='" + initiatorID + "'], [name='" + initiatorID + "'] .actionLoading, .actionLoading[autoUpdate='" + initiatorID + "']";
 					var dataControlEl = this.el.find(actionSelector).first().closest("[bind='DataControl']");
 					if (dataControlEl && dataControlEl.length > 0) {
 						dataControlEl.find(actionSelector).removeAttr('disabled');
