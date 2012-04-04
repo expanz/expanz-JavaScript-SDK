@@ -4,11 +4,23 @@ $.fn.KendoDropDownListAdapter = function() {
 	var cb = $(this).kendoDropDownList();
 	var list = cb.data("kendoDropDownList");
 
+	var emptyItemLabel = null;
+
+	if ($(this).attr('emptyItemLabel') !== undefined)
+		emptyItemLabel = $(this).attr('emptyItemLabel');
+
 	/**
 	 * define publishData which is called when list of data is ready, xml data is passed as argument after the event
 	 */
 	var publishData = function(event, xml) {
 		var data = [];
+
+		if (emptyItemLabel != null) {
+			data.push({
+				text : emptyItemLabel,
+				value : ''
+			});
+		}
 
 		_.each($(xml).find('Row'), function(row) {
 			var rowId = $(row).attr('id');
