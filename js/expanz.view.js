@@ -53,18 +53,26 @@ $(function() {
 			"change [attribute=value]" : "viewUpdate"
 		},
 
-		viewUpdate : function() {
+		viewUpdate : function(event) {
 			var elem = this.el.find('[attribute=value]');
-			// handle checkbox field case
-			if ($(elem).is(":checkbox")) {
+			// handle multi-choices
+			if (this.model.get('items') !== undefined && this.model.get('items').length > 0) {
 				this.model.update({
-					value : $(elem).prop("checked") ? 1 : 0
+					value : (event.target.checked ? 1 : -1) * (event.target.value)
 				});
 			}
 			else {
-				this.model.update({
-					value : $(elem).val()
-				});
+				// handle checkbox field case
+				if ($(elem).is(":checkbox")) {
+					this.model.update({
+						value : $(elem).prop("checked") ? 1 : 0
+					});
+				}
+				else {
+					this.model.update({
+						value : $(elem).val()
+					});
+				}
 			}
 
 			this.el.trigger('update:field');
@@ -954,14 +962,14 @@ $(function() {
 
 		}
 
-		/* multi choice field -> display as readonly checkboxes */
-		// TODO implement non readonly multi choices
+		/* multi choice field -> display as checkboxes */
 		if (allAttrs.items !== undefined && allAttrs.items.length > 0 && attr === 'value') {
+			var disabled = boolValue(elem.attr('editable')) ? "" : "disabled='disabled'";
 			_.each(allAttrs.items, function(item) {
 				var selected = boolValue($(item).attr('selected')) === true ? ' checked="checked" ' : '';
 				var text = $(item).attr('text');
 				var value = $(item).attr('value');
-				$(elem).append("<div><input disabled='disabled' " + selected + "' value='" + value + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
+				$(elem).append("<div><input " + disabled + selected + "' value='" + value + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
 			});
 		}
 		else {
