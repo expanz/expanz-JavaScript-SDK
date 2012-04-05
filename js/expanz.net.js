@@ -533,7 +533,7 @@ $(function() {
 	//
 	var parseCreateSessionResponse = function(callbacks) {
 		return function apply(xml) {
-			//window.expanz.logToConsole("start parseCreateSessionResponse");
+			// window.expanz.logToConsole("start parseCreateSessionResponse");
 
 			if ($(xml).find('CreateSessionXResult').length > 0) {
 				expanz.Storage.setSessionHandle($(xml).find('CreateSessionXResult').text());
@@ -568,7 +568,7 @@ $(function() {
 	};
 
 	function parseProcessAreas(xmlElement) {
-		//window.expanz.logToConsole("start parseProcessAreas");
+		// window.expanz.logToConsole("start parseProcessAreas");
 		var processAreas = [];
 		$(xmlElement).children('processarea').each(function() {
 			var processArea = new ProcessArea($(this).attr('id'), $(this).attr('title'));
@@ -602,7 +602,7 @@ $(function() {
 
 	function parseExecAnonymousResponse(callbacks) {
 		return function apply(xml) {
-			//window.expanz.logToConsole("start parseExecAnonymousResponse");
+			// window.expanz.logToConsole("start parseExecAnonymousResponse");
 			var execResults = $(xml).find('ExecAnonymousXResult');
 			var success = false;
 			if (execResults.length > 0) {
@@ -621,7 +621,7 @@ $(function() {
 					serverMessage += $(xml).first('errors').text();
 				}
 
-				//window.expanz.logToConsole("Success:" + success);
+				// window.expanz.logToConsole("Success:" + success);
 
 				if (serverMessage !== undefined && serverMessage.length > 0) {
 					if (success) {
@@ -654,7 +654,7 @@ $(function() {
 
 	function parseGetSessionDataResponse(callbacks) {
 		return function apply(xml) {
-			//window.expanz.logToConsole("start parseGetSessionDataResponse");
+			// window.expanz.logToConsole("start parseGetSessionDataResponse");
 
 			var processAreas = parseProcessAreas($(xml).find("Menu"));
 
@@ -690,7 +690,7 @@ $(function() {
 
 	function parseCreateActivityResponse(activity, callbacks) {
 		return function apply(xml) {
-			//window.expanz.logToConsole("start parseCreateActivityResponse");
+			// window.expanz.logToConsole("start parseCreateActivityResponse");
 
 			/* Errors case -> server is most likely not running */
 			$(xml).find('errors').each(function() {
@@ -739,6 +739,7 @@ $(function() {
 							maxLength : $(this).attr('maxLength'),
 							mask : $(this).attr('mask'),
 							label : $(this).attr('label'),
+							items : $(this).find("Item"),
 							value : $(this).attr('value') == '$longData$' ? $(this).text() : $(this).attr('value')
 
 						});
@@ -813,7 +814,7 @@ $(function() {
 
 	function parseDeltaResponse(activity, initiator, callbacks) {
 		return function apply(xml) {
-			//window.expanz.logToConsole("start parseDeltaResponse");
+			// window.expanz.logToConsole("start parseDeltaResponse");
 
 			var execResults = $(xml).find("ExecXResult");
 
@@ -883,10 +884,10 @@ $(function() {
 
 				/* Activity Request CASE */
 				$(execResults).find('ContextMenu').each(function() {
-					//window.expanz.logToConsole('ContextMenu received');
+					// window.expanz.logToConsole('ContextMenu received');
 					var caller = window.expanz.currentContextMenu;
 					if (caller !== null) {
-						//window.expanz.logToConsole('Caller found');
+						// window.expanz.logToConsole('Caller found');
 						caller.set({
 							data : null
 						});
@@ -910,6 +911,7 @@ $(function() {
 							}
 
 							field.set({
+								items : $(this).find("Item"),
 								text : $(this).attr('text'),
 								value : $(this).attr('value') == '$longData$' ? $(this).text() : $(this).attr('value')
 							});
@@ -935,15 +937,15 @@ $(function() {
 				$(execResults).find('File').each(function(data) {
 
 					if ($(this).attr('field') !== undefined && $(this).attr('path') != undefined) {
-						//window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
+						// window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
 						expanz.Net.GetBlobRequest($(this).attr('field'), activity, initiator);
 					}
 					else if ($(this).attr('name') !== undefined) {
-						//window.expanz.logToConsole("File found: " + $(this).attr('name'));
+						// window.expanz.logToConsole("File found: " + $(this).attr('name'));
 						expanz.Net.GetFileRequest($(this).attr('name'), activity, initiator);
 					}
 					else {
-						//window.expanz.logToConsole("Not implemented yet");
+						// window.expanz.logToConsole("Not implemented yet");
 					}
 
 				});
@@ -990,7 +992,7 @@ $(function() {
 					var pickfield = $(this).attr('pickField');
 					var contextObject = $(this).attr('contextObject');
 					if (id == 'picklist') {
-						//window.expanz.logToConsole("picklist received");
+						// window.expanz.logToConsole("picklist received");
 						var elId = id + pickfield;
 
 						var clientMessage = new expanz.Model.ClientMessage({
@@ -1017,7 +1019,7 @@ $(function() {
 								fillGridModel(gridModel, $(this));
 								picklistWindow.center();
 								gridModel.updateRowSelected = function(selectedId, type) {
-									//window.expanz.logToConsole("From parseDeltaResponse:updateRowSelected id:" + selectedId + ' ,type:' + type);
+									// window.expanz.logToConsole("From parseDeltaResponse:updateRowSelected id:" + selectedId + ' ,type:' + type);
 
 									var context = {
 										id : selectedId,
@@ -1087,7 +1089,7 @@ $(function() {
 
 	function parseDestroyActivityResponse(callbacks) {
 		return function apply(xml) {
-			//window.expanz.logToConsole("start parseDestroyActivityResponse");
+			// window.expanz.logToConsole("start parseDestroyActivityResponse");
 			var execResults = $(xml).find('ExecXResult');
 			if (xml && execResults) {
 				var esaResult = $(execResults).find('ESA');
@@ -1109,7 +1111,7 @@ $(function() {
 
 	function parseReleaseSessionResponse(callbacks) {
 		return function apply(xml) {
-			//window.expanz.logToConsole("start parseReleaseSessionResponse");
+			// window.expanz.logToConsole("start parseReleaseSessionResponse");
 			var result = $(xml).find("ReleaseSessionResult").text();
 			if (result === 'true') {
 				if (callbacks && callbacks.success) {

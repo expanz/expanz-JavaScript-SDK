@@ -8,6 +8,7 @@ $(function() {
 		initialize : function() {
 			this.model.bind("change:label", this.modelUpdate('label'), this);
 			this.model.bind("change:value", this.modelUpdate('value'), this);
+			this.model.bind("change:items", this.modelUpdate('value'), this);
 			this.model.bind("change:errorMessage", this.displayError(), this);
 			this.model.bind("change:loading", this.loading, this);
 		},
@@ -34,7 +35,7 @@ $(function() {
 					errorEl.show();
 					errorEl.css('display', 'inline');
 					this.el.addClass("errorField");
-					//window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
+					// window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
 				}
 				else {
 					var errorEl = this.el.find('#' + errorId);
@@ -42,7 +43,7 @@ $(function() {
 						errorEl.hide();
 					}
 					this.el.removeClass("errorField");
-					//window.expanz.logToConsole("hiding error message");
+					// window.expanz.logToConsole("hiding error message");
 				}
 
 			};
@@ -111,21 +112,21 @@ $(function() {
 		},
 
 		loading : function() {
-			//window.expanz.logToConsole('method loading ' + this.model.get('id'));
+			// window.expanz.logToConsole('method loading ' + this.model.get('id'));
 			if (this.model.get('loading') === true) {
-				if(this.el.is(":button")){
+				if (this.el.is(":button")) {
 					this.el.attr('disabled', 'disabled');
 				}
-				else{
-					this.el.find("button").attr('disabled','disabled');
+				else {
+					this.el.find("button").attr('disabled', 'disabled');
 				}
 				this.el.addClass('methodLoading');
 			}
 			else {
-				if(this.el.is(":button")){
+				if (this.el.is(":button")) {
 					this.el.removeAttr('disabled');
 				}
-				else{
+				else {
 					this.el.find("button").removeAttr('disabled');
 				}
 				this.el.removeClass('methodLoading');
@@ -162,8 +163,7 @@ $(function() {
 		},
 		modelUpdate : function() {
 			/* retrieve or create a div to host the context menu */
-			//window.expanz.logToConsole("modelUpdated");
-
+			// window.expanz.logToConsole("modelUpdated");
 			if (this.contextMenuEl === undefined) {
 				var contextMenuId = this.model.get('id').replace(/\./g, "_") + "_contextMenu";
 				this.el.append("<div class='contextMenu' id='" + contextMenuId + "' />");
@@ -211,7 +211,7 @@ $(function() {
 		},
 		submit : function() {
 			/* register current context menu */
-			//window.expanz.logToConsole("Registering current context menu");
+			// window.expanz.logToConsole("Registering current context menu");
 			window.expanz.currentContextMenu = this.model;
 			this.model.submit();
 			this.el.trigger('submit:' + this.model.get('id'));
@@ -289,7 +289,7 @@ $(function() {
 		},
 
 		renderWithPaging : function(currentPage, itemsPerPage) {
-			//window.expanz.logToConsole("GridView rendered for page  " + currentPage);
+			// window.expanz.logToConsole("GridView rendered for page " + currentPage);
 
 			var rows = this.model.getAllRows();
 			var firstItem = parseInt(currentPage * itemsPerPage);
@@ -667,7 +667,7 @@ $(function() {
 
 			var initiator = this.collection.get(initiatorID);
 			if (initiator) {
-				//window.expanz.logToConsole("delta method loading " + deltaLoading.isLoading + " " + initiatorID);
+				// window.expanz.logToConsole("delta method loading " + deltaLoading.isLoading + " " + initiatorID);
 				initiator.set({
 					loading : deltaLoading.isLoading
 				});
@@ -726,8 +726,7 @@ $(function() {
 					/* handle checkboxes click */
 					$(that.el).find("#" + id).click(function() {
 						/* send the delta to the server */
-						//window.expanz.logToConsole(that.model.id + " filtered with " + $(this).val());
-
+						// window.expanz.logToConsole(that.model.id + " filtered with " + $(this).val());
 						/* send negative value of id to say it has been unselected */
 						var val = $(this).val();
 						if (!$(this).is(":checked")) {
@@ -783,7 +782,7 @@ $(function() {
 		},
 
 		create : function(containerjQ) {
-			//window.expanz.logToConsole("render popupWindow");
+			// window.expanz.logToConsole("render popupWindow");
 			var popupWindow = containerjQ.find('#' + this.id);
 			if (popupWindow.length > 0) {
 				popupWindow.remove();
@@ -955,35 +954,47 @@ $(function() {
 
 		}
 
-		if ($(elem).is('input')) {
-			// special behaviour for checkbox input
-			if ($(elem).is(":checkbox")) {
-				$(elem).addClass('checkbox');
-				if (value == 1) {
-					$(elem).prop("checked", true);
-				}
-				else {
-					$(elem).prop("checked", false);
-				}
-			}
-			else {
-				$(elem).val(value);
-			}
-			$(elem).trigger("valueUpdated", value);
-
-			// if the field is disable apply the disabled attribute and style
-			if (allAttrs["disabled"] === true) {
-				$(elem).attr('disabled', 'disabled');
-				$(elem).addClass('readonlyInput');
-			}
-			else {
-				$(elem).removeAttr('disabled');
-				$(elem).removeClass('readonlyInput');
-			}
+		/* multi choice field -> display as readonly checkboxes */
+		// TODO implement non readonly multi choices
+		if (allAttrs.items !== undefined && allAttrs.items.length > 0 && attr === 'value') {
+			_.each(allAttrs.items, function(item) {
+				var selected = boolValue($(item).attr('selected')) === true ? ' checked="checked" ' : '';
+				var text = $(item).attr('text');
+				var value = $(item).attr('value');
+				$(elem).append("<div><input disabled='disabled' " + selected + "' value='" + value + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
+			});
 		}
 		else {
-			/* if value is empty put an unbreakable space instead */
-			$(elem).html(value || '&nbsp;');
+			if ($(elem).is('input')) {
+				// special behaviour for checkbox input
+				if ($(elem).is(":checkbox")) {
+					$(elem).addClass('checkbox');
+					if (value == 1) {
+						$(elem).prop("checked", true);
+					}
+					else {
+						$(elem).prop("checked", false);
+					}
+				}
+				else {
+					$(elem).val(value);
+				}
+				$(elem).trigger("valueUpdated", value);
+
+				// if the field is disable apply the disabled attribute and style
+				if (allAttrs["disabled"] === true) {
+					$(elem).attr('disabled', 'disabled');
+					$(elem).addClass('readonlyInput');
+				}
+				else {
+					$(elem).removeAttr('disabled');
+					$(elem).removeClass('readonlyInput');
+				}
+			}
+			else {
+				/* if value is empty put an unbreakable space instead */
+				$(elem).html(value || '&nbsp;');
+			}
 		}
 		return elem;
 	}
