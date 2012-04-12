@@ -1,7 +1,10 @@
 $.fn.KendoDropDownListAdapter = function() {
 
 	/* instantiate Kendo Control */
-	var cb = $(this).kendoDropDownList();
+	var cb = $(this).kendoDropDownList({
+		dataTextField : "text",
+		dataValueField : "value"
+	});
 	var list = cb.data("kendoDropDownList");
 
 	var emptyItemLabel = null;

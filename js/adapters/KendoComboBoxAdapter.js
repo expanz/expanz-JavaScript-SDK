@@ -1,7 +1,10 @@
 $.fn.KendoComboBoxAdapter = function() {
 
 	/* instantiate Kendo Control */
-	var cb = $(this).kendoComboBox();
+	var cb = $(this).kendoComboBox({
+		dataTextField : "text",
+		dataValueField : "value"
+	});
 	var list = cb.data("kendoComboBox");
 
 	/**
