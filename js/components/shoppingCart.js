@@ -12,7 +12,7 @@ $(function() {
 			listItemsOnSpecialMethodName : "listItemsOnSpecial",
 			listItemsOnSpecialMethodContextObject : "StockTranItem.ItemForSale",
 
-			listPreviouslyOrderedMethodName : "listItemsPreviouslyOrdered",
+			listPreviouslyOrderedMethodName : "listPreviouslyOrderedItems",
 			listPreviouslyOrderedContextObject : "StockTranItem.ItemForSale",
 
 			productListName : "productList",
@@ -43,11 +43,9 @@ $(function() {
 				'CategoriesTree',
 				'CategoriesAccordion',
 				'List',
-				'Checkout',
 				'ListOnSpecialItemsButton',
 				'ListPreviouslyOrderedButton',
-				'ListItemsAsList',
-				'ListItemsAsGrid',
+				'ListItems',
 				'ListDisplayChoice',
 				'CartTitle',
 				'CartItemsList',
@@ -58,7 +56,9 @@ $(function() {
 				'CheckoutItemsList',
 				'CheckoutEditCartButton',
 				'CheckoutPayNowButton',
-				'CheckoutTotals',
+				'CheckoutSubTotal',
+				'CheckoutFreight',
+				'CheckoutTotal',
 				'OrderHistory'
 			],
 
@@ -68,8 +68,11 @@ $(function() {
 				_.each(this.components, function(component) {
 					var componentEl = window.expanz.html.findShoppingCartElement(component);
 					if (componentEl !== undefined) {
-						var componentContent = that['render' + component + 'Component'](componentEl);
-						$(componentEl).append(componentContent);
+						componentEl.each(function() {
+							var componentContent = that['render' + component + 'Component']($(this));
+							$(this).append(componentContent);
+						});
+
 					}
 				});
 
@@ -81,12 +84,17 @@ $(function() {
 				_.each(this.components, function(component) {
 					var componentEl = window.expanz.html.findShoppingCartElement(component);
 					if (componentEl !== undefined) {
-						/* execute script after adding to content to the dom */
-						if (that['_executeAfterRender' + component + 'Component']) {
-							that['_executeAfterRender' + component + 'Component'](componentEl);
-						}
+						componentEl.each(function() {
+							/* execute script after adding to content to the dom */
+							if (that['_executeAfterRender' + component + 'Component']) {
+								that['_executeAfterRender' + component + 'Component']($(this));
+							}
+						});
+
 					}
 				});
+
+				addPlaceHolderCapabilities();
 
 			},
 
@@ -169,43 +177,29 @@ $(function() {
 				});
 			},
 
-			renderListItemsAsListComponent : function(el) {
+			renderListItemsComponent : function(el) {
 				var html = "";
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
-				html += this.renderListItemTemplate();
-				html += this.renderListItemTemplateHeader();
-				html += "<div id='searchResultTitle' class='searchResultTitle' style='display:none'>Search result</div>";
-				html += '<div id="productListDivList" noItemText="No item matches your selection" isHTMLTable="true" templateName="productListItemTemplateList"  itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
+				var displayAsTable = boolValue(el.attr('displayAsTable'));
+				var templateName = (el !== undefined && el.attr('templateName') !== undefined) ? el.attr('templateName') : 'productListItemTemplateGrid';
+				if (displayAsTable) {
+					html += this.renderDefaultListItemTemplate();
+					html += this.renderDefaultListItemTemplateHeader();
+				}
+				else {
+					html += this.renderDefaultListItemGridTemplate();
+				}
+				html += "<div id='searchResultTitle' class='searchResultTitle' style='display:none'>Showing Results for \"<span id='searchString'></span>\"</div>";
+				html += '<div id="productListDiv" noItemText="No item matches your selection" isHTMLTable="' + displayAsTable + '" templateName="' + templateName + '"  itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 				return html;
 			},
 
-			_executeAfterRenderListItemsAsListComponent : function() {
-				window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent($("#productListDivList"), 1);
+			_executeAfterRenderListItemsComponent : function(el) {
+				window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent($(el).find("#productListDiv"), 1);
 				var that = this;
-				$("#productListDivList").bind("table:rendered", function() {
+				$(el).find("#productListDiv").bind("table:rendered", function() {
 					if (that.lastListAction == 'search') {
-						$("#searchResultTitle").show();
-					}
-					else {
-						$("#searchResultTitle").hide();
-					}
-				});
-			},
-
-			renderListItemsAsGridComponent : function(el) {
-				var html = "";
-				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
-				html += this.renderListItemGridTemplate();
-				html += "<div id='searchResultTitle' class='searchResultTitle' style='display:none'>Search result</div>";
-				html += '<div id="productListDivGrid" noItemText="No item matches your selection" templateName="productListItemTemplateGrid" itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
-				return html;
-			},
-
-			_executeAfterRenderListItemsAsGridComponent : function() {
-				window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent($("#productListDivGrid"), 1);
-				var that = this;
-				$("#productListDivGrid").bind("table:rendered", function() {
-					if (that.lastListAction == 'search') {
+						$("#searchString").html($("#ItemSearch input").val());
 						$("#searchResultTitle").show();
 					}
 					else {
@@ -226,30 +220,33 @@ $(function() {
 
 			_executeAfterRenderListDisplayChoiceComponent : function() {
 				// TODO store and retrieve a user preference
-				if ($("#productListDivList").length > 0) {
+				var productListAsTable = $("#productListDiv[isHTMLTable='true']");
+				var productListAsGrid = $("#productListDiv[isHTMLTable='false']");
+
+				if (productListAsGrid.length > 0) {
 					$("#displayAsList").addClass("selectedDisplay");
-					$("#productListDivList").show();
-					$("#productListDivGrid").hide();
+					productListAsTable.show();
+					productListAsGrid.hide();
 				}
 				else {
 					$("#displayAsGrid").addClass("selectedDisplay");
-					$("#productListDivGrid").show();
-					$("#productListDivList").hide();
+					productListAsTable.show();
+					productListAsGrid.hide();
 				}
 
 				var that = this;
 				$("#displayAsList").click(function() {
 					$("#displayAsList").addClass("selectedDisplay");
 					$("#displayAsGrid").removeClass("selectedDisplay");
-					$("#productListDivList").show();
-					$("#productListDivGrid").hide();
+					productListAsTable.show();
+					productListAsGrid.hide();
 				});
 
 				$("#displayAsGrid").click(function() {
 					$("#displayAsList").removeClass("selectedDisplay");
 					$("#displayAsGrid").addClass("selectedDisplay");
-					$("#productListDivList").hide();
-					$("#productListDivGrid").show();
+					productListAsTable.hide();
+					productListAsGrid.show();
 				});
 
 			},
@@ -257,48 +254,46 @@ $(function() {
 			/**
 			 * Method used in the list component to render the template of an item in the grid
 			 */
-			renderListItemGridTemplate : function() {
+			renderDefaultListItemGridTemplate : function() {
 				var html = '';
 				html += '\
 					<script type="text/template" id="productListItemTemplateGrid"> \
-						<div class="item"> \
-							<div> \
+					<div class="productNDetail"> \
+						<div class="product"> \
 							<% if ( isImageValid(data.ThumbImage_FileContents) ){ %>  \
-								<img class="thumbnail" src="' + window.config._URLblobs + '<%= data.ThumbImage_FileContents %>' + '"/> \
+								<div class="productIcon left productThumbnail"> \
+									<a title="<%= data.Name %>" href="' + window.config._URLblobs + '<%= data.Image_FileContents %>' + '" class="productImage"><img class="thumbnail" src="' + window.config._URLblobs + '<%= data.ThumbImage_FileContents %>' + '"/></a> \
+								</div> \
 							<% } %>  \
 							<% if ( !isImageValid(data.ThumbImage_FileContents) ){ %>  \
-								<img class="noThumbnail" src="assets/images/no_image_available.png"/> \
+								<div class="productIcon left productThumbnail noThumbnail"></div> \
 							<% } %> \
-							<div style="min-height:100px"> \
-								<label><%= data.Name %></label><br/> \
-								<label><b>$<%= data.DefaultSellPrice %></b></label><br/> \
-								<label><%= window.expanz.html.getDisplayableDiscount(data.UdefString1) %></label> \
-							</div> \ \
-							<% if ( data.AvailableQuantity <= 0 ) { %>  \
-								<% if ( data.SellRateCalcNotes == "No stock available" ) { %>  \
-								<i><%= $.i18n.prop(data.SellRateCalcNotes,data.Available_From)%></i> \
-								<% } %>  \
-								<% if ( data.SellRateCalcNotes != "Not available before" ) { %>  \
-									<i><%= $.i18n.prop(data.SellRateCalcNotes)%></i> \
-									<% } %>  \
-							<% } %>  \
+							<div class="productTitle left"> \
+								<p class="productTitleTxt"><a href="javascript:void(0);" onclick="javascript:$(this).closest(\'.productNDetail\').children(\'.productdetails\').toggle()"><%= data.Name %></a></p> \
+								<p class="productoffer"><%= window.expanz.html.getDisplayableDiscount(data.UdefString1,",&nbsp;") %></p> \
+							</div> \
+							<div class="productPrice left"> \
+								<p class="productPriceText">$<%= data.DefaultSellPrice %></p>  \
+								<p class="productCurrency">ea</p> \
+							</div> \
 							<% if ( true ) { %>  \
-								<input class="gridUserInput" style="width:50px !important" type="text" format="numeric"  id="userinput_quantity"></input>\
-								<button class="addToCartButton" methodName="saveItemFromCart">Add</button> \
-							<% } %></div> \
+								<div class="productCount left"> \
+									<input class="gridUserInput" type="text" format="numeric"  id="userinput_quantity"></input>\
+								</div> \
+								<div class="left addProductMain"> \
+									<a class="addProduct" methodName="saveItemFromCart"></a> \
+								</div> \
+							<% } %> \
+							<div class="clear"></div> \
+							</div> \
+						<div class="productdetails" style="display:none"><p><%= data.ShortDescription || "No description" %></p></div> \
+						</div> \
+					</script>\
 					';
-
-				html += window.expanz.html.clearBoth();
-
-				html += '<div class="description"><label><%= data.ShortDescription %></label></div>';
-
-				html += '</div>';
-				html += '</script>';
-
 				return html;
 			},
 
-			renderListItemTemplateHeader : function() {
+			renderDefaultListItemTemplateHeader : function() {
 				var html = ' \
 					<script type="text/template" id="productListItemTemplateListHeader">\
 					<thead><tr class="item listDisplay" style="height:25px;font-size:16px;text-align:center"> \
@@ -315,7 +310,7 @@ $(function() {
 			/**
 			 * Method used in the list component to render the template of an item in the list
 			 */
-			renderListItemTemplate : function() {
+			renderDefaultListItemTemplate : function() {
 				var html = ' \
 					<script type="text/template" id="productListItemTemplateList"> \
 					<tr class="item listDisplay"> \
@@ -379,14 +374,14 @@ $(function() {
 
 				html += this.renderListOnSpecialItemsButtonComponent();
 
-				html += this.renderListItemsAsGridComponent();
+				html += this.renderListItemsComponent();
 
 				html += "</div>";
 				return html;
 			},
 
 			_executeAfterRenderListComponent : function() {
-				this._executeAfterRenderListItemsAsGridComponent();
+				this._executeAfterRenderListItemsComponent();
 				this._executeAfterRenderListDisplayChoiceComponent();
 			},
 
@@ -430,7 +425,7 @@ $(function() {
 			 * @return html code
 			 */
 			renderCategoriesAccordionComponent : function(treeEl) {
-				return '<div id="categoriesAccordion" name="' + this.categoryTreeName + '"  bind="DataControl" renderingType="accordion" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="accordion"></div>';
+				return '<div><ul id="categoriesAccordion" name="' + this.categoryTreeName + '"  bind="DataControl" renderingType="accordion" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="accordion"></ul></div>';
 			},
 
 			_executeAfterRenderCategoriesAccordionComponent : function() {
@@ -446,7 +441,8 @@ $(function() {
 						{
 							label : 'Specials',
 							method : this.listItemsOnSpecialMethodName,
-							contextObject : this.listItemsOnSpecialMethodContextObject
+							contextObject : this.listItemsOnSpecialMethodContextObject,
+							position : 'end'
 						}
 					]
 				});
@@ -512,7 +508,7 @@ $(function() {
 
 			renderMiniGoToCartBoxComponent : function(el) {
 				var html = "";
-				html += '<div><div id="miniCartBox" style="display:none" class="miniCartBox" onclick="if($(\'#nbItems\').text() != 0) window.location=\'' + this.shoppingCartCheckoutPage + '\'" >Cart  <div class="shoppingCartImage"></div> <div bind="field" name="CartItemsCount" class="CartItemsCount numberCircle"><span  id="nbItems" attribute="value">0</span></div></div></div>';
+				html += '<div><div id="miniCartBox" style="display:none" class="miniCartBox" onclick="if($(\'#nbItems\').text() != 0) window.location=\'' + this.shoppingCartCheckoutPage + '\'" ><span class="miniCartBoxImage">CART</span> <div bind="field" name="CartItemsCount" class="cartItemCount"><span  id="nbItems" attribute="value">0</span></div></div></div>';
 				return html;
 			},
 
@@ -521,7 +517,8 @@ $(function() {
 				if (CartItemsCountField) {
 					CartItemsCountField.collection.bind('change:value', function(el) {
 						if (el.get('value') == 0) {
-							$("#miniCartBox").hide();
+							/* can hidden if wanted */
+							$("#miniCartBox").show();
 						}
 						else {
 							$("#miniCartBox").show();
@@ -586,8 +583,6 @@ $(function() {
 				html += window.expanz.html.clearBoth();
 				html += '</script>';
 
-				html += "<div class='title'>Checkout</div>";
-
 				html += "<div class='checkoutList'>";
 				html += "<div bind='DataControl' renderingType='grid' id='checkoutCart' name='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
 
@@ -602,39 +597,47 @@ $(function() {
 
 				html += '\
 				<div class="deliveryAddress"> \
-					<div class="title">Delivery Address</div> \
-					<div bind="field" name="DeliveryAddressStreet" class="textinput"> \
-						<label attribute="label"></label> \
-						<input type="text" attribute="value" class="k-textbox" /> \
+					<div class="addressleft"> \
+						<div bind="field" name="DeliveryAddressStreet" class=""> \
+							<label attribute="label"></label> \
+							<input type="text" attribute="value" class="k-textbox" /> \
+						</div> \
+						<div bind="field" name="DeliveryLocation.ExtendedName"> \
+							<label>Suburb/State</label> \
+							<span type="text" attribute="value" style="word-wrap:break-word" /> \
+						</div> \
 					</div> \
-					<div bind="field" name="DeliveryAddress2" class="textinput"> \
-						<label attribute="label"></label> \
-						<input type="text" attribute="value" class="k-textbox" /> \
+					<div class="addressRight"> \
+						<div bind="field" name="DeliveryAddress2"> \
+							<label>Address line 2</label> \
+							<input type="text" attribute="value" class="k-textbox" /> \
+						</div> \
+						<div bind="field" name="DeliveryLocation.FindCode"> \
+							<label class="changeSub">Change Suburb</label> \
+							<input type="text" attribute="value" class="k-textbox" /> \
+						</div> \
 					</div> \
-					<div bind="field" name="DeliveryLocation.ExtendedName" class="textinput"> \
-						<label attribute="label"></label> \
-						<span type="text" attribute="value" style="word-wrap:break-word" /> \
-					</div> \
-					<div bind="field" name="DeliveryLocation.FindCode" class="textinput indentOneLevel"> \
-						<label attribute="label"></label> \
-						<input type="text" attribute="value" class="k-textbox" /> \
-					</div> \
+					<div class="clear"></div> \
 				</div> \
 				';
 				return html;
 			},
 
-			renderCheckoutTotalsComponent : function(checkoutEl) {
+			renderCheckoutSubTotalComponent : function(checkoutEl) {
 				var html = "";
-				html += "<div style='display:none'  id='cartCheckout' class='checkout'>";
-				html += window.expanz.html.renderFooterGridField('&nbsp;', 400);
-				html += window.expanz.html.renderFooterGridField('Freight', 100);
-				html += window.expanz.html.renderReadOnlyField("Freight", false, true, 100);
-				html += window.expanz.html.renderFooterGridField('&nbsp;', 400);
-				html += window.expanz.html.renderFooterGridField('Total', 100);
-				html += window.expanz.html.renderReadOnlyField("Total", false, true, 100);
-				html += window.expanz.html.clearBoth();
-				html += "<div>";
+				html += '<div bind="field" name="Total" class="checkoutSubtotal"><span attribute="value"></span></div>';
+				return html;
+			},
+
+			renderCheckoutFreightComponent : function(checkoutEl) {
+				var html = "";
+				html += '<div bind="field" name="Freight" class="checkoutFreight"><span attribute="value"></span></div>';
+				return html;
+			},
+
+			renderCheckoutTotalComponent : function(checkoutEl) {
+				var html = "";
+				html += '<div bind="field" name="Total2" class="checkoutTotal"><span attribute="value"></span></div>';
 				return html;
 			},
 
@@ -658,35 +661,6 @@ $(function() {
 			// return html;
 			// },
 
-			/**
-			 * Renders the checkout component
-			 * 
-			 * <pre>
-			 * 	Used directly in html by either &lt;shoppingCart:checkout&gt; or &lt;div class='shoppingCart-Checkout'&gt;
-			 * </pre>
-			 * 
-			 * Tag parameters:
-			 * 
-			 * @return html code
-			 */
-			renderCheckoutComponent : function(checkoutEl) {
-
-				var html = '';
-
-				html += "<div class='checkout'>";
-				html += this.renderCheckoutDeliveryAddressComponent();
-				html += this.renderCheckoutItemsListComponent();
-				html += this.renderCheckoutTotalsComponent();
-				html += this.renderCheckoutEditCartButtonComponent();
-				html += this.renderCheckoutPayNowButtonComponent();
-				html += "</div>";
-				return html;
-			},
-
-			_executeAfterRenderCheckoutComponent : function() {
-				this._executeAfterRenderCheckoutListItemsComponent();
-			},
-
 			_executeAfterRenderCheckoutItemsListComponent : function() {
 				window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent($("#checkoutCart"));
 				var that = this;
@@ -704,8 +678,14 @@ $(function() {
 			_executeAfterRenderSearchComponent : function(el) {
 				var displayButton = el.attr('buttonVisible') !== undefined ? boolValue(el.attr('buttonVisible')) : true;
 				var that = this;
-				/* if button is not visible trigger change on value change after a delay of 100 to be sure the value is takn by the server */
+				/* if button is not visible trigger change on value change after a delay of 100 to be sure the value is taken by the server */
 				if (!displayButton) {
+					$("#shoppingCartSearch #ItemSearch input").keypress(function(e) {
+						if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+							$("#shoppingCartSearch #ItemSearch input").blur(); /* send the search value to the server */
+						}
+					});
+
 					$("#shoppingCartSearch #ItemSearch input").change(function(e) {
 						$("#shoppingCartSearch #ItemSearch input").blur();
 						var timeoutID = window.setTimeout(function() {
@@ -714,7 +694,7 @@ $(function() {
 
 					});
 				}
-				/* else handle the enter key click */
+				/* else handle only the enter key click */
 				else {
 					$("#shoppingCartSearch #ItemSearch input").keypress(function(e) {
 						if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
@@ -759,18 +739,6 @@ $(function() {
 	 * static html rendering functions
 	 */
 	window.expanz.html = window.expanz.html || {};
-	window.expanz.html.renderBasicGridTemplate = function(templateId, columns) {
-		var html = '';
-		html += '<script type="text/template" id="' + templateId + '">';
-		html += window.expanz.html.startDiv("item");
-		$.each(columns, function() {
-			html += window.expanz.html.renderGridTemplateField(this.name, this.width);
-		});
-		html += window.expanz.html.endDiv();
-		html += window.expanz.html.clearBoth();
-		html += '</script>';
-		return html;
-	};
 
 	window.expanz.html.startDiv = function(className) {
 		return '<div class="' + className + '" >';
@@ -788,12 +756,6 @@ $(function() {
 		if (!width)
 			width = 100;
 		return '<div class="gridHeader" style="width:' + width + 'px;float:left">' + label + '</div>';
-	};
-
-	window.expanz.html.renderFooterGridField = function(label, width) {
-		if (!width)
-			width = 100;
-		return '<div class="gridFooter" style="width:' + width + 'px;float:left">' + label + '</div>';
 	};
 
 	window.expanz.html.renderGridTemplateField = function(fieldName, width) {
@@ -834,8 +796,10 @@ $(function() {
 		return method;
 	};
 
-	window.expanz.html.getDisplayableDiscount = function(discount) {
-		discount = discount.replace(/;/g, "<br/>");
+	window.expanz.html.getDisplayableDiscount = function(discount, separator) {
+		if (separator === undefined)
+			separator = "<br/>";
+		discount = discount.replace(/;/g, separator);
 		discount = discount.replace(/(\d*) @(\d*\.?\d*)/g, '<label class="discount">$1 items for &#36;$2</label>')
 		return discount;
 	};
@@ -862,14 +826,11 @@ $(function() {
 		if ($("shoppingCart\\:" + component).length > 0) {
 			return $("shoppingCart\\:" + component);
 		}
-
 		/* search for class (old browsers support) */
 		if ($(".shoppingCart-" + component).length > 0) {
 			return $(".shoppingCart-" + component);
 		}
-
 		return undefined;
-
 	}
 
 	window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent = function(hostEl, initValue, min, max) {
@@ -880,6 +841,13 @@ $(function() {
 		$(hostEl).bind("table:rendered", function() {
 			$(hostEl).find("[id*='_userinput_'][format='numeric']").each(function() {
 				var kntb = null;
+
+				/* look for current value of the input field */
+				var inputVal = $(this).val();
+				if (inputVal && inputVal > 0) {
+					initValue = inputVal;
+				}
+
 				if (initValue === undefined) {
 					kntb = $(this).kendoNumericTextBox({
 						min : min,
@@ -919,11 +887,9 @@ $(function() {
 			title : 'Lost password',
 			url : 'lostPassword.html'
 		});
-
 		var lostPwdPopup = new window.expanz.Views.UIMessage({
 			id : clientMessage.id,
 			model : clientMessage
 		}, $('body'));
 	}
-
 });
