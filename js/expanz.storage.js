@@ -195,7 +195,7 @@ $(function() {
 
 					// add back button if defined
 					if (window.config._backButton === true) {
-						el.find("#menuUL").append('<li class="processarea menuitem" id="home"><a href="#" onclick="history.go(-1);return true;" class="backbutton menuTitle">' + backLabel + '</a></li>');
+						el.find("#menuUL").before('<a href="javascript:void(0);" onclick="history.go(-1);return true;" class="backbutton">' + backLabel + '</a>');
 					}
 					
 					// add home page if defined
