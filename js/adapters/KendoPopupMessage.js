@@ -17,6 +17,12 @@ function useKendoPopups() {
 					that.postCloseActions(title);
 			}
 		});
+		/* interpret the title as html to allow <span> or any html tags to be rendered */
+		var thatEl = this.el;
+		this.el.data("kendoWindow").bind("open", function() {
+			$(thatEl).parent().find(".k-window-title").html($(thatEl).parent().find(".k-window-title").text());
+		});
+
 	};
 
 	/* must be overriden depending on the pluggin used */
