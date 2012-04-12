@@ -35,8 +35,6 @@ $.fn.KendoPanelBarAdapter = function(options) {
 			parentSelectable = options['parentSelectable'];
 		if (options['expandedOnLoad'] !== undefined)
 			expandedOnLoad = options['expandedOnLoad'];
-		if (options['runAfterPublish'] !== undefined)
-			runAfterPublish = options['runAfterPublish'];
 		if (options['staticElements'] !== undefined)
 			staticElements = options['staticElements'];
 	}
@@ -85,11 +83,18 @@ $.fn.KendoPanelBarAdapter = function(options) {
 		/* sort data */
 		data.sort(getObjectSortAscendingFunction('text'));
 
-		/* add static element at the beginning */
+		/* add static element at the position asked */
 		_.each(staticElements, function(elem) {
-			data.unshift({
-				text : $(elem).attr('label')
-			});
+			if (elem.position != undefined && elem.position == 'end') {
+				data.push({
+					text : $(elem).attr('label')
+				});
+			}
+			else {
+				data.unshift({
+					text : $(elem).attr('label')
+				});
+			}
 		});
 
 		panelView.kendoPanelBar({
@@ -146,6 +151,8 @@ $.fn.KendoPanelBarAdapter = function(options) {
 		if (runAfterPublish) {
 			runAfterPublish(xmlData);
 		}
+		
+		$(this).trigger('dataPublished');
 
 	};
 
