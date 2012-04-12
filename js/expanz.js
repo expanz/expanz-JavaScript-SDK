@@ -160,25 +160,22 @@ $(function() {
 	};
 
 	window.expanz.createActivityWindow = function(parentActivity, id, style, key, title) {
-		var callback = function(url, onRequest) {
-			if (url !== null) {
-				//window.expanz.logToConsole(url);
-			}
-			else {
+		var callback = function(activityMetadata) {
+			if (activityMetadata.url === null) {
 				window.expanz.logToConsole("Url of activity not found");
 			}
 
 			/* case 'popup' */
-			if (onRequest == 'popup') {
+			if (activityMetadata.onRequest == 'popup') {
 
 				/* an activity request shouldn't be reloaded from any state -> clean an eventual cookie if popup was not closed properly */
 				window.expanz.Storage.clearActivityHandle(id, style);
 
 				var clientMessage = new expanz.Model.ClientMessage({
 					id : 'ActivityRequest',
-					url : url + "?random=" + new Date().getTime(),
+					url : activityMetadata.url + "?random=" + new Date().getTime(),
 					parent : parentActivity,
-					title : unescape(title || '')
+					title : unescape(title || activityMetadata.title || '')
 				});
 
 				var popup = new window.expanz.Views.ManuallyClosedPopup({
@@ -196,7 +193,7 @@ $(function() {
 			}
 			/* case 'navigate' or default */
 			else {
-				window.location = url + "?random=" + new Date().getTime() + "&" + id + style + "initialKey=" + key;
+				window.location = activityMetadata.url + "?random=" + new Date().getTime() + "&" + id + style + "initialKey=" + key;
 			}
 
 		};
@@ -232,7 +229,7 @@ $(function() {
 
 			var msgDisplayedInPopup = false;
 
-			/* display the message in the popup as well if visible */
+			/* display the message in the popup instead if visible */
 			if (window.expanz.currentPopup !== undefined && $(window.expanz.currentPopup.el).is(":visible")) {
 				var popupEl = window.expanz.currentPopup.el.find(el);
 				if (popupEl) {
@@ -242,8 +239,8 @@ $(function() {
 						$(popupEl).hide('slow');
 					}
 					else {
-						$(popupEl).slideDown(800, function() {
-							$(popupEl).delay(5000).slideUp(800);
+						$(popupEl).show(1, function() {
+							$(popupEl).delay(5000).hide(1);
 						});
 					}
 				}
@@ -305,9 +302,14 @@ $(function() {
 				var name = $(this).attr('name');
 				var url = $(this).attr('form');
 				var onRequest = $(this).attr('onRequest');
+				var title = $(this).attr('title');
 				var style = $(this).attr('style');
 				if (name == activityName && style == activityStyle) {
-					callback(url, onRequest);
+					var activityMetadata = {};
+					activityMetadata.url = url;
+					activityMetadata.onRequest = onRequest;
+					activityMetadata.title = title;
+					callback(activityMetadata);
 					return;
 				}
 			});
