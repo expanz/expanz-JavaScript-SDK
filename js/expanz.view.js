@@ -25,25 +25,27 @@ $(function() {
 		displayError : function() {
 			return function() {
 				var errorId = 'error' + this.model.get('id').replace(/\./g, "_");
-				if (this.model.get('errorMessage') !== undefined) {
-					var errorEl = this.el.find('#' + errorId);
-					if (errorEl.length < 1) {
-						this.el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="' + errorId + '"></p>');
-						errorEl = this.el.find('#' + errorId);
+				if (this.el.attr('showError') !== 'false') {
+					if (this.model.get('errorMessage') !== undefined) {
+						var errorEl = this.el.find('#' + errorId);
+						if (errorEl.length < 1) {
+							this.el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="' + errorId + '"></p>');
+							errorEl = this.el.find('#' + errorId);
+						}
+						errorEl.html(this.model.get("errorMessage"));
+						errorEl.show();
+						errorEl.css('display', 'inline');
+						this.el.addClass("errorField");
+						// window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
 					}
-					errorEl.html(this.model.get("errorMessage"));
-					errorEl.show();
-					errorEl.css('display', 'inline');
-					this.el.addClass("errorField");
-					// window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
-				}
-				else {
-					var errorEl = this.el.find('#' + errorId);
-					if (errorEl) {
-						errorEl.hide();
+					else {
+						var errorEl = this.el.find('#' + errorId);
+						if (errorEl) {
+							errorEl.hide();
+						}
+						this.el.removeClass("errorField");
+						// window.expanz.logToConsole("hiding error message");
 					}
-					this.el.removeClass("errorField");
-					// window.expanz.logToConsole("hiding error message");
 				}
 
 			};
@@ -326,13 +328,23 @@ $(function() {
 				$(hostEl).html('');
 
 				if (!hasItem) {
-					$(hostEl).html('<div class="emptyGrid">' + noItemText + '</div>');
+					$(hostEl).addClass("emptyGrid");
+					$(hostEl).removeClass("nonEmptyGrid");
+					$(hostEl).html('<div>' + noItemText + '</div>');
 				}
 				else {
-
+					$(hostEl).addClass("nonEmptyGrid");
+					$(hostEl).removeClass("emptyGrid");
 					/* header template if defined */
 					if (headerTemplate && headerTemplate.length > 0) {
 						$(hostEl).html(headerTemplate.html());
+					}
+
+					/* create a wrapper for rows if not a table */
+					var gridItems = $(hostEl);
+					if (this.options['isHTMLTable'] != "true") {
+						$(hostEl).append("<div class='gridItems'></div>");
+						gridItems = $(hostEl).find(".gridItems");
 					}
 
 					var compiled = _.template(itemTemplate.html());
@@ -348,19 +360,24 @@ $(function() {
 							result = $(result).addClass('first');
 						if (i == (lastItem - 1))
 							result = $(result).addClass('last');
-						if (i % 2 === 1)
+						if (i % 2 === 1) {
 							result = $(result).addClass('alternate');
+							result = $(result).addClass('even');
+						}
+						else {
+							result = $(result).addClass('odd');
+						}
 
 						/* add row id to prefix id for eventual user inputs */
 						$(result).find("[id*='userinput_']").each(function() {
 							$(this).attr('id', row.getAttr('id') + "_" + $(this).attr('id'));
 						});
 
-						hostEl.append(result);
+						gridItems.append(result);
 
 						/* binding method from template */
 						var that = this;
-						hostEl.find("#" + itemId + " [methodName] ").each(function(index, element) {
+						gridItems.find("#" + itemId + " [methodName] ").each(function(index, element) {
 							var action = that.model.getAction($(element).attr('methodName'));
 							if (action && action.length > 0) {
 								$(element).click(function() {
@@ -373,7 +390,7 @@ $(function() {
 						});
 
 						/* trigger a method call if a user field include a change attribute */
-						hostEl.find("#" + itemId + "  [autoUpdate] ").change(function(elem) {
+						gridItems.find("#" + itemId + "  [autoUpdate] ").change(function(elem) {
 							var action = that.model.getAction($(this).attr('autoUpdate'));
 							if (action && action.length > 0) {
 								var rowId = $(this).closest("[rowId]").attr('rowId');
@@ -385,6 +402,7 @@ $(function() {
 							}
 						});
 					}
+
 					/* binding menuAction from template */
 					hostEl.find("#" + itemId + " [menuAction] ").each(function(index, element) {
 						var action = that.model.getAction($(element).attr('menuAction'));
