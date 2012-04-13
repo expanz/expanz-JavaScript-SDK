@@ -35,6 +35,8 @@ $.fn.KendoPanelBarAdapter = function(options) {
 			parentSelectable = options['parentSelectable'];
 		if (options['expandedOnLoad'] !== undefined)
 			expandedOnLoad = options['expandedOnLoad'];
+		if (options['runAfterPublish'] !== undefined)
+			runAfterPublish = options['runAfterPublish'];			
 		if (options['staticElements'] !== undefined)
 			staticElements = options['staticElements'];
 	}
