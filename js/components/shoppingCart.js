@@ -204,6 +204,7 @@ $(function() {
 					}
 					else {
 						$("#searchResultTitle").hide();
+						$("#ItemSearch input").val("");
 					}
 				});
 			},
