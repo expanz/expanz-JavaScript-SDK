@@ -56,6 +56,7 @@ $(function() {
 				'CheckoutItemsList',
 				'CheckoutEditCartButton',
 				'CheckoutPayNowButton',
+				'CheckoutPickupCheckbox',
 				'CheckoutSubTotal',
 				'CheckoutFreight',
 				'CheckoutTotal',
@@ -461,8 +462,9 @@ $(function() {
 				html += '<script type="text/template" id="lvMiniCartItemTemplate">';
 				html += window.expanz.html.startDiv("item");
 				html += window.expanz.html.renderGridTemplateField("ItemForSale_Name", 200);
-				html += window.expanz.html.renderGridTemplateField("ValueIncTax", 55);
-				html += '<input id="userinput_quantity" class="gridUserInput" style="width:50px !important" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/>';
+				html += window.expanz.html.renderGridTemplateField("UnitPrice", 50);
+				html += '<div style="float:left"><input id="userinput_quantity" class="gridUserInput" style="width:48px !important" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/></div>';
+				html += window.expanz.html.renderGridTemplateField("ValueIncTax", 65);
 				html += '<button style="display:none" methodName="saveItemFromCart">Adjust</button>';
 				html += '<button methodName="deleteItemFromCart">X</button>';
 				html += window.expanz.html.endDiv();
@@ -565,21 +567,22 @@ $(function() {
 				var html = "";
 				html += '<script type="text/template" id="lvMiniCartItemTemplate">';
 				html += window.expanz.html.startDiv("item");
-				html += window.expanz.html.renderGridTemplateField("ItemForSale_Name", 300);
+				html += window.expanz.html.renderGridTemplateField("ItemForSale_Name", 400);
 				html += window.expanz.html.renderGridTemplateField("UnitPrice", 100);
-				html += '<div style="width: 100px; float: left;"><input class="gridUserInput" style="width:50px !important" id="userinput_quantity" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/></div>';
-				html += window.expanz.html.renderGridTemplateField("ValueIncTax", 100);
+				html += '<div style="width: 100px; float: left; margin-top:-3px"><input class="gridUserInput" style="width:50px !important" id="userinput_quantity" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/></div>';
+				html += window.expanz.html.renderGridTemplateField("ValueIncTax", 120);
 				html += '<button style="display:none" methodName="saveItemFromCart">Adjust</button>';
-				html += '<button methodName="deleteItemFromCart">X</button>';
+				html += '<div class="deleteButton"><button methodName="deleteItemFromCart">X</button></div>';
 				html += window.expanz.html.endDiv();
+				html += window.expanz.html.clearBoth();
 				html += '</script>';
 
 				html += '<script type="text/template" id="lvMiniCartItemTemplateHeader">';
 				html += window.expanz.html.startDiv("header");
-				html += window.expanz.html.renderHeaderGridField("Item", 300);
+				html += window.expanz.html.renderHeaderGridField("Item", 400);
 				html += window.expanz.html.renderHeaderGridField("Price", 100);
 				html += window.expanz.html.renderHeaderGridField("Qty", 100);
-				html += window.expanz.html.renderHeaderGridField("Total", 100);
+				html += window.expanz.html.renderHeaderGridField("Total", 120);
 				html += window.expanz.html.endDiv();
 				html += window.expanz.html.clearBoth();
 				html += '</script>';
@@ -639,6 +642,13 @@ $(function() {
 			renderCheckoutTotalComponent : function(checkoutEl) {
 				var html = "";
 				html += '<div bind="field" name="Total2" class="checkoutTotal"><span attribute="value"></span></div>';
+				return html;
+			},
+
+			renderCheckoutPickupCheckboxComponent : function(el) {
+				var html = "";
+				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'Pick-up';
+				html += '<div class="checkoutPickup" name="DeliveryMethod" bind="field"> ' + label + ' <input checkedValue="pickup" uncheckedValue="" attribute="value" type="checkbox"/></span>';
 				return html;
 			},
 
