@@ -816,6 +816,14 @@ $(function() {
 		return function apply(xml) {
 			// window.expanz.logToConsole("start parseDeltaResponse");
 
+			/* Errors case -> server is most likely not running */
+			$(xml).find('errors').each(function() {
+				if ($(xml).find('errors').text().indexOf(':Your session cannot be contacted') != -1) {
+					expanz.Views.redirect(window.expanz.getMaintenancePage());
+				}
+			});
+			
+			
 			var execResults = $(xml).find("ExecXResult");
 
 			if (execResults) {
