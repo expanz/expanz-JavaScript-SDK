@@ -12,6 +12,18 @@ function pop(ary, map) { // , name, key ) {
 	return null;
 }
 
+function getObjectSortAscendingFunction(attribute) {
+	return function(a, b) {
+		var nameA = a[attribute].toLowerCase();
+		var nameB = b[attribute].toLowerCase();
+		if (nameA < nameB) // sort string ascending
+			return -1
+		if (nameA > nameB)
+			return 1
+		return 0 // default return value (no sorting)
+	};
+}
+
 function addPlaceHolderCapabilities() {
 	if (!Modernizr.input.placeholder) {
 
@@ -247,6 +259,15 @@ jQuery.fn.center = function(params) {
 		});
 
 		return attributes;
+	};
+
+	$.fn.vAlign = function(myDefaultHeight) {
+		return this.each(function(i) {
+			var ah = $(this).height() || myDefaultHeight;
+			var ph = $(this).parent().height();
+			var mh = Math.ceil((ph - ah) / 2);
+			$(this).css('margin-top', mh);
+		});
 	};
 })(jQuery);
 
