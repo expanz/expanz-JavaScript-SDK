@@ -278,14 +278,19 @@ $(function() {
 								<p class="productPriceText">$<%= data.DefaultSellPrice %></p>  \
 								<p class="productCurrency">ea</p> \
 							</div> \
-							<% if ( true ) { %>  \
+							<% if ( !window.expanz.html.isEmpty(data.Available_From)) { %>  \
+								<p class="availableFrom">Available from <%= data.Available_From %></p> \
+							<% } else {%> \
+							<% if ( data.SellRateCalcNotes == "No stock available" ) { %>  \
+									<p class="noStock">No stock</p> \
+							<% } else { %>\
 								<div class="productCount left"> \
 									<input class="gridUserInput" type="text" format="numeric"  id="userinput_quantity"></input>\
 								</div> \
 								<div class="left addProductMain"> \
 									<a class="addProduct" methodName="saveItemFromCart"></a> \
 								</div> \
-							<% } %> \
+							<% } }%> \
 							<div class="clear"></div> \
 							</div> \
 						<div class="productdetails" style="display:none"><p><%= data.ShortDescription || "No description" %></p></div> \
@@ -814,6 +819,12 @@ $(function() {
 		discount = discount.replace(/(\d*) @(\d*\.?\d*)/g, '<label class="discount">$1 items for &#36;$2</label>')
 		return discount;
 	};
+	
+	window.expanz.html.isEmpty = function(value) {
+		if (value === undefined)
+			return true;
+		return value == "";
+	};	
 
 	window.expanz.html.addDollar = function(price) {
 		return "$ " + price;
