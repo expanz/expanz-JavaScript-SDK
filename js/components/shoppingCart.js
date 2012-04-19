@@ -211,7 +211,7 @@ $(function() {
 
 					if (that.lastListAction == 'specials') {
 						$(el).find("#productListDiv").find("#noItemText").hide();
-						$(el).find("#productListDiv").find("#noItemText").after("<div id='onSpecial'>No Specials at this time – Check back later</div>");
+						$(el).find("#productListDiv").find("#noItemText").after("<div id='onSpecial' class='emptyListText'>No Specials at this time - Check back later</div>");
 					}
 					else {
 						$(el).find("#productListDiv").find("#noItemText").show();

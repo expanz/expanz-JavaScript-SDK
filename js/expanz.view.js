@@ -332,7 +332,7 @@ $(function() {
 				if (!hasItem) {
 					$(hostEl).addClass("emptyGrid");
 					$(hostEl).removeClass("nonEmptyGrid");
-					$(hostEl).html('<div id="noItemText">' + noItemText + '</div>');
+					$(hostEl).html('<div id="noItemText" class="emptyListText">' + noItemText + '</div>');
 				}
 				else {
 					$(hostEl).addClass("nonEmptyGrid");
