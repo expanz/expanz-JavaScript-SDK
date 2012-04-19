@@ -58,6 +58,7 @@ $(function() {
 				'CheckoutPayNowButton',
 				'CheckoutPickupCheckbox',
 				'CheckoutSubTotal',
+				'CheckoutTotalTaxAmount',
 				'CheckoutFreight',
 				'CheckoutTotal',
 				'OrderHistory'
@@ -206,6 +207,15 @@ $(function() {
 					else {
 						$("#searchResultTitle").hide();
 						$("#ItemSearch input").val("");
+					}
+
+					if (that.lastListAction == 'specials') {
+						$(el).find("#productListDiv").find("#noItemText").hide();
+						$(el).find("#productListDiv").find("#noItemText").after("<div id='onSpecial'>No Specials at this time – Check back later</div>");
+					}
+					else {
+						$(el).find("#productListDiv").find("#noItemText").show();
+						$(el).find("#productListDiv").find("#onSpecial").remove();
 					}
 				});
 			},
@@ -441,7 +451,12 @@ $(function() {
 					labelAttribute : 'value',
 					runAfterPublish : function() {
 						$("#categoriesAccordion").data("kendoPanelBar").bind("select", function(event) {
-							that.lastListAction = 'tree';
+							if ($(event.item).text() == 'Specials') {
+								that.lastListAction = 'specials';
+							}
+							else {
+								that.lastListAction = 'tree';
+							}
 						});
 					},
 					staticElements : [
@@ -638,6 +653,12 @@ $(function() {
 				return html;
 			},
 
+			renderCheckoutTotalTaxAmountComponent : function(checkoutEl) {
+				var html = "";
+				html += '<div bind="field" name="TotalTaxAmount" class="checkoutSubtotalTaxAmount"><span attribute="value"></span></div>';
+				return html;
+			},
+
 			renderCheckoutFreightComponent : function(checkoutEl) {
 				var html = "";
 				html += '<div bind="field" name="Freight" class="checkoutFreight"><span attribute="value"></span></div>';
@@ -819,12 +840,12 @@ $(function() {
 		discount = discount.replace(/(\d*) @(\d*\.?\d*)/g, '<label class="discount">$1 items for &#36;$2</label>')
 		return discount;
 	};
-	
+
 	window.expanz.html.isEmpty = function(value) {
 		if (value === undefined)
 			return true;
 		return value == "";
-	};	
+	};
 
 	window.expanz.html.addDollar = function(price) {
 		return "$ " + price;
