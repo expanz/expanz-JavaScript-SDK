@@ -1,0 +1,54 @@
+// Pull the plugin from a Maven Repo
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.eriwen:gradle-js-plugin:0.3'
+    }
+}
+// Invoke the plugin
+apply plugin: 'js'
+
+jsDir = "../expanz-JavaScript-SDK/js/adapters"
+env = System.getenv()
+jsVersion = "" //${env.BUILD_NUMBER}.
+
+// Specify a collection of files to be combined, then minified and finally GZip compressed.
+combineJs  {
+	dependsOn << 'clean'
+    file1 = fileTree(dir: "${jsDir}", include: "Kendo*.js")
+    inputs.files file1 
+    outputs.file file("${jsDir}/min/expanz.kendo.adapters.all.${jsVersion}js")
+}
+
+// Specify a collection of files to be combined, then minified and finally GZip compressed.
+minifyJs  {
+	dependsOn << 'combineJs'
+    file1 = fileTree(dir: "${jsDir}/min/", includes: ["expanz.kendo.adapters.all.${jsVersion}js"])
+    inputs.files file1 
+    outputs.file file("${jsDir}/min/expanz.kendo.adapters.all.${jsVersion}min.js")
+}
+
+// Specify a collection of files to be combined, then minified and finally GZip compressed.
+gzipJs  {
+	dependsOn << 'minifyJs'
+    file1 = fileTree(dir: "${jsDir}/min/", includes: ["expanz.kendo.adapters.all.${jsVersion}min.js"])
+    inputs.files file1 
+    outputs.file file("${jsDir}/min/expanz.kendo.adapters.all.${jsVersion}min.gzip.js")
+}
+
+task clean {
+	println 'Cleaning files'
+	doLast {
+		ant.delete(dir: "${jsDir}/min/")
+	}
+}
+
+task minify (dependsOn: ['gzipJs'] ){ 
+	println "Starting minifying version ${env.BUILD_NUMBER}"
+}
+
+
+
+
