@@ -12,7 +12,7 @@ $(function() {
 			listItemsOnSpecialMethodName : "listItemsOnSpecial",
 			listItemsOnSpecialMethodContextObject : "StockTranItem.ItemForSale",
 
-			listPreviouslyOrderedMethodName : "listPreviouslyOrderedItems",
+			listPreviouslyOrderedMethodName : "listPreviouslyOrderedItemsIncludingSpecial",
 			listPreviouslyOrderedContextObject : "StockTranItem.ItemForSale",
 
 			productListName : "productList",
@@ -837,7 +837,7 @@ $(function() {
 		if (separator === undefined)
 			separator = "<br/>";
 		discount = discount.replace(/;/g, separator);
-		discount = discount.replace(/(\d*) @(\d*\.?\d*)/g, '<label class="discount">$1 items for &#36;$2</label>')
+		discount = discount.replace(/(\d*) @(\d*\.?\d*)/g, '<label class="discount">$1 items for &#36;$2 each</label>')
 		return discount;
 	};
 
