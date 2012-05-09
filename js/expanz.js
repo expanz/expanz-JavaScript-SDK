@@ -435,16 +435,18 @@ $(function() {
 	}
 
 	/* load resource bundle */
-	jQuery.i18n.properties({
-		name : 'Messages',
-		path : 'assets/bundle/',
-		mode : 'map',
-		language : ' ', /* set to en to load Messages-en.properties as well, set to '' to load as well Messages-en-XX.properties - add to config.js if different for some customers */
-		cache : true,
-		callback : function() {
-			//window.expanz.logToConsole("Bundle loaded");
-		}
-	});
+	if( window.config._useBundle !== false){
+		jQuery.i18n.properties({
+			name : 'Messages',
+			path : 'assets/bundle/',
+			mode : 'map',
+			language : ' ', /* set to en to load Messages-en.properties as well, set to '' to load as well Messages-en-XX.properties - add to config.js if different for some customers */
+			cache : true,
+			callback : function() {
+				//window.expanz.logToConsole("Bundle loaded");
+			}
+		});
+	}
 
 	/* Load the Expanz Process Area menu without empty items */
 	_.each($('[bind=menu]'), function(el) {
