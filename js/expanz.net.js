@@ -68,35 +68,61 @@ $(function() {
 			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-				expanz.Views.redirect(expanz.getLoginURL());
-				return;
+			if (activity.getAttr('allowAnonymous') === false) {
+				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+					expanz.Views.redirect(expanz.getLoginURL());
+					return;
+				}
+
+				/* check if an activity has already been created, if so specify it instead of creating a new one */
+				var activityHandle = expanz.Storage.getActivityHandle(activity.getAttr('name'), activity.getAttr('style'));
+
+				if (activityHandle && activityHandle !== undefined) {
+					activity.setAttr({
+						'handle' : activityHandle
+					});
+				}
 			}
 
-			/* check if an activity has already been created, if so specify it instead of creating a new one */
-			var activityHandle = expanz.Storage.getActivityHandle(activity.getAttr('name'), activity.getAttr('style'));
+			/* if allow anonymous and session doesn't exist we don't create anything on the server */
+			if (expanz.Storage.getSessionHandle() && expanz.Storage.getSessionHandle() !== "") {
 
-			if (activityHandle && activityHandle !== undefined) {
 				activity.setAttr({
-					'handle' : activityHandle
+					loading : true
 				});
+
+				SendRequest(RequestObject.CreateActivity(activity, expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callbacks));
+			}
+		},
+
+		GetSavePreferencesRequest : function(activity, key, value, updateClientStorage, callbacks) {
+
+			if (activity.getAttr('allowAnonymous') === false) {
+				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+					expanz.Views.redirect(expanz.getLoginURL());
+					return;
+				}
 			}
 
-			activity.setAttr({
-				loading : true
-			});
+			if (updateClientStorage === true) {
+				window.expanz.Storage.setUserPreference(key, value);
+			}
 
-			SendRequest(RequestObject.CreateActivity(activity, expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callbacks));
-
+			if (!activity.isAnonymous()) {
+				// TODO check if we need a callback
+				SendRequest(RequestObject.GetSavePreferences(key, value, expanz.Storage.getSessionHandle()));
+			}
 		},
 
 		DeltaRequest : function(id, value, activity, callbacks) {
 			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-				expanz.Views.redirect(expanz.getLoginURL());
-				return;
+			if (activity.getAttr('allowAnonymous') === false) {
+				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+					expanz.Views.redirect(expanz.getLoginURL());
+					return;
+				}
 			}
 
 			var initiator = {
@@ -118,9 +144,11 @@ $(function() {
 			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-				expanz.Views.redirect(expanz.getLoginURL());
-				return;
+			if (activity.getAttr('allowAnonymous') === false) {
+				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+					expanz.Views.redirect(expanz.getLoginURL());
+					return;
+				}
 			}
 
 			var initiator = {
@@ -135,7 +163,14 @@ $(function() {
 				}
 			});
 
-			SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks));
+			// activity allows anonymous and user not logged in
+			if (activity.isAnonymous()) {
+				SendRequest(RequestObject.AnonymousMethod(name, methodAttributes, context, activity), parseDeltaResponse(activity, initiator, callbacks));
+			}
+			else {
+				SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks));
+			}
+
 		},
 
 		DestroyActivityRequest : function(activityHandle, callbacks) {
@@ -285,6 +320,13 @@ $(function() {
 			};
 		},
 
+		GetSavePreferences : function(key, value, sessionHandle) {
+			return {
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateSavePreferences(key, value)),
+				url : 'ExecX'
+			};
+		},
+
 		CreateActivity : function(activity, sessionHandle) {
 			return {
 				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateActivity(activity)),
@@ -303,6 +345,13 @@ $(function() {
 			return {
 				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateMethod(name, methodAttributes, context, activity)),
 				url : 'ExecX'
+			};
+		},
+
+		AnonymousMethod : function(name, methodAttributes, context, activity) {
+			return {
+				data : buildRequest('ExecAnonymousX', XMLNamespace, null, true)(RequestBody.CreateMethod(name, methodAttributes, context, activity)),
+				url : 'ExecAnonymousX'
 			};
 		},
 
@@ -393,11 +442,15 @@ $(function() {
 		CreateSession : function(username, password, appsite, authenticationMode) {
 			if (authenticationMode === undefined)
 				authenticationMode = "Primary";
-			return '<CreateSession user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + authenticationMode + '" clientVersion="' + window.expanz.clientVersion + '" schemaVersion="2.0"/>';
+			return '<CreateSession user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + authenticationMode + '" clientType="HTML" clientVersion="' + window.expanz.clientVersion + '" schemaVersion="2.0"/>';
 		},
 
 		GetSessionData : function() {
 			return '<GetSessionData/>';
+		},
+
+		CreateSavePreferences : function(key, value) {
+			return '<SavePreferences><UserPreference key="' + key + '" value="' + value + '" /></SavePreferences>';
 		},
 
 		CreateActivity : function(activity) {
@@ -465,7 +518,21 @@ $(function() {
 		},
 
 		CreateMethod : function(name, methodAttributes, context, activity) {
-			var body = '<Activity activityHandle="' + activity.getAttr('handle') + '">';
+			var body = '<Activity ';
+			if (activity.isAnonymous()) {
+				body += 'id="' + activity.getAttr('name') + '" >';
+				/* add all DataPublication as well since no activity exists, we just need id and populate method */
+				if (activity.hasDataControl()) {
+					_.each(activity.getDataControls(), function(dataControl, dataControlId) {
+						dataControl = dataControl[0];
+						var populateMethod = dataControl.getAttr('populateMethod') ? ' populateMethod="' + dataControl.getAttr('populateMethod') + '"' : '';
+						body += '<DataPublication id="' + dataControlId + '"' + populateMethod + '/>';
+					});
+				}
+			}
+			else {
+				body += ' activityHandle="' + activity.getAttr('handle') + '">';
+			}
 
 			if (context !== null && context.id) {
 				body += '<Context contextObject="' + context.contextObject + '" id="' + context.id + '" type="' + context.type + '" />';
@@ -474,9 +541,15 @@ $(function() {
 			body += '<Method name="' + name + '"';
 			if (methodAttributes !== undefined && methodAttributes.length > 0) {
 				_.each(methodAttributes, function(attribute) {
+					// don't add the contextObject for anonymous activities
+					// if (activity.isAnonymous() && attribute.name == 'contextObject') {
+					// window.expanz.logToConsole("isAnonymous: skipping contextObject");
+					// }
+					// else {
 					if (attribute.value !== undefined) {
 						body += " " + attribute.name + "='" + attribute.value + "' ";
 					}
+					// }
 				});
 			}
 
@@ -658,6 +731,11 @@ $(function() {
 
 			var processAreas = parseProcessAreas($(xml).find("Menu"));
 
+			/* store user preference if existing */
+			$(xml).find('PublishPreferences').find('Preference').each(function() {
+				window.expanz.Storage.setUserPreference($(this).attr('key'), $(this).attr('value'));
+			});
+
 			$.get('./formmapping.xml', function(data) {
 
 				$(data).find('activity').each(function() {
@@ -685,6 +763,7 @@ $(function() {
 					}
 				});
 			});
+
 		};
 	}
 
@@ -695,7 +774,9 @@ $(function() {
 			/* Errors case -> server is most likely not running */
 			$(xml).find('errors').each(function() {
 				if ($(xml).find('errors').text().indexOf(':Your session cannot be contacted') != -1) {
-					expanz.Views.redirect(window.expanz.getMaintenancePage());
+					if (activity.getAttr('allowAnonymous') === false) {
+						expanz.Views.redirect(window.expanz.getMaintenancePage());
+					}
 				}
 			});
 
@@ -707,8 +788,10 @@ $(function() {
 						var activityNotFound = /Activity .* not found/.test($(this).text());
 						if (sessionLost || activityNotFound) {
 							expanz.Storage.clearSession();
-							window.expanz.showLoginPopup(activity, true);
-							return;
+							if (activity.getAttr('allowAnonymous') === false) {
+								window.expanz.showLoginPopup(activity, true);
+								return;
+							}
 						}
 
 						if (callbacks && callbacks.error) {
@@ -732,7 +815,6 @@ $(function() {
 				$(execResults).find('Field').each(function() {
 					var field = activity.get($(this).attr('id'));
 					if (field) {
-
 						field.set({
 							text : $(this).attr('text'),
 							disabled : boolValue(this.getAttribute('disabled')),
@@ -822,13 +904,17 @@ $(function() {
 					expanz.Views.redirect(window.expanz.getMaintenancePage());
 				}
 			});
-			
-			
+
 			var execResults = $(xml).find("ExecXResult");
+			if (execResults == null || execResults.length == 0) {
+				execResults = $(xml).find("ExecAnonymousXResult");
+			}
 
 			if (execResults) {
-				/* remove other activities from the xml */
-				$(execResults).find("Activity[activityHandle!='" + activity.getAttr('handle') + "']").remove();
+				/* remove other activities from the xml except for anonymous activity */
+				if (!activity.isAnonymous()) {
+					$(execResults).find("Activity[activityHandle!='" + activity.getAttr('handle') + "']").remove();
+				}
 
 				var errors = [];
 				var infos = [];
@@ -1072,7 +1158,10 @@ $(function() {
 									};
 								}
 								else {
-									// TODO implement update of other datacontrols
+									/* update the xml data in the model, view will get a event if bound */
+									dataControlModel.setAttr({
+										xml : $(this)
+									});
 								}
 							}
 						}

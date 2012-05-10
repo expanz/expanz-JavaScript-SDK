@@ -9,6 +9,8 @@ $(function() {
 
 			activity : null, /* initialised when the activity is created */
 
+			allowAnonymous : false,
+
 			listItemsOnSpecialMethodName : "listItemsOnSpecial",
 			listItemsOnSpecialMethodContextObject : "StockTranItem.ItemForSale",
 
@@ -30,7 +32,20 @@ $(function() {
 			miniCartName : "lvMiniCart",
 			miniCartContextObject : "StockTranItem",
 
-			searchMethodName : "StockTranItem.listMatchingItems",
+			searchMethodName : "listMatchingItems",
+			searchMethodContextObject : "StockTranItem",
+
+			listDietaryClaimsMethodName : "listDietaryClaims",
+			listDietaryClaimsContextObject : "StockTranItem.ItemForSale",
+
+			listAllergensMethodName : "listAllergens",
+			listAllergensContextObject : "StockTranItem.ItemForSale",
+
+			listCountryOfOriginsMethodName : "listCountryOfOrigins",
+			listCountryOfOriginsContextObject : "StockTranItem.ItemForSale",
+			
+			listCategoriesMethodName : "listCategories",
+			listCategoriesContextObject : "StockTranItem.ItemForSale",			
 
 			shoppingCartPage : "shoppingCart.html",
 
@@ -38,6 +53,9 @@ $(function() {
 
 			components : [
 				'Search',
+				'AdvancedSearchAllergensFilter',
+				'AdvancedSearchDietaryClaimsFilter',
+				'AdvancedSearchCountryOfOriginFilter',
 				'AdvancedSearch',
 				'Cart',
 				'CategoriesTree',
@@ -81,6 +99,44 @@ $(function() {
 				var activities = expanz.CreateActivity($('[bind=activity]'));
 				if (activities !== undefined && activities.length > 0) {
 					this.activity = activities[0];
+					var that = this;
+					var anonymousCalls = function() {
+						if (that.activity.collection.isAnonymous()) {
+							console.log('Anonymous -> must call some stuff ');
+							/* list of anonymous call we want to do at the beginning (data publication) */
+							var dataModelList = [
+								{
+									name : that.listDietaryClaimsMethodName,
+									contextObject : that.listDietaryClaimsContextObject
+								}, {
+									name : that.listAllergensMethodName,
+									contextObject : that.listAllergensContextObject
+								}
+								, {
+									name : that.listCategoriesMethodName,
+									contextObject : that.listCategoriesContextObject
+								}								
+							];
+							
+							$.each(dataModelList, function(index, value) {
+								expanz.Net.MethodRequest(value.name, [
+									{
+										name : "contextObject",
+										value : value.contextObject
+									}
+								], null, that.activity.collection);
+							});
+
+						}
+					};
+					if (this.activity.collection.getAttr('loading') === false) {
+						anonymousCalls();
+					}
+					else {
+						this.activity.collection.bind("update:loading", function() {
+							anonymousCalls();
+						});
+					}
 				}
 
 				_.each(this.components, function(component) {
@@ -126,7 +182,7 @@ $(function() {
 				var html = '';
 				html += '<div id="shoppingCartSearch" class="search">';
 				html += window.expanz.html.renderField('ItemSearch', '', inputPrompt);
-				html += window.expanz.html.renderMethod(this.searchMethodName, buttonLabel, null, !displayButton);
+				html += window.expanz.html.renderMethod(this.searchMethodName, buttonLabel, this.searchMethodContextObject, !displayButton);
 				html += "</div>";
 				return html;
 			},
@@ -143,9 +199,33 @@ $(function() {
 			renderAdvancedSearchComponent : function(searchEl) {
 				var html = '';
 				html += '<div id="shoppingCartAdvancedSearch" class="advancedSearch">';
-				html += "Not implemented on the default component";
+				html += this.renderAdvancedSearchDietaryClaimsFilter();
+				html += this.renderAdvancedSearchAllergensFilter();
+				html += this.renderAdvancedSearchCountryOfOriginFilter();
 				html += "</div>";
 				return html;
+			},
+
+			renderAdvancedSearchDietaryClaimsFilterComponent : function(el) {
+				var html = "";
+				html += '<div class="advancedSearchCategory">Dietary Claims</div><div id="filterSearchCheckboxesDivDietaryClaims"  templateName="filterSearchCheckboxesTemplate" name="DietaryClaimsSearchDP" fieldName="DietaryClaimsSearch" populateMethod="' + this.listDietaryClaimsMethodName + '" bind="DataControl" renderingType="checkboxes" contextObject="' + this.listDietaryClaimsContextObject + '"></div>';
+				return html
+			},
+
+			renderAdvancedSearchAllergensFilterComponent : function(el) {
+				var html = "";
+				html += '<div class="advancedSearchCategory">Allergens</div><div id="filterSearchCheckboxesDivAllergens"  templateName="filterSearchCheckboxesTemplate" name="AllergensSearchDP" fieldName="AllergensSearch"  populateMethod="' + this.listAllergensMethodName + '" bind="DataControl" renderingType="checkboxes" contextObject="' + this.listAllergensContextObject + '"></div>';
+				return html
+			},
+
+			renderAdvancedSearchCountryOfOriginFilterComponent : function(el) {
+				var html = "";
+				html += '<div bind="field" name="CountryOfOriginSearch"><div class="advancedSearchCategory">Country</div><input style="width:200px" id="cbCountry" bind="DataControl" emptyItemLabel="Select" renderingType="dropdownlist" populateMethod="' + this.listCountryOfOriginsMethodName + '" name="CountryOfOriginSearchDP" fieldName="CountryOfOriginSearch" attribute="value" class="k-textbox" contextObject="' + this.listCountryOfOriginsContextObject + '"/></div>';
+				return html
+			},
+
+			_executeAfterRenderAdvancedSearchCountryOfOriginFilterComponent : function(el) {
+				renderKendoComponents($(el));
 			},
 
 			/**
@@ -231,19 +311,20 @@ $(function() {
 			},
 
 			_executeAfterRenderListDisplayChoiceComponent : function() {
-				// TODO store and retrieve a user preference
+				var userPref = window.expanz.Storage.getUserPreference("DefaultShoppingCartView");
+
 				var productListAsTable = $("#productListDiv[isHTMLTable='true']");
 				var productListAsGrid = $("#productListDiv[isHTMLTable='false']");
 
-				if (productListAsGrid.length > 0) {
+				if (userPref == 'displayAsList') {
 					$("#displayAsList").addClass("selectedDisplay");
 					productListAsTable.show();
 					productListAsGrid.hide();
 				}
 				else {
 					$("#displayAsGrid").addClass("selectedDisplay");
-					productListAsTable.show();
-					productListAsGrid.hide();
+					productListAsGrid.show();
+					productListAsTable.hide();
 				}
 
 				var that = this;
@@ -252,6 +333,7 @@ $(function() {
 					$("#displayAsGrid").removeClass("selectedDisplay");
 					productListAsTable.show();
 					productListAsGrid.hide();
+					expanz.Net.GetSavePreferencesRequest(that.activity.collection, "DefaultShoppingCartView", 'displayAsList', true);
 				});
 
 				$("#displayAsGrid").click(function() {
@@ -259,6 +341,7 @@ $(function() {
 					$("#displayAsGrid").addClass("selectedDisplay");
 					productListAsTable.hide();
 					productListAsGrid.show();
+					expanz.Net.GetSavePreferencesRequest(that.activity.collection, "DefaultShoppingCartView", 'displayAsGrid', true);
 				});
 
 			},
@@ -281,7 +364,13 @@ $(function() {
 								<div class="productIcon left productThumbnail noThumbnail"></div> \
 							<% } %> \
 							<div class="productTitle left"> \
-								<p class="productTitleTxt"><a href="javascript:void(0);" onclick="javascript:$(this).closest(\'.productNDetail\').children(\'.productdetails\').toggle()"><%= data.Name %></a></p> \
+								<p class="productTitleTxt"> \
+								<% if ( data.ShortDescription ){ %> \
+									<a href="javascript:void(0);" onclick="javascript:$(this).closest(\'.productNDetail\').children(\'.productdetails\').toggle()"><%= data.Name %></a> \
+								<% } else { %>\
+									<%= data.Name %> \
+								<% } %> \
+								</p> \
 								<p class="productoffer"><%= window.expanz.html.getDisplayableDiscount(data.UdefString1,",&nbsp;") %></p> \
 							</div> \
 							<div class="productPrice left"> \
@@ -303,7 +392,7 @@ $(function() {
 							<% } }%> \
 							<div class="clear"></div> \
 							</div> \
-						<div class="productdetails" style="display:none"><p><%= data.ShortDescription || "No description" %></p></div> \
+						<div class="productdetails" style="display:none"><p><%= data.ShortDescription %></p></div> \
 						</div> \
 					</script>\
 					';
@@ -827,7 +916,7 @@ $(function() {
 		var method = '';
 		var ctx = contextObject ? ' contextObject = "' + contextObject + '" ' : '';
 		var visible = hidden ? ' style="display:none" ' : '';
-		method += '<span bind="method" id="' + methodName + '" name="' + methodName + '" ' + ctx + visible + ' class="method">';
+		method += '<span bind="method" id="' + methodName + '" name="' + methodName + '" ' + ctx + visible + ' class="method" >';
 		method += '<button type="button" attribute="submit" >' + buttonLabel + '</button>';
 		method += '</span>';
 		return method;
@@ -837,7 +926,7 @@ $(function() {
 		if (separator === undefined)
 			separator = "<br/>";
 		discount = discount.replace(/;/g, separator);
-		discount = discount.replace(/(\d*) @(\d*\.?\d*)/g, '<label class="discount">$1 items for &#36;$2 each</label>')
+		discount = discount.replace(/(\d*) @(\d*\.?\d*)/g, '<label class="discount">$1 items or more for &#36;$2 each</label>')
 		return discount;
 	};
 

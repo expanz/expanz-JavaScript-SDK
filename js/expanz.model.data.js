@@ -12,7 +12,7 @@ $(function() {
 
 		update : function(attrs) {
 
-			expanz.Net.DeltaRequest(this.getAttr('id'), attrs.value, this.getAttr('parent'));
+			expanz.Net.DeltaRequest(this.getAttr('fieldId'), attrs.value, this.getAttr('parent'));
 			return;
 		},
 
@@ -25,7 +25,7 @@ $(function() {
 			}
 			/* normal case we send a delta request */
 			else {
-				expanz.Net.DeltaRequest(this.getAttr('id'), selectedId, this.getAttr('parent'), callbacks);
+				expanz.Net.DeltaRequest(this.getAttr('fieldId'), selectedId, this.getAttr('parent'), callbacks);
 			}
 		}
 	});

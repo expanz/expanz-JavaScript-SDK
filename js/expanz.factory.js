@@ -27,7 +27,8 @@ $(function() {
 				url : $(activityEl).attr('url'),
 				key : $(activityEl).attr('key'),
 				style : $(activityEl).attr('activityStyle'),
-				optimisation : $(activityEl).attr('optimisation') ? boolValue($(activityEl).attr('optimisation')) : true
+				optimisation : $(activityEl).attr('optimisation') ? boolValue($(activityEl).attr('optimisation')) : true,
+				allowAnonymous : $(activityEl).attr('allowAnonymous') ? boolValue($(activityEl).attr('allowAnonymous')) : false
 			});
 			var activityView = new expanz.Views.ActivityView({
 				el : $(activityEl),
@@ -225,9 +226,11 @@ $(function() {
 
 				}
 				/* renderingType is not grid: 'tree' or 'combobox' or checkboxes or empty */
+				/* the attribute fieldName might be defined in case, the datacontrol updates a field value if not specified taking the name */
 				else {
 					var dataControlModel = new expanz.Model.Data.DataControl({
 						id : $(dataControlEl).attr('name'),
+						fieldId: $(dataControlEl).attr('fieldName') || $(dataControlEl).attr('name'),
 						populateMethod : $(dataControlEl).attr('populateMethod'),
 						type : $(dataControlEl).attr('type'),
 						contextObject : $(dataControlEl).attr('contextObject'),

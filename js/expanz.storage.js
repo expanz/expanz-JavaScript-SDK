@@ -74,6 +74,15 @@ $(function() {
 			return true;
 		},
 
+		setUserPreference : function(key, value) {
+			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'UserPreference' + key, value);
+			return true;
+		},
+		
+		getUserPreference : function(key) {
+			return this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'UserPreference' + key);
+		},		
+
 		clearSession : function() {
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'session.handle');
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess');
@@ -197,7 +206,7 @@ $(function() {
 					if (window.config._backButton === true) {
 						el.find("#menuUL").before('<a href="javascript:void(0);" onclick="history.go(-1);return true;" class="backbutton">' + backLabel + '</a>');
 					}
-					
+
 					// add home page if defined
 					if (window.config._homepage) {
 						var homeClass = "";

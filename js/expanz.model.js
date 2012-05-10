@@ -157,6 +157,10 @@ $(function() {
 
 		model : expanz.Model.Bindable,
 
+		isAnonymous : function() {
+			return !this.getAttr('handle');
+		},
+
 		callbacks : {
 			success : function(message) {
 			},
