@@ -28,6 +28,8 @@ $(function() {
 			categoryTreeName : "StockTranItem.ItemForSale.ItemCategory.PersistentId",
 			categoryTreePopMethod : '$custom',
 			categoryTreeContextObject : "StockTranItem.ItemForSale.ItemCategory",
+			categoryTreeSelectionChangeAnonymousMethod : "listItemsForCategoryFiltered",
+			categoryTreeSelectionChangeAnonymousContextObject : "StockTranItem.ItemForSale",
 
 			miniCartName : "lvMiniCart",
 			miniCartContextObject : "StockTranItem",
@@ -43,9 +45,9 @@ $(function() {
 
 			listCountryOfOriginsMethodName : "listCountryOfOrigins",
 			listCountryOfOriginsContextObject : "StockTranItem.ItemForSale",
-			
+
 			listCategoriesMethodName : "listCategories",
-			listCategoriesContextObject : "StockTranItem.ItemForSale",			
+			listCategoriesContextObject : "StockTranItem.ItemForSale",
 
 			shoppingCartPage : "shoppingCart.html",
 
@@ -111,13 +113,12 @@ $(function() {
 								}, {
 									name : that.listAllergensMethodName,
 									contextObject : that.listAllergensContextObject
-								}
-								, {
+								}, {
 									name : that.listCategoriesMethodName,
 									contextObject : that.listCategoriesContextObject
-								}								
+								}
 							];
-							
+
 							$.each(dataModelList, function(index, value) {
 								expanz.Net.MethodRequest(value.name, [
 									{
@@ -126,6 +127,12 @@ $(function() {
 									}
 								], null, that.activity.collection);
 							});
+
+							/* hide unwanted stuff when anonymous */
+							$("[loginNeeded='true']").hide();
+							// $("#rightPart").hide();
+							$("#logout a").hide();
+							$("#logout").append('<a class="login menuTitle">Login</a>');
 
 						}
 					};
@@ -181,7 +188,7 @@ $(function() {
 					buttonLabel = '&nbsp;';
 				var html = '';
 				html += '<div id="shoppingCartSearch" class="search">';
-				html += window.expanz.html.renderField('ItemSearch', '', inputPrompt);
+				html += window.expanz.html.renderField('ItemSearch', '', inputPrompt, this.searchMethodName);
 				html += window.expanz.html.renderMethod(this.searchMethodName, buttonLabel, this.searchMethodContextObject, !displayButton);
 				html += "</div>";
 				return html;
@@ -503,7 +510,7 @@ $(function() {
 			 * @return html code
 			 */
 			renderCategoriesTreeComponent : function(treeEl) {
-				return '<div id="categoriesTree" name="' + this.categoryTreeName + '"  bind="DataControl" renderingType="tree" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="tree"></div>';
+				return '<div id="categoriesTree" name="categoriesList" fieldName="' + this.categoryTreeName + '" selectionChangeAnonymousMethod="' + this.categoryTreeSelectionChangeAnonymousMethod + '"  selectionChangeAnonymousContextObject="' + this.categoryTreeSelectionChangeAnonymousContextObject + '" bind="DataControl" renderingType="tree" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="tree"></div>';
 			},
 
 			_executeAfterRenderCategoriesTreeComponent : function() {
@@ -890,9 +897,9 @@ $(function() {
 		return '<div class="' + fieldName + '" style="width:' + width + 'px;float:left"><%= data.' + fieldName + ' %>&nbsp;</div>';
 	};
 
-	window.expanz.html.renderField = function(fieldName, showLabel, prompt) {
+	window.expanz.html.renderField = function(fieldName, showLabel, prompt, anonymousBoundMethod) {
 		var field = '';
-		field += '<div id="' + fieldName + '"  bind="field" name="' + fieldName + '" class="field ' + fieldName + '">';
+		field += '<div id="' + fieldName + '"  bind="field" name="' + fieldName + '" class="field ' + fieldName + '" anonymousBoundMethod=' + anonymousBoundMethod + '>';
 		if (showLabel === true)
 			field += '<label attribute="label"></label>';
 		field += '<input type="text" attribute="value"  class="k-textbox" placeholder="' + prompt + '"/>';
@@ -923,6 +930,8 @@ $(function() {
 	};
 
 	window.expanz.html.getDisplayableDiscount = function(discount, separator) {
+		if (!discount)
+			return "";
 		if (separator === undefined)
 			separator = "<br/>";
 		discount = discount.replace(/;/g, separator);

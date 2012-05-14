@@ -93,6 +93,9 @@ $(function() {
 
 				SendRequest(RequestObject.CreateActivity(activity, expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callbacks));
 			}
+			else{
+				/* anonymous case because no session handle is set */
+			}
 		},
 
 		GetSavePreferencesRequest : function(activity, key, value, updateClientStorage, callbacks) {
@@ -140,7 +143,7 @@ $(function() {
 			SendRequest(RequestObject.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks));
 		},
 
-		MethodRequest : function(name, methodAttributes, context, activity, callbacks) {
+		MethodRequest : function(name, methodAttributes, context, activity, anonymousFields, callbacks) {
 			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
@@ -165,7 +168,7 @@ $(function() {
 
 			// activity allows anonymous and user not logged in
 			if (activity.isAnonymous()) {
-				SendRequest(RequestObject.AnonymousMethod(name, methodAttributes, context, activity), parseDeltaResponse(activity, initiator, callbacks));
+				SendRequest(RequestObject.AnonymousMethod(name, methodAttributes, context, activity, anonymousFields), parseDeltaResponse(activity, initiator, callbacks));
 			}
 			else {
 				SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks));
@@ -348,9 +351,9 @@ $(function() {
 			};
 		},
 
-		AnonymousMethod : function(name, methodAttributes, context, activity) {
+		AnonymousMethod : function(name, methodAttributes, context, activity, anonymousFields) {
 			return {
-				data : buildRequest('ExecAnonymousX', XMLNamespace, null, true)(RequestBody.CreateMethod(name, methodAttributes, context, activity)),
+				data : buildRequest('ExecAnonymousX', XMLNamespace, null, true)(RequestBody.CreateMethod(name, methodAttributes, context, activity, anonymousFields)),
 				url : 'ExecAnonymousX'
 			};
 		},
@@ -517,7 +520,7 @@ $(function() {
 			return '<Activity activityHandle="' + activity.getAttr('handle') + '">' + '<Delta id="' + id + '" value="' + value + '"/>' + '</Activity>';
 		},
 
-		CreateMethod : function(name, methodAttributes, context, activity) {
+		CreateMethod : function(name, methodAttributes, context, activity, anonymousFields) {
 			var body = '<Activity ';
 			if (activity.isAnonymous()) {
 				body += 'id="' + activity.getAttr('name') + '" >';
@@ -526,9 +529,16 @@ $(function() {
 					_.each(activity.getDataControls(), function(dataControl, dataControlId) {
 						dataControl = dataControl[0];
 						var populateMethod = dataControl.getAttr('populateMethod') ? ' populateMethod="' + dataControl.getAttr('populateMethod') + '"' : '';
-						body += '<DataPublication id="' + dataControlId + '"' + populateMethod + '/>';
+						var query = dataControl.getAttr('query') ? ' query="' + dataControl.getAttr('query') + '"' : '';
+						var autoPopulate = dataControl.getAttr('autoPopulate') ? ' autoPopulate="' + dataControl.getAttr('autoPopulate') + '"' : '';
+						var type = dataControl.getAttr('type') ? ' type="' + dataControl.getAttr('type') + '"' : '';
+
+						body += '<DataPublication id="' + dataControlId + '"' + query + populateMethod + autoPopulate + type;
+						dataControl.getAttr('contextObject') ? body += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
+						body += '/>';
 					});
 				}
+
 			}
 			else {
 				body += ' activityHandle="' + activity.getAttr('handle') + '">';
@@ -541,19 +551,27 @@ $(function() {
 			body += '<Method name="' + name + '"';
 			if (methodAttributes !== undefined && methodAttributes.length > 0) {
 				_.each(methodAttributes, function(attribute) {
-					// don't add the contextObject for anonymous activities
-					// if (activity.isAnonymous() && attribute.name == 'contextObject') {
-					// window.expanz.logToConsole("isAnonymous: skipping contextObject");
-					// }
-					// else {
 					if (attribute.value !== undefined) {
 						body += " " + attribute.name + "='" + attribute.value + "' ";
 					}
-					// }
 				});
 			}
 
-			body += '/>';
+			/* add company code if anonymous */
+			if (activity.isAnonymous()){
+				body += " company='" + config._anonymousCompanyCode + "' ";
+			}
+			
+			body += '>';
+
+			/* add all bound fields in anonymous activity case */
+			if (activity.isAnonymous() && anonymousFields && anonymousFields.length > 0) {
+				_.each(anonymousFields, function(field) {
+					body += '<' + field.id + '>' + field.value + '</' + field.id + '>';
+				});
+			}
+
+			body += '</Method>';
 
 			body += '</Activity>';
 			return body;

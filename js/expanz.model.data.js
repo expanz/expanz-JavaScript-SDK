@@ -17,15 +17,34 @@ $(function() {
 		},
 
 		updateItemSelected : function(selectedId, callbacks) {
-			//window.expanz.logToConsole("DataControl:updateItemSelected id:" + selectedId);
+			// window.expanz.logToConsole("DataControl:updateItemSelected id:" + selectedId);
 
-			/* exception for documents we have to send a MenuAction request */
-			if (this.getAttr('id') == 'documents') {
-				expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, "File", null, "1", callbacks);
+			/* if we are in anonymous mode we need to call a method sending instead */
+			if (this.getAttr('parent').isAnonymous()) {
+				var anonymousFields = [
+					{
+						id : this.getAttr('fieldId'),
+						value : selectedId
+					}
+				];
+
+				expanz.Net.MethodRequest(this.getAttr('selectionChangeAnonymousMethod'), [
+					{
+						name : "contextObject",
+						value : this.getAttr('selectionChangeAnonymousContextObject')
+					}
+				], null, this.getAttr('parent'), anonymousFields);
 			}
-			/* normal case we send a delta request */
 			else {
-				expanz.Net.DeltaRequest(this.getAttr('fieldId'), selectedId, this.getAttr('parent'), callbacks);
+
+				/* exception for documents we have to send a MenuAction request */
+				if (this.getAttr('id') == 'documents') {
+					expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, "File", null, "1", callbacks);
+				}
+				/* normal case we send a delta request */
+				else {
+					expanz.Net.DeltaRequest(this.getAttr('fieldId'), selectedId, this.getAttr('parent'), callbacks);
+				}
 			}
 		}
 	});

@@ -37,9 +37,9 @@ $(function() {
 				collection : activityModel
 			});
 
+			expanz.Factory.bindMethods(activityModel, activityEl);
 			expanz.Factory.bindDataControls(activityModel, activityEl);
 			expanz.Factory.bindFields(activityModel, activityEl);
-			expanz.Factory.bindMethods(activityModel, activityEl);
 			return activityView;
 		},
 
@@ -51,6 +51,22 @@ $(function() {
 					silent : true
 				});
 				activityModel.add(fieldModel);
+
+				/* add anonymous fields bound to method */
+				if (fieldModel.get('anonymousBoundMethod') != null && fieldModel.get('anonymousBoundMethod') != '') {
+					var boundMethod = activityModel.get(fieldModel.get('anonymousBoundMethod'));
+					if (boundMethod) {
+						var anonymousFields = boundMethod.get('anonymousFields');
+						if (anonymousFields == null) {
+							anonymousFields = [];
+						}
+						anonymousFields.push(fieldModel);
+						boundMethod.set({
+							anonymousFields : anonymousFields
+						});
+					}
+				}
+
 			});
 
 			_.each(expanz.Factory.DependantField($(el).find('[bind=dependant]')), function(dependantFieldModel) {
@@ -90,7 +106,8 @@ $(function() {
 			_.each(DOMObjects, function(fieldEl) {
 				// create a model for each field
 				var field = new expanz.Model.Field({
-					id : $(fieldEl).attr('name')
+					id : $(fieldEl).attr('name'),
+					anonymousBoundMethod : $(fieldEl).attr('anonymousBoundMethod')
 				});
 				var view = new expanz.Views.FieldView({
 					el : $(fieldEl),
@@ -101,6 +118,7 @@ $(function() {
 				});
 
 				fieldModels.push(field);
+
 			});
 			return fieldModels;
 		},
@@ -177,7 +195,9 @@ $(function() {
 						populateMethod : $(dataControlEl).attr('populateMethod'),
 						autoPopulate : $(dataControlEl).attr('autoPopulate'),
 						contextObject : $(dataControlEl).attr('contextObject'),
-						renderingType : $(dataControlEl).attr('renderingType')
+						renderingType : $(dataControlEl).attr('renderingType'),
+						selectionChangeAnonymousMethod : $(dataControlEl).attr('selectionChangeAnonymousMethod'),
+						selectionChangeAnonymousContextObject : $(dataControlEl).attr('selectionChangeAnonymousContextObject')
 					});
 
 					var view = new expanz.Views.GridView({
@@ -230,12 +250,14 @@ $(function() {
 				else {
 					var dataControlModel = new expanz.Model.Data.DataControl({
 						id : $(dataControlEl).attr('name'),
-						fieldId: $(dataControlEl).attr('fieldName') || $(dataControlEl).attr('name'),
+						fieldId : $(dataControlEl).attr('fieldName') || $(dataControlEl).attr('name'),
 						populateMethod : $(dataControlEl).attr('populateMethod'),
 						type : $(dataControlEl).attr('type'),
 						contextObject : $(dataControlEl).attr('contextObject'),
 						autoPopulate : $(dataControlEl).attr('autoPopulate'),
-						renderingType : $(dataControlEl).attr('renderingType')
+						renderingType : $(dataControlEl).attr('renderingType'),
+						selectionChangeAnonymousMethod : $(dataControlEl).attr('selectionChangeAnonymousMethod'),
+						selectionChangeAnonymousContextObject : $(dataControlEl).attr('selectionChangeAnonymousContextObject')
 					});
 
 					if ($(dataControlEl).attr('renderingType') == 'checkboxes') {

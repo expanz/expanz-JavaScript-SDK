@@ -55,8 +55,24 @@ $(function() {
 			"change [attribute=value]" : "viewUpdate"
 		},
 
-		viewUpdate : function(event) {
+		getValue : function() {
 			var elem = this.el.find('[attribute=value]');
+
+			var value = null;
+			// handle checkbox field case
+			if ($(elem).is(":checkbox")) {
+				var checkedValue = $(elem).attr("checkedValue") !== undefined ? $(elem).attr("checkedValue") : 1;
+				var uncheckedValue = $(elem).attr("uncheckedValue") !== undefined ? $(elem).attr("uncheckedValue") : 0;
+				value = $(elem).prop("checked") ? checkedValue : uncheckedValue;
+			}
+			else {
+				value = $(elem).val();
+			}
+			return value;
+
+		},
+
+		viewUpdate : function(event) {
 			// handle multi-choices
 			if (this.model.get('items') !== undefined && this.model.get('items').length > 0) {
 				this.model.update({
@@ -64,19 +80,9 @@ $(function() {
 				});
 			}
 			else {
-				// handle checkbox field case
-				if ($(elem).is(":checkbox")) {
-					var checkedValue = $(elem).attr("checkedValue") !== undefined ? $(elem).attr("checkedValue")  : 1;
-					var uncheckedValue = $(elem).attr("uncheckedValue")  !== undefined  ?  $(elem).attr("uncheckedValue") : 0;
-					this.model.update({
-						value : $(elem).prop("checked") ? checkedValue : uncheckedValue
-					});
-				}
-				else {
-					this.model.update({
-						value : $(elem).val()
-					});
-				}
+				this.model.update({
+					value : this.getValue()
+				});
 			}
 
 			this.el.trigger('update:field');
@@ -991,7 +997,7 @@ $(function() {
 				// special behaviour for checkbox input
 				if ($(elem).is(":checkbox")) {
 					$(elem).addClass('checkbox');
-					var checkedValue = $(elem).attr("checkedValue") ? $(elem).attr("checkedValue")  : 1;
+					var checkedValue = $(elem).attr("checkedValue") ? $(elem).attr("checkedValue") : 1;
 					if (value == checkedValue) {
 						$(elem).prop("checked", true);
 					}

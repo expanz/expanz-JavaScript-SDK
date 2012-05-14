@@ -68,7 +68,14 @@ $(function() {
 		},
 
 		update : function(attrs) {
-			expanz.Net.DeltaRequest(this.get('id'), attrs.value, this.get('parent'));
+			if (this.get('parent').isAnonymous()) {
+				this.set({
+					lastValue : attrs.value
+				});
+			}
+			else {
+				expanz.Net.DeltaRequest(this.get('id'), attrs.value, this.get('parent'));
+			}
 			return;
 		}
 
@@ -80,12 +87,22 @@ $(function() {
 
 		submit : function() {
 
+			var anonymousFields = [];
+			if (this.get('anonymousFields')) {
+				$.each(this.get('anonymousFields'), function(index, value) {
+					anonymousFields.push({
+						id : value.get('id'),
+						value : value.get('lastValue')
+					});
+				});
+			}
+
 			expanz.Net.MethodRequest(this.get('id'), [
 				{
 					name : "contextObject",
 					value : this.get('contextObject')
 				}
-			], null, this.get('parent'));
+			], null, this.get('parent'), anonymousFields);
 			return;
 
 		}
