@@ -103,7 +103,8 @@ $(function() {
 					this.activity = activities[0];
 					var that = this;
 					var anonymousCalls = function() {
-						if (that.activity.collection.isAnonymous()) {
+						if (that.isAnonymous()) {
+
 							console.log('Anonymous -> must call some stuff ');
 							/* list of anonymous call we want to do at the beginning (data publication) */
 							var dataModelList = [
@@ -215,19 +216,19 @@ $(function() {
 
 			renderAdvancedSearchDietaryClaimsFilterComponent : function(el) {
 				var html = "";
-				html += '<div class="advancedSearchCategory">Dietary Claims</div><div id="filterSearchCheckboxesDivDietaryClaims"  templateName="filterSearchCheckboxesTemplate" name="DietaryClaimsSearchDP" fieldName="DietaryClaimsSearch" populateMethod="' + this.listDietaryClaimsMethodName + '" bind="DataControl" renderingType="checkboxes" contextObject="' + this.listDietaryClaimsContextObject + '"></div>';
+				html += '<div class="advancedSearchCategory">Dietary Claims</div><div id="filterSearchCheckboxesDivDietaryClaims"  templateName="filterSearchCheckboxesTemplate" name="DietaryClaimsSearchDP" fieldName="DietaryClaimsSearch" populateMethod="' + this.listDietaryClaimsMethodName + '" bind="DataControl" renderingType="checkboxes" contextObject="' + this.listDietaryClaimsContextObject + '" anonymousBoundMethod="' + this.searchMethodName + '"></div>';
 				return html
 			},
 
 			renderAdvancedSearchAllergensFilterComponent : function(el) {
 				var html = "";
-				html += '<div class="advancedSearchCategory">Allergens</div><div id="filterSearchCheckboxesDivAllergens"  templateName="filterSearchCheckboxesTemplate" name="AllergensSearchDP" fieldName="AllergensSearch"  populateMethod="' + this.listAllergensMethodName + '" bind="DataControl" renderingType="checkboxes" contextObject="' + this.listAllergensContextObject + '"></div>';
+				html += '<div class="advancedSearchCategory">Allergens</div><div id="filterSearchCheckboxesDivAllergens"  templateName="filterSearchCheckboxesTemplate" name="AllergensSearchDP" fieldName="AllergensSearch"  populateMethod="' + this.listAllergensMethodName + '" bind="DataControl" renderingType="checkboxes" contextObject="' + this.listAllergensContextObject + '"  anonymousBoundMethod="' + this.searchMethodName + '"></div>';
 				return html
 			},
 
 			renderAdvancedSearchCountryOfOriginFilterComponent : function(el) {
 				var html = "";
-				html += '<div bind="field" name="CountryOfOriginSearch"><div class="advancedSearchCategory">Country</div><input style="width:200px" id="cbCountry" bind="DataControl" emptyItemLabel="Select" renderingType="dropdownlist" populateMethod="' + this.listCountryOfOriginsMethodName + '" name="CountryOfOriginSearchDP" fieldName="CountryOfOriginSearch" attribute="value" class="k-textbox" contextObject="' + this.listCountryOfOriginsContextObject + '"/></div>';
+				html += '<div bind="field" name="CountryOfOriginSearch"><div class="advancedSearchCategory">Country</div><input style="width:200px" id="cbCountry" bind="DataControl" emptyItemLabel="Select" renderingType="dropdownlist" populateMethod="' + this.listCountryOfOriginsMethodName + '" name="CountryOfOriginSearchDP" fieldName="CountryOfOriginSearch" attribute="value" class="k-textbox" contextObject="' + this.listCountryOfOriginsContextObject + '"  anonymousBoundMethod="' + this.searchMethodName + '"/></div>';
 				return html
 			},
 
@@ -864,6 +865,12 @@ $(function() {
 
 				html += '<div id="orderHistoryDivList" class="orderHistory" isHTMLTable="true" populateMethod="' + this.orderHistoryPopMethod + '" itemsPerPage="' + itemsPerPage + '" name="' + this.orderHistoryListName + '" bind="DataControl" renderingType="grid" contextObject="' + this.orderHistoryContextObject + '"></div>';
 				return html;
+			},
+
+			isAnonymous : function() {
+				if (this.activity == null)
+					return null;
+				return this.activity.collection.isAnonymous();
 			}
 
 		});

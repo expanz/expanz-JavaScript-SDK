@@ -19,24 +19,50 @@ $(function() {
 		updateItemSelected : function(selectedId, callbacks) {
 			// window.expanz.logToConsole("DataControl:updateItemSelected id:" + selectedId);
 
-			/* if we are in anonymous mode we need to call a method sending instead */
+			/* anonymous activity case */
 			if (this.getAttr('parent').isAnonymous()) {
-				var anonymousFields = [
-					{
-						id : this.getAttr('fieldId'),
-						value : selectedId
-					}
-				];
+				/* if we are in anonymous mode and the data control is a tree we need to call a method on selection change instead of a delta */
+				if (this.getAttr('renderingType') == 'tree') {
+					var anonymousFields = [
+						{
+							id : this.getAttr('fieldId'),
+							value : selectedId
+						}
+					];
 
-				expanz.Net.MethodRequest(this.getAttr('selectionChangeAnonymousMethod'), [
-					{
-						name : "contextObject",
-						value : this.getAttr('selectionChangeAnonymousContextObject')
+					expanz.Net.MethodRequest(this.getAttr('selectionChangeAnonymousMethod'), [
+						{
+							name : "contextObject",
+							value : this.getAttr('selectionChangeAnonymousContextObject')
+						}
+					], null, this.getAttr('parent'), anonymousFields);
+				}
+				/* if we are in anonymous mode and the data control is a checkboxes control we need to store the value to send it later */
+				else {
+					var lastValues = this.getAttr('lastValues');
+					if (!lastValues) {
+						lastValues = "";
 					}
-				], null, this.getAttr('parent'), anonymousFields);
+
+					/* unticked */
+					if (selectedId < 0) {
+						var re = new RegExp("(" + (-selectedId) + ";)|(;?" + (-selectedId) + "$)", "g");
+						lastValues = lastValues.replace(re, "")
+					}
+					/* ticked */
+					else {
+						if (lastValues.length > 0)
+							lastValues += ";";
+						lastValues += selectedId;
+					}
+
+					this.setAttr({
+						lastValues : lastValues
+					});
+				}
 			}
+			/* logged in case */
 			else {
-
 				/* exception for documents we have to send a MenuAction request */
 				if (this.getAttr('id') == 'documents') {
 					expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, "File", null, "1", callbacks);

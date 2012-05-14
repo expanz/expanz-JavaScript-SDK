@@ -90,10 +90,18 @@ $(function() {
 			var anonymousFields = [];
 			if (this.get('anonymousFields')) {
 				$.each(this.get('anonymousFields'), function(index, value) {
-					anonymousFields.push({
-						id : value.get('id'),
-						value : value.get('lastValue')
-					});
+					if(value instanceof expanz.Model.Data.DataControl){
+						anonymousFields.push({
+							id : value.getAttr('fieldId'),
+							value : value.getAttr('lastValues') || ""
+						});
+					}
+					else{
+						anonymousFields.push({
+							id : value.get('id'),
+							value : value.get('lastValue')
+						});
+					}
 				});
 			}
 
@@ -105,6 +113,18 @@ $(function() {
 			], null, this.get('parent'), anonymousFields);
 			return;
 
+		},
+
+		/* add an anonymous field or datacontrol to the method, will be added to the xml message when the method is called */
+		addAnonymousElement : function(element) {
+			var anonymousFields = this.get('anonymousFields');
+			if (anonymousFields == null) {
+				anonymousFields = [];
+			}
+			anonymousFields.push(element);
+			this.set({
+				anonymousFields : anonymousFields
+			});
 		}
 
 	});

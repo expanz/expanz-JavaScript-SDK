@@ -56,14 +56,7 @@ $(function() {
 				if (fieldModel.get('anonymousBoundMethod') != null && fieldModel.get('anonymousBoundMethod') != '') {
 					var boundMethod = activityModel.get(fieldModel.get('anonymousBoundMethod'));
 					if (boundMethod) {
-						var anonymousFields = boundMethod.get('anonymousFields');
-						if (anonymousFields == null) {
-							anonymousFields = [];
-						}
-						anonymousFields.push(fieldModel);
-						boundMethod.set({
-							anonymousFields : anonymousFields
-						});
+						boundMethod.addAnonymousElement(fieldModel);
 					}
 				}
 
@@ -97,6 +90,15 @@ $(function() {
 					activityId : activityModel.getAttr('name')
 				});
 				activityModel.addDataControl(DataControlModel);
+
+				/* add anonymous datacontrol field bound to method */
+				if (DataControlModel.getAttr('anonymousBoundMethod') != null && DataControlModel.get('anonymousBoundMethod') != '') {
+					var boundMethod = activityModel.get(DataControlModel.getAttr('anonymousBoundMethod'));
+					if (boundMethod) {
+						boundMethod.addAnonymousElement(DataControlModel);
+					}
+				}
+
 			});
 		},
 
@@ -197,7 +199,8 @@ $(function() {
 						contextObject : $(dataControlEl).attr('contextObject'),
 						renderingType : $(dataControlEl).attr('renderingType'),
 						selectionChangeAnonymousMethod : $(dataControlEl).attr('selectionChangeAnonymousMethod'),
-						selectionChangeAnonymousContextObject : $(dataControlEl).attr('selectionChangeAnonymousContextObject')
+						selectionChangeAnonymousContextObject : $(dataControlEl).attr('selectionChangeAnonymousContextObject'),
+						anonymousBoundMethod : $(dataControlEl).attr('anonymousBoundMethod')
 					});
 
 					var view = new expanz.Views.GridView({
@@ -257,7 +260,8 @@ $(function() {
 						autoPopulate : $(dataControlEl).attr('autoPopulate'),
 						renderingType : $(dataControlEl).attr('renderingType'),
 						selectionChangeAnonymousMethod : $(dataControlEl).attr('selectionChangeAnonymousMethod'),
-						selectionChangeAnonymousContextObject : $(dataControlEl).attr('selectionChangeAnonymousContextObject')
+						selectionChangeAnonymousContextObject : $(dataControlEl).attr('selectionChangeAnonymousContextObject'),
+						anonymousBoundMethod : $(dataControlEl).attr('anonymousBoundMethod')
 					});
 
 					if ($(dataControlEl).attr('renderingType') == 'checkboxes') {
