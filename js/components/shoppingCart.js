@@ -9,8 +9,6 @@ $(function() {
 
 			activity : null, /* initialised when the activity is created */
 
-			allowAnonymous : false,
-
 			listItemsOnSpecialMethodName : "listItemsOnSpecial",
 			listItemsOnSpecialMethodContextObject : "StockTranItem.ItemForSale",
 
@@ -870,7 +868,7 @@ $(function() {
 			isAnonymous : function() {
 				if (this.activity == null)
 					return null;
-				return this.activity.collection.isAnonymous();
+				return this.activity.collection.getAttr('allowAnonymous') === true && this.activity.collection.isAnonymous();
 			}
 
 		});
