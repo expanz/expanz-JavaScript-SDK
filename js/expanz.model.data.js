@@ -118,11 +118,10 @@ $(function() {
 			}, this);
 
 			var map = {};
+			var sortedMap = {};
 			_.each(cells, function(cell) {
-				/*
-				 * map[cell.get('field')] = { value : cell.get('value'), sortValue : cell.get('sortValue'), };
-				 */
 				map[cell.get('field')] = cell.get('value');
+				sortedMap[cell.get('field')] = cell.get('sortValue') || cell.get('value');
 			});
 
 			/* add row id and type to the map */
@@ -131,7 +130,8 @@ $(function() {
 
 			/* using a data to put the data to avoid underscore 'variable is not defined' error */
 			return {
-				data : map
+				data : map,
+				sortedValues : sortedMap
 			};
 		}
 	});
@@ -139,6 +139,10 @@ $(function() {
 	window.expanz.Model.Data.Grid = expanz.Collection.extend({
 
 		model : expanz.Model.Data.Row,
+
+		// header : [],
+		//		
+		// actions : [],
 
 		initialize : function(attrs) {
 			expanz.Collection.prototype.initialize.call(this, attrs);
@@ -217,6 +221,18 @@ $(function() {
 				return (row.getAttr('id') === '_header') || (row.getAttr('id') === '_actions') || (this.getAttr('id') === row.getAttr('id')) || (this.getAttr('activityId') === row.getAttr('id'));
 			}, this);
 		},
+
+		sortRows : function(columnName, ascending) {
+			this.comparator = function(rowA) {
+				var sortValue = rowA.getCellsMapByField().sortedValues[columnName] || "";
+				return sortValue.toLowerCase();
+			};
+			this.sort();
+			if (!ascending)
+				this.models.reverse();
+
+		},
+
 		addRow : function(_id, _type) {
 
 			this.add({

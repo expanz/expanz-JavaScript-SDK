@@ -306,7 +306,7 @@ $(function() {
 			}
 		},
 
-		renderWithPaging : function(currentPage, itemsPerPage) {
+		renderWithPaging : function(currentPage, itemsPerPage, currentSortField, currentSortAsc) {
 			// window.expanz.logToConsole("GridView rendered for page " + currentPage);
 
 			var rows = this.model.getAllRows();
@@ -343,9 +343,35 @@ $(function() {
 				else {
 					$(hostEl).addClass("nonEmptyGrid");
 					$(hostEl).removeClass("emptyGrid");
+
 					/* header template if defined */
 					if (headerTemplate && headerTemplate.length > 0) {
+						var that = this;
 						$(hostEl).html(headerTemplate.html());
+						$(hostEl).find("[sortField]").each(function() {
+							var fieldName = $(this).attr('sortField');
+							$(this).addClass("sortable");
+							if(fieldName == currentSortField){
+								if(currentSortAsc){
+									$(this).addClass("sortedAsc");
+								}
+								else{
+									$(this).addClass("sortedDesc");
+								}
+							}
+							
+							$(this).click(function() {
+								
+								var sortAsc = true;
+								if (fieldName == currentSortField) {
+									sortAsc = !currentSortAsc;
+								}
+								/* sort and display again */
+								that.model.sortRows(fieldName, sortAsc);
+								that.renderWithPaging(0, itemsPerPage, fieldName, sortAsc);
+							});
+						});
+						
 					}
 
 					/* create a wrapper for rows if not a table */
