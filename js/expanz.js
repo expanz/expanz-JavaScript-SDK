@@ -1,4 +1,4 @@
-/* Author: Adam Tait
+/* Author: Kim Damevin
 
  */
 $(function() {
