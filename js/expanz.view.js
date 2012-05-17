@@ -577,7 +577,7 @@ $(function() {
 		render : function() {
 
 			var itemsPerPage = this.options['itemsPerPage'];
-			if (!itemsPerPage) {
+			if (!itemsPerPage || itemsPerPage <= 0) {
 				itemsPerPage = 1000;
 			}
 

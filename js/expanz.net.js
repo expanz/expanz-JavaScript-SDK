@@ -1380,7 +1380,7 @@ $(function() {
 		// add columns to the grid Model
 		_.each($(data).find('Column'), function(column) {
 			var field = $(column).attr('field') ? $(column).attr('field') : $(column).attr('id');
-			field = field.replace(".", "_");
+			field = field.replace(/\./g, "_");
 			columnMap[$(column).attr('id')] = field;
 			gridModel.addColumn($(column).attr('id'), $(column).attr('field'), $(column).attr('label'), $(column).attr('datatype'), $(column).attr('width'));
 		});
