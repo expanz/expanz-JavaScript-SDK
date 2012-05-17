@@ -228,6 +228,7 @@ $(function() {
 				return sortValue.toLowerCase();
 			};
 			this.sort();
+
 			if (!ascending)
 				this.models.reverse();
 
