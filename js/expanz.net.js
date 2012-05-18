@@ -1083,11 +1083,21 @@ $(function() {
 							};
 						}
 
+						var methodAttributes = [];
+						if( $('Request > Method', this)[0] &&  $('Request > Method', this)[0].attributes.length > 0){
+							 _.each($('Request > Method', this)[0].attributes,function(attribute){
+								 if(attribute.name != 'name'){
+									 methodAttributes.push({name: attribute.name, value: attribute.value});
+								 }
+							 });
+						}
+						
 						var actionModel = new expanz.Model.Method({
 							id : $('Request > Method', this)[0] ? $($('Request > Method', this)[0]).attr('name') : 'close',
 							label : $(this).attr('label'),
 							response : $('Response', this)[0] ? $($('Response', this)[0]).children() : undefined,
-							parent : activity
+							parent : activity,
+							methodAttributes : methodAttributes
 						});
 						clientMessage.add(actionModel);
 					});

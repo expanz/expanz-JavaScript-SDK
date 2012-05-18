@@ -84,7 +84,7 @@ $(function() {
 	window.expanz.Model.Method = expanz.Model.Bindable.extend({
 
 		_type : 'Method',
-
+		
 		submit : function() {
 
 			var anonymousFields = [];
@@ -105,12 +105,16 @@ $(function() {
 				});
 			}
 
-			expanz.Net.MethodRequest(this.get('id'), [
-				{
-					name : "contextObject",
-					value : this.get('contextObject')
-				}
-			], null, this.get('parent'), anonymousFields);
+			var methodAttributes = [{
+				name : "contextObject",
+				value : this.get('contextObject')
+			}];
+			
+			if(this.get('methodAttributes')){
+				methodAttributes = methodAttributes.concat(this.get('methodAttributes'));
+			}
+			
+			expanz.Net.MethodRequest(this.get('id'),methodAttributes,null, this.get('parent'), anonymousFields);
 			return;
 
 		},
