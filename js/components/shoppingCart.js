@@ -22,7 +22,10 @@ $(function() {
 			orderHistoryListName : "orderHistory",
 			orderHistoryPopMethod : 'listMatchingOrders',
 			orderHistoryContextObject : "",
-
+			
+			myStandardOrdersPopMethod : "listMyStandardOrders",
+			myStandardOrdersContextObject : "",
+			
 			categoryTreeName : "StockTranItem.ItemForSale.ItemCategory.PersistentId",
 			categoryTreePopMethod : '$custom',
 			categoryTreeContextObject : "StockTranItem.ItemForSale.ItemCategory",
@@ -64,6 +67,7 @@ $(function() {
 				'ListOnSpecialItemsButton',
 				'ListPreviouslyOrderedButton',
 				'ListItems',
+				'StandardOrdersList',
 				'ListDisplayChoice',
 				'CartTitle',
 				'CartItemsList',
@@ -75,6 +79,7 @@ $(function() {
 				'CheckoutEditCartButton',
 				'CheckoutPayNowButton',
 				'CheckoutPickupCheckbox',
+				'CheckoutStandardOrder',
 				'CheckoutSubTotal',
 				'CheckoutTotalTaxAmount',
 				'CheckoutFreight',
@@ -352,6 +357,21 @@ $(function() {
 
 			},
 
+			renderStandardOrdersListComponent : function(el) {
+				var html = "";
+				html += '<script type="text/template" id="listStandardOrdersItemTemplate">';
+				html += '<div class="item"><%=data.StandardOrderName%><br/>';
+				html += '<div class="actions"><a class="loadStandardOrder" methodName="loadStandardOrder" href="javascript:void(0)">Load</a> - <a methodName="deleteStandardOrderWithPrompt" class="deleteStandardOrder" href="javascript:void(0)">X</a></div>';
+				html += '</div>';
+				html += '</script>';
+				html += '<script type="text/template" id="listStandardOrdersItemTemplateHeader">';
+				html += '<div class="header">My standard orders';
+				html += '</div>';
+				html += '</script>';
+				html += '<div id="listStandardOrders" class="standardOrders" itemsPerPage="10" name="listStandardOrders" bind="DataControl" renderingType="grid" populateMethod="' + this.myStandardOrdersPopMethod + '" autoPopulate="0" contextObject="' + this.myStandardOrdersContextObject + '"></div>';
+				return html;
+			},			
+			
 			/**
 			 * Method used in the list component to render the template of an item in the grid
 			 */
@@ -770,6 +790,13 @@ $(function() {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'Pick-up';
 				html += '<div class="checkoutPickup" name="DeliveryMethod" bind="field"> ' + label + ' <input checkedValue="pickup" uncheckedValue="" attribute="value" type="checkbox"/></span>';
+				return html;
+			},
+			
+			renderCheckoutStandardOrderComponent : function(el) {
+				var html = "";
+				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'Save as standard order';
+				html += '<div class="checkoutStandardOrder" name="StandardOrderName" bind="field"> ' + label + ' <input attribute="value" type="text" class="k-textbox"/></span>';
 				return html;
 			},
 
