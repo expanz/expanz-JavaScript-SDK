@@ -350,6 +350,15 @@ $(function() {
 						$(hostEl).html(headerTemplate.html());
 						$(hostEl).find("[sortField]").each(function() {
 							var fieldName = $(this).attr('sortField');
+							
+							var defaultSorted = $(this).attr('defaultSorted');
+							if( currentSortField == null && defaultSorted != null){
+								currentSortAsc = defaultSorted.toLowerCase() == 'desc' ? false : true;
+								currentSortField = fieldName;
+								that.model.sortRows(currentSortField, currentSortAsc);
+								rows = that.model.getAllRows();
+							};
+							
 							$(this).addClass("sortable");
 							if(fieldName == currentSortField){
 								if(currentSortAsc){
