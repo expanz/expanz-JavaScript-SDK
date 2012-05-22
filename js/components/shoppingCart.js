@@ -360,15 +360,15 @@ $(function() {
 			renderStandardOrdersListComponent : function(el) {
 				var html = "";
 				html += '<script type="text/template" id="listStandardOrdersItemTemplate">';
-				html += '<div class="item"><%=data.StandardOrderName%><br/>';
-				html += '<div class="actions"><a class="loadStandardOrder" methodName="loadStandardOrder" href="javascript:void(0)">Load</a> - <a methodName="deleteStandardOrderWithPrompt" class="deleteStandardOrder" href="javascript:void(0)">X</a></div>';
-				html += '</div>';
+				html += '<div class="item"><div class="loadStandardOrderName"><a methodName="loadStandardOrderWithPrompt" href="javascript:void(0)"><%=data.Name%></a></div>';
+				html += '<button methodName="deleteStandardOrderWithPrompt" class="deleteStandardOrder" href="javascript:void(0)"></button>';
+				html += '<div class="clear"></div></div>';
 				html += '</script>';
 				html += '<script type="text/template" id="listStandardOrdersItemTemplateHeader">';
 				html += '<div class="header">My standard orders';
 				html += '</div>';
 				html += '</script>';
-				html += '<div id="listStandardOrders" class="standardOrders" itemsPerPage="10" name="listStandardOrders" bind="DataControl" renderingType="grid" populateMethod="' + this.myStandardOrdersPopMethod + '" autoPopulate="0" contextObject="' + this.myStandardOrdersContextObject + '"></div>';
+				html += '<div id="listStandardOrders" class="standardOrders" itemsPerPage="10" name="listStandardOrders" bind="DataControl" renderingType="grid" populateMethod="' + this.myStandardOrdersPopMethod + '" contextObject="' + this.myStandardOrdersContextObject + '"></div>';
 				return html;
 			},			
 			
@@ -789,14 +789,15 @@ $(function() {
 			renderCheckoutPickupCheckboxComponent : function(el) {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'Pick-up';
-				html += '<div class="checkoutPickup" name="DeliveryMethod" bind="field"> ' + label + ' <input checkedValue="pickup" uncheckedValue="" attribute="value" type="checkbox"/></span>';
+				html += '<div class="checkoutPickup" name="DeliveryMethod" bind="field"> ' + label + ' <input checkedValue="pickup" uncheckedValue="" attribute="value" type="checkbox"/></div>';
 				return html;
 			},
 			
 			renderCheckoutStandardOrderComponent : function(el) {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'Save as standard order';
-				html += '<div class="checkoutStandardOrder" name="StandardOrderName" bind="field"> ' + label + ' <input attribute="value" type="text" class="k-textbox"/></span>';
+				html += '<div class="checkoutStandardOrder" name="StandardName" bind="field"> ' + label + ' <input attribute="value" type="text" class="k-textbox"/>';
+				html += '<span class="method" name="saveAsStandardOrder" id="saveAsStandardOrder" bind="method"><button attribute="submit" type="button" class="standardOrderSave">Save</button></span></div>'
 				return html;
 			},
 
