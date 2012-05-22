@@ -273,7 +273,7 @@ $(function() {
 			this.model.menuActionSelected(id, name, params);
 		},
 
-		renderPagingBar : function(currentPage, itemsPerPage, hostEl) {
+		renderPagingBar : function(currentPage, itemsPerPage, hostEl, currentSortField, currentSortAsc) {
 			var pagingBar = "";
 
 			var nbItems = this.model.getAllRows().length;
@@ -298,7 +298,7 @@ $(function() {
 
 						var that = this;
 						$(pagingBar).find("#" + inputId).click(function() {
-							that.renderWithPaging(this.value - 1, itemsPerPage);
+							that.renderWithPaging(this.value - 1, itemsPerPage,currentSortField,currentSortAsc);
 						});
 					}
 				}
@@ -575,7 +575,7 @@ $(function() {
 				$('table#' + hostId + ' tr [bind=menuAction] > button').click(this, onMenuActionClick);
 			}
 
-			this.renderPagingBar(currentPage, itemsPerPage, hostEl);
+			this.renderPagingBar(currentPage, itemsPerPage, hostEl,currentSortField,currentSortAsc);
 
 			$(hostEl).attr('nbItems', rows.length);
 			hostEl.trigger("table:rendered");
