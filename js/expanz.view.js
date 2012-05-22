@@ -191,7 +191,7 @@ $(function() {
 			this.contextMenuEl.html("");
 
 			var data = this.model.get('data');
-			if (data === undefined)
+			if (data === undefined || data == null)
 				return;
 
 			/* position menu below button */
