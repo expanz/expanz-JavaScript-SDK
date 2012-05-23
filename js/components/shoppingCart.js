@@ -881,11 +881,11 @@ $(function() {
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 12;
 
 				html += '<script type="text/template" id="orderHistoryItemTemplateHeader">';
-				html += '<thead><tr class="item"><th sortField="SearchCode" style="width:100px">Search code</th><th style="width:200px" sortField="Name" >Name</th><th style="width:200px">Delivery Address</th><th style="width:100px" sortField="Status" >Status</th><th  style="width:200px" sortField="CreationDate">Creation Date</th><th style="width:120px" sortField="Total">Amount</th><th>Actions</th></tr></thead>';
+				html += '<thead><tr class="item"><th sortField="SearchCode" style="width:100px">Search code</th><th style="width:200px" sortField="Name" >Name</th><th style="width:100px" sortField="Status" >Status</th><th  style="width:200px" sortField="CreationDate">Creation Date</th><th style="width:120px" sortField="Total">Amount</th><th>Actions</th></tr></thead>';
 				html += '</script>';
 
 				html += '<script type="text/template" id="orderHistoryItemTemplate">';
-				html += '<tr class="item"><td><%=data.SearchCode%></td><td><%=data.Client_Name%></td><td><%=data.DeliveryAddressStreeet%></td><td><%=data.Status%></td><td><%=data.CreationDate%></td><td><%=data.Total%></td>';
+				html += '<tr class="item"><td><%=data.SearchCode%></td><td><%=data.Client_Name%></td><td><%=data.Status%></td><td><%=data.CreationDate%></td><td><%=data.Total%></td>';
 				html += '<td><button methodName="showInvoice">Show Invoice</button></td></tr>';
 				html += '</script>';
 
