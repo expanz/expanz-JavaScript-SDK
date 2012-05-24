@@ -165,9 +165,22 @@ $(function() {
 					});
 				}
 				else {
+					/* look for potential methodAttributes - format is name:value;name2:value2; */
+					
+					var methodAttributes = [];
+					if($(methodEl).attr('methodAttributes')){
+						_.each($(methodEl).attr('methodAttributes').split(';'),function(val){
+							var split = val.split(':');
+							if(split.length == 2){
+								methodAttributes.push({name: split[0], value:split[1]});
+							}
+						});
+					}
+					
 					method = new expanz.Model.Method({
 						id : $(methodEl).attr('name'),
-						contextObject : $(methodEl).attr('contextObject')
+						contextObject : $(methodEl).attr('contextObject'),
+						methodAttributes : methodAttributes
 					});
 
 					var view = new expanz.Views.MethodView({
