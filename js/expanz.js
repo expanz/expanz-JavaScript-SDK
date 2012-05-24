@@ -223,6 +223,11 @@ $(function() {
 	window.expanz.basicMsgDisplay = function(el) {
 		return function display(str) {
 
+			var fade = true;
+			if($(el).attr('fade') && boolValue($(el).attr('fade')) === false){
+				fade = false;
+			}
+			
 			if (str instanceof Array) {
 				str = str.join("<br/>");
 			}
@@ -240,7 +245,9 @@ $(function() {
 					}
 					else {
 						$(popupEl).show(1, function() {
-							$(popupEl).delay(5000).hide(1);
+							if(fade){
+								$(popupEl).delay(5000).hide(1);
+							}
 						});
 					}
 				}
@@ -254,7 +261,9 @@ $(function() {
 				else {
 					// $(el).show('slow');
 					$(el).slideDown(800, function() {
-						$(el).delay(5000).slideUp(800);
+						if(fade){
+							$(el).delay(5000).slideUp(800);
+						}
 					});
 				}
 			}
