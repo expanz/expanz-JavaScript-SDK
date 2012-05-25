@@ -32,6 +32,15 @@ function renderKendoComponents(el) {
 	/* bind menus to kendo ui menu */
 	if (el.find('[bind=menu] > ul.menu').length > 0)
 		el.find('[bind=menu] > ul.menu').kendoMenu();
+
+	/* bind numeric stepper */
+	if (el.find("[renderingType=numerictextbox]").length > 0)
+		el.find("[renderingType=numerictextbox]").kendoNumericTextBox({
+			min : 1,
+			max : 99,
+			step : 1,
+			format : "n0"
+		});
 }
 
 function useKendoMobile() {

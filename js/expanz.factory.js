@@ -223,6 +223,7 @@ $(function() {
 						itemsPerPage : $(dataControlEl).attr('itemsPerPage'),
 						templateName : $(dataControlEl).attr('templateName'),
 						isHTMLTable : $(dataControlEl).attr('isHTMLTable'),
+						enableConfiguration : $(dataControlEl).attr('enableConfiguration'),
 						noItemText : $(dataControlEl).attr('noItemText'),
 						model : dataControlModel
 					});

@@ -73,6 +73,20 @@ $(function() {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess', (new Date()).getTime());
 			return true;
 		},
+		
+		getLastURL : function() {
+			return this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'lastURL');
+		},
+
+		setLastURL : function(url) {
+			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'lastURL', url);
+			return true;
+		},
+		
+		clearLastURL : function() {
+			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'lastURL');
+			return true;
+		},		
 
 		setUserPreference : function(key, value) {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'UserPreference' + key, value);

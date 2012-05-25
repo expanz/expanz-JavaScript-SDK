@@ -84,19 +84,19 @@ $(function() {
 	window.expanz.Model.Method = expanz.Model.Bindable.extend({
 
 		_type : 'Method',
-		
+
 		submit : function() {
 
 			var anonymousFields = [];
 			if (this.get('anonymousFields')) {
 				$.each(this.get('anonymousFields'), function(index, value) {
-					if(value instanceof expanz.Model.Data.DataControl){
+					if (value instanceof expanz.Model.Data.DataControl) {
 						anonymousFields.push({
 							id : value.getAttr('fieldId'),
 							value : value.getAttr('lastValues') || ""
 						});
 					}
-					else{
+					else {
 						anonymousFields.push({
 							id : value.get('id'),
 							value : value.get('lastValue')
@@ -105,16 +105,29 @@ $(function() {
 				});
 			}
 
-			var methodAttributes = [{
-				name : "contextObject",
-				value : this.get('contextObject')
-			}];
-			
-			if(this.get('methodAttributes')){
+			var methodAttributes = [
+				{
+					name : "contextObject",
+					value : this.get('contextObject')
+				}
+			];
+
+			if (this.get('methodAttributes')) {
 				methodAttributes = methodAttributes.concat(this.get('methodAttributes'));
 			}
-			
-			expanz.Net.MethodRequest(this.get('id'),methodAttributes,null, this.get('parent'), anonymousFields);
+
+			/* bind eventual dynamic values -> requiring user input for example, format is %input_id% */
+			/* input id must be unique in the page */
+			methodAttributes = methodAttributes.clone();
+			for ( var i = 0; i < methodAttributes.length; i++) {
+				var value = methodAttributes[i].value;
+				var inputField = /^%(.*)%$/.exec(value);
+				if (inputField) {
+					methodAttributes[i].value = $("#" + inputField[1]).val();
+				}
+			}
+
+			expanz.Net.MethodRequest(this.get('id'), methodAttributes, null, this.get('parent'), anonymousFields);
 			return;
 
 		},
@@ -178,6 +191,16 @@ $(function() {
 									window.location.reload();
 								}
 								else {
+
+									/*
+									 * NOT IMPLEMENTED YET...problem with url where sessionHandle and activityHandle are GET parameters 
+									 * var urlBeforeLogin = expanz.Storage.getLastURL(); 
+									 * if(urlBeforeLogin != null && urlBeforeLogin != ''){ 
+									 * expanz.Storage.clearLastURL();
+									 *  expanz.Views.redirect(urlBeforeLogin); 
+									 *  return;
+									 * } 
+									 */
 									// redirect to default activity
 									expanz.Views.redirect(url);
 								}

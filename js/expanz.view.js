@@ -298,7 +298,7 @@ $(function() {
 
 						var that = this;
 						$(pagingBar).find("#" + inputId).click(function() {
-							that.renderWithPaging(this.value - 1, itemsPerPage,currentSortField,currentSortAsc);
+							that.renderWithPaging(this.value - 1, itemsPerPage, currentSortField, currentSortAsc);
 						});
 					}
 				}
@@ -320,7 +320,9 @@ $(function() {
 
 			var templateName = this.options['templateName'] || this.model.getAttr('id') + "ItemTemplate";
 			var wrapperElement = this.options['isHTMLTable'] == "true" ? 'table' : 'div';
+			var enableConfiguration = this.options['enableConfiguration'] ? boolValue(this.options['enableConfiguration']) : false;
 			var noItemText = this.options['noItemText'] || '';
+			var nbItemsPerPageText = this.options['nbItemsPerPageText'] || 'Items per page';
 
 			var headerTemplate = $("#" + templateName + "Header");
 			var itemTemplate = $("#" + templateName);
@@ -334,43 +336,67 @@ $(function() {
 					hostEl = this.el.find(wrapperElement + '#' + hostId);
 				}
 				$(hostEl).html('');
+				$(hostEl).parent().find("#" + hostId + "_Configuration").remove();
 
 				if (!hasItem) {
 					$(hostEl).addClass("emptyGrid");
 					$(hostEl).removeClass("nonEmptyGrid");
-					$(hostEl).html('<div id="noItemText" class="emptyListText">' + noItemText + '</div>');
+					$(hostEl).append('<div id="noItemText" class="emptyListText">' + noItemText + '</div>');
 				}
 				else {
 					$(hostEl).addClass("nonEmptyGrid");
 					$(hostEl).removeClass("emptyGrid");
 
+					/* datagrid/list configuration (nb items per page, sorting as combo box) */
+					if (enableConfiguration) {
+						$(hostEl).parent().prepend('<div id="' + hostId + '_Configuration"></div>');
+						$confEl = $(hostEl).parent().find("#" + hostId + "_Configuration");
+
+						var itemsPerPageChoices = [
+							10, 20, 50, 100
+						];
+						$confEl.append('<div class="ItemsPerPage" >' + nbItemsPerPageText + '<select id="' + hostId + '_Configuration_ItemsPerPage" name="ItemsPerPage">');
+						var selectEl = $confEl.find("#" + hostId + "_Configuration_ItemsPerPage");
+						for ( var i = 0; i < itemsPerPageChoices.length; i++) {
+							var defString = itemsPerPage == itemsPerPageChoices[i] ? ' selected="selected" ' : '';
+							selectEl.append('<option ' + defString + ' value="' + itemsPerPageChoices[i] + '">' + itemsPerPageChoices[i] + '</option>');
+						}
+						selectEl.append('</select></div>');
+
+						var that = this;
+						selectEl.change(function() {
+							that.renderWithPaging(currentPage, $(this).val(), currentSortField, !currentSortAsc)
+						});
+					}
+
 					/* header template if defined */
 					if (headerTemplate && headerTemplate.length > 0) {
 						var that = this;
-						$(hostEl).html(headerTemplate.html());
+						$(hostEl).append(headerTemplate.html());
 						$(hostEl).find("[sortField]").each(function() {
 							var fieldName = $(this).attr('sortField');
-							
+
 							var defaultSorted = $(this).attr('defaultSorted');
-							if( currentSortField == null && defaultSorted != null){
+							if (currentSortField == null && defaultSorted != null) {
 								currentSortAsc = defaultSorted.toLowerCase() == 'desc' ? false : true;
 								currentSortField = fieldName;
 								that.model.sortRows(currentSortField, currentSortAsc);
 								rows = that.model.getAllRows();
-							};
-							
+							}
+							;
+
 							$(this).addClass("sortable");
-							if(fieldName == currentSortField){
-								if(currentSortAsc){
+							if (fieldName == currentSortField) {
+								if (currentSortAsc) {
 									$(this).addClass("sortedAsc");
 								}
-								else{
+								else {
 									$(this).addClass("sortedDesc");
 								}
 							}
-							
+
 							$(this).click(function() {
-								
+
 								var sortAsc = true;
 								if (fieldName == currentSortField) {
 									sortAsc = !currentSortAsc;
@@ -380,7 +406,7 @@ $(function() {
 								that.renderWithPaging(0, itemsPerPage, fieldName, sortAsc);
 							});
 						});
-						
+
 					}
 
 					/* create a wrapper for rows if not a table */
@@ -575,7 +601,7 @@ $(function() {
 				$('table#' + hostId + ' tr [bind=menuAction] > button').click(this, onMenuActionClick);
 			}
 
-			this.renderPagingBar(currentPage, itemsPerPage, hostEl,currentSortField,currentSortAsc);
+			this.renderPagingBar(currentPage, itemsPerPage, hostEl, currentSortField, currentSortAsc);
 
 			$(hostEl).attr('nbItems', rows.length);
 			hostEl.trigger("table:rendered");
@@ -985,6 +1011,12 @@ $(function() {
 	// Public Functions
 	window.expanz.Views.redirect = function(destinationURL) {
 		window.location.href = destinationURL;
+	};
+
+	window.expanz.Views.requestLogin = function() {
+		/* if redirection to login page store the last page to be able to redirect the user once logged in */
+		window.expanz.Storage.setLastURL(document.URL);
+		expanz.Views.redirect(expanz.getLoginURL());
 	};
 
 	// Private Functions

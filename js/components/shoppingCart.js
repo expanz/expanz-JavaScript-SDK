@@ -22,10 +22,10 @@ $(function() {
 			orderHistoryListName : "orderHistory",
 			orderHistoryPopMethod : 'listMatchingOrders',
 			orderHistoryContextObject : "",
-			
+
 			myStandardOrdersPopMethod : "listMyStandardOrders",
 			myStandardOrdersContextObject : "",
-			
+
 			categoryTreeName : "StockTranItem.ItemForSale.ItemCategory.PersistentId",
 			categoryTreePopMethod : '$custom',
 			categoryTreeContextObject : "StockTranItem.ItemForSale.ItemCategory",
@@ -136,6 +136,11 @@ $(function() {
 							$("[loginNeeded='true']").hide();
 							// $("#rightPart").hide();
 							$("#logout a").hide();
+							$("#logout").unbind("click");
+							$("#logout").click(function() {
+								expanz.Views.requestLogin();
+							});
+
 							$("#logout").append('<a class="login menuTitle">Login</a>');
 
 						}
@@ -275,6 +280,7 @@ $(function() {
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 9;
 				var displayAsTable = boolValue(el.attr('displayAsTable'));
 				var templateName = (el !== undefined && el.attr('templateName') !== undefined) ? el.attr('templateName') : 'productListItemTemplateGrid';
+				var enableConfiguration = (el !== undefined && el.attr('enableConfiguration') !== undefined) ? el.attr('enableConfiguration') : 'false';
 				if (displayAsTable) {
 					html += this.renderDefaultListItemTemplate();
 					html += this.renderDefaultListItemTemplateHeader();
@@ -283,7 +289,7 @@ $(function() {
 					html += this.renderDefaultListItemGridTemplate();
 				}
 				html += "<div id='searchResultTitle' class='searchResultTitle' style='display:none'>Showing Results for \"<span id='searchString'></span>\"</div>";
-				html += '<div id="productListDiv" noItemText="No item matches your selection" isHTMLTable="' + displayAsTable + '" templateName="' + templateName + '"  itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
+				html += '<div id="productListDiv" enableConfiguration="' + enableConfiguration + '" noItemText="No item matches your selection" isHTMLTable="' + displayAsTable + '" templateName="' + templateName + '"  itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 				return html;
 			},
 
@@ -370,8 +376,8 @@ $(function() {
 				html += '</script>';
 				html += '<div id="listStandardOrders" class="standardOrders" itemsPerPage="10" name="listStandardOrders" bind="DataControl" renderingType="grid" populateMethod="' + this.myStandardOrdersPopMethod + '" contextObject="' + this.myStandardOrdersContextObject + '"></div>';
 				return html;
-			},			
-			
+			},
+
 			/**
 			 * Method used in the list component to render the template of an item in the grid
 			 */
@@ -793,7 +799,7 @@ $(function() {
 				html += '<div class="checkoutPickup" name="DeliveryMethod" bind="field"> ' + label + ' <input checkedValue="pickup" uncheckedValue="" attribute="value" type="checkbox"/></div>';
 				return html;
 			},
-			
+
 			renderCheckoutStandardOrderComponent : function(el) {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'Save as standard order';
