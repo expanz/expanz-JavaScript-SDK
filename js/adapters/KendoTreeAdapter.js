@@ -3,7 +3,6 @@ $.fn.KendoTreeAdapter = function(options) {
 	var treeView = $(this);
 
 	var parentSelectable = true;
-	var childType = 'File';
 	var labelAttribute = 'title';
 	var idAttribute = 'id';
 	var expandedOnLoad = true;
@@ -82,6 +81,42 @@ $.fn.KendoTreeAdapter = function(options) {
 			filterData = options['filterData'];
 	}
 
+	
+	var parseChildrenRows = function(parentXml){
+		var items = [];
+		_.each($(parentXml).children(), function(childXml) {
+			childTag = childXml.tagName;
+			var child = {
+				text : $(childXml).attr(labelAttribute),
+				value : $(childXml).attr(idAttribute),
+				allAttributes : $(childXml)
+			};
+			
+			if($(childXml).attr('Type') == 'parent'){
+				var itemsChildren = parseChildrenRows(childXml);
+				if(itemsChildren.length > 0 ){
+					child.items = itemsChildren;
+				}
+			}
+			items.push(child);
+		});
+		return items;
+	}
+	
+	var parseRow = function(parentXml) {
+		var parentId = $(parentXml).attr(idAttribute);
+		var parentObj = {};
+		parentObj.text = $(parentXml).attr(labelAttribute);
+		parentObj.expanded = expandedOnLoad;
+		parentObj.allAttributes = $(parentXml).getAttributes();
+
+		var items = parseChildrenRows(parentXml);		
+		if (items.length > 0) {
+			parentObj.items = items;
+		}
+		return parentObj;
+	}
+
 	/**
 	 * define publishData which is called when list of data is ready
 	 */
@@ -98,27 +133,8 @@ $.fn.KendoTreeAdapter = function(options) {
 		}
 
 		_.each($(xml).children(), function(parentXml) {
-			var parentId = $(parentXml).attr(idAttribute);
-			var parentObj = {};
-			parentObj.text = $(parentXml).attr(labelAttribute);
-			parentObj.expanded = expandedOnLoad;
-			parentObj.allAttributes = $(parentXml).getAttributes();
-
-			var items = [];
-			_.each($(parentXml).children(), function(childXml) {
-				childTag = childXml.tagName;
-				items.push({
-					text : $(childXml).attr(labelAttribute),
-					value : $(childXml).attr(idAttribute),
-					allAttributes : $(childXml)
-				});
-			});
-
-			if (items.length > 0) {
-				parentObj.items = items;
-			}
+			var parentObj = parseRow(parentXml);
 			data.push(parentObj);
-
 		});
 
 		treeView.kendoTreeView({
