@@ -108,7 +108,7 @@ $(function() {
 					var anonymousCalls = function() {
 						if (that.isAnonymous()) {
 
-							console.log('Anonymous -> must call some stuff ');
+							//console.log('Anonymous -> must call some stuff ');
 							/* list of anonymous call we want to do at the beginning (data publication) */
 							var dataModelList = [
 								{
@@ -832,8 +832,8 @@ $(function() {
 				window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent($("#checkoutCart"));
 				var that = this;
 				$("#checkoutCart").bind("table:rendered", function() {
-					/* hiding the checkout part if no items */
-					if ($("#checkoutCart > [nbItems]").attr("nbItems") === "0") {
+					/* hiding the checkout part if no items and not order submitted message displayed */
+					if ($("#checkoutCart > [nbItems]").attr("nbItems") === "0" && $('.k-window-title:contains("Order Submitted")').length == 0 ) {
 						expanz.Views.redirect(that.shoppingCartPage);
 					}
 					else {
