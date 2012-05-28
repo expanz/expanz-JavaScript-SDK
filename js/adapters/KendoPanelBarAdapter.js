@@ -3,7 +3,6 @@ $.fn.KendoPanelBarAdapter = function(options) {
 	var panelView = $(this);
 
 	var parentSelectable = true;
-	var childType = 'File';
 	var labelAttribute = 'title';
 	var idAttribute = 'id';
 	var expandedOnLoad = true;

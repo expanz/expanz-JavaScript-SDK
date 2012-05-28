@@ -3,7 +3,6 @@ $.fn.KendoMobileListAdapter = function(options) {
 	var listView = $(this);
 
 	var parentSelectable = true;
-	var childType = 'File';
 	var labelAttribute = 'title';
 	var idAttribute = 'id';
 
