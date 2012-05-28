@@ -32,6 +32,7 @@ $.fn.KendoTreeAdapter = function(options) {
 			newData = originalData;
 		}
 		else {
+			//TODO: Handle more than 2 levels with filtering
 			/* creating a filtered array of data */
 			var regExp = new RegExp(filter, "i");
 			var newData = [];
@@ -89,7 +90,8 @@ $.fn.KendoTreeAdapter = function(options) {
 			var child = {
 				text : $(childXml).attr(labelAttribute),
 				value : $(childXml).attr(idAttribute),
-				allAttributes : $(childXml)
+				allAttributes : $(childXml),
+				expanded: expandedOnLoad
 			};
 			
 			if($(childXml).attr('Type') == 'parent'){
