@@ -35,7 +35,7 @@ $(function() {
 							name : "contextObject",
 							value : this.getAttr('selectionChangeAnonymousContextObject')
 						}
-					], null, this.getAttr('parent'), anonymousFields);
+					], null, this.getAttr('parent'), anonymousFields,callbacks);
 				}
 				/* if we are in anonymous mode and the data control is a checkboxes control we need to store the value to send it later */
 				else {

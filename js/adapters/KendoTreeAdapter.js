@@ -7,17 +7,56 @@ $.fn.KendoTreeAdapter = function(options) {
 	var idAttribute = 'id';
 	var expandedOnLoad = true;
 	var filteringInput = []; /* array of input element */
+	var displayLoading = true;
 
 	/* function called after the delta has been sent and the response has been handle by the client */
-	/* format is selectionCallback = { success : function(){ <doing some actions> } } */
+	/* format is selectionCallback = function(){ <doing some actions> } */
 	var selectionCallback = null;
+
+	var callback = {
+		success : function() {
+			// treeView.data('kendoTreeView').enable(".k-item",true);
+			if(displayLoading){
+				treeView.removeClass('treeSelectionLoading');
+				var loadingId = "LoadingTree_" + treeView.attr('id');
+				var loadingEL = $(treeView).find("#" + loadingId);
+				if (loadingEL)
+					loadingEL.hide();
+			}
+
+			if (selectionCallback)
+				selectionCallback.call();
+		}
+	};
 
 	var runAfterPublish = null;
 
 	var onSelection = function(view, id, isChild) {
 		if (!parentSelectable && !isChild)
 			return;
-		view.itemSelected(id, selectionCallback);
+		view.itemSelected(id, callback);
+		// treeView.data('kendoTreeView').enable(".k-item",false);
+		if(displayLoading){
+			var loadingId = "LoadingTree_" + treeView.attr('id');
+			var loadingEL = $(view.el).find("#" + loadingId);
+			if (loadingEL.length === 0) {
+				$(view.el).append('<div class="loading" id="' + loadingId + '"><span> </span></div>');
+				loadingEL = $(view.el).find("#" + loadingId);
+			}
+	
+			loadingEL.css("position", "absolute");
+			loadingEL.css('width', '100%');
+			loadingEL.css('height', '100%');
+			loadingEL.css('margin', '0');
+			loadingEL.css('padding', '0');
+			loadingEL.css('top', '0px');
+			loadingEL.css('left', '0px');
+			loadingEL.css('z-index', '999');
+			loadingEL.css('overflow', 'hidden');
+			loadingEL.css('background', 'url(data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==) center');
+			loadingEL.show();
+			treeView.addClass('treeSelectionLoading');
+		}
 	};
 
 	/* filter data */
@@ -32,7 +71,7 @@ $.fn.KendoTreeAdapter = function(options) {
 			newData = originalData;
 		}
 		else {
-			//TODO: Handle more than 2 levels with filtering
+			// TODO: Handle more than 2 levels with filtering
 			/* creating a filtered array of data */
 			var regExp = new RegExp(filter, "i");
 			var newData = [];
@@ -80,23 +119,23 @@ $.fn.KendoTreeAdapter = function(options) {
 			runAfterPublish = options['runAfterPublish'];
 		if (options['filterData'] !== undefined)
 			filterData = options['filterData'];
+		if (options['displayLoading'] !== undefined)
+			displayLoading = options['displayLoading'];		
 	}
 
-	
-	var parseChildrenRows = function(parentXml){
+	var parseChildrenRows = function(parentXml) {
 		var items = [];
 		_.each($(parentXml).children(), function(childXml) {
-			childTag = childXml.tagName;
 			var child = {
 				text : $(childXml).attr(labelAttribute),
 				value : $(childXml).attr(idAttribute),
 				allAttributes : $(childXml),
-				expanded: expandedOnLoad
+				expanded : expandedOnLoad
 			};
-			
-			if($(childXml).attr('Type') == 'parent'){
+
+			if ($(childXml).attr('Type') == 'parent') {
 				var itemsChildren = parseChildrenRows(childXml);
-				if(itemsChildren.length > 0 ){
+				if (itemsChildren.length > 0) {
 					child.items = itemsChildren;
 				}
 			}
@@ -104,7 +143,7 @@ $.fn.KendoTreeAdapter = function(options) {
 		});
 		return items;
 	}
-	
+
 	var parseRow = function(parentXml) {
 		var parentId = $(parentXml).attr(idAttribute);
 		var parentObj = {};
@@ -112,7 +151,7 @@ $.fn.KendoTreeAdapter = function(options) {
 		parentObj.expanded = expandedOnLoad;
 		parentObj.allAttributes = $(parentXml).getAttributes();
 
-		var items = parseChildrenRows(parentXml);		
+		var items = parseChildrenRows(parentXml);
 		if (items.length > 0) {
 			parentObj.items = items;
 		}
@@ -127,7 +166,7 @@ $.fn.KendoTreeAdapter = function(options) {
 		var xmlData = xml;
 		var data = [];
 
-		var childTag = '';
+		var parentTag = '';
 
 		/* if xml contains rows tag, this is where starts the real data for the tree */
 		if ($(xml).find("Rows").length > 0) {
@@ -136,6 +175,7 @@ $.fn.KendoTreeAdapter = function(options) {
 
 		_.each($(xml).children(), function(parentXml) {
 			var parentObj = parseRow(parentXml);
+			parentTag = parentXml.tagName;
 			data.push(parentObj);
 		});
 
@@ -157,7 +197,7 @@ $.fn.KendoTreeAdapter = function(options) {
 			});
 
 			if (onSelection) {
-				onSelection(view, elem.attr('id'), elem.is(childTag));
+				onSelection(view, elem.attr('id'), !elem.is(parentTag));
 			}
 		});
 
