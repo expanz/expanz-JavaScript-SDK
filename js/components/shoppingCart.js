@@ -314,6 +314,9 @@ $(function() {
 						$(el).find("#productListDiv").find("#noItemText").show();
 						$(el).find("#productListDiv").find("#onSpecial").remove();
 					}
+					
+					$(el).find("[name=ItemsPerPage]").kendoDropDownList();
+					
 				});
 			},
 
@@ -978,6 +981,16 @@ $(function() {
 		discount = discount.replace(/(\d*) @(\d*\.?\d*)/g, '<label class="discount">$1 items or more for &#36;$2 each</label>')
 		return discount;
 	};
+	
+	window.expanz.html.addNameToImageURL = function(currentUrl,name) {
+		if (!currentUrl || !name)
+			return "";
+		var lastSlashPos = currentUrl.replace(/\\/g,"/").lastIndexOf("/");
+		if (lastSlashPos >= 0 ){
+			return currentUrl.splice(lastSlashPos + 1, 0 , escapeBadCharForURL(name) + "-");
+		}
+		return "";
+	};	
 
 	window.expanz.html.isEmpty = function(value) {
 		if (value === undefined)
