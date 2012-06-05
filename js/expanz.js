@@ -32,7 +32,7 @@ $(function() {
 			if (loginUrl == "")
 				loginUrl = "/";
 		}
-		//window.expanz.logToConsole("getLoginURL : " + loginUrl);
+		// window.expanz.logToConsole("getLoginURL : " + loginUrl);
 		return loginUrl;
 	};
 
@@ -152,7 +152,7 @@ $(function() {
 
 		/* set focus on username field */
 		$("#username input").focus()
-		
+
 		createLogin(loginPopup.el.find('[bind=login]'));
 
 		return;
@@ -224,10 +224,10 @@ $(function() {
 		return function display(str) {
 
 			var fade = true;
-			if($(el).attr('fade') && boolValue($(el).attr('fade')) === false){
+			if ($(el).attr('fade') && boolValue($(el).attr('fade')) === false) {
 				fade = false;
 			}
-			
+
 			if (str instanceof Array) {
 				str = str.join("<br/>");
 			}
@@ -245,7 +245,7 @@ $(function() {
 					}
 					else {
 						$(popupEl).show(1, function() {
-							if(fade){
+							if (fade) {
 								$(popupEl).delay(5000).hide(1);
 							}
 						});
@@ -254,17 +254,21 @@ $(function() {
 			}
 
 			if (!msgDisplayedInPopup) {
-				$(el).find('[attribute=value]').html(str);
-				if (!str || str.length < 1) {
-					$(el).hide('slow');
-				}
-				else {
-					// $(el).show('slow');
-					$(el).slideDown(800, function() {
-						if(fade){
-							$(el).delay(5000).slideUp(800);
-						}
-					});
+				if ($(el).find('[attribute=value]').length > 0) {
+					$(el).find('[attribute=value]').html(str);
+					if (!str || str.length < 1) {
+						$(el).hide('slow');
+					}
+					else {
+						/*if (!isVisibleOnScreen($(el))) {
+							console.log('not visible at the moment');
+						}*/
+						$(el).slideDown(800, function() {
+							if (fade) {
+								$(el).delay(5000).slideUp(800);
+							}
+						});
+					}
 				}
 			}
 		};
@@ -444,7 +448,7 @@ $(function() {
 	}
 
 	/* load resource bundle */
-	if( window.config._useBundle !== false){
+	if (window.config._useBundle !== false) {
 		jQuery.i18n.properties({
 			name : 'Messages',
 			path : 'assets/bundle/',
@@ -452,7 +456,7 @@ $(function() {
 			language : ' ', /* set to en to load Messages-en.properties as well, set to '' to load as well Messages-en-XX.properties - add to config.js if different for some customers */
 			cache : true,
 			callback : function() {
-				//window.expanz.logToConsole("Bundle loaded");
+				// window.expanz.logToConsole("Bundle loaded");
 			}
 		});
 	}

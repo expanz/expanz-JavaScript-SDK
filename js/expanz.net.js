@@ -93,7 +93,7 @@ $(function() {
 
 				SendRequest(RequestObject.CreateActivity(activity, expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callbacks));
 			}
-			else{
+			else {
 				/* anonymous case because no session handle is set */
 			}
 		},
@@ -558,10 +558,10 @@ $(function() {
 			}
 
 			/* add company code if anonymous */
-			if (activity.isAnonymous()){
+			if (activity.isAnonymous()) {
 				body += " company='" + config._anonymousCompanyCode + "' ";
 			}
-			
+
 			body += '>';
 
 			/* add all bound fields in anonymous activity case */
@@ -869,7 +869,7 @@ $(function() {
 						for ( var i = 0; i < dataControlModels.length; i++) {
 							dataControlModel = dataControlModels[i];
 							/* grid case */
-							if (dataControlModel.getAttr('renderingType') == 'grid') {
+							if (dataControlModel.getAttr('renderingType') == 'grid' || dataControlModel.getAttr('renderingType') == 'popupGrid') {
 								fillGridModel(dataControlModel, data);
 
 								/* add a method handler for each action button */
@@ -1084,14 +1084,17 @@ $(function() {
 						}
 
 						var methodAttributes = [];
-						if( $('Request > Method', this)[0] &&  $('Request > Method', this)[0].attributes.length > 0){
-							 _.each($('Request > Method', this)[0].attributes,function(attribute){
-								 if(attribute.name != 'name'){
-									 methodAttributes.push({name: attribute.name, value: attribute.value});
-								 }
-							 });
+						if ($('Request > Method', this)[0] && $('Request > Method', this)[0].attributes.length > 0) {
+							_.each($('Request > Method', this)[0].attributes, function(attribute) {
+								if (attribute.name != 'name') {
+									methodAttributes.push({
+										name : attribute.name,
+										value : attribute.value
+									});
+								}
+							});
 						}
-						
+
 						var actionModel = new expanz.Model.Method({
 							id : $('Request > Method', this)[0] ? $($('Request > Method', this)[0]).attr('name') : 'close',
 							label : $(this).attr('label'),
@@ -1172,7 +1175,7 @@ $(function() {
 						if (dataControlModels !== undefined) {
 							for ( var i = 0; i < dataControlModels.length; i++) {
 								dataControlModel = dataControlModels[i];
-								if (dataControlModel.getAttr('renderingType') == 'grid') {
+								if (dataControlModel.getAttr('renderingType') == 'grid' || dataControlModel.getAttr('renderingType') == 'popupGrid') {
 									fillGridModel(dataControlModel, $(this));
 
 									/* override the method handler for each action button */

@@ -166,17 +166,20 @@ $(function() {
 				}
 				else {
 					/* look for potential methodAttributes - format is name:value;name2:value2; */
-					
+
 					var methodAttributes = [];
-					if($(methodEl).attr('methodAttributes')){
-						_.each($(methodEl).attr('methodAttributes').split(';'),function(val){
+					if ($(methodEl).attr('methodAttributes')) {
+						_.each($(methodEl).attr('methodAttributes').split(';'), function(val) {
 							var split = val.split(':');
-							if(split.length == 2){
-								methodAttributes.push({name: split[0], value:split[1]});
+							if (split.length == 2) {
+								methodAttributes.push({
+									name : split[0],
+									value : split[1]
+								});
 							}
 						});
 					}
-					
+
 					method = new expanz.Model.Method({
 						id : $(methodEl).attr('name'),
 						contextObject : $(methodEl).attr('contextObject'),
@@ -203,9 +206,10 @@ $(function() {
 			_.each(DOMObjects, function(dataControlEl) {
 
 				/* case rendering as a grid */
-				if ($(dataControlEl).attr('renderingType') == 'grid') {
+				if ($(dataControlEl).attr('renderingType') == 'grid' || $(dataControlEl).attr('renderingType') == 'popupGrid') {
 					var dataControlModel = new expanz.Model.Data.Grid({
 						id : $(dataControlEl).attr('name'),
+						fieldId : $(dataControlEl).attr('fieldName') || $(dataControlEl).attr('name'),
 						query : $(dataControlEl).attr('query'),
 						populateMethod : $(dataControlEl).attr('populateMethod'),
 						autoPopulate : $(dataControlEl).attr('autoPopulate'),

@@ -604,6 +604,24 @@ $(function() {
 			this.renderPagingBar(currentPage, itemsPerPage, hostEl, currentSortField, currentSortAsc);
 
 			$(hostEl).attr('nbItems', rows.length);
+
+			if (this.model.getAttr('renderingType') == 'popupGrid') {
+				var clientMessage = new expanz.Model.ClientMessage({
+					id : hostId + 'PopUp',
+					title : '',
+					text : '',
+					parent : this.model.getAttr('parent')
+				});
+
+				var picklistWindow = new window.expanz.Views.PopupView({
+					id : clientMessage.id,
+					model : clientMessage
+				}, $('body'));
+
+				picklistWindow.el.append(hostEl);
+				picklistWindow.center();
+			}
+
 			hostEl.trigger("table:rendered");
 
 			return this;
