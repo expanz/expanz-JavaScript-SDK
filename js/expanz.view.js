@@ -470,21 +470,21 @@ $(function() {
 								window.expanz.logToConsole("autUpdate action not defined in formapping: " + $(this).attr('autoUpdate'));
 							}
 						});
+
+						/* binding menuAction from template */
+						hostEl.find("#" + itemId + " [menuAction] ").each(function(index, element) {
+							var action = that.model.getAction($(element).attr('menuAction'));
+							if (action && action.length > 0) {
+								$(element).click(function() {
+									var rowId = $(this).closest("[rowId]").attr('rowId');
+									var actionParams = action[0].get('actionParams').clone();
+
+									that._handleMenuActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+
+								});
+							}
+						});
 					}
-
-					/* binding menuAction from template */
-					hostEl.find("#" + itemId + " [menuAction] ").each(function(index, element) {
-						var action = that.model.getAction($(element).attr('menuAction'));
-						if (action && action.length > 0) {
-							$(element).click(function() {
-								var rowId = $(this).closest("[rowId]").attr('rowId');
-								var actionParams = action[0].get('actionParams').clone();
-
-								that._handleMenuActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
-
-							});
-						}
-					});
 				}
 			}
 			/* else normal table display */

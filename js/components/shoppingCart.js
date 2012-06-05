@@ -625,8 +625,8 @@ $(function() {
 				var html = "";
 				html += "<div style='display:none' id='cartTotals' class='cartTotals'>";
 				html += window.expanz.html.renderReadOnlyField("Total", true);
-				html += window.expanz.html.renderReadOnlyField("Freight", true);
-				html += window.expanz.html.renderReadOnlyField("Total2", true);
+				//html += window.expanz.html.renderReadOnlyField("Freight", true);
+				//html += window.expanz.html.renderReadOnlyField("Total2", true);
 				html += "</div>";
 				return html
 			},

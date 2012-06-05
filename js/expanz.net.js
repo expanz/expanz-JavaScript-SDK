@@ -869,7 +869,10 @@ $(function() {
 						for ( var i = 0; i < dataControlModels.length; i++) {
 							dataControlModel = dataControlModels[i];
 							/* grid case */
-							if (dataControlModel.getAttr('renderingType') == 'grid' || dataControlModel.getAttr('renderingType') == 'popupGrid') {
+							if (dataControlModel.getAttr('renderingType') == 'popupGrid') {
+								/* don't display it on load, only happening with deltas */
+							}
+							else if (dataControlModel.getAttr('renderingType') == 'grid') {
 								fillGridModel(dataControlModel, data);
 
 								/* add a method handler for each action button */

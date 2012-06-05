@@ -120,8 +120,9 @@ $(function() {
 			var map = {};
 			var sortedMap = {};
 			_.each(cells, function(cell) {
-				map[cell.get('field')] = cell.get('value');
-				sortedMap[cell.get('field')] = cell.get('sortValue') || cell.get('value');
+				var key = cell.get('field') || cell.get('label');
+				map[key] = cell.get('value');
+				sortedMap[key] = cell.get('sortValue') || cell.get('value');
 			});
 
 			/* add row id and type to the map */
