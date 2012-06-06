@@ -34,6 +34,7 @@ function escapeBadCharForURL(data){
 	escapedStr = escapedStr.replace(/\+/g,' ');
 	escapedStr = escapedStr.replace(/#/g,' ');
 	escapedStr = escapedStr.replace(/%/g,' ');
+	escapedStr = escapedStr.replace(/ /g,'-'); //replace space y dash
 	return escapedStr;
 }
 

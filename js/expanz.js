@@ -208,21 +208,9 @@ $(function() {
 		expanz._error = fn;
 	};
 
-	// window.expanz.basicErrorDisplay = function(el) {
-	// return function error(str) {
-	// $(el).find('[attribute=value]').html(str);
-	// if (!str || str.length < 1) {
-	// $(el).hide('slow');
-	// }
-	// else {
-	// $(el).show('slow');
-	// }
-	// };
-	// };
-
 	window.expanz.basicMsgDisplay = function(el) {
 		return function display(str) {
-
+				
 			var fade = true;
 			if ($(el).attr('fade') && boolValue($(el).attr('fade')) === false) {
 				fade = false;
@@ -263,7 +251,9 @@ $(function() {
 						/*if (!isVisibleOnScreen($(el))) {
 							console.log('not visible at the moment');
 						}*/
-						$(el).slideDown(800, function() {
+						$(el).clearQueue();
+						$(el).show();
+						$(el).slideDown(100, function() {
 							if (fade) {
 								$(el).delay(5000).slideUp(800);
 							}

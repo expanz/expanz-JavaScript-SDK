@@ -709,7 +709,7 @@ $(function() {
 
 				var serverMessage = esaResult.attr('serverMessage') || "";
 				if (!success && $(xml).find('errors').length > 0) {
-					serverMessage += $(xml).first('errors').text();
+					serverMessage += $(xml).find('errors').text();
 				}
 
 				// window.expanz.logToConsole("Success:" + success);
