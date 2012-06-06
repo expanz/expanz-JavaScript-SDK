@@ -108,7 +108,7 @@ $(function() {
 					var anonymousCalls = function() {
 						if (that.isAnonymous()) {
 
-							//console.log('Anonymous -> must call some stuff ');
+							// console.log('Anonymous -> must call some stuff ');
 							/* list of anonymous call we want to do at the beginning (data publication) */
 							var dataModelList = [
 								{
@@ -314,9 +314,9 @@ $(function() {
 						$(el).find("#productListDiv").find("#noItemText").show();
 						$(el).find("#productListDiv").find("#onSpecial").remove();
 					}
-					
+
 					$(el).find("[name=ItemsPerPage]").kendoDropDownList();
-					
+
 				});
 			},
 
@@ -625,8 +625,8 @@ $(function() {
 				var html = "";
 				html += "<div style='display:none' id='cartTotals' class='cartTotals'>";
 				html += window.expanz.html.renderReadOnlyField("Total", true);
-				//html += window.expanz.html.renderReadOnlyField("Freight", true);
-				//html += window.expanz.html.renderReadOnlyField("Total2", true);
+				// html += window.expanz.html.renderReadOnlyField("Freight", true);
+				// html += window.expanz.html.renderReadOnlyField("Total2", true);
 				html += "</div>";
 				return html
 			},
@@ -836,7 +836,7 @@ $(function() {
 				var that = this;
 				$("#checkoutCart").bind("table:rendered", function() {
 					/* hiding the checkout part if no items and not order submitted message displayed */
-					if ($("#checkoutCart > [nbItems]").attr("nbItems") === "0" && $('.k-window-title:contains("Order Submitted")').length == 0 ) {
+					if ($("#checkoutCart > [nbItems]").attr("nbItems") === "0" && $('.k-window-title:contains("Order Submitted")').length == 0) {
 						expanz.Views.redirect(that.shoppingCartPage);
 					}
 					else {
@@ -981,16 +981,16 @@ $(function() {
 		discount = discount.replace(/(\d*) @(\d*\.?\d*)/g, '<label class="discount">$1 items or more for &#36;$2 each</label>')
 		return discount;
 	};
-	
-	window.expanz.html.addNameToImageURL = function(currentUrl,name) {
+
+	window.expanz.html.addNameToImageURL = function(currentUrl, name) {
 		if (!currentUrl || !name)
 			return "";
-		var lastSlashPos = currentUrl.replace(/\\/g,"/").lastIndexOf("/");
-		if (lastSlashPos >= 0 ){
-			return currentUrl.splice(lastSlashPos + 1, 0 , escapeBadCharForURL(name) + "-");
+		var lastSlashPos = currentUrl.replace(/\\/g, "/").lastIndexOf("/");
+		if (lastSlashPos >= 0) {
+			return currentUrl.splice(lastSlashPos + 1, 0, escapeBadCharForURL(name) + "-");
 		}
 		return "";
-	};	
+	};
 
 	window.expanz.html.isEmpty = function(value) {
 		if (value === undefined)
@@ -1001,9 +1001,11 @@ $(function() {
 	window.expanz.html.addDollar = function(price) {
 		return "$ " + price;
 	};
-
+	
+	window.expanz.html.anonymousPersonActivity = "ERP.Person";
+	
 	window.expanz.html.submitLostPasswordForm = function(loginCode, EmailAdress) {
-		var xml = '<Activity id="ERP.Person">';
+		var xml = '<Activity id="' + window.expanz.html.anonymousPersonActivity  + '">';
 		if (loginCode) {
 			xml += '<Delta id="LoginCode" value="' + loginCode + '" />';
 		}
