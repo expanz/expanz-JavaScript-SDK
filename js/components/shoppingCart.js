@@ -47,6 +47,9 @@ $(function() {
 			listCountryOfOriginsMethodName : "listCountryOfOrigins",
 			listCountryOfOriginsContextObject : "StockTranItem.ItemForSale",
 
+			listBrandsMethodName : "listBrands",
+			listBrandsContextObject : "StockTranItem.ItemForSale",
+
 			listCategoriesMethodName : "listCategories",
 			listCategoriesContextObject : "StockTranItem.ItemForSale",
 
@@ -59,6 +62,7 @@ $(function() {
 				'AdvancedSearchAllergensFilter',
 				'AdvancedSearchDietaryClaimsFilter',
 				'AdvancedSearchCountryOfOriginFilter',
+				'AdvancedSearchBrandsFilter',
 				'AdvancedSearch',
 				'Cart',
 				'CategoriesTree',
@@ -120,6 +124,9 @@ $(function() {
 								}, {
 									name : that.listCategoriesMethodName,
 									contextObject : that.listCategoriesContextObject
+								}, {
+									name : that.listBrandsMethodName,
+									contextObject : that.listBrandsContextObject
 								}
 							];
 
@@ -241,6 +248,16 @@ $(function() {
 			},
 
 			_executeAfterRenderAdvancedSearchCountryOfOriginFilterComponent : function(el) {
+				renderKendoComponents($(el));
+			},
+
+			renderAdvancedSearchBrandsFilterComponent : function(el) {
+				var html = "";
+				html += '<div bind="field" name="BrandsSearch" anonymousBoundMethod="' + this.searchMethodName + '"><div class="advancedSearchCategory">Brand</div><input style="width:200px" id="cbBrand" bind="DataControl" emptyItemLabel="Select" renderingType="dropdownlist" populateMethod="' + this.listBrandsMethodName+ '" name="BrandSearchDP" attribute="value" class="k-textbox" contextObject="' + this.listBrandsContextObject + '"  /></div>';
+				return html
+			},
+
+			_executeAfterRenderAdvancedSearchBrandsFilterComponent : function(el) {
 				renderKendoComponents($(el));
 			},
 
@@ -1001,11 +1018,11 @@ $(function() {
 	window.expanz.html.addDollar = function(price) {
 		return "$ " + price;
 	};
-	
+
 	window.expanz.html.anonymousPersonActivity = "ERP.Person";
-	
+
 	window.expanz.html.submitLostPasswordForm = function(loginCode, EmailAdress) {
-		var xml = '<Activity id="' + window.expanz.html.anonymousPersonActivity  + '">';
+		var xml = '<Activity id="' + window.expanz.html.anonymousPersonActivity + '">';
 		if (loginCode) {
 			xml += '<Delta id="LoginCode" value="' + loginCode + '" />';
 		}
