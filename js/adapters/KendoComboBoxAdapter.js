@@ -18,7 +18,7 @@ $.fn.KendoComboBoxAdapter = function() {
 			_.each($(row).find('Cell'), function(cell) {
 				data.push({
 					text : $(cell).text(),
-					value : rowId
+					value : rowId == 0 ? $(cell).text() : rowId
 				});
 			});
 		});
