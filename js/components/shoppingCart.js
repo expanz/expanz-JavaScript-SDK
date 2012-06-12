@@ -130,14 +130,7 @@ $(function() {
 								}
 							];
 
-							$.each(dataModelList, function(index, value) {
-								expanz.Net.MethodRequest(value.name, [
-									{
-										name : "contextObject",
-										value : value.contextObject
-									}
-								], null, that.activity.collection);
-							});
+							expanz.Net.AnonymousMethodsRequest(dataModelList, that.activity.collection);
 
 							/* hide unwanted stuff when anonymous */
 							$("[loginNeeded='true']").hide();
@@ -232,19 +225,19 @@ $(function() {
 			renderAdvancedSearchDietaryClaimsFilterComponent : function(el) {
 				var html = "";
 				html += '<div class="advancedSearchCategory">Dietary Claims</div><div id="filterSearchCheckboxesDivDietaryClaims"  templateName="filterSearchCheckboxesTemplate" name="DietaryClaimsSearchDP" fieldName="DietaryClaimsSearch" populateMethod="' + this.listDietaryClaimsMethodName + '" bind="DataControl" renderingType="checkboxes" contextObject="' + this.listDietaryClaimsContextObject + '" anonymousBoundMethod="' + this.searchMethodName + '"></div>';
-				return html
+				return html;
 			},
 
 			renderAdvancedSearchAllergensFilterComponent : function(el) {
 				var html = "";
 				html += '<div class="advancedSearchCategory">Allergens</div><div id="filterSearchCheckboxesDivAllergens"  templateName="filterSearchCheckboxesTemplate" name="AllergensSearchDP" fieldName="AllergensSearch"  populateMethod="' + this.listAllergensMethodName + '" bind="DataControl" renderingType="checkboxes" contextObject="' + this.listAllergensContextObject + '"  anonymousBoundMethod="' + this.searchMethodName + '"></div>';
-				return html
+				return html;
 			},
 
 			renderAdvancedSearchCountryOfOriginFilterComponent : function(el) {
 				var html = "";
-				html += '<div bind="field" name="CountryOfOriginSearch"><div class="advancedSearchCategory">Country</div><input style="width:200px" id="cbCountry" bind="DataControl" emptyItemLabel="Select" renderingType="dropdownlist" populateMethod="' + this.listCountryOfOriginsMethodName + '" name="CountryOfOriginSearchDP" fieldName="CountryOfOriginSearch" attribute="value" class="k-textbox" contextObject="' + this.listCountryOfOriginsContextObject + '"  anonymousBoundMethod="' + this.searchMethodName + '"/></div>';
-				return html
+				html += '<div bind="field" name="CountryOfOriginSearch" anonymousBoundMethod="' + this.searchMethodName + '"><div class="advancedSearchCategory">Country</div><input style="width:200px" id="cbCountry" bind="DataControl" emptyItemLabel="Select" renderingType="dropdownlist" populateMethod="' + this.listCountryOfOriginsMethodName + '" name="CountryOfOriginSearchDP" attribute="value" class="k-textbox" contextObject="' + this.listCountryOfOriginsContextObject + '"/></div>';
+				return html;
 			},
 
 			_executeAfterRenderAdvancedSearchCountryOfOriginFilterComponent : function(el) {
@@ -253,8 +246,8 @@ $(function() {
 
 			renderAdvancedSearchBrandsFilterComponent : function(el) {
 				var html = "";
-				html += '<div bind="field" name="BrandsSearch" anonymousBoundMethod="' + this.searchMethodName + '"><div class="advancedSearchCategory">Brand</div><input style="width:200px" id="cbBrand" bind="DataControl" emptyItemLabel="Select" renderingType="dropdownlist" populateMethod="' + this.listBrandsMethodName+ '" name="BrandSearchDP" attribute="value" class="k-textbox" contextObject="' + this.listBrandsContextObject + '"  /></div>';
-				return html
+				html += '<div bind="field" name="BrandsSearch" anonymousBoundMethod="' + this.searchMethodName + '"><div class="advancedSearchCategory">Brand</div><input style="width:200px" id="cbBrand" bind="DataControl" emptyItemLabel="Select" renderingType="dropdownlist" populateMethod="' + this.listBrandsMethodName + '" name="BrandSearchDP" attribute="value" class="k-textbox" contextObject="' + this.listBrandsContextObject + '"  /></div>';
+				return html;
 			},
 
 			_executeAfterRenderAdvancedSearchBrandsFilterComponent : function(el) {

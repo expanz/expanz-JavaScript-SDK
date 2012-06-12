@@ -689,12 +689,12 @@ $(function() {
 			var passwordEl = this.el.find("#password input");
 
 			if (usernameEl.length === 0 || passwordEl.length === 0) {
-				expanz._error("username or password field cannot be found on the page");
+				expanz.messageController.addErrorMessageByText("username or password field cannot be found on the page");
 				return;
 			}
 
 			if (usernameEl.val().length === 0 || passwordEl.val().length === 0) {
-				expanz._error("username or password are empty");
+				expanz.messageController.addErrorMessageByKey("loginOrPasswordEmpty");
 				return;
 			}
 			else {
@@ -726,7 +726,7 @@ $(function() {
 		},
 
 		updateError : function(model, error) {
-			expanz._error(error);
+			expanz.messageController.addErrorMessageByText(error);
 		},
 
 		events : {
@@ -774,7 +774,7 @@ $(function() {
 
 		deltaLoading : function() {
 			var deltaLoading = this.collection.getAttr('deltaLoading');
-
+			
 			var initiatorID = deltaLoading.initiator.id;
 			var initiatorType = deltaLoading.initiator.type;
 

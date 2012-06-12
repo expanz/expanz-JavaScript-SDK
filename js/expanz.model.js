@@ -193,13 +193,8 @@ $(function() {
 								else {
 
 									/*
-									 * NOT IMPLEMENTED YET...problem with url where sessionHandle and activityHandle are GET parameters 
-									 * var urlBeforeLogin = expanz.Storage.getLastURL(); 
-									 * if(urlBeforeLogin != null && urlBeforeLogin != ''){ 
-									 * expanz.Storage.clearLastURL();
-									 *  expanz.Views.redirect(urlBeforeLogin); 
-									 *  return;
-									 * } 
+									 * NOT IMPLEMENTED YET...problem with url where sessionHandle and activityHandle are GET parameters var urlBeforeLogin = expanz.Storage.getLastURL(); if(urlBeforeLogin != null && urlBeforeLogin != ''){ expanz.Storage.clearLastURL(); expanz.Views.redirect(urlBeforeLogin);
+									 * return; }
 									 */
 									// redirect to default activity
 									expanz.Views.redirect(url);
@@ -211,7 +206,9 @@ $(function() {
 				};
 				expanz.Net.CreateSessionRequest(this.get('username').get('value'), this.get('password').get('value'), {
 					success : loginCallback,
-					error : expanz._error
+					error : function(message) {
+						expanz.messageController.addErrorMessageByText(message);
+					}
 				});
 			}
 		}
@@ -227,12 +224,13 @@ $(function() {
 
 		callbacks : {
 			success : function(message) {
+				expanz.messageController.addSuccessMessageByText(message);
 			},
 			error : function(message) {
-				expanz._error(message);
+				expanz.messageController.addErrorMessageByText(message);
 			},
 			info : function(message) {
-				expanz._info(message);
+				expanz.messageController.addInfoMessageByText(message);
 			}
 		},
 

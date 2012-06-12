@@ -176,6 +176,27 @@ $(function() {
 
 		},
 
+		/* only use on load of the page to load the datapublications in anonymous context */
+		AnonymousMethodsRequest : function(methods, activity, callbacks) {
+			if (callbacks === undefined)
+				callbacks = activity.callbacks;
+
+			var initiator = {
+				type : "anonymous",
+				id : "anonymous"
+			};
+
+			activity.setAttr({
+				'deltaLoading' : {
+					isLoading : true,
+					initiator : initiator
+				}
+			});
+
+			SendRequest(RequestObject.AnonymousMethods(methods, activity), parseDeltaResponse(activity, initiator, callbacks));
+
+		},
+
 		DestroyActivityRequest : function(activityHandle, callbacks) {
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
@@ -354,6 +375,13 @@ $(function() {
 		AnonymousMethod : function(name, methodAttributes, context, activity, anonymousFields) {
 			return {
 				data : buildRequest('ExecAnonymousX', XMLNamespace, null, true)(RequestBody.CreateMethod(name, methodAttributes, context, activity, anonymousFields)),
+				url : 'ExecAnonymousX'
+			};
+		},
+
+		AnonymousMethods : function(methods, activity) {
+			return {
+				data : buildRequest('ExecAnonymousX', XMLNamespace, null, true)(RequestBody.CreateAnonymousMethods(methods, activity)),
 				url : 'ExecAnonymousX'
 			};
 		},
@@ -572,6 +600,36 @@ $(function() {
 			}
 
 			body += '</Method>';
+
+			body += '</Activity>';
+			return body;
+		},
+
+		CreateAnonymousMethods : function(methods, activity) {
+			var body = '<Activity ';
+			body += 'id="' + activity.getAttr('name') + '" >';
+			/* add all DataPublication as well since no activity exists, we just need id and populate method */
+			if (activity.hasDataControl()) {
+				_.each(activity.getDataControls(), function(dataControl, dataControlId) {
+					dataControl = dataControl[0];
+					var populateMethod = dataControl.getAttr('populateMethod') ? ' populateMethod="' + dataControl.getAttr('populateMethod') + '"' : '';
+					var query = dataControl.getAttr('query') ? ' query="' + dataControl.getAttr('query') + '"' : '';
+					var autoPopulate = dataControl.getAttr('autoPopulate') ? ' autoPopulate="' + dataControl.getAttr('autoPopulate') + '"' : '';
+					var type = dataControl.getAttr('type') ? ' type="' + dataControl.getAttr('type') + '"' : '';
+
+					body += '<DataPublication id="' + dataControlId + '"' + query + populateMethod + autoPopulate + type;
+					dataControl.getAttr('contextObject') ? body += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
+					body += '/>';
+				});
+			}
+
+			$.each(methods, function(index, value) {
+				body += '<Method name="' + value.name + '"';
+				body += " contextObject='" + value.contextObject + "' ";
+				body += " company='" + config._anonymousCompanyCode + "' ";
+				body += '>';
+				body += '</Method>';
+			});
 
 			body += '</Activity>';
 			return body;

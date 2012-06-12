@@ -9,14 +9,6 @@ $(function() {
 	window.App = [];
 	window.expanz = window.expanz || {};
 
-	window.expanz._error = window.expanz._error || function(error) {
-		window.expanz.logToConsole("Expanz JavaScript SDK has encountered an error: " + error);
-	};
-
-	window.expanz._info = window.expanz._info || function(info) {
-		window.expanz.logToConsole("Info received: " + info);
-	};
-
 	window.expanz.logToConsole = function(message) {
 		if (typeof (console) != "undefined" && console.log) {
 			console.log(message);
@@ -46,6 +38,180 @@ $(function() {
 			return true;
 		}
 		return false;
+	};
+
+	window.expanz.messageController = {
+
+		initialize : function() {
+
+			/* load resource bundle */
+			if (window.config._useBundle !== false) {
+				jQuery.i18n.properties({
+					name : 'Messages',
+					path : 'assets/bundle/',
+					mode : 'map',
+					language : ' ', /* set to en to load Messages-en.properties as well, set to '' to load as well Messages-en-XX.properties - add to config.js if different for some customers */
+					cache : true,
+					callback : function() {
+						// window.expanz.logToConsole("Bundle loaded");
+					}
+				});
+			}
+		},
+
+		addErrorMessageByText : function(messageText) {
+			this._addMessageByText(messageText, 'error');
+		},
+
+		addWarningMessageByText : function(messageText) {
+			this._addMessageByText(messageText, 'warning');
+		},
+
+		addInfoMessageByText : function(messageText) {
+			this._addMessageByText(messageText, 'info');
+		},
+
+		addSuccessMessageByText : function(messageText) {
+			this._addMessageByText(messageText, 'success');
+		},
+
+		_addMessageByText : function(messageText, messageType) {
+			if (window.config._useBundle === true) {
+				/* find the key with regexp */
+				if (typeof window.expanz.messageController.findKey != 'function') {
+					window.expanz.logToConsole('You need to define window.expanz.messageController.findKey in your client implementation');
+					return;
+				}
+				var data = window.expanz.messageController.findKey(messageText);
+				if (data != null) {
+					this._addMessageByKey(data['key'], data['data'], messageType, data['popup']);
+				}
+				else {
+					if (window.config._showAllMessages === true && messageText != "") {
+						this.displayMessage('[Displayed for debugging only]' + messageText, messageType);
+					}
+				}
+			}
+			else {
+				this.displayMessage(messageText, messageType);
+			}
+
+		},
+
+		/* server doesn't send key anymore so it will be for futur use */
+		addErrorMessageByKey : function(messageKey, messageData) {
+			this._addMessageByKey(messageKey, messageData, 'error');
+		},
+
+		addInfoMessageByKey : function(messageKey, messageData) {
+			this._addMessageByKey(messageKey, messageData, 'info');
+		},
+
+		addWarningMessageByKey : function(messageKey, messageData) {
+			this._addMessageByKey(messageKey, messageData, 'warning');
+		},
+
+		addSuccessMessageByKey : function(messageKey, messageData) {
+			this._addMessageByKey(messageKey, messageData, 'success');
+		},
+
+		_addMessageByKey : function(messageKey, messageData, messageType, popup) {
+			/* look for the key in message.properties file */
+			var msg = jQuery.i18n.prop(messageKey, messageData);
+			if (msg) {
+				if (popup === true) {
+					this.displayPopupMessage(msg, messageType);
+				}
+				else {
+					this.displayMessage(msg, messageType);
+				}
+			}
+			else {
+				if (window.config._showAllMessages === true) {
+					this.displayMessage('[Displayed for debugging only]' + messageKey + messageData, messageType);
+				}
+			}
+
+		},
+
+		displayMessage : function(message, type) {
+			if (type == 'error') {
+				this._basicMsgDisplay('[bind=message][type=error]')(message);
+			}
+			else if (type == 'warning') {
+				this._basicMsgDisplay('[bind=message][type=error]')(message);
+			}
+			else if (type == 'info') {
+				this._basicMsgDisplay('[bind=message][type=info]')(message);
+			}
+			else if (type == 'success') {
+				this._basicMsgDisplay('[bind=message][type=info]')(message);
+			}
+			else {
+				window.expanz.logToConsole('type ' + type + ' unknown for message ' + message);
+			}
+		},
+
+		displayPopupMessage : function(message, type) {
+			alert(message);
+		},
+
+		_basicMsgDisplay : function(el) {
+			return function display(str) {
+
+				var fade = true;
+				if ($(el).attr('fade') && boolValue($(el).attr('fade')) === false) {
+					fade = false;
+				}
+
+				if (str instanceof Array) {
+					str = str.join("<br/>");
+				}
+
+				var msgDisplayedInPopup = false;
+
+				/* display the message in the popup instead if visible */
+				if (window.expanz.currentPopup !== undefined && $(window.expanz.currentPopup.el).is(":visible")) {
+					var popupEl = window.expanz.currentPopup.el.find(el);
+					if (popupEl) {
+						msgDisplayedInPopup = true;
+						popupEl.find('[attribute=value]').html(str);
+						if (!str || str.length < 1) {
+							$(popupEl).hide('slow');
+						}
+						else {
+							$(popupEl).show(1, function() {
+								if (fade) {
+									$(popupEl).delay(5000).hide(1);
+								}
+							});
+						}
+					}
+				}
+
+				if (!msgDisplayedInPopup) {
+					if ($(el).find('[attribute=value]').length > 0) {
+						$(el).find('[attribute=value]').html(str);
+						if (!str || str.length < 1) {
+							$(el).hide('slow');
+						}
+						else {
+							/*
+							 * if (!isVisibleOnScreen($(el))) { console.log('not visible at the moment'); }
+							 */
+							$(el).clearQueue();
+							$(el).show();
+							$(el).slideDown(100, function() {
+								if (fade) {
+									$(el).delay(5000).slideUp(800);
+								}
+							});
+						}
+					}
+				}
+			};
+		}
+
 	};
 
 	//
@@ -203,86 +369,17 @@ $(function() {
 
 	};
 
-	window.expanz.SetErrorCallback = function(fn) {
-
-		expanz._error = fn;
-	};
-
-	window.expanz.basicMsgDisplay = function(el) {
-		return function display(str) {
-				
-			var fade = true;
-			if ($(el).attr('fade') && boolValue($(el).attr('fade')) === false) {
-				fade = false;
-			}
-
-			if (str instanceof Array) {
-				str = str.join("<br/>");
-			}
-
-			var msgDisplayedInPopup = false;
-
-			/* display the message in the popup instead if visible */
-			if (window.expanz.currentPopup !== undefined && $(window.expanz.currentPopup.el).is(":visible")) {
-				var popupEl = window.expanz.currentPopup.el.find(el);
-				if (popupEl) {
-					msgDisplayedInPopup = true;
-					popupEl.find('[attribute=value]').html(str);
-					if (!str || str.length < 1) {
-						$(popupEl).hide('slow');
-					}
-					else {
-						$(popupEl).show(1, function() {
-							if (fade) {
-								$(popupEl).delay(5000).hide(1);
-							}
-						});
-					}
-				}
-			}
-
-			if (!msgDisplayedInPopup) {
-				if ($(el).find('[attribute=value]').length > 0) {
-					$(el).find('[attribute=value]').html(str);
-					if (!str || str.length < 1) {
-						$(el).hide('slow');
-					}
-					else {
-						/*if (!isVisibleOnScreen($(el))) {
-							console.log('not visible at the moment');
-						}*/
-						$(el).clearQueue();
-						$(el).show();
-						$(el).slideDown(100, function() {
-							if (fade) {
-								$(el).delay(5000).slideUp(800);
-							}
-						});
-					}
-				}
-			}
-		};
-	};
-
-	window.expanz.SetInfoCallback = function(fn) {
-
-		expanz._info = fn;
-	};
-
 	window.expanz.defaultCallbacks = {
 		success : function(message) {
+			expanz.messageController.addSucessMessageByText(message);
 		},
 		error : function(message) {
-			expanz._error(message);
+			expanz.messageController.addErrorMessageByText(message);
 		},
 		info : function(message) {
-			expanz._info(message);
+			expanz.messageController.addInfoMessageByText(message);
 		}
 	};
-	// window.expanz.SetHomePage = function(homepage) {
-	//
-	// expanz._home = homepage;
-	// };
 
 	//
 	// Helper Functions
@@ -437,28 +534,12 @@ $(function() {
 		});
 	}
 
-	/* load resource bundle */
-	if (window.config._useBundle !== false) {
-		jQuery.i18n.properties({
-			name : 'Messages',
-			path : 'assets/bundle/',
-			mode : 'map',
-			language : ' ', /* set to en to load Messages-en.properties as well, set to '' to load as well Messages-en-XX.properties - add to config.js if different for some customers */
-			cache : true,
-			callback : function() {
-				// window.expanz.logToConsole("Bundle loaded");
-			}
-		});
-	}
+	window.expanz.messageController.initialize();
 
 	/* Load the Expanz Process Area menu without empty items */
 	_.each($('[bind=menu]'), function(el) {
 		loadMenu($(el), false);
 	});
-
-	/* registering callback for error/info messages */
-	expanz.SetErrorCallback(expanz.basicMsgDisplay('[bind=message][type=error]'));
-	expanz.SetInfoCallback(expanz.basicMsgDisplay('[bind=message][type=info]'));
 
 	/* create login if exists */
 	expanz.CreateLogin($('[bind=login]'));
