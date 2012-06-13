@@ -437,9 +437,6 @@ $(function() {
 
 	};
 
-	//
-	// XML Message Construction Functions
-	//
 	var buildRequest = function(requestType, xmlns, sessionHandle, includeSite) {
 		return function insertBody(body) {
 			var site = includeSite ? '<site>' + config._AppSite + '</site>' : '';
@@ -453,9 +450,6 @@ $(function() {
 		};
 	};
 
-	//
-	// XML Message Construction Functions
-	//
 	var buildRequestWithoutESA = function(requestType, xmlns, sessionHandle) {
 		return function insertBody(body) {
 
@@ -677,9 +671,6 @@ $(function() {
 
 	};
 
-	//
-	// XML Message Response Parsers
-	//
 	var parseCreateSessionResponse = function(callbacks) {
 		return function apply(xml) {
 			// window.expanz.logToConsole("start parseCreateSessionResponse");

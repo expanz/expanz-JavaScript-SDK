@@ -191,21 +191,32 @@ $(function() {
 
 				if (!msgDisplayedInPopup) {
 					if ($(el).find('[attribute=value]').length > 0) {
-						$(el).find('[attribute=value]').html(str);
-						if (!str || str.length < 1) {
-							$(el).hide('slow');
-						}
-						else {
-							/*
-							 * if (!isVisibleOnScreen($(el))) { console.log('not visible at the moment'); }
-							 */
-							$(el).clearQueue();
+						if (str && str.length > 0) {
+							// make the error div visible
 							$(el).show();
-							$(el).slideDown(100, function() {
+							// push the new message a div in the error div (will fade and be removed automatically after 5 sec)
+							var newErrorId = 'msg_' + new Date().getTime();
+							var divMessage = "<div id='" + newErrorId + "' class='message_item' style='display:none'>" + str + "</div>";
+							$(el).find('[attribute=value]').append(divMessage);
+
+							var messageItem = $(el).find("#" + newErrorId);
+
+							messageItem.slideDown(100, function() {
 								if (fade) {
-									$(el).delay(5000).slideUp(800);
+									messageItem.delay(5000).slideUp(800, function() {
+										messageItem.remove();
+										// if it was the last message in the message notification area, we hide the notification area.
+										if ($(el).find("div").length == 0) {
+											$(el).hide();
+										}
+									});
 								}
 							});
+						}
+						else {
+							if (!fade) {
+								$(el).hide();
+							}
 						}
 					}
 				}
