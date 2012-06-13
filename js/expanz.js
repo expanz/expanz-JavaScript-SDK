@@ -192,6 +192,12 @@ $(function() {
 				if (!msgDisplayedInPopup) {
 					if ($(el).find('[attribute=value]').length > 0) {
 						if (str && str.length > 0) {
+							// check if message already displayed
+							var existingMsgEl = null;
+							if ($(el).find('div:contains("' + str + '")').length > 0) {
+								existingMsgEl = $(el).find('div:contains("' + str + '")')[0];
+								$(existingMsgEl).remove();
+							}
 							// make the error div visible
 							$(el).show();
 							// push the new message a div in the error div (will fade and be removed automatically after 5 sec)
