@@ -12,30 +12,36 @@ function pop(ary, map) { // , name, key ) {
 	return null;
 }
 
-//function isVisibleOnScreen(elem) {
-//   var $window = $(window)
-//   var viewport_top = $window.scrollTop()
-//   var viewport_height = $window.height()
-//   var viewport_bottom = viewport_top + viewport_height
-//   var $elem = $(elem)
-//   var top = $elem.offset().top
-//   var height = $elem.height()
-//   var bottom = top + height
+// function isVisibleOnScreen(elem) {
+// var $window = $(window)
+// var viewport_top = $window.scrollTop()
+// var viewport_height = $window.height()
+// var viewport_bottom = viewport_top + viewport_height
+// var $elem = $(elem)
+// var top = $elem.offset().top
+// var height = $elem.height()
+// var bottom = top + height
 //
-//   return (top >= viewport_top && top < viewport_bottom) ||
-//          (bottom > viewport_top && bottom <= viewport_bottom) ||
-//          (height > viewport_height && top <= viewport_top && bottom >= viewport_bottom)
+// return (top >= viewport_top && top < viewport_bottom) ||
+// (bottom > viewport_top && bottom <= viewport_bottom) ||
+// (height > viewport_height && top <= viewport_top && bottom >= viewport_bottom)
 // }
 
-
-function escapeBadCharForURL(data){
-	if(!data) return "";
-	var escapedStr = data.replace(/\//g,' ');
-	escapedStr = escapedStr.replace(/\+/g,' ');
-	escapedStr = escapedStr.replace(/#/g,' ');
-	escapedStr = escapedStr.replace(/%/g,' ');
-	escapedStr = escapedStr.replace(/ /g,'-'); //replace space y dash
+function escapeBadCharForURL(data) {
+	if (!data)
+		return "";
+	var escapedStr = data.replace(/\//g, ' ');
+	escapedStr = escapedStr.replace(/\+/g, ' ');
+	escapedStr = escapedStr.replace(/#/g, ' ');
+	escapedStr = escapedStr.replace(/%/g, ' ');
+	escapedStr = escapedStr.replace(/ /g, '-'); // replace space y dash
 	return escapedStr;
+}
+
+function escapeHTML(data) {
+	if (!data)
+		return "";
+	return data.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function getObjectSortAscendingFunction(attribute) {
@@ -97,10 +103,9 @@ function eliminateDuplicates(arr) {
 	return out;
 }
 
-String.prototype.splice = function( idx, rem, s ) {
-   return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
+String.prototype.splice = function(idx, rem, s) {
+	return (this.slice(0, idx) + s + this.slice(idx + Math.abs(rem)));
 };
-
 
 // Array Remove - By John Resig (MIT Licensed)
 Array.prototype.remove = function(from, to) {
@@ -202,6 +207,16 @@ function getQueryParameterByName(name) {
 		return decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
+/* Assuming format is #name=value;name2=value2; */
+function getQueryHashParameterByName(name) {
+	var regex = new RegExp(name + "=([^;]*)");
+	if (regex.test(window.location.hash)) {
+		return RegExp.$1;
+	}
+	return null;
+
+}
+
 function loadjscssfile(filename, filetype) {
 	if (filetype == "js") { // if filename is a external JavaScript file
 		var fileref = document.createElement('script');
@@ -278,89 +293,78 @@ jQuery.fn.center = function(params) {
 
 };
 
-var keyStr = "ABCDEFGHIJKLMNOP" +
-             "QRSTUVWXYZabcdef" +
-             "ghijklmnopqrstuv" +
-             "wxyz0123456789+/" +
-             "=";
+var keyStr = "ABCDEFGHIJKLMNOP" + "QRSTUVWXYZabcdef" + "ghijklmnopqrstuv" + "wxyz0123456789+/" + "=";
 
 function encode64(input) {
-   var output = "";
-   var chr1, chr2, chr3 = "";
-   var enc1, enc2, enc3, enc4 = "";
-   var i = 0;
+	var output = "";
+	var chr1, chr2, chr3 = "";
+	var enc1, enc2, enc3, enc4 = "";
+	var i = 0;
 
-   do {
-      chr1 = input.charCodeAt(i++);
-      chr2 = input.charCodeAt(i++);
-      chr3 = input.charCodeAt(i++);
+	do {
+		chr1 = input.charCodeAt(i++);
+		chr2 = input.charCodeAt(i++);
+		chr3 = input.charCodeAt(i++);
 
-      enc1 = chr1 >> 2;
-      enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-      enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-      enc4 = chr3 & 63;
+		enc1 = chr1 >> 2;
+		enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+		enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+		enc4 = chr3 & 63;
 
-      if (isNaN(chr2)) {
-         enc3 = enc4 = 64;
-      } else if (isNaN(chr3)) {
-         enc4 = 64;
-      }
+		if (isNaN(chr2)) {
+			enc3 = enc4 = 64;
+		}
+		else if (isNaN(chr3)) {
+			enc4 = 64;
+		}
 
-      output = output +
-         keyStr.charAt(enc1) +
-         keyStr.charAt(enc2) +
-         keyStr.charAt(enc3) +
-         keyStr.charAt(enc4);
-      chr1 = chr2 = chr3 = "";
-      enc1 = enc2 = enc3 = enc4 = "";
-   } while (i < input.length);
+		output = output + keyStr.charAt(enc1) + keyStr.charAt(enc2) + keyStr.charAt(enc3) + keyStr.charAt(enc4);
+		chr1 = chr2 = chr3 = "";
+		enc1 = enc2 = enc3 = enc4 = "";
+	} while (i < input.length);
 
-   return output;
+	return output;
 }
 
 function decode64(input) {
-   var output = "";
-   var chr1, chr2, chr3 = "";
-   var enc1, enc2, enc3, enc4 = "";
-   var i = 0;
+	var output = "";
+	var chr1, chr2, chr3 = "";
+	var enc1, enc2, enc3, enc4 = "";
+	var i = 0;
 
-   // remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-   var base64test = /[^A-Za-z0-9\+\/\=]/g;
-   if (base64test.exec(input)) {
-      alert("There were invalid base64 characters in the input text.\n" +
-            "Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
-            "Expect errors in decoding.");
-   }
-   input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+	// remove all characters that are not A-Z, a-z, 0-9, +, /, or =
+	var base64test = /[^A-Za-z0-9\+\/\=]/g;
+	if (base64test.exec(input)) {
+		alert("There were invalid base64 characters in the input text.\n" + "Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" + "Expect errors in decoding.");
+	}
+	input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
 
-   do {
-      enc1 = keyStr.indexOf(input.charAt(i++));
-      enc2 = keyStr.indexOf(input.charAt(i++));
-      enc3 = keyStr.indexOf(input.charAt(i++));
-      enc4 = keyStr.indexOf(input.charAt(i++));
+	do {
+		enc1 = keyStr.indexOf(input.charAt(i++));
+		enc2 = keyStr.indexOf(input.charAt(i++));
+		enc3 = keyStr.indexOf(input.charAt(i++));
+		enc4 = keyStr.indexOf(input.charAt(i++));
 
-      chr1 = (enc1 << 2) | (enc2 >> 4);
-      chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-      chr3 = ((enc3 & 3) << 6) | enc4;
+		chr1 = (enc1 << 2) | (enc2 >> 4);
+		chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+		chr3 = ((enc3 & 3) << 6) | enc4;
 
-      output = output + String.fromCharCode(chr1);
+		output = output + String.fromCharCode(chr1);
 
-      if (enc3 != 64) {
-         output = output + String.fromCharCode(chr2);
-      }
-      if (enc4 != 64) {
-         output = output + String.fromCharCode(chr3);
-      }
+		if (enc3 != 64) {
+			output = output + String.fromCharCode(chr2);
+		}
+		if (enc4 != 64) {
+			output = output + String.fromCharCode(chr3);
+		}
 
-      chr1 = chr2 = chr3 = "";
-      enc1 = enc2 = enc3 = enc4 = "";
+		chr1 = chr2 = chr3 = "";
+		enc1 = enc2 = enc3 = enc4 = "";
 
-   } while (i < input.length);
+	} while (i < input.length);
 
-   return unescape(output);
+	return unescape(output);
 }
-
-
 
 (function($) {
 	$.fn.getAttributes = function() {
