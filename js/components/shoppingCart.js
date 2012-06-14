@@ -4,6 +4,7 @@
 $(function() {
 
 	window.expanz = window.expanz || {};
+
 	window.expanz.ShoppingCart = Backbone.View
 		.extend({
 
@@ -88,7 +89,8 @@ $(function() {
 				'CheckoutTotalTaxAmount',
 				'CheckoutFreight',
 				'CheckoutTotal',
-				'OrderHistory'
+				'OrderHistory',
+				'Breadcrumb'
 			],
 
 			initialize : function() {
@@ -109,7 +111,27 @@ $(function() {
 				if (activities !== undefined && activities.length > 0) {
 					this.activity = activities[0];
 					var that = this;
-					var anonymousCalls = function() {
+					var initialCall = function() {
+						var from = null;
+						var catId = null;
+						var catName = null;
+						var catParentName = null;
+						var search = null;
+						/* using the hash */
+						if (window.location.hash.length > 0) {
+							from = getQueryHashParameterByName('from');
+							catId = getQueryHashParameterByName('catId');
+							catName = escapeHTML(getQueryHashParameterByName('catName')).replace("%20", " ");
+							catParentName = escapeHTML(getQueryHashParameterByName('catParentName')).replace("%20", " ");
+							search = getQueryHashParameterByName('search');
+						}
+						/* using the url -> url rewrite -> category */
+						else {
+							//from = "tree";
+							/* not working yet */
+						}
+
+						that.lastListAction = from;
 						if (that.isAnonymous()) {
 
 							// console.log('Anonymous -> must call some stuff ');
@@ -126,9 +148,41 @@ $(function() {
 									contextObject : that.listCategoriesContextObject
 								}, {
 									name : that.listBrandsMethodName,
-									contextObject : that.listBrandsContextObject
+									contextObject : that.listBrandsContextObject,
 								}
 							];
+
+							/* initial load -> user has copied the url, reloaded the page or is coming from google */
+							if (from == 'tree') {
+								dataModelList.push({
+									name : that.categoryTreeSelectionChangeAnonymousMethod,
+									contextObject : that.categoryTreeSelectionChangeAnonymousContextObject,
+									additionalElement : '<StockTranItem.ItemForSale.ItemCategory.PersistentId>' + catId + '</StockTranItem.ItemForSale.ItemCategory.PersistentId>'
+								});
+								that.lastCategory = catName;
+								that.lastCategoryParent = catParentName;
+							}
+							else if (from == 'specials') {
+								dataModelList.push({
+									name : that.listItemsOnSpecialMethodName,
+									contextObject : that.listItemsOnSpecialMethodContextObject
+								});
+							}
+							else if (from == 'previously') {
+								dataModelList.push({
+									name : that.listPreviouslyOrderedMethodName,
+									contextObject : that.listPreviouslyOrderedContextObject
+								});
+							}
+							else if (from == 'search') {
+								/* doesnt support advanced search at the moment */
+								dataModelList.push({
+									name : that.searchMethodName,
+									contextObject : that.searchMethodContextObject,
+									additionalElement : '<ItemSearch>' + getQueryHashParameterByName('search') + '</ItemSearch>'
+								});
+								$("#ItemSearch input").val(search);
+							}
 
 							expanz.Net.AnonymousMethodsRequest(dataModelList, that.activity.collection);
 
@@ -144,13 +198,42 @@ $(function() {
 							$("#logout").append('<a class="login menuTitle">Login</a>');
 
 						}
+						else {
+							/* initial load as a logged in user -> user has copied the url, reloaded the page */
+							if (from == 'tree') {
+								expanz.Net.DeltaRequest(that.categoryTreeName, catId, that.activity.collection);
+								that.lastCategory = catName;
+								that.lastCategoryParent = catParentName;
+							}
+							else if (from == 'specials') {
+								var methodAttributes = [
+									{
+										name : "contextObject",
+										value : that.listItemsOnSpecialMethodContextObject
+									}
+								];
+								expanz.Net.MethodRequest(that.listItemsOnSpecialMethodName, methodAttributes, null, that.activity.collection);
+							}
+							else if (from == 'previously') {
+								var methodAttributes = [
+									{
+										name : "contextObject",
+										value : that.listPreviouslyOrderedContextObject
+									}
+								];
+								expanz.Net.MethodRequest(that.listPreviouslyOrderedMethodName, methodAttributes, null, that.activity.collection);
+							}
+							else if (from == 'search') {
+								// TODO support search initial load for logged in user
+							}
+						}
 					};
 					if (this.activity.collection.getAttr('loading') === false) {
-						anonymousCalls();
+						initialCall();
 					}
 					else {
 						this.activity.collection.bind("update:loading", function() {
-							anonymousCalls();
+							initialCall();
 						});
 					}
 				}
@@ -260,14 +343,15 @@ $(function() {
 			renderListOnSpecialItemsButtonComponent : function(el) {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'List Items On Special';
-				html += window.expanz.html.renderMethod(this.listItemsOnSpecialMethodName, label, this.listItemsOnSpecialMethodContextObject);
+				html += window.expanz.html.renderMethod(this.listItemsOnSpecialMethodName, label, this.listItemsOnSpecialMethodContextObject, false);
 				return html;
 			},
 
 			_executeAfterRenderListOnSpecialItemsButtonComponent : function(el) {
 				var that = this;
 				$("#" + this.listItemsOnSpecialMethodName + " button").click(function() {
-					that.lastListAction = 'button';
+					that.lastListAction = 'specials';
+					that._updateURLHash();
 				});
 			},
 
@@ -281,7 +365,8 @@ $(function() {
 			_executeAfterRenderListPreviouslyOrderedButtonComponent : function(el) {
 				var that = this;
 				$("#" + this.listPreviouslyOrderedMethodName + " button").click(function() {
-					that.lastListAction = 'button';
+					that.lastListAction = 'previouslyOrdered';
+					that._updateURLHash();
 				});
 			},
 
@@ -327,7 +412,72 @@ $(function() {
 
 					$(el).find("[name=ItemsPerPage]").kendoDropDownList();
 
+					that._updateBreadCrumb();
 				});
+			},
+
+			_updateURLHash : function() {
+				var addParamHash = '';
+				if (this.lastListAction == 'search') {
+					addParamHash = ';search=' + $("#ItemSearch input").val();
+				}
+				else if (this.lastListAction == 'tree') {
+					addParamHash = ";catId=" + this.lastCategoryId + ";catName=" + this.lastCategory;
+					if (this.lastCategoryParent != undefined && this.lastCategoryParent != '') {
+						addParamHash += ';catParentName=' + this.lastCategoryParent;
+					}
+				}
+				window.location.hash = "from=" + this.lastListAction + addParamHash;
+			},
+
+			_updateBreadCrumb : function() {
+				if ($("#breadcrumb").length > 0) {
+					var homeLink = '<a href="' + this.shoppingCartPage + '">Shop home</a>';
+					var sep = " &gt; ";
+					if (this.lastListAction == 'search') {
+						$("#breadcrumb").html(homeLink + sep + "Search");
+					}
+					else if (this.lastListAction == 'specials') {
+						$("#breadcrumb").html(homeLink + sep + "Specials");
+					}
+					else if (this.lastListAction == 'previouslyOrdered') {
+						$("#breadcrumb").html(homeLink + sep + "Previously Ordered");
+					}
+					else if (this.lastListAction == 'tree') {
+						var that = this;
+						if ($("#categoriesTree").data('kendoTreeView') != undefined) {
+							$("#breadcrumb").html(homeLink + sep);
+							if (this.lastCategoryParent != undefined && this.lastCategoryParent != '') {
+								$("#breadcrumb").append("<a id='breadcrumbParentCategory' href='#' onclick='javascript:void(0)'>" + this.lastCategoryParent + "</a>" + sep);
+
+								$("#breadcrumbParentCategory").click(function() {
+									/* find the category in the tree a emulate a click */
+									var parentCat = $("#categoriesTree").find('span').filter(function() {
+										return $(this).text() === that.lastCategoryParent;
+									});
+									if (parentCat && parentCat.length > 0)
+										parentCat.click();
+								});
+							}
+
+							var currentCatFound = $("#categoriesTree").find('span').filter(function() {
+								return $(this).text() === that.lastCategory;
+							});
+							//TODO Imrprove and retrieve it from the id somehow
+							if (currentCatFound && currentCatFound.length > 0) {
+								$("#breadcrumb").append(this.lastCategory);
+							}
+							else {
+								$("#breadcrumb").append('Current category');
+							}
+
+						}
+					}
+					else {
+						$("#breadcrumb").html("Shop home");
+					}
+				}
+
 			},
 
 			renderListDisplayChoiceComponent : function(el) {
@@ -556,8 +706,12 @@ $(function() {
 				$("#categoriesTree").KendoTreeAdapter({
 					labelAttribute : 'value',
 					runAfterPublish : function() {
-						$("#categoriesTree").data("kendoTreeView").bind("select", function(event) {
+						$("#categoriesTree").bind("TreeSelectionChanged", function(event, options) {
 							that.lastListAction = 'tree';
+							that.lastCategory = options['text'];
+							that.lastCategoryParent = options['parentText'];
+							that.lastCategoryId = options['id'];
+							that._updateURLHash();
 						});
 					}
 				});
@@ -591,6 +745,7 @@ $(function() {
 							else {
 								that.lastListAction = 'tree';
 							}
+							that._updateURLHash();
 						});
 					},
 					staticElements : [
@@ -892,6 +1047,7 @@ $(function() {
 
 				$('#shoppingCartSearch button').click(function() {
 					that.lastListAction = 'search';
+					that._updateURLHash();
 				});
 
 			},
@@ -911,6 +1067,18 @@ $(function() {
 
 				html += '<div id="orderHistoryDivList" class="orderHistory" isHTMLTable="true" populateMethod="' + this.orderHistoryPopMethod + '" itemsPerPage="' + itemsPerPage + '" name="' + this.orderHistoryListName + '" bind="DataControl" renderingType="grid" contextObject="' + this.orderHistoryContextObject + '"></div>';
 				return html;
+			},
+
+			renderBreadcrumbComponent : function(el) {
+				var html = "";
+
+				html += '<div id="breadcrumb" class="breadcrumb" >';
+				html += '</div>';
+				return html;
+			},
+
+			_executeAfterRenderBreadcrumbComponent : function(el) {
+				this._updateBreadCrumb();
 			},
 
 			isAnonymous : function() {
@@ -950,9 +1118,9 @@ $(function() {
 		return '<div class="' + fieldName + '" style="width:' + width + 'px;float:left"><%= data.' + fieldName + ' %>&nbsp;</div>';
 	};
 
-	window.expanz.html.renderField = function(fieldName, showLabel, prompt, anonymousBoundMethod) {
+	window.expanz.html.renderField = function(fieldName, showLabel, prompt, anonymousBoundMethod, showError) {
 		var field = '';
-		field += '<div id="' + fieldName + '"  bind="field" name="' + fieldName + '" class="field ' + fieldName + '" anonymousBoundMethod=' + anonymousBoundMethod + '>';
+		field += '<div showError="' + showError + '" id="' + fieldName + '"  bind="field" name="' + fieldName + '" class="field ' + fieldName + '" anonymousBoundMethod=' + anonymousBoundMethod + '>';
 		if (showLabel === true)
 			field += '<label attribute="label"></label>';
 		field += '<input type="text" attribute="value"  class="k-textbox" placeholder="' + prompt + '"/>';
