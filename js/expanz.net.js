@@ -519,6 +519,7 @@ $(function() {
 				_.each(activity.getDataControls(), function(dataControl, dataControlId) {
 					/* dataControl is an array if many UI element are using the same data but they should all be for the same parameters, we take only the first one then */
 					dataControl = dataControl[0];
+
 					var populateMethod = dataControl.getAttr('populateMethod') ? ' populateMethod="' + dataControl.getAttr('populateMethod') + '"' : '';
 					var query = dataControl.getAttr('query') ? ' query="' + dataControl.getAttr('query') + '"' : '';
 					var autoPopulate = dataControl.getAttr('autoPopulate') ? ' autoPopulate="' + dataControl.getAttr('autoPopulate') + '"' : '';
@@ -527,7 +528,9 @@ $(function() {
 					center += '<DataPublication id="' + dataControlId + '"' + query + populateMethod + autoPopulate + type;
 					dataControl.getAttr('contextObject') ? center += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
 					center += '/>';
+
 				});
+
 			}
 			if (handle) {
 				center += '</PublishSchema>';
@@ -622,6 +625,9 @@ $(function() {
 				body += " contextObject='" + value.contextObject + "' ";
 				body += " company='" + config._anonymousCompanyCode + "' ";
 				body += '>';
+				if (value.additionalElement) {
+					body += value.additionalElement;
+				}
 				body += '</Method>';
 			});
 
