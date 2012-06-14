@@ -99,7 +99,7 @@ $(function() {
 					else {
 						anonymousFields.push({
 							id : value.get('id'),
-							value : value.get('lastValue')
+							value : value.get('lastValue') || ""
 						});
 					}
 				});
