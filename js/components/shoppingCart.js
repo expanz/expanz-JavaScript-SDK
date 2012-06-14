@@ -10,6 +10,8 @@ $(function() {
 
 			activity : null, /* initialised when the activity is created */
 
+			useHashInUrl : false,
+
 			listItemsOnSpecialMethodName : "listItemsOnSpecial",
 			listItemsOnSpecialMethodContextObject : "StockTranItem.ItemForSale",
 
@@ -127,7 +129,7 @@ $(function() {
 						}
 						/* using the url -> url rewrite -> category */
 						else {
-							//from = "tree";
+							// from = "tree";
 							/* not working yet */
 						}
 
@@ -417,17 +419,19 @@ $(function() {
 			},
 
 			_updateURLHash : function() {
-				var addParamHash = '';
-				if (this.lastListAction == 'search') {
-					addParamHash = ';search=' + $("#ItemSearch input").val();
-				}
-				else if (this.lastListAction == 'tree') {
-					addParamHash = ";catId=" + this.lastCategoryId + ";catName=" + this.lastCategory;
-					if (this.lastCategoryParent != undefined && this.lastCategoryParent != '') {
-						addParamHash += ';catParentName=' + this.lastCategoryParent;
+				if (this.useHashInUrl === true) {
+					var addParamHash = '';
+					if (this.lastListAction == 'search') {
+						addParamHash = ';search=' + $("#ItemSearch input").val();
 					}
+					else if (this.lastListAction == 'tree') {
+						addParamHash = ";catId=" + this.lastCategoryId + ";catName=" + this.lastCategory;
+						if (this.lastCategoryParent != undefined && this.lastCategoryParent != '') {
+							addParamHash += ';catParentName=' + this.lastCategoryParent;
+						}
+					}
+					window.location.hash = "from=" + this.lastListAction + addParamHash;
 				}
-				window.location.hash = "from=" + this.lastListAction + addParamHash;
 			},
 
 			_updateBreadCrumb : function() {
@@ -463,7 +467,7 @@ $(function() {
 							var currentCatFound = $("#categoriesTree").find('span').filter(function() {
 								return $(this).text() === that.lastCategory;
 							});
-							//TODO Imrprove and retrieve it from the id somehow
+							// TODO Imrprove and retrieve it from the id somehow
 							if (currentCatFound && currentCatFound.length > 0) {
 								$("#breadcrumb").append(this.lastCategory);
 							}
