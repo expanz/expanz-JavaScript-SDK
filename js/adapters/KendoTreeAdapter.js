@@ -16,7 +16,7 @@ $.fn.KendoTreeAdapter = function(options) {
 	var callback = {
 		success : function() {
 			// treeView.data('kendoTreeView').enable(".k-item",true);
-			if(displayLoading){
+			if (displayLoading) {
 				treeView.removeClass('treeSelectionLoading');
 				var loadingId = "LoadingTree_" + treeView.attr('id');
 				var loadingEL = $(treeView).find("#" + loadingId);
@@ -36,14 +36,14 @@ $.fn.KendoTreeAdapter = function(options) {
 			return;
 		view.itemSelected(id, callback);
 		// treeView.data('kendoTreeView').enable(".k-item",false);
-		if(displayLoading){
+		if (displayLoading) {
 			var loadingId = "LoadingTree_" + treeView.attr('id');
 			var loadingEL = $(view.el).find("#" + loadingId);
 			if (loadingEL.length === 0) {
 				$(view.el).append('<div class="loading" id="' + loadingId + '"><span> </span></div>');
 				loadingEL = $(view.el).find("#" + loadingId);
 			}
-	
+
 			loadingEL.css("position", "absolute");
 			loadingEL.css('width', '100%');
 			loadingEL.css('height', '100%');
@@ -120,7 +120,7 @@ $.fn.KendoTreeAdapter = function(options) {
 		if (options['filterData'] !== undefined)
 			filterData = options['filterData'];
 		if (options['displayLoading'] !== undefined)
-			displayLoading = options['displayLoading'];		
+			displayLoading = options['displayLoading'];
 	}
 
 	var parseChildrenRows = function(parentXml) {
@@ -199,6 +199,13 @@ $.fn.KendoTreeAdapter = function(options) {
 			if (onSelection) {
 				onSelection(view, elem.attr('id'), !elem.is(parentTag));
 			}
+
+			$(treeView).trigger("TreeSelectionChanged", {
+				id : elem.attr('id'),
+				text : selectedText,
+				parentId : elem.parent().attr('id'),
+				parentText : elem.parent().attr(labelAttribute)
+			});
 		});
 
 		/* if there is a filtering input field or button we bind the on change/click event to and filter the tree */
