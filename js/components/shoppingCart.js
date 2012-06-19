@@ -12,6 +12,8 @@ $(function() {
 
 			useHashInUrl : false,
 
+			shopUrlRewritePattern : '/shop/',
+
 			listItemsOnSpecialMethodName : "listItemsOnSpecial",
 			listItemsOnSpecialMethodContextObject : "StockTranItem.ItemForSale",
 
@@ -102,8 +104,11 @@ $(function() {
 					var componentEl = window.expanz.html.findShoppingCartElement(component);
 					if (componentEl !== undefined) {
 						componentEl.each(function() {
+							// if (componentEl.attr('loaded') === undefined) {
 							var componentContent = that['render' + component + 'Component']($(this));
 							$(this).append(componentContent);
+							componentEl.attr('loaded', '1');
+							// }
 						});
 
 					}
@@ -129,8 +134,28 @@ $(function() {
 						}
 						/* using the url -> url rewrite -> category */
 						else {
-							// from = "tree";
-							/* not working yet */
+							if (document.URL.indexOf('/shop/') != -1) {
+
+								var categoryURL = document.URL.substr(document.URL.indexOf(that.shopUrlRewritePattern) + 6);
+								var categoryArray = categoryURL.split("/");
+								/* no parent category */
+								if (/l(\d*)/.test(categoryArray[1])) {
+									from = "tree";
+									catId = RegExp.$1;
+									catName = escapeHTML(categoryArray[0]).replace(/-/g, " ");
+									catName = catName.replace(/&amp;/g, "&");
+								}
+								else if (/l(\d*)/.test(categoryArray[2])) {
+									from = "tree";
+									catId = RegExp.$1;
+									catName = escapeHTML(categoryArray[1]).replace(/-/g, " ");
+									catName = catName.replace(/&amp;/g, "&");
+									catParentName = escapeHTML(categoryArray[0]).replace(/-/g, " ");
+									catParentName = catParentName.replace(/&amp;/g, "&");
+								}
+
+							}
+
 						}
 
 						that.lastListAction = from;
@@ -300,9 +325,9 @@ $(function() {
 			renderAdvancedSearchComponent : function(searchEl) {
 				var html = '';
 				html += '<div id="shoppingCartAdvancedSearch" class="advancedSearch">';
-				html += this.renderAdvancedSearchDietaryClaimsFilter();
-				html += this.renderAdvancedSearchAllergensFilter();
-				html += this.renderAdvancedSearchCountryOfOriginFilter();
+				html += this.renderAdvancedSearchDietaryClaimsFilterComponent();
+				html += this.renderAdvancedSearchAllergensFilterComponent();
+				html += this.renderAdvancedSearchCountryOfOriginFilterComponent();
 				html += "</div>";
 				return html;
 			},
@@ -419,18 +444,34 @@ $(function() {
 			},
 
 			_updateURLHash : function() {
-				if (this.useHashInUrl === true) {
+				if (this.updateUrlOrHash === true) {
 					var addParamHash = '';
+					/* always use hash for search */
 					if (this.lastListAction == 'search') {
 						addParamHash = ';search=' + $("#ItemSearch input").val();
+						window.location.hash = "from=" + this.lastListAction + addParamHash;
 					}
 					else if (this.lastListAction == 'tree') {
-						addParamHash = ";catId=" + this.lastCategoryId + ";catName=" + this.lastCategory;
-						if (this.lastCategoryParent != undefined && this.lastCategoryParent != '') {
-							addParamHash += ';catParentName=' + this.lastCategoryParent;
+						/* check if browser support HTML5 pushstate, if not use hash instead */
+						if (window.history.pushState) {
+							var newUrl = config._urlAbsoluteSiteName + this.shopUrlRewritePattern;
+							if (this.lastCategoryParent != undefined && this.lastCategoryParent != '') {
+								newUrl += escapeBadCharForURL(this.lastCategoryParent) + "/";
+							}
+							newUrl += escapeBadCharForURL(this.lastCategory) + "/l" + this.lastCategoryId + "/";
+							window.history.pushState({
+								cat : this.lastCategoryId
+							}, this.lastCategory, newUrl);
 						}
+						else {
+							addParamHash = ";catId=" + this.lastCategoryId + ";catName=" + this.lastCategory;
+							if (this.lastCategoryParent != undefined && this.lastCategoryParent != '') {
+								addParamHash += ';catParentName=' + this.lastCategoryParent;
+							}
+							window.location.hash = "from=" + this.lastListAction + addParamHash;
+						}
+
 					}
-					window.location.hash = "from=" + this.lastListAction + addParamHash;
 				}
 			},
 
