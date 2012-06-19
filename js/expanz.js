@@ -145,7 +145,7 @@ $(function() {
 				this._basicMsgDisplay('[bind=message][type=info]')(message);
 			}
 			else if (type == 'success') {
-				this._basicMsgDisplay('[bind=message][type=info]')(message);
+				this._basicMsgDisplay('[bind=message][type=success]')(message);
 			}
 			else {
 				window.expanz.logToConsole('type ' + type + ' unknown for message ' + message);

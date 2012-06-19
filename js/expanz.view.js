@@ -420,7 +420,6 @@ $(function() {
 					var i;
 					for (i = firstItem; i < lastItem; i++) {
 						var row = rows[i];
-
 						var result = compiled(row.getCellsMapByField());
 						var itemId = this.model.getAttr('id') + "_" + row.getAttr('id');
 						result = $(result).attr('id', itemId).attr('rowId', row.getAttr('id'));
@@ -774,7 +773,7 @@ $(function() {
 
 		deltaLoading : function() {
 			var deltaLoading = this.collection.getAttr('deltaLoading');
-			
+
 			var initiatorID = deltaLoading.initiator.id;
 			var initiatorType = deltaLoading.initiator.type;
 

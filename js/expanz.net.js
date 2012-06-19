@@ -1464,6 +1464,8 @@ $(function() {
 
 			// add cells to this row
 			_.each($(row).find('Cell'), function(cell) {
+				// nextline is quick fix for htmlunit
+				cell = XMLDocumentsToXMLString(cell);
 				gridModel.addCell(rowId, $(cell).attr('id'), $(cell).text(), columnMap[$(cell).attr('id')], $(cell).attr('sortValue'));
 			});
 		});
