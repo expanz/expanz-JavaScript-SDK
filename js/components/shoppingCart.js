@@ -307,7 +307,7 @@ $(function() {
 					buttonLabel = '&nbsp;';
 				var html = '';
 				html += '<div id="shoppingCartSearch" class="search">';
-				html += window.expanz.html.renderField('ItemSearch', '', inputPrompt, this.searchMethodName);
+				html += window.expanz.html.renderField('ItemSearch', '', inputPrompt, this.searchMethodName,"false");
 				html += window.expanz.html.renderMethod(this.searchMethodName, buttonLabel, this.searchMethodContextObject, !displayButton);
 				html += "</div>";
 				return html;
