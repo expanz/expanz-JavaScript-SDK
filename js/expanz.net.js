@@ -1176,7 +1176,7 @@ $(function() {
 					var contextObject = $(this).attr('contextObject');
 					if (id == 'picklist') {
 						// window.expanz.logToConsole("picklist received");
-						var elId = id + pickfield;
+						var elId = id + pickfield.replace(/ /g, "_");
 
 						var clientMessage = new expanz.Model.ClientMessage({
 							id : elId,
@@ -1204,20 +1204,28 @@ $(function() {
 								gridModel.updateRowSelected = function(selectedId, type) {
 									// window.expanz.logToConsole("From parseDeltaResponse:updateRowSelected id:" + selectedId + ' ,type:' + type);
 
-									var context = {
-										id : selectedId,
-										contextObject : contextObject,
-										type : type
-									};
+									var clientFunction = window["picklistUpdateRowSelected" + type];
+									if (typeof (clientFunction) == "function") {
+										clientFunction(selectedId);
+									}
+									else {
 
-									var methodAttributes = [
-										{
-											name : "contextObject",
-											value : contextObject
-										}
-									];
+										var context = {
+											id : selectedId,
+											contextObject : contextObject,
+											type : type
+										};
 
-									expanz.Net.MethodRequest('SetIdFromContext', methodAttributes, context, activity);
+										var methodAttributes = [
+											{
+												name : "contextObject",
+												value : contextObject
+											}
+										];
+
+										expanz.Net.MethodRequest('SetIdFromContext', methodAttributes, context, activity);
+
+									}
 									picklistWindow.close();
 								};
 
