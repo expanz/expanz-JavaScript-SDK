@@ -1209,7 +1209,6 @@ $(function() {
 										clientFunction(selectedId);
 									}
 									else {
-
 										var context = {
 											id : selectedId,
 											contextObject : contextObject,

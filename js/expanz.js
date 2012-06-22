@@ -207,6 +207,18 @@ $(function() {
 
 							var messageItem = $(el).find("#" + newErrorId);
 
+							// check if el is visible in the screen if not fix it to top of the visible page
+							if (!isVisibleOnScreen($(el))) {
+								// var top = document.body.scrollTop;
+								$(el).css('top', "0px");
+								$(el).css('position', 'fixed');
+								$(el).css('z-index', '10000');
+							}
+							else {
+								$(el).css('top', '');
+								$(el).css('position', '');
+							}
+
 							messageItem.slideDown(100, function() {
 								if (fade) {
 									messageItem.delay(5000).slideUp(800, function() {
