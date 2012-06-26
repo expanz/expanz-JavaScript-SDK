@@ -307,7 +307,7 @@ $(function() {
 					buttonLabel = '&nbsp;';
 				var html = '';
 				html += '<div id="shoppingCartSearch" class="search">';
-				html += window.expanz.html.renderField('ItemSearch', '', inputPrompt, this.searchMethodName,"false");
+				html += window.expanz.html.renderField('ItemSearch', '', inputPrompt, this.searchMethodName, "false");
 				html += window.expanz.html.renderMethod(this.searchMethodName, buttonLabel, this.searchMethodContextObject, !displayButton);
 				html += "</div>";
 				return html;
@@ -453,7 +453,7 @@ $(function() {
 					}
 					else if (this.lastListAction == 'tree') {
 						/* check if browser support HTML5 pushstate, if not use hash instead */
-						if (window.history.pushState) {
+						if (supports_history_api()) {
 							var newUrl = config._urlAbsoluteSiteName + this.shopUrlRewritePattern;
 							if (this.lastCategoryParent != undefined && this.lastCategoryParent != '') {
 								newUrl += escapeBadCharForURL(this.lastCategoryParent) + "/";
@@ -1107,7 +1107,7 @@ $(function() {
 
 				html += '<script type="text/template" id="orderHistoryItemTemplate">';
 				html += '<tr class="item"><td><%=data.SearchCode%></td><td><%=data.Client_Name%></td><td><%=data.Status%></td><td><%=data.CreationDate%></td><td><%=data.Total%></td>';
-				html += '<td><button methodName="showInvoice">Show Invoice</button></td></tr>';
+				html += '<td class="actions"><% if(sortedValues.Status >= 20){ %><button methodName="showInvoice">Show Invoice</button><% } %></td></tr>';
 				html += '</script>';
 
 				html += '<div id="orderHistoryDivList" class="orderHistory" isHTMLTable="true" populateMethod="' + this.orderHistoryPopMethod + '" itemsPerPage="' + itemsPerPage + '" name="' + this.orderHistoryListName + '" bind="DataControl" renderingType="grid" contextObject="' + this.orderHistoryContextObject + '"></div>';
