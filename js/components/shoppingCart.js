@@ -1046,7 +1046,7 @@ $(function() {
 				var that = this;
 				$("#checkoutCart").bind("table:rendered", function() {
 					/* hiding the checkout part if no items and not order submitted message displayed */
-					if ($("#checkoutCart > [nbItems]").attr("nbItems") === "0" && $('.k-window-title:contains("Order Submitted")').length == 0) {
+					if ($("#checkoutCart > [nbItems]").attr("nbItems") === "0" && ($('.k-window-title:contains("Order Submitted")').length == 0) && $('.k-window-title:contains("Order Saved")').length == 0) {
 						expanz.Views.redirect(that.shoppingCartPage);
 					}
 					else {
@@ -1102,7 +1102,7 @@ $(function() {
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 12;
 
 				html += '<script type="text/template" id="orderHistoryItemTemplateHeader">';
-				html += '<thead><tr class="item"><th sortField="SearchCode" style="width:100px">Search code</th><th style="width:200px" sortField="Name" >Name</th><th style="width:100px" sortField="Status" >Status</th><th  style="width:200px" sortField="CreationDate">Creation Date</th><th style="width:120px" sortField="Total">Amount</th><th>Actions</th></tr></thead>';
+				html += '<thead><tr class="item"><th sortField="SearchCode" style="width:100px">Search code</th><th style="width:200px" sortField="Name" >Name</th><th style="width:100px" sortField="Status" >Status</th><th  style="width:200px" sortField="CreationDate" defaultSorted="desc">Creation Date</th><th style="width:120px" sortField="Total">Amount</th><th>Actions</th></tr></thead>';
 				html += '</script>';
 
 				html += '<script type="text/template" id="orderHistoryItemTemplate">';
