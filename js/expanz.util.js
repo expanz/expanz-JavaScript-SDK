@@ -298,6 +298,8 @@ jQuery.fn.center = function(params) {
 var keyStr = "ABCDEFGHIJKLMNOP" + "QRSTUVWXYZabcdef" + "ghijklmnopqrstuv" + "wxyz0123456789+/" + "=";
 
 function encode64(input) {
+	if (input == undefined)
+		return undefined;
 	var output = "";
 	var chr1, chr2, chr3 = "";
 	var enc1, enc2, enc3, enc4 = "";
@@ -329,6 +331,8 @@ function encode64(input) {
 }
 
 function decode64(input) {
+	if (input == undefined)
+		return undefined;
 	var output = "";
 	var chr1, chr2, chr3 = "";
 	var enc1, enc2, enc3, enc4 = "";

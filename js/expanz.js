@@ -210,19 +210,22 @@ $(function() {
 							// check if el is visible in the screen if not fix it to top of the visible page
 							if (!isVisibleOnScreen($(el))) {
 								// var top = document.body.scrollTop;
-								$(el).css('top', "0px");
-								$(el).css('position', 'fixed');
-								$(el).css('z-index', '10000');
+								$(el).parent().css('top', "0px");
+								$(el).parent().css('position', 'fixed');
+								$(el).parent().css('z-index', '10000');
 							}
 							else {
-								$(el).css('top', '');
-								$(el).css('position', '');
+								$(el).parent().css('top', '');
+								$(el).parent().css('position', '');
 							}
 
+							messageItem.show();
+							
 							messageItem.slideDown(100, function() {
 								if (fade) {
 									messageItem.delay(5000).slideUp(800, function() {
 										messageItem.remove();
+										console.log("slideup finished: removing " +  messageItem.id);
 										// if it was the last message in the message notification area, we hide the notification area.
 										if ($(el).find("div").length == 0) {
 											$(el).hide();
