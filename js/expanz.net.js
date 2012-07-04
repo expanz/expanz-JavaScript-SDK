@@ -73,6 +73,10 @@ $(function() {
 					expanz.Views.requestLogin();
 					return;
 				}
+			}
+
+			/* if allow anonymous and session doesn't exist we don't create anything on the server */
+			if (expanz.Storage.getSessionHandle() && expanz.Storage.getSessionHandle() !== "") {
 
 				/* check if an activity has already been created, if so specify it instead of creating a new one */
 				var activityHandle = expanz.Storage.getActivityHandle(activity.getAttr('name'), activity.getAttr('style'));
@@ -82,11 +86,7 @@ $(function() {
 						'handle' : activityHandle
 					});
 				}
-			}
-
-			/* if allow anonymous and session doesn't exist we don't create anything on the server */
-			if (expanz.Storage.getSessionHandle() && expanz.Storage.getSessionHandle() !== "") {
-
+				
 				activity.setAttr({
 					loading : true
 				});
