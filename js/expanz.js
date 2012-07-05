@@ -220,12 +220,12 @@ $(function() {
 							}
 
 							messageItem.show();
-							
+
 							messageItem.slideDown(100, function() {
 								if (fade) {
 									messageItem.delay(5000).slideUp(800, function() {
 										messageItem.remove();
-										console.log("slideup finished: removing " +  messageItem.id);
+										console.log("slideup finished: removing " + messageItem.id);
 										// if it was the last message in the message notification area, we hide the notification area.
 										if ($(el).find("div").length == 0) {
 											$(el).hide();
@@ -579,6 +579,25 @@ $(function() {
 	/* create all activities where autoLoad attribute is not set to false */
 	_.each($('[bind=activity][autoLoad!="false"]'), function(el) {
 		expanz.CreateActivity($(el));
+	});
+
+	/* apply security roles -> hide stuff */
+	_.each($("body").find("[requiresRole]"), function(el) {
+		var roles = $(el).attr("requiresRole");
+		if (roles != null && roles != "") {
+			var roleFound = false;
+			roles = roles.split(" ");
+			for ( var i = 0; i < roles.length; i++) {
+				if (expanz.Storage.hasRole(roles[i])) {
+					roleFound = true;
+					break;
+				}
+			}
+			if (roleFound !== true) {
+				$(el).hide();
+			}
+		}
+
 	});
 
 	/* load UI plugin */

@@ -86,7 +86,7 @@ $(function() {
 						'handle' : activityHandle
 					});
 				}
-				
+
 				activity.setAttr({
 					loading : true
 				});
@@ -730,6 +730,20 @@ $(function() {
 		return processAreas;
 	}
 
+	function parseRoles(xmlElement) {
+
+		if (xmlElement == undefined || xmlElement.length == 0)
+			return null;
+		var roles = {};
+		$(xmlElement).children('UserRole').each(function() {
+			roles[$(this).attr('id')] = {
+				id : $(this).attr('id'),
+				name : $(this).text()
+			}
+		});
+		return roles;
+	}
+
 	function fillActivityData(processAreas, url, name, style, gridviewList) {
 		$.each(processAreas, function(i, processArea) {
 			$.each(processArea.activities, function(j, activity) {
@@ -803,6 +817,9 @@ $(function() {
 			// window.expanz.logToConsole("start parseGetSessionDataResponse");
 
 			var processAreas = parseProcessAreas($(xml).find("Menu"));
+
+			var roles = parseRoles($(xml).find("Roles"));
+			expanz.Storage.setRolesList(roles);
 
 			/* store user preference if existing */
 			$(xml).find('PublishPreferences').find('Preference').each(function() {

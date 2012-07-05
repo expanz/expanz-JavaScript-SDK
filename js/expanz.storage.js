@@ -11,7 +11,7 @@ $(function() {
 		// functions
 
 		_getBestStorage : function() {
-			if (window['localStorage'] !== null  && window.localStorage) {
+			if (window['localStorage'] !== null && window.localStorage) {
 				/*
 				 * length is unused but please leave it. I don't know why but sometimes firefox get an empty window.localStorage by mistake Doing this force it to evaluate the window.localStorage object and it seems to work
 				 */
@@ -65,6 +65,21 @@ $(function() {
 			return true;
 		},
 
+		setRolesList : function(roles) {
+			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'roles.list', JSON.stringify(roles));
+			return true;
+		},
+
+		/* is used for display but HAVE TO be enforced on the server as well */
+		hasRole : function(id) {
+			var roles = JSON.parse(this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'roles.list'));
+			if (roles != null) {
+				return (roles[id] != undefined)
+			}
+			return false;
+
+		},
+
 		getLastPingSuccess : function() {
 			return this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess');
 		},
@@ -73,7 +88,7 @@ $(function() {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess', (new Date()).getTime());
 			return true;
 		},
-		
+
 		getLastURL : function() {
 			return this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'lastURL');
 		},
@@ -82,24 +97,25 @@ $(function() {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'lastURL', url);
 			return true;
 		},
-		
+
 		clearLastURL : function() {
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'lastURL');
 			return true;
-		},		
+		},
 
 		setUserPreference : function(key, value) {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'UserPreference' + key, value);
 			return true;
 		},
-		
+
 		getUserPreference : function(key) {
 			return this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'UserPreference' + key);
-		},		
+		},
 
 		clearSession : function() {
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'session.handle');
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess');
+			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'roles.list');
 			this.clearActivityHandles();
 			return true;
 		},
