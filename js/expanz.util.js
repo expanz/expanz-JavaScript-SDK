@@ -1,3 +1,15 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 function pop(ary, map) { // , name, key ) {
 
 	for ( var i = 0; i < ary.length; i++) {

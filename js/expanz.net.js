@@ -1,6 +1,9 @@
+/*!
 ////////////////////////////////////////////////////////////////////////////////
 //
 //  EXPANZ
+//  Usage: http://expanz.com/docs/client-technologies/javascript-sdk/
+//  Author: Kim Damevin
 //  Copyright 2008-2012 EXPANZ
 //  All Rights Reserved.
 //
@@ -8,7 +11,7 @@
 //  in accordance with the terms of the license agreement accompanying it.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
+ */
 $(function() {
 
 	window.expanz = window.expanz || {};
@@ -744,6 +747,32 @@ $(function() {
 		return roles;
 	}
 
+	function parseDashboards(xmlElement) {
+
+		if (xmlElement == undefined || xmlElement.length == 0)
+			return null;
+		var dashboards = {};
+		$(xmlElement).children().each(function() {
+			dashboards[this.tagName] = {
+				'id' : this.tagName
+			}
+			for ( var j = 0; j < this.attributes.length; j++) {
+				var attribute = this.attributes.item(j);
+				dashboards[this.tagName][attribute.nodeName] = attribute.nodeValue;
+
+				/* update field if in the view */
+				var dashboardField = window.expanz.Dashboards.get(this.tagName + "_" + attribute.nodeName);
+				if (dashboardField != null) {
+					dashboardField.set({
+						value : attribute.nodeValue
+					})
+				}
+			}
+
+		});
+		return dashboards;
+	}
+
 	function fillActivityData(processAreas, url, name, style, gridviewList) {
 		$.each(processAreas, function(i, processArea) {
 			$.each(processArea.activities, function(j, activity) {
@@ -821,6 +850,9 @@ $(function() {
 			var roles = parseRoles($(xml).find("Roles"));
 			expanz.Storage.setRolesList(roles);
 
+			var dashboards = parseDashboards($(xml).find("Dashboards"));
+			expanz.Storage.setDashboards(dashboards);
+
 			/* store user preference if existing */
 			$(xml).find('PublishPreferences').find('Preference').each(function() {
 				window.expanz.Storage.setUserPreference($(this).attr('key'), $(this).attr('value'));
@@ -894,6 +926,12 @@ $(function() {
 						}
 					}
 				});
+
+				/* DASHBOARD UPDATE CASE */
+				var dashboards = parseDashboards($(execResults).find("Dashboards"));
+				if (dashboards != null) {
+					expanz.Storage.setDashboards(dashboards);
+				}
 
 				$(execResults).find('Activity').each(function() {
 					activity.setAttr({
@@ -1011,6 +1049,12 @@ $(function() {
 
 				var errors = [];
 				var infos = [];
+
+				/* DASHBOARD UPDATE CASE */
+				var dashboards = parseDashboards($(execResults).find("Dashboards"));
+				if (dashboards != null) {
+					expanz.Storage.setDashboards(dashboards);
+				}
 
 				/* MESSAGE CASE */
 				$(execResults).find('Message').each(function() {

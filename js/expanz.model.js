@@ -1,7 +1,14 @@
-/* Author: Adam Tait And Kim Damevin
-
- */
-
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
 $(function() {
 
 	window.expanz = window.expanz || {};
@@ -76,6 +83,15 @@ $(function() {
 			else {
 				expanz.Net.DeltaRequest(this.get('id'), attrs.value, this.get('parent'));
 			}
+			return;
+		}
+
+	});
+
+	window.expanz.Model.DashboardField = window.expanz.Model.Field.extend({
+
+		update : function(attrs) {
+			/* only read only field -> no delta send */
 			return;
 		}
 
@@ -212,6 +228,10 @@ $(function() {
 				});
 			}
 		}
+	});
+
+	window.expanz.Model.Dashboards = expanz.Collection.extend({
+		model : expanz.Model.DashboardField
 	});
 
 	window.expanz.Model.Activity = expanz.Collection.extend({

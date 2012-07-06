@@ -1,6 +1,14 @@
-/* Author: Adam Tait
-
- */
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
 
 $(function() {
 
@@ -77,7 +85,19 @@ $(function() {
 				return (roles[id] != undefined)
 			}
 			return false;
+		},
 
+		setDashboards : function(dashboards) {
+			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'dashboards', JSON.stringify(dashboards));
+			return true;
+		},
+
+		getDashboardFieldValue : function(dashboardName, fieldName) {
+			var dashboards = JSON.parse(this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'dashboards'));
+			if (dashboards != null && dashboards[dashboardName] != null) {
+				return (dashboards[dashboardName][fieldName]);
+			}
+			return null;
 		},
 
 		getLastPingSuccess : function() {
@@ -116,6 +136,7 @@ $(function() {
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'session.handle');
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess');
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'roles.list');
+			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'dashboards');
 			this.clearActivityHandles();
 			return true;
 		},

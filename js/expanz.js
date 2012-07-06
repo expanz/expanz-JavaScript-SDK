@@ -1,6 +1,14 @@
-/* Author: Kim Damevin
-
- */
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
 $(function() {
 
 	//
@@ -565,6 +573,9 @@ $(function() {
 			});
 		});
 	}
+
+	/* init dashboards object */
+	window.expanz.Dashboards = new window.expanz.Model.Dashboards();
 
 	window.expanz.messageController.initialize();
 

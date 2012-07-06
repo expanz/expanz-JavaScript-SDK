@@ -1,3 +1,15 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 $(function() {
 
 	window.expanz = window.expanz || {};
@@ -62,6 +74,15 @@ $(function() {
 
 			});
 
+			_.each(expanz.Factory.DashboardField($(el).find('[bind=dashboardfield]')), function(dashboardFieldModel) {
+				var fieldSessionValue = expanz.Storage.getDashboardFieldValue(dashboardFieldModel.get('dashboardName'), dashboardFieldModel.get('name'));
+				dashboardFieldModel.set({
+					value : fieldSessionValue || ''
+				});
+
+				expanz.Dashboards.add(dashboardFieldModel);
+			});
+
 			_.each(expanz.Factory.DependantField($(el).find('[bind=dependant]')), function(dependantFieldModel) {
 				dependantFieldModel.set({
 					parent : activityModel
@@ -110,6 +131,30 @@ $(function() {
 				var field = new expanz.Model.Field({
 					id : $(fieldEl).attr('name'),
 					anonymousBoundMethod : $(fieldEl).attr('anonymousBoundMethod')
+				});
+				var view = new expanz.Views.FieldView({
+					el : $(fieldEl),
+					id : $(fieldEl).attr('id'),
+					className : $(fieldEl).attr('class'),
+					model : field,
+					textTransformFunction : $(fieldEl).attr('textTransformFunction')
+				});
+
+				fieldModels.push(field);
+
+			});
+			return fieldModels;
+		},
+
+		DashboardField : function(DOMObjects) {
+
+			var fieldModels = [];
+			_.each(DOMObjects, function(fieldEl) {
+				// create a model for each field
+				var field = new expanz.Model.DashboardField({
+					id : $(fieldEl).attr('dashboardName') + "_" + $(fieldEl).attr('name'),
+					name : $(fieldEl).attr('name'),
+					dashboardName : $(fieldEl).attr('dashboardName')
 				});
 				var view = new expanz.Views.FieldView({
 					el : $(fieldEl),
