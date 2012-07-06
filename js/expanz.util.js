@@ -207,6 +207,18 @@ function createMailtoLink(emailAddress) {
 	return "<a href='mailto:" + emailAddress + "'>" + emailAddress + "</a>";
 }
 
+addDollar = function(price) {
+	if (price == null || price == '')
+		return '';
+	return "$ " + price;
+};
+
+addPercent = function(number) {
+	if (number == null || number == '')
+		return '';
+	return number + "%";
+};
+
 Object.size = function(obj) {
 	var size = 0, key;
 	for (key in obj) {

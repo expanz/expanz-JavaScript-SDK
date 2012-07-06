@@ -1,4 +1,4 @@
-/* Author: Kim Damevin
+/* Author: kdamevin
 
  */
 $(function() {
@@ -1219,10 +1219,6 @@ $(function() {
 		if (value === undefined)
 			return true;
 		return value == "";
-	};
-
-	window.expanz.html.addDollar = function(price) {
-		return "$ " + price;
 	};
 
 	window.expanz.html.anonymousPersonActivity = "ERP.Person";
