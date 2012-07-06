@@ -11452,6 +11452,18 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
 /*
  * START OF FILE - /expanz-JavaScript-SDK/js/expanz.util.js
  */
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 function pop(ary, map) { // , name, key ) {
 
 	for ( var i = 0; i < ary.length; i++) {
@@ -11466,20 +11478,22 @@ function pop(ary, map) { // , name, key ) {
 	return null;
 }
 
-// function isVisibleOnScreen(elem) {
-// var $window = $(window)
-// var viewport_top = $window.scrollTop()
-// var viewport_height = $window.height()
-// var viewport_bottom = viewport_top + viewport_height
-// var $elem = $(elem)
-// var top = $elem.offset().top
-// var height = $elem.height()
-// var bottom = top + height
-//
-// return (top >= viewport_top && top < viewport_bottom) ||
-// (bottom > viewport_top && bottom <= viewport_bottom) ||
-// (height > viewport_height && top <= viewport_top && bottom >= viewport_bottom)
-// }
+function isVisibleOnScreen(elem) {
+	var $window = $(window)
+	var viewport_top = $window.scrollTop()
+	var viewport_height = $window.height()
+	var viewport_bottom = viewport_top + viewport_height
+	var $elem = $(elem)
+	var top = $elem.offset().top
+	var height = $elem.height()
+	var bottom = top + height
+
+	return (top >= viewport_top && top < viewport_bottom) || (bottom > viewport_top && bottom <= viewport_bottom) || (height > viewport_height && top <= viewport_top && bottom >= viewport_bottom)
+}
+
+function supports_history_api() {
+	return !!(window.history && history.pushState);
+}
 
 function escapeBadCharForURL(data) {
 	if (!data)
@@ -11641,6 +11655,24 @@ isImageValid = function(imagePath) {
 	return false;
 };
 
+function createMailtoLink(emailAddress) {
+	if (emailAddress == null)
+		return '';
+	return "<a href='mailto:" + emailAddress + "'>" + emailAddress + "</a>";
+}
+
+addDollar = function(price) {
+	if (price == null || price == '')
+		return '';
+	return "$ " + price;
+};
+
+addPercent = function(number) {
+	if (number == null || number == '')
+		return '';
+	return number + "%";
+};
+
 Object.size = function(obj) {
 	var size = 0, key;
 	for (key in obj) {
@@ -11750,6 +11782,8 @@ jQuery.fn.center = function(params) {
 var keyStr = "ABCDEFGHIJKLMNOP" + "QRSTUVWXYZabcdef" + "ghijklmnopqrstuv" + "wxyz0123456789+/" + "=";
 
 function encode64(input) {
+	if (input == undefined)
+		return undefined;
 	var output = "";
 	var chr1, chr2, chr3 = "";
 	var enc1, enc2, enc3, enc4 = "";
@@ -11781,6 +11815,8 @@ function encode64(input) {
 }
 
 function decode64(input) {
+	if (input == undefined)
+		return undefined;
 	var output = "";
 	var chr1, chr2, chr3 = "";
 	var enc1, enc2, enc3, enc4 = "";
@@ -11858,6 +11894,18 @@ $(function() {
 /*
  * START OF FILE - /expanz-JavaScript-SDK/js/expanz.factory.js
  */
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 $(function() {
 
 	window.expanz = window.expanz || {};
@@ -11922,6 +11970,15 @@ $(function() {
 
 			});
 
+			_.each(expanz.Factory.DashboardField($(el).find('[bind=dashboardfield]')), function(dashboardFieldModel) {
+				var fieldSessionValue = expanz.Storage.getDashboardFieldValue(dashboardFieldModel.get('dashboardName'), dashboardFieldModel.get('name'));
+				dashboardFieldModel.set({
+					value : fieldSessionValue || ''
+				});
+
+				expanz.Dashboards.add(dashboardFieldModel);
+			});
+
 			_.each(expanz.Factory.DependantField($(el).find('[bind=dependant]')), function(dependantFieldModel) {
 				dependantFieldModel.set({
 					parent : activityModel
@@ -11970,6 +12027,30 @@ $(function() {
 				var field = new expanz.Model.Field({
 					id : $(fieldEl).attr('name'),
 					anonymousBoundMethod : $(fieldEl).attr('anonymousBoundMethod')
+				});
+				var view = new expanz.Views.FieldView({
+					el : $(fieldEl),
+					id : $(fieldEl).attr('id'),
+					className : $(fieldEl).attr('class'),
+					model : field,
+					textTransformFunction : $(fieldEl).attr('textTransformFunction')
+				});
+
+				fieldModels.push(field);
+
+			});
+			return fieldModels;
+		},
+
+		DashboardField : function(DOMObjects) {
+
+			var fieldModels = [];
+			_.each(DOMObjects, function(fieldEl) {
+				// create a model for each field
+				var field = new expanz.Model.DashboardField({
+					id : $(fieldEl).attr('dashboardName') + "_" + $(fieldEl).attr('name'),
+					name : $(fieldEl).attr('name'),
+					dashboardName : $(fieldEl).attr('dashboardName')
 				});
 				var view = new expanz.Views.FieldView({
 					el : $(fieldEl),
@@ -12176,10 +12257,17 @@ $(function() {
 /*
  * START OF FILE - /expanz-JavaScript-SDK/js/expanz.model.js
  */
-/* Author: Adam Tait And Kim Damevin
-
- */
-
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
 $(function() {
 
 	window.expanz = window.expanz || {};
@@ -12254,6 +12342,15 @@ $(function() {
 			else {
 				expanz.Net.DeltaRequest(this.get('id'), attrs.value, this.get('parent'));
 			}
+			return;
+		}
+
+	});
+
+	window.expanz.Model.DashboardField = window.expanz.Model.Field.extend({
+
+		update : function(attrs) {
+			/* only read only field -> no delta send */
 			return;
 		}
 
@@ -12392,6 +12489,10 @@ $(function() {
 		}
 	});
 
+	window.expanz.Model.Dashboards = expanz.Collection.extend({
+		model : expanz.Model.DashboardField
+	});
+
 	window.expanz.Model.Activity = expanz.Collection.extend({
 
 		model : expanz.Model.Bindable,
@@ -12470,9 +12571,12 @@ $(function() {
 /*
  * START OF FILE - /expanz-JavaScript-SDK/js/expanz.net.js
  */
+/*!
 ////////////////////////////////////////////////////////////////////////////////
 //
 //  EXPANZ
+//  Usage: http://expanz.com/docs/client-technologies/javascript-sdk/
+//  Author: Kim Damevin
 //  Copyright 2008-2012 EXPANZ
 //  All Rights Reserved.
 //
@@ -12480,7 +12584,7 @@ $(function() {
 //  in accordance with the terms of the license agreement accompanying it.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
+ */
 $(function() {
 
 	window.expanz = window.expanz || {};
@@ -12545,6 +12649,10 @@ $(function() {
 					expanz.Views.requestLogin();
 					return;
 				}
+			}
+
+			/* if allow anonymous and session doesn't exist we don't create anything on the server */
+			if (expanz.Storage.getSessionHandle() && expanz.Storage.getSessionHandle() !== "") {
 
 				/* check if an activity has already been created, if so specify it instead of creating a new one */
 				var activityHandle = expanz.Storage.getActivityHandle(activity.getAttr('name'), activity.getAttr('style'));
@@ -12554,10 +12662,6 @@ $(function() {
 						'handle' : activityHandle
 					});
 				}
-			}
-
-			/* if allow anonymous and session doesn't exist we don't create anything on the server */
-			if (expanz.Storage.getSessionHandle() && expanz.Storage.getSessionHandle() !== "") {
 
 				activity.setAttr({
 					loading : true
@@ -13202,6 +13306,46 @@ $(function() {
 		return processAreas;
 	}
 
+	function parseRoles(xmlElement) {
+
+		if (xmlElement == undefined || xmlElement.length == 0)
+			return null;
+		var roles = {};
+		$(xmlElement).children('UserRole').each(function() {
+			roles[$(this).attr('id')] = {
+				id : $(this).attr('id'),
+				name : $(this).text()
+			}
+		});
+		return roles;
+	}
+
+	function parseDashboards(xmlElement) {
+
+		if (xmlElement == undefined || xmlElement.length == 0)
+			return null;
+		var dashboards = {};
+		$(xmlElement).children().each(function() {
+			dashboards[this.tagName] = {
+				'id' : this.tagName
+			}
+			for ( var j = 0; j < this.attributes.length; j++) {
+				var attribute = this.attributes.item(j);
+				dashboards[this.tagName][attribute.nodeName] = attribute.nodeValue;
+
+				/* update field if in the view */
+				var dashboardField = window.expanz.Dashboards.get(this.tagName + "_" + attribute.nodeName);
+				if (dashboardField != null) {
+					dashboardField.set({
+						value : attribute.nodeValue
+					})
+				}
+			}
+
+		});
+		return dashboards;
+	}
+
 	function fillActivityData(processAreas, url, name, style, gridviewList) {
 		$.each(processAreas, function(i, processArea) {
 			$.each(processArea.activities, function(j, activity) {
@@ -13276,6 +13420,12 @@ $(function() {
 
 			var processAreas = parseProcessAreas($(xml).find("Menu"));
 
+			var roles = parseRoles($(xml).find("Roles"));
+			expanz.Storage.setRolesList(roles);
+
+			var dashboards = parseDashboards($(xml).find("Dashboards"));
+			expanz.Storage.setDashboards(dashboards);
+
 			/* store user preference if existing */
 			$(xml).find('PublishPreferences').find('Preference').each(function() {
 				window.expanz.Storage.setUserPreference($(this).attr('key'), $(this).attr('value'));
@@ -13349,6 +13499,12 @@ $(function() {
 						}
 					}
 				});
+
+				/* DASHBOARD UPDATE CASE */
+				var dashboards = parseDashboards($(execResults).find("Dashboards"));
+				if (dashboards != null) {
+					expanz.Storage.setDashboards(dashboards);
+				}
 
 				$(execResults).find('Activity').each(function() {
 					activity.setAttr({
@@ -13466,6 +13622,12 @@ $(function() {
 
 				var errors = [];
 				var infos = [];
+
+				/* DASHBOARD UPDATE CASE */
+				var dashboards = parseDashboards($(execResults).find("Dashboards"));
+				if (dashboards != null) {
+					expanz.Storage.setDashboards(dashboards);
+				}
 
 				/* MESSAGE CASE */
 				$(execResults).find('Message').each(function() {
@@ -13648,7 +13810,7 @@ $(function() {
 					var contextObject = $(this).attr('contextObject');
 					if (id == 'picklist') {
 						// window.expanz.logToConsole("picklist received");
-						var elId = id + pickfield;
+						var elId = id + pickfield.replace(/ /g, "_");
 
 						var clientMessage = new expanz.Model.ClientMessage({
 							id : elId,
@@ -13676,20 +13838,27 @@ $(function() {
 								gridModel.updateRowSelected = function(selectedId, type) {
 									// window.expanz.logToConsole("From parseDeltaResponse:updateRowSelected id:" + selectedId + ' ,type:' + type);
 
-									var context = {
-										id : selectedId,
-										contextObject : contextObject,
-										type : type
-									};
+									var clientFunction = window["picklistUpdateRowSelected" + type];
+									if (typeof (clientFunction) == "function") {
+										clientFunction(selectedId);
+									}
+									else {
+										var context = {
+											id : selectedId,
+											contextObject : contextObject,
+											type : type
+										};
 
-									var methodAttributes = [
-										{
-											name : "contextObject",
-											value : contextObject
-										}
-									];
+										var methodAttributes = [
+											{
+												name : "contextObject",
+												value : contextObject
+											}
+										];
 
-									expanz.Net.MethodRequest('SetIdFromContext', methodAttributes, context, activity);
+										expanz.Net.MethodRequest('SetIdFromContext', methodAttributes, context, activity);
+
+									}
 									picklistWindow.close();
 								};
 
@@ -13960,9 +14129,17 @@ $(function() {
 /*
  * START OF FILE - /expanz-JavaScript-SDK/js/expanz.storage.js
  */
-/* Author: Adam Tait
-
- */
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
 
 $(function() {
 
@@ -13973,7 +14150,7 @@ $(function() {
 		// functions
 
 		_getBestStorage : function() {
-			if (window['localStorage'] !== null  && window.localStorage) {
+			if (window['localStorage'] !== null && window.localStorage) {
 				/*
 				 * length is unused but please leave it. I don't know why but sometimes firefox get an empty window.localStorage by mistake Doing this force it to evaluate the window.localStorage object and it seems to work
 				 */
@@ -14027,6 +14204,33 @@ $(function() {
 			return true;
 		},
 
+		setRolesList : function(roles) {
+			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'roles.list', JSON.stringify(roles));
+			return true;
+		},
+
+		/* is used for display but HAVE TO be enforced on the server as well */
+		hasRole : function(id) {
+			var roles = JSON.parse(this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'roles.list'));
+			if (roles != null) {
+				return (roles[id] != undefined)
+			}
+			return false;
+		},
+
+		setDashboards : function(dashboards) {
+			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'dashboards', JSON.stringify(dashboards));
+			return true;
+		},
+
+		getDashboardFieldValue : function(dashboardName, fieldName) {
+			var dashboards = JSON.parse(this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'dashboards'));
+			if (dashboards != null && dashboards[dashboardName] != null) {
+				return (dashboards[dashboardName][fieldName]);
+			}
+			return null;
+		},
+
 		getLastPingSuccess : function() {
 			return this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess');
 		},
@@ -14035,7 +14239,7 @@ $(function() {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess', (new Date()).getTime());
 			return true;
 		},
-		
+
 		getLastURL : function() {
 			return this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'lastURL');
 		},
@@ -14044,24 +14248,26 @@ $(function() {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'lastURL', url);
 			return true;
 		},
-		
+
 		clearLastURL : function() {
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'lastURL');
 			return true;
-		},		
+		},
 
 		setUserPreference : function(key, value) {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'UserPreference' + key, value);
 			return true;
 		},
-		
+
 		getUserPreference : function(key) {
 			return this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'UserPreference' + key);
-		},		
+		},
 
 		clearSession : function() {
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'session.handle');
 			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess');
+			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'roles.list');
+			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'dashboards');
 			this.clearActivityHandles();
 			return true;
 		},
@@ -14315,6 +14521,18 @@ $(function() {
 /*
  * START OF FILE - /expanz-JavaScript-SDK/js/expanz.model.data.js
  */
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 $(function() {
 
 	window.expanz = window.expanz || {};
@@ -14602,6 +14820,17 @@ $(function() {
 /*
  * START OF FILE - /expanz-JavaScript-SDK/js/expanz.view.js
  */
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
 $(function() {
 
 	window.expanz = window.expanz || {};
@@ -15725,9 +15954,17 @@ $(function() {
 /*
  * START OF FILE - /expanz-JavaScript-SDK/js/expanz.js
  */
-/* Author: Kim Damevin
-
- */
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
 $(function() {
 
 	//
@@ -15933,6 +16170,20 @@ $(function() {
 							$(el).find('[attribute=value]').append(divMessage);
 
 							var messageItem = $(el).find("#" + newErrorId);
+
+							// check if el is visible in the screen if not fix it to top of the visible page
+							if (!isVisibleOnScreen($(el))) {
+								// var top = document.body.scrollTop;
+								$(el).parent().css('top', "0px");
+								$(el).parent().css('position', 'fixed');
+								$(el).parent().css('z-index', '10000');
+							}
+							else {
+								$(el).parent().css('top', '');
+								$(el).parent().css('position', '');
+							}
+
+							messageItem.show();
 
 							messageItem.slideDown(100, function() {
 								if (fade) {
@@ -16278,6 +16529,9 @@ $(function() {
 		});
 	}
 
+	/* init dashboards object */
+	window.expanz.Dashboards = new window.expanz.Model.Dashboards();
+
 	window.expanz.messageController.initialize();
 
 	/* Load the Expanz Process Area menu without empty items */
@@ -16291,6 +16545,25 @@ $(function() {
 	/* create all activities where autoLoad attribute is not set to false */
 	_.each($('[bind=activity][autoLoad!="false"]'), function(el) {
 		expanz.CreateActivity($(el));
+	});
+
+	/* apply security roles -> hide stuff */
+	_.each($("body").find("[requiresRole]"), function(el) {
+		var roles = $(el).attr("requiresRole");
+		if (roles != null && roles != "") {
+			var roleFound = false;
+			roles = roles.split(" ");
+			for ( var i = 0; i < roles.length; i++) {
+				if (expanz.Storage.hasRole(roles[i])) {
+					roleFound = true;
+					break;
+				}
+			}
+			if (roleFound !== true) {
+				$(el).hide();
+			}
+		}
+
 	});
 
 	/* load UI plugin */

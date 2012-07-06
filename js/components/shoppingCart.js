@@ -161,7 +161,6 @@ $(function() {
 						that.lastListAction = from;
 						if (that.isAnonymous()) {
 
-							// console.log('Anonymous -> must call some stuff ');
 							/* list of anonymous call we want to do at the beginning (data publication) */
 							var dataModelList = [
 								{
