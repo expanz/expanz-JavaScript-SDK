@@ -201,6 +201,12 @@ isImageValid = function(imagePath) {
 	return false;
 };
 
+function createMailtoLink(emailAddress) {
+	if (emailAddress == null)
+		return '';
+	return "<a href='mailto:" + emailAddress + "'>" + emailAddress + "</a>";
+}
+
 Object.size = function(obj) {
 	var size = 0, key;
 	for (key in obj) {
