@@ -982,7 +982,7 @@ $(function() {
 							if (dataControlModel.getAttr('renderingType') == 'popupGrid') {
 								/* don't display it on load, only happening with deltas */
 							}
-							else if (dataControlModel.getAttr('renderingType') == 'grid') {
+							else if (dataControlModel.getAttr('renderingType') == 'grid' || dataControlModel.getAttr('renderingType') == 'rotatingBar') {
 								fillGridModel(dataControlModel, data);
 
 								/* add a method handler for each action button */
@@ -1301,7 +1301,7 @@ $(function() {
 						if (dataControlModels !== undefined) {
 							for ( var i = 0; i < dataControlModels.length; i++) {
 								dataControlModel = dataControlModels[i];
-								if (dataControlModel.getAttr('renderingType') == 'grid' || dataControlModel.getAttr('renderingType') == 'popupGrid') {
+								if (dataControlModel.getAttr('renderingType') == 'grid' || dataControlModel.getAttr('renderingType') == 'popupGrid' || dataControlModel.getAttr('renderingType') == 'rotatingBar') {
 									fillGridModel(dataControlModel, $(this));
 
 									/* override the method handler for each action button */

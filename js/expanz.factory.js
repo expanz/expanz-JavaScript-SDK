@@ -251,7 +251,7 @@ $(function() {
 			_.each(DOMObjects, function(dataControlEl) {
 
 				/* case rendering as a grid */
-				if ($(dataControlEl).attr('renderingType') == 'grid' || $(dataControlEl).attr('renderingType') == 'popupGrid') {
+				if ($(dataControlEl).attr('renderingType') == 'grid' || $(dataControlEl).attr('renderingType') == 'popupGrid' || $(dataControlEl).attr('renderingType') == 'rotatingBar') {
 					var dataControlModel = new expanz.Model.Data.Grid({
 						id : $(dataControlEl).attr('name'),
 						fieldId : $(dataControlEl).attr('fieldName') || $(dataControlEl).attr('name'),

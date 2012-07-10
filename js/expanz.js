@@ -215,8 +215,9 @@ $(function() {
 
 							var messageItem = $(el).find("#" + newErrorId);
 
+							//TODO Commented out, not working very well, need to find a better solution
 							// check if el is visible in the screen if not fix it to top of the visible page
-							if (!isVisibleOnScreen($(el))) {
+							/*if (!isVisibleOnScreen($(el))) {
 								// var top = document.body.scrollTop;
 								$(el).parent().css('top', "0px");
 								$(el).parent().css('position', 'fixed');
@@ -225,7 +226,7 @@ $(function() {
 							else {
 								$(el).parent().css('top', '');
 								$(el).parent().css('position', '');
-							}
+							}*/
 
 							messageItem.show();
 

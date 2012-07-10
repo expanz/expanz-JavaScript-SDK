@@ -631,10 +631,64 @@ $(function() {
 				picklistWindow.el.append(hostEl);
 				picklistWindow.center();
 			}
+			else if (this.model.getAttr('renderingType') == 'rotatingBar') {
+				this.renderAsRotationBar(hostEl, 3, 3, 0);
+			}
 
 			hostEl.trigger("table:rendered");
 
 			return this;
+		},
+
+		renderAsRotationBar : function(el, itemPerPage, rotationStep, firstItem) {
+			var totalItems = $(el).find("li.rotatingItem").length;
+			var that = this;
+			var elId = $(el).attr('id');
+
+			$(el).find("li.rotatingItem").hide();
+
+			var i = 0;
+
+			$(el).find("li.rotatingItem").each(function() {
+
+				if (i >= firstItem) {
+					$(this).show();
+				}
+				i++;
+				if ((i - firstItem) >= itemPerPage)
+					return false;
+			});
+
+			if ($(el).find("#" + elId + "NextBtn").length == 0) {
+				$(el).find("li.rotatingItem").last().after("<li class='rotatingButton'><button id='" + elId + "NextBtn'>></button></li>");
+				$(el).find("#" + elId + "NextBtn").unbind("click");
+			}
+			if ($("#" + elId + "PrevBtn").length == 0) {
+				$(el).find("li.rotatingItem").first().before("<li class='rotatingButton'><button  id='" + elId + "PrevBtn'><</button></li>");
+				$(el).find("#" + elId + "PrevBtn").unbind("click");
+			}
+
+			/* show pre button if needed */
+			if (firstItem > 0) {
+				$(el).find("#" + elId + "PrevBtn").click(function() {
+					that.renderAsRotationBar($(el), itemPerPage, rotationStep, Math.max(firstItem - rotationStep, 0));
+				});
+				$(el).find("#" + elId + "PrevBtn").show();
+			}
+			else {
+				$(el).find("#" + elId + "PrevBtn").hide();
+			}
+
+			/* show next button if needed */
+			if (i < totalItems) {
+				$(el).find("#" + elId + "NextBtn").click(function() {
+					that.renderAsRotationBar($(el), itemPerPage, rotationStep, Math.min(firstItem + rotationStep, totalItems - itemPerPage));
+				});
+				$(el).find("#" + elId + "NextBtn").show();
+			}
+			else {
+				$(el).find("#" + elId + "NextBtn").hide();
+			}
 		},
 
 		render : function() {

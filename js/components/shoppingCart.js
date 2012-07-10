@@ -15,7 +15,12 @@ $(function() {
 			shopUrlRewritePattern : '/shop/',
 
 			listItemsOnSpecialMethodName : "listItemsOnSpecial",
+			listItemsOnSpecialMethodNameByPopMethod : "listItemsOnSpecialByPopMethod",
 			listItemsOnSpecialMethodContextObject : "StockTranItem.ItemForSale",
+			
+			listItemsNewMethodName : "listItemsNew",
+			listItemsNewMethodNameByPopMethod : "listItemsNewByPopMethod",
+			listItemsNewMethodContextObject : "StockTranItem.ItemForSale",			
 
 			listPreviouslyOrderedMethodName : "listPreviouslyOrderedItemsIncludingSpecial",
 			listPreviouslyOrderedContextObject : "StockTranItem.ItemForSale",
@@ -176,6 +181,12 @@ $(function() {
 								}, {
 									name : that.listBrandsMethodName,
 									contextObject : that.listBrandsContextObject
+								}, {
+									name : that.listItemsOnSpecialMethodNameByPopMethod,
+									contextObject : that.listItemsOnSpecialMethodContextObject
+								}, {
+									name : that.listItemsNewMethodNameByPopMethod,
+									contextObject : that.listItemsNewMethodContextObject
 								}
 							];
 
