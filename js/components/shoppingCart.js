@@ -81,6 +81,7 @@ $(function() {
 				'CartTitle',
 				'CartItemsList',
 				'CartTotals',
+				'CartEmptyButton',
 				'CartCheckoutButton',
 				'MiniGoToCartBox',
 				'CheckoutDeliveryAddress',
@@ -174,7 +175,7 @@ $(function() {
 									contextObject : that.listCategoriesContextObject
 								}, {
 									name : that.listBrandsMethodName,
-									contextObject : that.listBrandsContextObject,
+									contextObject : that.listBrandsContextObject
 								}
 							];
 
@@ -840,6 +841,14 @@ $(function() {
 				return html
 			},
 
+			renderCartEmptyButtonComponent : function(el) {
+				var html = "";
+				html += "<div  id='cartEmptyButton' class='emptyCart' bind='method' name='emptyCart'>";
+				html += "<button attribute='submit'>Empty cart</button>";
+				html += "</div>";
+				return html
+			},
+
 			renderCartCheckoutButtonComponent : function(el) {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'Go to Checkout';
@@ -854,10 +863,12 @@ $(function() {
 					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === "0") {
 						$("#cartCheckout").hide();
 						$("#cartTotals").hide();
+						$("#cartEmptyButton").hide();
 					}
 					else {
 						$("#cartCheckout").show();
 						$("#cartTotals").show();
+						$("#cartEmptyButton").show();
 					}
 				});
 			},
