@@ -802,7 +802,9 @@ $(function() {
 				$(execResults).find('Method').each(function() {
 					var res = boolValue($(this).attr('result'));
 					var methodName = $(this).attr('name');
-					$("body").trigger(methodName, res);
+					var event = jQuery.Event(methodName);
+					event.methodResult = res;
+					$("body").trigger(event);
 				});
 
 				var serverMessage = esaResult.attr('serverMessage') || "";

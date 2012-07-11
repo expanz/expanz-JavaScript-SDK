@@ -17,10 +17,13 @@ $(function() {
 			listItemsOnSpecialMethodName : "listItemsOnSpecial",
 			listItemsOnSpecialMethodNameByPopMethod : "listItemsOnSpecialByPopMethod",
 			listItemsOnSpecialMethodContextObject : "StockTranItem.ItemForSale",
-			
+
 			listItemsNewMethodName : "listItemsNew",
 			listItemsNewMethodNameByPopMethod : "listItemsNewByPopMethod",
-			listItemsNewMethodContextObject : "StockTranItem.ItemForSale",			
+			listItemsNewMethodContextObject : "StockTranItem.ItemForSale",
+
+			listItemsEndOfLineMethodName : "listItemsEndOfLine",
+			listItemsEndOfLineMethodContextObject : "StockTranItem.ItemForSale",
 
 			listPreviouslyOrderedMethodName : "listPreviouslyOrderedItemsIncludingSpecial",
 			listPreviouslyOrderedContextObject : "StockTranItem.ItemForSale",
@@ -80,6 +83,7 @@ $(function() {
 				'List',
 				'ListOnSpecialItemsButton',
 				'ListPreviouslyOrderedButton',
+				'ListNewItemsButton',
 				'ListItems',
 				'StandardOrdersList',
 				'ListDisplayChoice',
@@ -90,6 +94,7 @@ $(function() {
 				'CartCheckoutButton',
 				'MiniGoToCartBox',
 				'CheckoutDeliveryAddress',
+				'CheckoutDeliveryNotes',
 				'CheckoutItemsList',
 				'CheckoutEditCartButton',
 				'CheckoutPayNowButton',
@@ -206,6 +211,12 @@ $(function() {
 									contextObject : that.listItemsOnSpecialMethodContextObject
 								});
 							}
+							else if (from == 'newItems') {
+								dataModelList.push({
+									name : that.listItemsNewMethodName,
+									contextObject : that.listItemsNewMethodContextObject
+								});
+							}							
 							else if (from == 'previously') {
 								dataModelList.push({
 									name : that.listPreviouslyOrderedMethodName,
@@ -252,6 +263,15 @@ $(function() {
 								];
 								expanz.Net.MethodRequest(that.listItemsOnSpecialMethodName, methodAttributes, null, that.activity.collection);
 							}
+							else if (from == 'newItems') {
+								var methodAttributes = [
+									{
+										name : "contextObject",
+										value : that.listItemsNewMethodContextObject
+									}
+								];
+								expanz.Net.MethodRequest(that.listItemsNewMethodName, methodAttributes, null, that.activity.collection);
+							}							
 							else if (from == 'previously') {
 								var methodAttributes = [
 									{
@@ -384,11 +404,26 @@ $(function() {
 				html += window.expanz.html.renderMethod(this.listItemsOnSpecialMethodName, label, this.listItemsOnSpecialMethodContextObject, false);
 				return html;
 			},
-
+			
 			_executeAfterRenderListOnSpecialItemsButtonComponent : function(el) {
 				var that = this;
 				$("#" + this.listItemsOnSpecialMethodName + " button").click(function() {
 					that.lastListAction = 'specials';
+					that._updateURLHash();
+				});
+			},
+			
+			renderListNewItemsButtonComponent : function(el) {
+				var html = "";
+				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'List New Items';
+				html += window.expanz.html.renderMethod(this.listItemsNewMethodName, label, this.listItemsNewMethodContextObject, false);
+				return html;
+			},
+			
+			_executeAfterRenderListNewItemsButtonComponent : function(el) {
+				var that = this;
+				$("#" + this.listItemsNewMethodName + " button").click(function() {
+					that.lastListAction = 'newItems';
 					that._updateURLHash();
 				});
 			},
@@ -443,6 +478,10 @@ $(function() {
 						$(el).find("#productListDiv").find("#noItemText").hide();
 						$(el).find("#productListDiv").find("#noItemText").after("<div id='onSpecial' class='emptyListText'>No Specials at this time - Check back later</div>");
 					}
+					else if (that.lastListAction == 'newItems') {
+						$(el).find("#productListDiv").find("#noItemText").hide();
+						$(el).find("#productListDiv").find("#noItemText").after("<div id='newItems' class='emptyListText'>No new items at this time - Check back later</div>");
+					}
 					else {
 						$(el).find("#productListDiv").find("#noItemText").show();
 						$(el).find("#productListDiv").find("#onSpecial").remove();
@@ -496,6 +535,9 @@ $(function() {
 					else if (this.lastListAction == 'specials') {
 						$("#breadcrumb").html(homeLink + sep + "Specials");
 					}
+					else if (this.lastListAction == 'newItems') {
+						$("#breadcrumb").html(homeLink + sep + "New Items");
+					}					
 					else if (this.lastListAction == 'previouslyOrdered') {
 						$("#breadcrumb").html(homeLink + sep + "Previously Ordered");
 					}
@@ -997,6 +1039,21 @@ $(function() {
 							<input type="text" attribute="value" class="k-textbox" /> \
 						</div> \
 					</div> \
+					<div class="clear"></div> \
+				</div> \
+				';
+				return html;
+			},
+
+			renderCheckoutDeliveryNotesComponent : function(checkoutEl) {
+				var html = "";
+
+				html += '\
+				<div class="deliveryNotes"> \
+						<div bind="field" name="DeliveryNotes" class=""> \
+							<label attribute="label"></label> \
+							<textarea attribute="value" class="k-textbox" /> \
+						</div> \
 					<div class="clear"></div> \
 				</div> \
 				';
