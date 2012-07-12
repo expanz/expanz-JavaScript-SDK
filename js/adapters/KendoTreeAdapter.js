@@ -8,6 +8,7 @@ $.fn.KendoTreeAdapter = function(options) {
 	var expandedOnLoad = true;
 	var filteringInput = []; /* array of input element */
 	var displayLoading = true;
+	var staticElements = {};
 
 	/* function called after the delta has been sent and the response has been handle by the client */
 	/* format is selectionCallback = function(){ <doing some actions> } */
@@ -121,6 +122,8 @@ $.fn.KendoTreeAdapter = function(options) {
 			filterData = options['filterData'];
 		if (options['displayLoading'] !== undefined)
 			displayLoading = options['displayLoading'];
+		if (options['staticElements'] !== undefined)
+			staticElements = options['staticElements'];
 	}
 
 	var parseChildrenRows = function(parentXml) {
@@ -179,6 +182,20 @@ $.fn.KendoTreeAdapter = function(options) {
 			data.push(parentObj);
 		});
 
+		/* add static element at the position asked */
+		_.each(staticElements, function(elem) {
+			if (elem.position != undefined && elem.position == 'end') {
+				data.push({
+					text : $(elem).attr('label')
+				});
+			}
+			else {
+				data.unshift({
+					text : $(elem).attr('label')
+				});
+			}
+		});
+
 		treeView.kendoTreeView({
 			dataSource : data
 		});
@@ -189,23 +206,51 @@ $.fn.KendoTreeAdapter = function(options) {
 			 * unfortunately we cannot attach any data/id to the tree items -> we need to do a lookup based on the child label in the xml datasource to retrieve the child id
 			 */
 			var selectedText = event.node.firstChild.textContent || event.node.firstChild.innerText;
-			var elem = undefined;
-			$(xmlData).find("[" + labelAttribute + "]").each(function() {
-				if (selectedText === $(this).attr(labelAttribute)) {
-					elem = $(this);
-				}
-			});
 
-			if (onSelection) {
-				onSelection(view, elem.attr('id'), !elem.is(parentTag));
+			/* check if it is a static element */
+			var isStatic = false;
+			if (staticElements.length > 0) {
+				_.each(staticElements, function(elem) {
+					if (selectedText === elem.label) {
+						isStatic = true;
+						/* call the method associated */
+						expanz.Net.MethodRequest(elem.method, [
+							{
+								name : "contextObject",
+								value : elem.contextObject
+							}
+						], null, view.model.getAttr('parent'));
+
+						$(treeView).trigger("TreeSelectionChanged", {
+							id : 'static',
+							text : selectedText
+						});
+
+					}
+				});
+
 			}
 
-			$(treeView).trigger("TreeSelectionChanged", {
-				id : elem.attr('id'),
-				text : selectedText,
-				parentId : elem.parent().attr('id'),
-				parentText : elem.parent().attr(labelAttribute)
-			});
+			if (!isStatic) {
+
+				var elem = undefined;
+				$(xmlData).find("[" + labelAttribute + "]").each(function() {
+					if (selectedText === $(this).attr(labelAttribute)) {
+						elem = $(this);
+					}
+				});
+
+				if (onSelection) {
+					onSelection(view, elem.attr('id'), !elem.is(parentTag));
+				}
+
+				$(treeView).trigger("TreeSelectionChanged", {
+					id : elem.attr('id'),
+					text : selectedText,
+					parentId : elem.parent().attr('id'),
+					parentText : elem.parent().attr(labelAttribute)
+				});
+			}
 		});
 
 		/* if there is a filtering input field or button we bind the on change/click event to and filter the tree */

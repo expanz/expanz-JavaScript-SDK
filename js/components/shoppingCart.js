@@ -14,14 +14,17 @@ $(function() {
 
 			shopUrlRewritePattern : '/shop/',
 
+			listItemsOnSpecialLabel : 'Specials',
 			listItemsOnSpecialMethodName : "listItemsOnSpecial",
 			listItemsOnSpecialMethodNameByPopMethod : "listItemsOnSpecialByPopMethod",
 			listItemsOnSpecialMethodContextObject : "StockTranItem.ItemForSale",
 
+			listItemsNewLabel : 'New Items',
 			listItemsNewMethodName : "listItemsNew",
 			listItemsNewMethodNameByPopMethod : "listItemsNewByPopMethod",
 			listItemsNewMethodContextObject : "StockTranItem.ItemForSale",
 
+			listItemsEndOfLineLabel : "End of line",
 			listItemsEndOfLineMethodName : "listItemsEndOfLine",
 			listItemsEndOfLineMethodContextObject : "StockTranItem.ItemForSale",
 
@@ -216,7 +219,13 @@ $(function() {
 									name : that.listItemsNewMethodName,
 									contextObject : that.listItemsNewMethodContextObject
 								});
-							}							
+							}
+							else if (from == 'endOfLine') {
+								dataModelList.push({
+									name : that.listItemsEndOfLineMethodName,
+									contextObject : that.listItemsEndOfLineMethodContextObject
+								});
+							}
 							else if (from == 'previously') {
 								dataModelList.push({
 									name : that.listPreviouslyOrderedMethodName,
@@ -271,7 +280,16 @@ $(function() {
 									}
 								];
 								expanz.Net.MethodRequest(that.listItemsNewMethodName, methodAttributes, null, that.activity.collection);
-							}							
+							}
+							else if (from == 'endOfLine') {
+								var methodAttributes = [
+									{
+										name : "contextObject",
+										value : that.listItemsEndOfLineMethodContextObject
+									}
+								];
+								expanz.Net.MethodRequest(that.listItemsEndOfLineMethodName, methodAttributes, null, that.activity.collection);
+							}
 							else if (from == 'previously') {
 								var methodAttributes = [
 									{
@@ -400,11 +418,11 @@ $(function() {
 			 */
 			renderListOnSpecialItemsButtonComponent : function(el) {
 				var html = "";
-				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'List Items On Special';
+				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'List ' + this.listItemsOnSpecialLabel;
 				html += window.expanz.html.renderMethod(this.listItemsOnSpecialMethodName, label, this.listItemsOnSpecialMethodContextObject, false);
 				return html;
 			},
-			
+
 			_executeAfterRenderListOnSpecialItemsButtonComponent : function(el) {
 				var that = this;
 				$("#" + this.listItemsOnSpecialMethodName + " button").click(function() {
@@ -412,14 +430,14 @@ $(function() {
 					that._updateURLHash();
 				});
 			},
-			
+
 			renderListNewItemsButtonComponent : function(el) {
 				var html = "";
-				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'List New Items';
+				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'List ' + this.listItemsNewLabel;
 				html += window.expanz.html.renderMethod(this.listItemsNewMethodName, label, this.listItemsNewMethodContextObject, false);
 				return html;
 			},
-			
+
 			_executeAfterRenderListNewItemsButtonComponent : function(el) {
 				var that = this;
 				$("#" + this.listItemsNewMethodName + " button").click(function() {
@@ -482,6 +500,10 @@ $(function() {
 						$(el).find("#productListDiv").find("#noItemText").hide();
 						$(el).find("#productListDiv").find("#noItemText").after("<div id='newItems' class='emptyListText'>No new items at this time - Check back later</div>");
 					}
+					else if (that.lastListAction == 'endOfLine') {
+						$(el).find("#productListDiv").find("#noItemText").hide();
+						$(el).find("#productListDiv").find("#noItemText").after("<div id='endOfLine' class='emptyListText'>No end of line items at this time - Check back later</div>");
+					}
 					else {
 						$(el).find("#productListDiv").find("#noItemText").show();
 						$(el).find("#productListDiv").find("#onSpecial").remove();
@@ -533,11 +555,14 @@ $(function() {
 						$("#breadcrumb").html(homeLink + sep + "Search");
 					}
 					else if (this.lastListAction == 'specials') {
-						$("#breadcrumb").html(homeLink + sep + "Specials");
+						$("#breadcrumb").html(homeLink + sep + this.listItemsOnSpecialLabel);
 					}
 					else if (this.lastListAction == 'newItems') {
-						$("#breadcrumb").html(homeLink + sep + "New Items");
-					}					
+						$("#breadcrumb").html(homeLink + sep + this.listItemsNewLabel);
+					}
+					else if (this.lastListAction == 'endOfLine') {
+						$("#breadcrumb").html(homeLink + sep + this.listItemsEndOfLineLabel);
+					}
 					else if (this.lastListAction == 'previouslyOrdered') {
 						$("#breadcrumb").html(homeLink + sep + "Previously Ordered");
 					}
@@ -805,13 +830,42 @@ $(function() {
 					labelAttribute : 'value',
 					runAfterPublish : function() {
 						$("#categoriesTree").bind("TreeSelectionChanged", function(event, options) {
-							that.lastListAction = 'tree';
-							that.lastCategory = options['text'];
-							that.lastCategoryParent = options['parentText'];
-							that.lastCategoryId = options['id'];
-							that._updateURLHash();
+							if (options['text'] == that.listItemsOnSpecialLabel) {
+								that.lastListAction = 'specials';
+							}
+							else if (options['text'] == that.listItemsNewLabel) {
+								that.lastListAction = 'newItems';
+							}
+							else if (options['text'] == that.listItemsEndOfLineLabel) {
+								that.lastListAction = 'endOfLine';
+							}
+							else {
+								that.lastListAction = 'tree';
+								that.lastCategory = options['text'];
+								that.lastCategoryParent = options['parentText'];
+								that.lastCategoryId = options['id'];
+								that._updateURLHash();
+							}
 						});
-					}
+					},
+					staticElements : [
+						{
+							label : this.listItemsOnSpecialLabel,
+							method : this.listItemsOnSpecialMethodName,
+							contextObject : this.listItemsOnSpecialMethodContextObject,
+							position : 'beginning'
+						}, {
+							label : this.listItemsNewLabel,
+							method : this.listItemsNewMethodName,
+							contextObject : this.listItemsNewMethodContextObject,
+							position : 'beginning'
+						}, {
+							label : this.listItemsEndOfLineLabel,
+							method : this.listItemsEndOfLineMethodName,
+							contextObject : this.listItemsEndOfLineMethodContextObject,
+							position : 'beginning'
+						}
+					]
 				});
 
 			},
