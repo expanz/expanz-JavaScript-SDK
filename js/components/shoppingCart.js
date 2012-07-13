@@ -544,6 +544,9 @@ $(function() {
 						}
 
 					}
+					else {
+						window.location.hash = "from=" + this.lastListAction;
+					}
 				}
 			},
 
@@ -828,6 +831,7 @@ $(function() {
 				var that = this;
 				$("#categoriesTree").KendoTreeAdapter({
 					labelAttribute : 'value',
+					expandedOnLoad : false,
 					runAfterPublish : function() {
 						$("#categoriesTree").bind("TreeSelectionChanged", function(event, options) {
 							if (options['text'] == that.listItemsOnSpecialLabel) {
@@ -844,8 +848,8 @@ $(function() {
 								that.lastCategory = options['text'];
 								that.lastCategoryParent = options['parentText'];
 								that.lastCategoryId = options['id'];
-								that._updateURLHash();
 							}
+							that._updateURLHash();
 						});
 					},
 					staticElements : [
