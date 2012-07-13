@@ -902,7 +902,6 @@ $(function() {
 
 					/* handle checkboxes click */
 					$(that.el).find("#" + id).click(function() {
-						/* send the delta to the server */
 						// window.expanz.logToConsole(that.model.id + " filtered with " + $(this).val());
 						/* send negative value of id to say it has been unselected */
 						var val = $(this).val();
@@ -911,6 +910,34 @@ $(function() {
 						}
 						/* send the delta to the server */
 						that.model.updateItemSelected(val);
+					});
+
+				});
+			});
+
+		}
+
+	});
+
+	window.expanz.Views.RadioButtonsView = expanz.Views.DataControlView.extend({
+		publishData : function() {
+			/* clean elements */
+			this.el.html();
+			var that = this;
+			/* no external component needed just have to draw the checkboxes and handle the clicks */
+
+			_.each(this.model.getAttr('xml').find('Row'), function(row) {
+				var rowId = $(row).attr('id');
+				var selected = boolValue($(row).attr('selected')) === true ? ' checked="checked" ' : '';
+				_.each($(row).find('Cell'), function(cell) {
+					var text = $(cell).text();
+					var id = that.model.id.replace(/\./g, "_") + "_" + rowId;
+					that.el.append("<div><input " + selected + " id='" + id + "' value='" + rowId + "' name='radio' type='radio'></input><span>" + text + "</span></div>");
+
+					/* handle radio button click */
+					$(that.el).find("#" + id).click(function() {
+						/* send the delta to the server */
+						that.model.updateItemSelected($(this).val());
 					});
 
 				});
@@ -1144,7 +1171,7 @@ $(function() {
 		else {
 			if ($(elem).is('input')) {
 				// special behaviour for checkbox input
-				if ($(elem).is(":checkbox")) {
+				if ($(elem).is(":checkbox") || $(elem).is(":radio") ) {
 					$(elem).addClass('checkbox');
 					var checkedValue = $(elem).attr("checkedValue") ? $(elem).attr("checkedValue") : 1;
 					if (value == checkedValue) {

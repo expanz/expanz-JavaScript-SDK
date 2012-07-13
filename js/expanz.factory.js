@@ -335,6 +335,14 @@ $(function() {
 							model : dataControlModel
 						});
 					}
+					else if ($(dataControlEl).attr('renderingType') == 'radiobuttons') {
+						var view = new expanz.Views.RadioButtonsView({
+							el : $(dataControlEl),
+							id : $(dataControlEl).attr('id'),
+							className : $(dataControlEl).attr('class'),
+							model : dataControlModel
+						});
+					}
 					else {
 						var view = new expanz.Views.DataControlView({
 							el : $(dataControlEl),
