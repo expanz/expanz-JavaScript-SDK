@@ -354,10 +354,11 @@ $(function() {
 				var buttonLabel = searchEl.attr('buttonLabel') !== undefined ? searchEl.attr('buttonLabel') : 'Search';
 				if (buttonLabel.length === 0)
 					buttonLabel = '&nbsp;';
+				var methodName = searchEl.attr('methodName') !== undefined ? searchEl.attr('methodName') : this.searchMethodName;
 				var html = '';
 				html += '<div id="shoppingCartSearch" class="search">';
 				html += window.expanz.html.renderField('ItemSearch', '', inputPrompt, this.searchMethodName, "false");
-				html += window.expanz.html.renderMethod(this.searchMethodName, buttonLabel, this.searchMethodContextObject, !displayButton);
+				html += window.expanz.html.renderMethod(methodName, buttonLabel, this.searchMethodContextObject, !displayButton);
 				html += "</div>";
 				return html;
 			},
@@ -419,7 +420,8 @@ $(function() {
 			renderListOnSpecialItemsButtonComponent : function(el) {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'List ' + this.listItemsOnSpecialLabel;
-				html += window.expanz.html.renderMethod(this.listItemsOnSpecialMethodName, label, this.listItemsOnSpecialMethodContextObject, false);
+				var methodName = (el !== undefined && el.attr('methodName') !== undefined) ? el.attr('methodName') : this.listItemsOnSpecialMethodName;
+				html += window.expanz.html.renderMethod(methodName, label, this.listItemsOnSpecialMethodContextObject, false);
 				return html;
 			},
 
@@ -434,7 +436,8 @@ $(function() {
 			renderListNewItemsButtonComponent : function(el) {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'List ' + this.listItemsNewLabel;
-				html += window.expanz.html.renderMethod(this.listItemsNewMethodName, label, this.listItemsNewMethodContextObject, false);
+				var methodName = (el !== undefined && el.attr('methodName') !== undefined) ? el.attr('methodName') : this.listItemsNewMethodName;
+				html += window.expanz.html.renderMethod(methodName, label, this.listItemsNewMethodContextObject, false);
 				return html;
 			},
 
@@ -449,7 +452,8 @@ $(function() {
 			renderListPreviouslyOrderedButtonComponent : function(el) {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'List Previously Ordered Items';
-				html += window.expanz.html.renderMethod(this.listPreviouslyOrderedMethodName, label, this.listPreviouslyOrderedContextObject);
+				var methodName = (el !== undefined && el.attr('methodName') !== undefined) ? el.attr('methodName') : this.listPreviouslyOrderedMethodName;
+				html += window.expanz.html.renderMethod(methodName, label, this.listPreviouslyOrderedContextObject);
 				return html;
 			},
 
@@ -1167,7 +1171,8 @@ $(function() {
 			renderCheckoutPayNowButtonComponent : function(el) {
 				var html = "";
 				var label = (el !== undefined && el.attr('label') !== undefined) ? el.attr('label') : 'Pay now';
-				html += window.expanz.html.renderMethod("Checkout", label);
+				var methodName = (el !== undefined && el.attr('methodName') !== undefined) ? el.attr('methodName') : 'Checkout';
+				html += window.expanz.html.renderMethod(methodName, label);
 				return html;
 			},
 
