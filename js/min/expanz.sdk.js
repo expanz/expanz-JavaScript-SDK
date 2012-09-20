@@ -14399,7 +14399,12 @@ $(function() {
 					}
 
 					_.each(this.processAreas, function(pA) {
-						el.find("#menuUL").append('<li class="processarea menuitem" id="' + pA.id + '"><a class="menuTitle" href="#">' + pA.title + '</a></li>');
+						var menuItemClass = "";
+						if (pA.title.indexOf("[CR]") != -1) {
+							menuItemClass = "small";
+						}
+						pA.title = pA.title.replace("[CR]", "<br />");
+						el.find("#menuUL").append('<li class="processarea menuitem ' + menuItemClass + '" id="' + pA.id + '"><a class="menuTitle" href="#">' + pA.title + '</a></li>');
 						pA.load(el.find('#' + pA.id + '.processarea.menuitem'), 0, false);
 					});
 					// add html and click handler to DOM
@@ -14500,6 +14505,7 @@ $(function() {
 			this.img = img;
 
 			this.load = function(el, displayAsIcons) {
+				this.title = this.title.replace("[CR]", "<br />");
 				if (displayAsIcons === true) {
 					el.append('<li><div class="icon navContainer"><a class="nav-' + this.name.replace(/\./g, "-") + "-" + this.style.replace(/\./g, "-") + ' navItem" href="' + this.url + '"></a><a class="navText" href="' + this.url + '">' + this.title + '</a></div></li>');
 				}
