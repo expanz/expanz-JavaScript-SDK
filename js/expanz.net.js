@@ -1008,9 +1008,10 @@ $(function() {
 					}
 
 				}); // foreach 'Data'
-				if (callbacks && callbacks.success) {
-					callbacks.success('Activity (' + activity.name + ') has been loaded: ' + execResults);
-				}
+				//if (callbacks && callbacks.success) {
+					window.expanz.logToConsole("Activity ("+activity.name+") has been loaded: "+execResults);
+					//callbacks.success('Activity (' + activity.name + ') has been loaded: ' + execResults);
+				//}
 
 			}
 			else {
@@ -1327,9 +1328,10 @@ $(function() {
 					}
 				});
 
-				if (callbacks && callbacks.success) {
-					callbacks.success('Delta handled: ' + execResults);
-				}
+				//if (callbacks && callbacks.success) {
+					window.expanz.logToConsole('Delta handled: '+execResults);
+					//callbacks.success('Delta handled: ' + execResults);
+				//}
 			}
 
 			activity.setAttr({
