@@ -1,0 +1,122 @@
+// Expanz-SDK
+// Pull the plugin from a Maven Repo
+buildscript {
+    repositories {
+        //mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.eriwen:gradle-css-plugin:1.1.1'
+    }
+}
+
+//buildscript {
+//    configurations.classpath.resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+//}
+
+//repositories {
+//    mavenLocal()
+//    mavenCentral()
+//}
+
+// Invoke the plugin
+apply plugin: 'css'
+
+ext {
+	jsAdaptersSrcDir = "${projectDir}/../source/js/adapters"
+	jsComponentsSrcDir = "${projectDir}/../source/js/components"
+	jsExpanzSrcDir = "${projectDir}/../source/js/expanz"
+	jsVendorSrcDir = "${projectDir}/../source/js/vendor"
+	jsVendorSimpleSrcDir = "${projectDir}/../source/js/vendor/min-simple"
+	jsVendorWhitespaceSrcDir = "${projectDir}/../source/js/vendor/min-whitespace"
+	jsVendorCopySrcDir = "${projectDir}/../source/js/vendor/min-copy"
+	jsTmpVendorSrcDir = "${projectDir}/tmp-vendor"
+	jsDocDir = "${projectDir}/../doc"
+	//env = System.getenv()
+	//jsVersion = "" //${env.BUILD_NUMBER}.
+}
+project.buildDir = '../public/js'
+def jsTmpDocDir = "${buildDir}/tmp"
+def jsVersion = "." + Integer.toHexString(Integer.parseInt(new java.text.SimpleDateFormat('yyDDHHmm').format(new Date())))
+//def jsVersion = ""
+println "Version - {$jsVersion}"
+
+// Declare your sources
+css.source {
+    adapters {
+        js {
+            srcDir jsAdaptersSrcDir
+            include "*.js"
+            exclude "*.all*.js"
+        }
+    }
+    adaptersTarget {
+        js {
+            srcDir "${buildDir}"
+            include "expanz.adapters*.js"
+        }
+    }
+    components {
+        js {
+            srcDir jsComponentsSrcDir
+            include "*.js"
+            exclude "*.all*.js"
+        }
+    }
+    componentsTarget {
+        js {
+            srcDir "${buildDir}"
+            include "expanz.components*.js"
+        }
+    }
+    //expanz {
+    //    js {
+    //        srcDir jsExpanzSrcDir
+    //        include "*.js"
+    //        exclude "expanz.js"
+    //    }
+    //}
+    //expanz {
+    //    js {
+    //        srcDir jsExpanzSrcDir
+    //        include "*.js"
+    //        exclude "expanz.js"
+    //    }
+    //}
+    expanzTarget {
+        js {
+            srcDir "${buildDir}"
+            include "expanz*.js"
+        }
+    }
+    vendorsimple {
+        js {
+            srcDir jsVendorSimpleSrcDir
+            include "*.js"
+        }
+    }
+    vendorwhitespace {
+        js {
+            srcDir jsVendorWhitespaceSrcDir
+            include "*.js"
+        }
+    }
+    vendorcopy {
+        js {
+            srcDir jsVendorCopySrcDir
+            include "*.js"
+        }
+    }
+    vendor {
+        js {
+            srcDir jsTmpVendorSrcDir
+            include "*.min.js"
+        }
+    }
+    vendorTarget {
+        js {
+            srcDir "${buildDir}"
+            include "vendor*.js"
+        }
+    }
+}
