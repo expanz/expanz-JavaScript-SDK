@@ -1,69 +1,399 @@
+// Expanz-SDK
 // Pull the plugin from a Maven Repo
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.eriwen:gradle-js-plugin:0.3'
+        classpath 'com.eriwen:gradle-js-plugin:1.1'
     }
 }
+
+buildscript {
+    configurations.classpath.resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
 // Invoke the plugin
 apply plugin: 'js'
 
-jsDir = "../expanz-JavaScript-SDK/js/"
-env = System.getenv()
-jsVersion = "" //${env.BUILD_NUMBER}.
+ext {
+	jsAdaptersSrcDir = "${projectDir}/../source/js/adapters"
+	jsComponentsSrcDir = "${projectDir}/../source/js/components"
+	jsExpanzSrcDir = "${projectDir}/../source/js/expanz"
+	jsVendorSrcDir = "${projectDir}/../source/js/vendor"
+	jsVendorSimpleSrcDir = "${projectDir}/../source/js/vendor/min-simple"
+	jsVendorWhitespaceSrcDir = "${projectDir}/../source/js/vendor/min-whitespace"
+	jsVendorCopySrcDir = "${projectDir}/../source/js/vendor/min-copy"
+	jsTmpVendorSrcDir = "${projectDir}/tmp-vendor"
+	jsDocDir = "${projectDir}/../doc"
+	//env = System.getenv()
+	//jsVersion = "" //${env.BUILD_NUMBER}.
+}
+project.buildDir = '../public/js'
+def jsTmpDocDir = "${buildDir}/tmp"
+def jsVersion = "." + Integer.toHexString(Integer.parseInt(new java.text.SimpleDateFormat('yyDDHHmm').format(new Date())))
+//def jsVersion = ""
+println "Version - {$jsVersion}"
 
-// Specify a collection of files to be combined, then minified and finally GZip compressed.
-combineJs  {
-	dependsOn << 'clean'
-    file1 = fileTree(dir: "${jsDir}", includes: ['jquery-1.7.1.js'])
-	file2 = fileTree(dir: "${jsDir}", includes: ['jquery.cookies.2.2.0.js'])
-	file3 = fileTree(dir: "${jsDir}", includes: ['jquery-ui-1.8.16.custom.min.js'])
-	file4 = fileTree(dir: "${jsDir}", includes: ['jquery.i18n.properties-min-1.0.9.js'])
-	file5 = fileTree(dir: "${jsDir}", includes: ['json2.js'])
-	file6 = fileTree(dir: "${jsDir}", includes: ['modernizr-2.0.6.js'])
-	file7 = fileTree(dir: "${jsDir}", includes: ['underscore-min.js'])
-	file8 = fileTree(dir: "${jsDir}", includes: ['backbone-min.js'])
-	file9 = fileTree(dir: "${jsDir}", includes: ['expanz.util.js'])
-	file10 = fileTree(dir: "${jsDir}", includes: ['expanz.factory.js'])
-	file11 = fileTree(dir: "${jsDir}", includes: ['expanz.model.js'])
-	file12 = fileTree(dir: "${jsDir}", includes: ['expanz.net.js'])
-	file13 = fileTree(dir: "${jsDir}", includes: ['expanz.storage.js'])
-	file14 = fileTree(dir: "${jsDir}", includes: ['expanz.model.data.js'])
-	file15 = fileTree(dir: "${jsDir}", includes: ['expanz.view.js'])
-	file16 = fileTree(dir: "${jsDir}", includes: ['expanz.js'])
-
-    inputs.files file1 + file2 + file3 + file4 + file5 + file6 + file7 + file8 + file9 + file10 + file11 + file12 + file13 + file14 + file15 + file16
-    outputs.file file("${jsDir}/min/expanz.sdk.${jsVersion}js")
+// Declare your sources
+javascript.source {
+    adapters {
+        js {
+            srcDir jsAdaptersSrcDir
+            include "*.js"
+            exclude "*.all*.js"
+        }
+    }
+    adaptersTarget {
+        js {
+            srcDir "${buildDir}"
+            include "expanz.adapters*.js"
+        }
+    }
+    components {
+        js {
+            srcDir jsComponentsSrcDir
+            include "*.js"
+            exclude "*.all*.js"
+        }
+    }
+    componentsTarget {
+        js {
+            srcDir "${buildDir}"
+            include "expanz.components*.js"
+        }
+    }
+    //expanz {
+    //    js {
+    //        srcDir jsExpanzSrcDir
+    //        include "*.js"
+    //        exclude "expanz.js"
+    //    }
+    //}
+    //expanz {
+    //    js {
+    //        srcDir jsExpanzSrcDir
+    //        include "*.js"
+    //        exclude "expanz.js"
+    //    }
+    //}
+    expanzTarget {
+        js {
+            srcDir "${buildDir}"
+            include "expanz*.js"
+        }
+    }
+    vendorsimple {
+        js {
+            srcDir jsVendorSimpleSrcDir
+            include "*.js"
+        }
+    }
+    vendorwhitespace {
+        js {
+            srcDir jsVendorWhitespaceSrcDir
+            include "*.js"
+        }
+    }
+    vendorcopy {
+        js {
+            srcDir jsVendorCopySrcDir
+            include "*.js"
+        }
+    }
+    vendor {
+        js {
+            srcDir jsTmpVendorSrcDir
+            include "*.min.js"
+        }
+    }
+    vendorTarget {
+        js {
+            srcDir "${buildDir}"
+            include "vendor*.js"
+        }
+    }
 }
 
-// Specify a collection of files to be combined, then minified and finally GZip compressed.
-minifyJs  {
-	dependsOn << 'combineJs'
-    file1 = fileTree(dir: "${jsDir}/min/", includes: ["expanz.sdk.${jsVersion}js"])
-    inputs.files file1 
-    outputs.file file("${jsDir}/min/expanz.sdk.${jsVersion}min.js")
+//task clean(type: Delete) {
+//	println 'Cleaning files'
+//   delete buildDir
+//}
+
+task cleanTmpDocAdapters(type: Delete) {
+//	println 'Cleaning files'
+   delete jsTmpDocDir
+}
+task cleanTmpDocComponents(type: Delete) {
+//	println 'Cleaning files'
+   delete jsTmpDocDir
+}
+task cleanTmpDocExpanz(type: Delete) {
+//	println 'Cleaning files'
+   delete jsTmpDocDir
 }
 
-// Specify a collection of files to be combined, then minified and finally GZip compressed.
-gzipJs  {
-	dependsOn << 'minifyJs'
-    file1 = fileTree(dir: "${jsDir}/min/", includes: ["expanz.sdk.${jsVersion}min.js"])
-    inputs.files file1 
-    outputs.file file("${jsDir}/min/expanz.sdk.${jsVersion}min.gzip.js")
+// Combine JS files - Not normally run directly 
+// TODO Currently removes all files in the build directory
+task cleanadapters (type: Delete) {
+	//println 'Cleaning adapter files'
+	javascript.source.adaptersTarget.js.files.eachWithIndex { jsFile, idx ->
+	   //println "Delete ${jsFile.name}"
+	   //delete jsFile
+	}
+	delete files(javascript.source.adaptersTarget.js.files)
+}
+task combineadaptersjs(dependsOn: cleanadapters, type: com.eriwen.gradle.js.tasks.CombineJsTask) {
+	//println "Combining Adaptors ${jsVersion}"
+    source = javascript.source.adapters.js.files
+    dest = "${buildDir}/expanz.adapters.all${jsVersion}.js"
+	//println "Build ${jsAdaptersSrcDir}"
+//javascript.source.adapters.js.files.eachWithIndex { jsFile, idx ->
+  // println "${buildDir}/${jsFile.name}"
+//}
+}
+task minifyadaptersjs(type: com.eriwen.gradle.js.tasks.MinifyJsTask) {
+	//println "Minifying Adaptors ${jsVersion}"
+    source = combineadaptersjs
+    dest = file("${buildDir}/expanz.adapters.all${jsVersion}.min.js")
+    closure {
+        warningLevel = 'VERBOSE'
+        compilationLevel = 'WHITESPACE_ONLY'//'SIMPLE_OPTIMIZATIONS'
+    }
+}
+task gzipadaptersjs(type: com.eriwen.gradle.js.tasks.GzipJsTask) {
+	//println "Compressing Adaptors ${jsVersion}"
+    source = minifyadaptersjs
+    dest = file("${buildDir}/expanz.adapters.all${jsVersion}.min.gzip.js")
+}
+task jshintadaptersjs(type: com.eriwen.gradle.js.tasks.JsHintTask) {
+    source = "${buildDir}/expanz.adapters.all${jsVersion}.js"
+    dest = file("${projectDir}/jshint-adapters.out")
+}
+task jsdocadaptersjs(type: com.eriwen.gradle.js.tasks.JsDocTask) {
+    source = javascript.source.adapters.js.files
+    destinationDir = file("${jsDocDir}/adapters")
 }
 
-task clean {
-	println 'Cleaning files'
+task cleancomponents {
+	//println 'Cleaning component files'
+	delete files(javascript.source.componentsTarget.js.files)
+}
+task combinecomponentsjs(dependsOn: cleancomponents, type: com.eriwen.gradle.js.tasks.CombineJsTask) {
+	//println "Combining Components ${jsVersion}"
+    source = javascript.source.components.js.files
+    dest = "${buildDir}/expanz.components.all${jsVersion}.js"
+}
+task minifycomponentsjs(type: com.eriwen.gradle.js.tasks.MinifyJsTask) {
+	//println "Minifying Components ${jsVersion}"
+    source = combinecomponentsjs
+    dest = file("${buildDir}/expanz.components.all${jsVersion}.min.js")
+    closure {
+        warningLevel = 'VERBOSE'
+        compilationLevel = 'WHITESPACE_ONLY'//'SIMPLE_OPTIMIZATIONS'
+    }
+}
+task gzipcomponentsjs(type: com.eriwen.gradle.js.tasks.GzipJsTask) {
+	//println "Compressing Components ${jsVersion}"
+    source = minifycomponentsjs
+    dest = file("${buildDir}/expanz.components.all${jsVersion}.min.gzip.js")
+}
+task jshintcomponentsjs(type: com.eriwen.gradle.js.tasks.JsHintTask) {
+    source = "${buildDir}/expanz.components.all${jsVersion}.js"
+    dest = file("${projectDir}/jshint-components.out")
+}
+task jsdoccomponentsjs(type: com.eriwen.gradle.js.tasks.JsDocTask) {
+    source = javascript.source.components.js.files
+    destinationDir = file("${jsDocDir}/components")
+}
+
+task cleanexpanz {
+	//println 'Cleaning expanz files'
+	delete files(javascript.source.expanzTarget.js.files)
+}
+task combineexpanzjs(dependsOn: cleanexpanz, type: com.eriwen.gradle.js.tasks.CombineJsTask) {
+	//println "Combining Expanz SDK ${jsVersion}"
+    source = files("${jsExpanzSrcDir}/expanz.collection.js", "${jsExpanzSrcDir}/expanz.component.js", "${jsExpanzSrcDir}/expanz.factory.js", "${jsExpanzSrcDir}/expanz.html.js", "${jsExpanzSrcDir}/expanz.model.js", "${jsExpanzSrcDir}/expanz.model.data.js", "${jsExpanzSrcDir}/expanz.net.js", "${jsExpanzSrcDir}/expanz.storage.js", "${jsExpanzSrcDir}/expanz.util.js", "${jsExpanzSrcDir}/expanz.view.js", "${jsExpanzSrcDir}/expanz.js")
+    dest = "${buildDir}/expanz.sdk${jsVersion}.js"
+}
+task minifyexpanzjs(type: com.eriwen.gradle.js.tasks.MinifyJsTask) {
+	//println "Minifying Expanz SDK ${jsVersion}"
+    source = combineexpanzjs
+    dest = file("${buildDir}/expanz.sdk${jsVersion}.min.js")
+    closure {
+        warningLevel = 'VERBOSE'
+        compilationLevel = 'WHITESPACE_ONLY'//'SIMPLE_OPTIMIZATIONS'
+		//externs = files("${jsVendorSrcDir}/min-whitespace/backbone-min.js")
+    }
+}
+task gzipexpanzjs(type: com.eriwen.gradle.js.tasks.GzipJsTask) {
+	//println "Compressing Expanz SDK ${jsVersion}"
+    source = minifyexpanzjs
+    dest = file("${buildDir}/expanz.sdk${jsVersion}.min.gzip.js")
+}
+task jshintexpanzjs(type: com.eriwen.gradle.js.tasks.JsHintTask) {
+    source = "${buildDir}/expanz.sdk${jsVersion}.js"
+    dest = file("${projectDir}/jshint-expanz.out")
+}
+task jsdocexpanzjs(type: com.eriwen.gradle.js.tasks.JsDocTask) {
+    source = files("${jsExpanzSrcDir}/expanz.collection.js", "${jsExpanzSrcDir}/expanz.component.js", "${jsExpanzSrcDir}/expanz.factory.js", "${jsExpanzSrcDir}/expanz.html.js", "${jsExpanzSrcDir}/expanz.model.js", "${jsExpanzSrcDir}/expanz.model.data.js", "${jsExpanzSrcDir}/expanz.net.js", "${jsExpanzSrcDir}/expanz.storage.js", "${jsExpanzSrcDir}/expanz.util.js", "${jsExpanzSrcDir}/expanz.view.js", "${jsExpanzSrcDir}/expanz.js")
+    destinationDir = file("${jsDocDir}/expanz")
+}
+
+task cleantmpvendor {
+	//println 'Cleaning vendor temporary files'
 	doLast {
-		ant.delete(dir: "${jsDir}/min/")
+		ant.delete(dir: "${jsTmpVendorSrcDir}")
+		ant.mkdir(dir: "${jsTmpVendorSrcDir}")
 	}
 }
 
-task minify (dependsOn: ['gzipJs'] ){ 
-	println "Starting minifying version ${env.BUILD_NUMBER}"
+task combinevendorsimplejs(dependsOn: cleantmpvendor, type: com.eriwen.gradle.js.tasks.CombineJsTask) {
+	//println "Combining Vendors Simple ${jsVersion}"
+    source = javascript.source.vendorsimple.js.files
+    dest = "${jsTmpVendorSrcDir}/vendor.simple.all.${jsVersion}.js"
 }
+task minifyvendorsimplejs(type: com.eriwen.gradle.js.tasks.MinifyJsTask) {
+	//println "Minifying Vendors Simple ${jsVersion}"
+    source = combinevendorsimplejs
+    dest = file("${jsTmpVendorSrcDir}/vendor.simple.all.${jsVersion}.min.js")
+    closure {
+        warningLevel = 'VERBOSE'
+        compilationLevel = 'WHITESPACE_ONLY'//'SIMPLE_OPTIMIZATIONS'
+    }
+}
+
+task combinevendorwhitespacejs(dependsOn: cleantmpvendor, type: com.eriwen.gradle.js.tasks.CombineJsTask) {
+	//println "Combining Vendors Whitespace ${jsVersion}"
+    source = javascript.source.vendorwhitespace.js.files
+    dest = "${jsTmpVendorSrcDir}/vendor.whitespace.all${jsVersion}.js"
+}
+task minifyvendorwhitespacejs(type: com.eriwen.gradle.js.tasks.MinifyJsTask) {
+	//println "Minifying Vendors Whitespace ${jsVersion}"
+    source = combinevendorwhitespacejs
+    dest = file("${jsTmpVendorSrcDir}/vendor.whitespace.all${jsVersion}.min.js")
+    closure {
+        warningLevel = 'VERBOSE'
+        compilationLevel = 'WHITESPACE_ONLY'//'SIMPLE_OPTIMIZATIONS'
+    }
+}
+
+task cleanvendors {
+	//println 'Cleaning vendor files'
+	delete files(javascript.source.vendorTarget.js.files)
+}
+//task combinevendorjs(dependsOn: [tasks.matching { Task task -> task.name.startsWith("minifyvendor")}], type: com.eriwen.gradle.js.tasks.CombineJsTask) {
+task combinevendorjs(dependsOn: cleanvendors, type: com.eriwen.gradle.js.tasks.CombineJsTask) {
+	//println "Combining Vendors ${jsVersion}"
+    //source = javascript.source.vendor.js.files
+    source = files(minifyvendorsimplejs, minifyvendorwhitespacejs)
+    dest = file("${buildDir}/vendor.all${jsVersion}.min.js")
+	//println "combinevendorjs ${jsTmpVendorSrcDir}"
+	//println "${buildDir}/vendor.all${jsVersion}.min.js"
+}
+task gzipvendorjs(type: com.eriwen.gradle.js.tasks.GzipJsTask) {
+	//println "Compressing Vendors ${jsVersion}"
+    source = combinevendorjs
+    dest = file("${buildDir}/vendor.all${jsVersion}.min.gzip.js")
+	//println "gzipvendorjs ${jsTmpVendorSrcDir}"
+	//println "${buildDir}/vendor.all${jsVersion}.min.gzip.js"
+}
+task copyvendorjs(type:Copy) {
+	from javascript.source.vendorcopy.js.files
+	into buildDir
+}
+
+// These are the tasks normally run from the command line
+task adapters (dependsOn: [gzipadaptersjs, jshintadaptersjs, jsdocadaptersjs, cleanTmpDocAdapters]) {
+	//println 'Building all expanz adapter files'
+}
+task components (dependsOn: [gzipcomponentsjs, jshintcomponentsjs, jsdoccomponentsjs, cleanTmpDocComponents]) {
+	//println 'Building all expanz component files'
+}
+task sdk (dependsOn: [gzipexpanzjs, jshintexpanzjs, jsdocexpanzjs, cleanTmpDocExpanz]) {
+	//println 'Building all expanz sdk files'
+}
+task expanz (dependsOn: [adapters, components, sdk]) {
+	//println 'Building all expanz files'
+}
+task vendor (dependsOn: [gzipvendorjs, copyvendorjs]) {
+	//println 'Building all vendor files'
+}
+task all (dependsOn: [expanz, vendor]) {
+	//println 'Building all files'
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Specify a collection of files to be combined, then minified and finally GZip compressed.
+//combineJs  {
+//	dependsOn << 'clean'
+//    file1 = fileTree(dir: "${jsDir}", includes: ['jquery-1.7.1.js'])
+//	file2 = fileTree(dir: "${jsDir}", includes: ['jquery.cookies.2.2.0.js'])
+//	file3 = fileTree(dir: "${jsDir}", includes: ['jquery-ui-1.8.16.custom.min.js'])
+//	file4 = fileTree(dir: "${jsDir}", includes: ['jquery.i18n.properties-min-1.0.9.js'])
+//	file5 = fileTree(dir: "${jsDir}", includes: ['json2.js'])
+//	file6 = fileTree(dir: "${jsDir}", includes: ['modernizr-2.0.6.js'])
+//	file7 = fileTree(dir: "${jsDir}", includes: ['underscore-min.js'])
+//	file8 = fileTree(dir: "${jsDir}", includes: ['backbone-min.js'])
+//	file9 = fileTree(dir: "${jsDir}", includes: ['expanz.util.js'])
+//	file10 = fileTree(dir: "${jsDir}", includes: ['expanz.factory.js'])
+//	file11 = fileTree(dir: "${jsDir}", includes: ['expanz.html.js'])
+//	file10 = fileTree(dir: "${jsDir}", includes: ['expanz.collection.js'])
+//	file11 = fileTree(dir: "${jsDir}", includes: ['expanz.model.js'])
+//	file12 = fileTree(dir: "${jsDir}", includes: ['expanz.net.js'])
+//	file13 = fileTree(dir: "${jsDir}", includes: ['expanz.storage.js'])
+//	file14 = fileTree(dir: "${jsDir}", includes: ['expanz.model.data.js'])
+//	file15 = fileTree(dir: "${jsDir}", includes: ['expanz.view.js'])
+//	file16 = fileTree(dir: "${jsDir}", includes: ['expanz.js'])
+
+//    inputs.files file1 + file2 + file3 + file4 + file5 + file6 + file7 + file8 + file9 + file10 + file11 + file12 + file13 + file14 + file15 + file16
+//    outputs.file file("${jsDir}/min/expanz.sdk.${jsVersion}js")
+//}
+
+// Specify a collection of files to be combined, then minified and finally GZip compressed.
+//minifyJs  {
+//	dependsOn << 'combineJs'
+//    file1 = fileTree(dir: "${jsDir}/min/", includes: ["expanz.sdk.${jsVersion}js"])
+//    inputs.files file1 
+//    outputs.file file("${jsDir}/min/expanz.sdk.${jsVersion}min.js")
+//}
+
+// Specify a collection of files to be combined, then minified and finally GZip compressed.
+//gzipJs  {
+//	dependsOn << 'minifyJs'
+//    file1 = fileTree(dir: "${jsDir}/min/", includes: ["expanz.sdk.${jsVersion}min.js"])
+//    inputs.files file1 
+//    outputs.file file("${jsDir}/min/expanz.sdk.${jsVersion}min.gzip.js")
+//}
+
+//task clean {
+//	println 'Cleaning files'
+//	doLast {
+//		ant.delete(dir: "${jsDir}/min/")
+//	}
+//}
+
+//task minify (dependsOn: ['gzipJs'] ){ 
+//	println "Starting minifying version ${env.BUILD_NUMBER}"
+//}
 
 
 
