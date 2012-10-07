@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{38ECBCFD-0A08-46D6-8F34-967DCA110D6E}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HTMLSDK</RootNamespace>
+    <AssemblyName>HTMLSDK</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="css\ui-lightness\jquery-ui-1.8.16.custom.css" />
+    <Content Include="js\.gitignore" />
+    <Content Include="js\adapters\.gitignore" />
+    <Content Include="js\adapters\KendoAdapter.js" />
+    <Content Include="js\adapters\KendoComboBoxAdapter.js" />
+    <Content Include="js\adapters\KendoDropDownListAdapter.js" />
+    <Content Include="js\adapters\KendoMobileListAdapter.js" />
+    <Content Include="js\adapters\KendoPanelBarAdapter.js" />
+    <Content Include="js\adapters\KendoPopupMessage.js" />
+    <Content Include="js\adapters\KendoTabStripAdapter.js" />
+    <Content Include="js\adapters\KendoTreeAdapter.js" />
+    <Content Include="js\adapters\min\.gitignore" />
+    <Content Include="js\adapters\min\expanz.kendo.adapters.all.js" />
+    <Content Include="js\adapters\min\expanz.kendo.adapters.all.js.min.js" />
+    <Content Include="js\adapters\min\expanz.kendo.adapters.all.js.ycomp.js" />
+    <Content Include="js\adapters\min\expanz.kendo.adapters.all.min.js" />
+    <Content Include="js\adapters\min\expanz.kendo.adapters.all.ycomp.js" />
+    <Content Include="js\backbone-min-0.9.2.js" />
+    <Content Include="js\backbone-min.js" />
+    <Content Include="js\components\.gitignore" />
+    <Content Include="js\components\shoppingCart.js" />
+    <Content Include="js\expanz.factory.js" />
+    <Content Include="js\expanz.js" />
+    <Content Include="js\expanz.model.data.js" />
+    <Content Include="js\expanz.model.js" />
+    <Content Include="js\expanz.net.js" />
+    <Content Include="js\expanz.storage.js" />
+    <Content Include="js\expanz.util.js" />
+    <Content Include="js\expanz.view.js" />
+    <Content Include="js\jquery-1.7.1.js" />
+    <Content Include="js\jquery-1.7.1.min.js" />
+    <Content Include="js\jquery-ui-1.8.16.custom.min.js" />
+    <Content Include="js\jquery.cookies.2.2.0.js" />
+    <Content Include="js\jquery.i18n.properties-min-1.0.9.js" />
+    <Content Include="js\json2.js" />
+    <Content Include="js\min\.gitignore" />
+    <Content Include="js\min\expanz.sdk.js" />
+    <Content Include="js\min\expanz.sdk.js.min.js" />
+    <Content Include="js\min\expanz.sdk.js.ycomp.js" />
+    <Content Include="js\min\expanz.sdk.min.js" />
+    <Content Include="js\min\expanz.sdk.ycomp.js" />
+    <Content Include="js\modernizr-2.0.6.js" />
+    <Content Include="js\underscore-min.1.2.2.js" />
+    <Content Include="js\underscore-min.js" />
+    <Content Include="public\css\ui-lightness\jquery-ui-1.8.16.custom.css" />
+    <Content Include="public\js\backbone-min.js" />
+    <Content Include="public\js\expanz.adapters.all.751cc43.js" />
+    <Content Include="public\js\expanz.adapters.all.751cc43.min.gzip.js" />
+    <Content Include="public\js\expanz.adapters.all.751cc43.min.js" />
+    <Content Include="public\js\expanz.components.all.751cc43.js" />
+    <Content Include="public\js\expanz.components.all.751cc43.min.gzip.js" />
+    <Content Include="public\js\expanz.components.all.751cc43.min.js" />
+    <Content Include="public\js\expanz.sdk.751cc43.js" />
+    <Content Include="public\js\expanz.sdk.751cc43.min.gzip.js" />
+    <Content Include="public\js\expanz.sdk.751cc43.min.js" />
+    <Content Include="public\js\tmp\js\jshint-rhino.js" />
+    <Content Include="public\js\vendor.all.751cc43.min.gzip.js" />
+    <Content Include="public\js\vendor.all.751cc43.min.js" />
+    <Content Include="source\js\adapters\.gitignore" />
+    <Content Include="source\js\adapters\KendoAdapter.js" />
+    <Content Include="source\js\adapters\KendoComboBoxAdapter.js" />
+    <Content Include="source\js\adapters\KendoDropDownListAdapter.js" />
+    <Content Include="source\js\adapters\KendoMobileListAdapter.js" />
+    <Content Include="source\js\adapters\KendoPanelBarAdapter.js" />
+    <Content Include="source\js\adapters\KendoPopupMessage.js" />
+    <Content Include="source\js\adapters\KendoTabStripAdapter.js" />
+    <Content Include="source\js\adapters\KendoTreeAdapter.js" />
+    <Content Include="source\js\adapters\min\.gitignore" />
+    <Content Include="source\js\adapters\min\expanz.kendo.adapters.all.min.js" />
+    <Content Include="source\js\adapters\min\expanz.kendo.adapters.all.ycomp.js" />
+    <Content Include="source\js\components\.gitignore" />
+    <Content Include="source\js\components\core.js" />
+    <Content Include="source\js\components\shoppingCart.js" />
+    <Content Include="source\js\expanz\expanz.collection.js" />
+    <Content Include="source\js\expanz\expanz.component.js" />
+    <Content Include="source\js\expanz\expanz.factory.js" />
+    <Content Include="source\js\expanz\expanz.html.js" />
+    <Content Include="source\js\expanz\expanz.js" />
+    <Content Include="source\js\expanz\expanz.model.data.js" />
+    <Content Include="source\js\expanz\expanz.model.js" />
+    <Content Include="source\js\expanz\expanz.net.js" />
+    <Content Include="source\js\expanz\expanz.storage.js" />
+    <Content Include="source\js\expanz\expanz.util.js" />
+    <Content Include="source\js\expanz\expanz.view.js" />
+    <Content Include="source\js\vendor\archive\backbone\backbone-min-0.9.2.js" />
+    <Content Include="source\js\vendor\archive\jquery\jquery-1.7.1.js" />
+    <Content Include="source\js\vendor\archive\jquery\jquery-1.7.1.min.js" />
+    <Content Include="source\js\vendor\archive\json2.js" />
+    <Content Include="source\js\vendor\archive\modernizr-2.0.6.js" />
+    <Content Include="source\js\vendor\archive\underscore\underscore-min.1.2.2.js" />
+    <Content Include="source\js\vendor\archive\underscore\underscore-min.js" />
+    <Content Include="source\js\vendor\min-copy\backbone-min.js" />
+    <Content Include="source\js\vendor\min-simple\jquery.cookies.2.2.0.js" />
+    <Content Include="source\js\vendor\min-whitespace\jquery-ui-1.8.16.custom.min.js" />
+    <Content Include="source\js\vendor\min-whitespace\jquery.i18n.properties-min-1.0.9.js" />
+    <Content Include="Web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include=".project" />
+    <Content Include="expanz_jscompressor.rb" />
+    <Content Include="README" />
+    <Content Include=".settings\org.eclipse.ltk.core.refactoring.prefs" />
+    <Content Include=".settings\org.eclipse.wst.xsl.core.prefs" />
+    <Content Include="build\build.gradle" />
+    <Content Include="build\build.kendo.gradle" />
+    <Content Include="build\build.shoppingCart.gradle" />
+    <None Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>17625</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:17605/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
