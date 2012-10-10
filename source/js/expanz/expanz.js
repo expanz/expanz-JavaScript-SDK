@@ -401,7 +401,7 @@ $(function() {
 			}
 			/* case 'navigate' or default */
 			else {
-				window.location = activityMetadata.url + "?random=" + new Date().getTime() + "&" + id + style + "initialKey=" + key;
+				window.location = activityMetadata.url + "&random=" + new Date().getTime() + "&" + id + style + "initialKey=" + key;
 			}
 
 		};
