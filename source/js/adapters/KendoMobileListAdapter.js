@@ -36,19 +36,34 @@ $.fn.KendoMobileListAdapter = function(options) {
 	var publishData = function(event, xml, view) {
 		window.expanz.logToConsole("KendoMobileListAdapter publishData");
 		var xmlData = xml;
-		var data = new Array();
-
+		var dataRows = new Array();
+		var columns = null;
+		var template = null;
 		var childTag = '';
 
 		/* if xml contains rows tag, this is where starts the real data for the tree */
 		if ($(xml).find("Rows").length > 0) {
+		    columns = $(xml).find("Columns");
 			xml = $(xml).find("Rows");
 		}
-
+	    //create a template from the columns
+		if (columns != null) {
+		    template = "<script type='text/template' id='${name}'><tr class='item listDisplay'";
+		    var counter = 0;
+		    _.each($(columns).children(), function (columnXml) {
+		        counter++;
+		        if ($(columnXml).attr("width") > 0) {
+		            template += "<td><%=data[" + counter + "]%></td>";
+		        }
+		    });
+		    template += "</tr></script>";
+		    $('body').append(template);
+		}
+        //turn xml rows into js array
 		_.each($(xml).children(), function(parentXml) {
 			var items = new Array();
 			_.each($(parentXml).children(), function(childXml) {
-				data.push({
+				dataRows.push({
 					name : $(childXml).attr(labelAttribute),
 					category : $(parentXml).attr(labelAttribute),
 					id : $(childXml).attr(idAttribute)
@@ -59,7 +74,7 @@ $.fn.KendoMobileListAdapter = function(options) {
 
 		listView.kendoMobileListView({
 			dataSource : kendo.data.DataSource.create({
-				data : data,
+				data : dataRows,
 				group : "category"
 			}),
 			 template: "${name}",
