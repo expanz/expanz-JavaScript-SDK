@@ -1,153 +1,153 @@
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:769:27)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:769:27)
 > html += '\
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:770:85)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:770:85)
 > <script type="text/template" id="productListItemTemplateGrid"> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:771:51)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:771:51)
 > <div class="productNDetail"> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:772:48)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:772:48)
 > <div class="product"> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:773:88)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:773:88)
 > <% if ( isImageValid(data.ThumbImage_FileContents) ){ %>  \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:774:82)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:774:82)
 > <div class="productIcon left productThumbnail"> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:775:268)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:775:268)
 > <a title="<%= data.Name %>" href="' + window.config._URLblobs + '<%= data.Image_FileContents %>' + '" class="productImage"><img class="thumbnail" src="' + window.config._URLblobs + '<%= data.ThumbImage_FileContents %>' + '"/></a> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:776:41)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:776:41)
 > </div> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:777:39)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:777:39)
 > <% } %>  \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:778:89)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:778:89)
 > <% if ( !isImageValid(data.ThumbImage_FileContents) ){ %>  \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:779:100)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:779:100)
 > <div class="productIcon left productThumbnail noThumbnail"></div> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:780:38)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:780:38)
 > <% } %> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:781:62)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:781:62)
 > <div class="productTitle left"> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:782:62)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:782:62)
 > <p class="productTitleTxt"> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:783:70)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:783:70)
 > <% if ( data.ShortDescription ){ %> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:784:186)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:784:186)
 > <a href="javascript:void(0);" onclick="javascript:$(this).closest(\'.productNDetail\').children(\'.productdetails\').toggle()"><%= data.Name %></a> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:785:48)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:785:48)
 > <% } else { %>\
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:786:55)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:786:55)
 > <%= data.Name %> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:787:42)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:787:42)
 > <% } %> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:788:39)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:788:39)
 > </p> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:789:139)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:789:139)
 > <p class="productoffer"><%= window.expanz.html.getDisplayableDiscount(data.UdefString1,",&nbsp;") %></p> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:790:37)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:790:37)
 > </div> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:791:62)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:791:62)
 > <div class="productPrice left"> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:792:97)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:792:97)
 > <p class="productPriceText">$<%= data.DefaultSellPrice %></p>  \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:793:68)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:793:68)
 > <p class="productCurrency">ea</p> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:794:37)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:794:37)
 > </div> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:795:94)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:795:94)
 > <% if ( !window.expanz.html.isEmpty(data.Available_From)) { %>  \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:796:105)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:796:105)
 > <p class="availableFrom">Available from <%= data.Available_From %></p> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:797:44)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:797:44)
 > <% } else {%> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:798:93)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:798:93)
 > <% if ( data.SellRateCalcNotes == "No stock available" ) { %>  \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:799:70)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:799:70)
 > <p class="noStock">No stock</p> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:800:44)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:800:44)
 > <% } else { %>\
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:801:66)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:801:66)
 > <div class="productCount left"> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:802:129)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:802:129)
 > <input class="gridUserInput" type="text" format="numeric"  id="userinput_quantity"></input>\
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:803:41)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:803:41)
 > </div> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:804:68)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:804:68)
 > <div class="left addProductMain"> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:805:95)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:805:95)
 > <a class="addProduct" methodName="saveItemFromCart"></a> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:806:41)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:806:41)
 > </div> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:807:39)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:807:39)
 > <% } }%> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:808:56)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:808:56)
 > <div class="clear"></div> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:809:37)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:809:37)
 > </div> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:810:117)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:810:117)
 > <div class="productdetails" style="display:none"><p><%= data.ShortDescription %></p></div> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:811:33)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:811:33)
 > </div> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:812:31)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:812:31)
 > </script>\
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:818:31)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:818:31)
 > var html = ' \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:819:90)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:819:90)
 > <script type="text/template" id="productListItemTemplateListHeader">\
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:820:112)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:820:112)
 > <thead><tr class="item listDisplay" style="height:25px;font-size:16px;text-align:center"> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:821:71)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:821:71)
 > <th class="cell" style="width:65px;">&nbsp;</th> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:822:49)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:822:49)
 > <th class="cell">Name</th> \
 
-Bad escapement of EOL. Use option multistr if needed. (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:823:70)
+Bad escapement of EOL. Use option multistr if needed. (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:823:70)
 > <th class="cell" style="width:60px;">Price</th> \
 
-Too many errors. (56% scanned). (E:\git\sdk\expanz-JavaScript-SDK\public\js\expanz.components.all.7521bb0.js:823:70)
+Too many errors. (56% scanned). (F:\workspace-git\Expanz-JavaScript-SDK\public\js\expanz.components.all.7537d94.js:823:70)
 > 
 

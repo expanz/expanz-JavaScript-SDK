@@ -689,8 +689,9 @@ $(function() {
 			}
 			else {
 				if (callbacks && callbacks.error) {
-					callbacks.error("Error: Server did not provide a sessionhandle. We are unable to log you in at this time.");
+					callbacks.error("Server session error. We are unable to log you in at this time.");
 				}
+				window.expanz.logToConsole("Error: Server did not provide a sessionhandle. Unable to login. " + xml);
 				return;
 			}
 
@@ -704,6 +705,7 @@ $(function() {
 					if (callbacks && callbacks.error) {
 						callbacks.error(errorString);
 					}
+					window.expanz.logToConsole(errorString + " " + xml);
 					return;
 				}
 			}
@@ -833,10 +835,13 @@ $(function() {
 							callbacks.error($(this).text());
 						}
 					}
-					else if ($(this).attr('type') == 'Info') {
+					else if ($(this).attr('type') == 'Info' && $(this).attr('messageSource') != 'System') {
 						if (callbacks && callbacks.info) {
 							callbacks.info($(this).text());
 						}
+					}
+					else if ($(this).attr('type') == 'Info' && $(this).attr('messageSource') == 'System') {
+						window.expanz.logToConsole("System-Info: " + $(this).text());
 					}
 				});
 			}
@@ -1019,8 +1024,9 @@ $(function() {
 			}
 			else {
 				if (callbacks && callbacks.error) {
-					callbacks.error('Server gave an empty response to a CreateActivity request: ' + xml);
+					callbacks.error('The response from the server was empty');
 				}
+				window.expanz.logToConsole('Server gave an empty response to a CreateActivity request: ' + xml);
 			}
 
 			activity.setAttr({
@@ -1102,6 +1108,7 @@ $(function() {
 
 				if (callbacks && callbacks.info) {
 					if (infos) {
+						//window.expanz.logToConsole(infos)
 						callbacks.info(infos);
 					}
 					else {
