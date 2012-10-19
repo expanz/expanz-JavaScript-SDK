@@ -17,7 +17,8 @@ $(function() {
 	 * static html rendering functions
 	 */
 	window.expanz.html = window.expanz.html || {};
-
+	window.expanz.html.busyIndicator = function () {
+	};
 	window.expanz.html.startDiv = function(className) {
 		if (!className)
 			className = '';

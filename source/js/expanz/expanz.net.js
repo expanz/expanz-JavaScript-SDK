@@ -143,7 +143,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(RequestObject.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks));
+			SendRequest(RequestObject.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks),null,true);
 		},
 
 		MethodRequest : function(name, methodAttributes, context, activity, anonymousFields, callbacks) {
@@ -171,10 +171,10 @@ $(function() {
 
 			// activity allows anonymous and user not logged in
 			if (activity.isAnonymous()) {
-				SendRequest(RequestObject.AnonymousMethod(name, methodAttributes, context, activity, anonymousFields), parseDeltaResponse(activity, initiator, callbacks));
+				SendRequest(RequestObject.AnonymousMethod(name, methodAttributes, context, activity, anonymousFields), parseDeltaResponse(activity, initiator, callbacks),null,true);
 			}
 			else {
-				SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks));
+			    SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
 			}
 
 		},
@@ -196,7 +196,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(RequestObject.AnonymousMethods(methods, activity), parseDeltaResponse(activity, initiator, callbacks));
+			SendRequest(RequestObject.AnonymousMethods(methods, activity), parseDeltaResponse(activity, initiator, callbacks), null, true);
 
 		},
 
@@ -231,7 +231,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(RequestObject.DataRefresh(dataId, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks));
+			SendRequest(RequestObject.DataRefresh(dataId, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
 		},
 
 		ReleaseSessionRequest : function(callbacks) {
@@ -300,7 +300,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(RequestObject.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks));
+			SendRequest(RequestObject.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
 		},
 
 		/* create an anonymous request */
@@ -1398,9 +1398,18 @@ $(function() {
 	/*
 	 * Send Request :manage the sending of XML requests to the server, and dispatching of response handlers
 	 */
-
-	var SendRequest = function(request, responseHandler, isPopup) {
-
+	var requestBusy;
+	var requestQueue = [];
+	var SendRequest = function (request, responseHandler, isPopup, callAsync) {
+	    if (false && requestBusy) {
+            requestQueue.push([request, responseHandler, isPopup])
+	    }
+	    requestBusy = true;
+	    var isAsync = true;
+	    if (callAsync !== undefined && callAsync) {
+	        isAsync = true;
+	    }
+	    $(window.expanz.html.busyIndicator()).trigger("isBusy");
 		if (config._URLproxy !== undefined && config._URLproxy.length > 0) {
 			$.ajax({
 				type : 'POST',
@@ -1411,8 +1420,11 @@ $(function() {
 					method : request.method || "POST"
 				},
 				dataType : 'XML',
-				processData : true,
-				complete : function(HTTPrequest) {
+				processData: true,
+                async: isAsync,
+				complete: function (HTTPrequest) {
+				    requestBusy = false;
+				    $(window.expanz.html.busyIndicator()).trigger("notBusy");
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
 					}

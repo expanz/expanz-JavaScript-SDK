@@ -166,6 +166,12 @@
     <Content Include="build\build.gradle" />
     <Content Include="build\build.kendo.gradle" />
     <Content Include="build\build.shoppingCart.gradle" />
+    <Content Include="build\buildcss.gradle" />
+    <Content Include="build\buildjs.gradle" />
+    <Content Include="build\archive\build.components.gradle" />
+    <Content Include="build\archive\build.expanzsdk.gradle" />
+    <Content Include="build\archive\build.kendo.gradle" />
+    <Content Include="build\archive\test.gradle" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
