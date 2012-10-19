@@ -97,8 +97,11 @@ $(function() {
 					this._addMessageByKey(data['key'], data['data'], messageType, data['popup']);
 				}
 				else {
-					if (window.config._showAllMessages === true && messageText != "") {
-						this.displayMessage('[Displayed for debugging only]' + messageText, messageType);
+					if (messageText != "") {
+						this.displayMessage(messageText, messageType);
+						if (window.config._showAllMessages === true && messageText != "") {
+							window.expanz.logToConsole(messageType + ': ' + messageKey + messageData);
+						}
 					}
 				}
 			}
@@ -137,8 +140,10 @@ $(function() {
 				}
 			}
 			else {
+				this.displayMessage(messageKey, messageType);
 				if (window.config._showAllMessages === true) {
-					this.displayMessage('[Displayed for debugging only]' + messageKey + messageData, messageType);
+					//this.displayMessage('[Displayed for debugging only]' + messageKey + messageData, messageType);
+					window.expanz.logToConsole(messageType + ': ' + messageKey + messageData);
 				}
 			}
 
