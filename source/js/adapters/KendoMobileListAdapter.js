@@ -35,38 +35,45 @@ $.fn.KendoMobileListAdapter = function(options) {
 	 */
 	var publishData = function(event, xml, view) {
 		window.expanz.logToConsole("KendoMobileListAdapter publishData");
-		var xmlData = xml;
-		var dataRows = new Array();
-		var columns = null;
-		var template = null;
-		var childTag = '';
+		//var childTag = '';
 
-		/* if xml contains rows tag, this is where starts the real data for the tree */
-		if ($(xml).find("Rows").length > 0) {
-		    columns = $(xml).find("Columns");
-			xml = $(xml).find("Rows");
+		// Create template from the server if it doesn't exist
+		if ($("head").find("#${name}")) {
+			var columnsXml;
+			var gridDataTemplate;
+			
+			if ($(xml).find("Columns").length > 0) {
+				columnsXml = $(xml).find("Columns");
+			}
+			// TODO Need to cater for isHTMLTable?? = false, width, style, type, etc...
+			if (columnsXml != undefined) {
+				gridDataTemplate = "<script type='text/template' id='${name}'><tr class='item listDisplay'";
+				var columnCounter = 0;
+				_.each($(columnsXml).children(), function (columnXml) {
+					columnCounter++;
+					if ($(columnXml).attr("width") > 0) {
+						gridDataTemplate += "<td><%=data[" + columnCounter + "]%></td>"; 
+					}
+				});
+				gridDataTemplate += "</tr></script>";
+				$('head').append(gridDataTemplate);
+			}
 		}
-	    //create a template from the columns
-		if (columns != null) {
-		    template = "<script type='text/template' id='${name}'><tr class='item listDisplay'";
-		    var counter = 0;
-		    _.each($(columns).children(), function (columnXml) {
-		        counter++;
-		        if ($(columnXml).attr("width") > 0) {
-		            template += "<td><%=data[" + counter + "]%></td>";
-		        }
-		    });
-		    template += "</tr></script>";
-		    $('body').append(template);
+		
+		/* if xml contains rows tag, this is where starts the real data for the tree */
+		var dataXml;
+		var dataRows = new Array();
+		if ($(xml).find("Rows").length > 0) {
+			dataXml = $(xml).find("Rows");
 		}
         //turn xml rows into js array
-		_.each($(xml).children(), function(parentXml) {
+		_.each($(dataXml).children(), function(rowXml) {
 			var items = new Array();
-			_.each($(parentXml).children(), function(childXml) {
+			_.each($(rowXml).children(), function(cellXml) {
 				dataRows.push({
-					name : $(childXml).attr(labelAttribute),
-					category : $(parentXml).attr(labelAttribute),
-					id : $(childXml).attr(idAttribute)
+					name : $(cellXml).attr(labelAttribute),
+					category : $(rowXml).attr(labelAttribute),
+					id : $(cellXml).attr(idAttribute)
 				});
 			});
 
@@ -84,9 +91,6 @@ $.fn.KendoMobileListAdapter = function(options) {
 		    }
 
 		});
-
-
-
 	};
 
 	/* bind listenner */
