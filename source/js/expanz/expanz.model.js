@@ -72,7 +72,7 @@ $(function() {
 				$.each(this.get('anonymousFields'), function(index, value) {
 					if (value instanceof expanz.Model.Data.DataControl) {
 						anonymousFields.push({
-							id : value.getAttr('fieldId'),
+							id : value.getAttr('dataId'),
 							value : value.getAttr('lastValues') || ""
 						});
 					}
