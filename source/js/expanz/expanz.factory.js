@@ -257,8 +257,9 @@ $(function() {
 				if ($(dataControlEl).attr('renderingType') == 'grid' || $(dataControlEl).attr('renderingType') == 'popupGrid' || $(dataControlEl).attr('renderingType') == 'rotatingBar') {
 					var dataControlModel = new expanz.Model.Data.Grid({
 						id : $(dataControlEl).attr('id'),
-						dataId: $(dataControlEl).attr('id') || $(dataControlEl).attr('query') || $(dataControlEl).attr('populateMethod'),
-						query : $(dataControlEl).attr('query'),
+						dataId: $(dataControlEl).attr('dataId') || $(dataControlEl).attr('id') || $(dataControlEl).attr('query') || $(dataControlEl).attr('populateMethod'),
+						query: $(dataControlEl).attr('query'),
+						fieldName: $(dataControlEl).attr('fieldName') || $(dataControlEl).attr('dataId'),
 						populateMethod : $(dataControlEl).attr('populateMethod'),
 						autoPopulate : $(dataControlEl).attr('autoPopulate'),
 						contextObject : $(dataControlEl).attr('contextObject'),
@@ -320,6 +321,7 @@ $(function() {
 				    var dataControlModel = new expanz.Model.Data.DataControl({
 				        id: $(dataControlEl).attr('id'),
 				        dataId: $(dataControlEl).attr('id') || $(dataControlEl).attr('query') || $(dataControlEl).attr('populateMethod'),
+				        fieldName: $(dataControlEl).attr('fieldName') || $(dataControlEl).attr('dataId'),
 						populateMethod : $(dataControlEl).attr('populateMethod'),
 						type : $(dataControlEl).attr('type'),
 						contextObject : $(dataControlEl).attr('contextObject'),

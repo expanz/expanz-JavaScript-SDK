@@ -388,19 +388,19 @@ $(function() {
 
 			renderAdvancedSearchDietaryClaimsFilterModule : function(el) {
 				var html = "";
-				html += '<div class="advancedSearchCategory">Dietary Claims</div><div id="filterSearchCheckboxesDivDietaryClaims"  templateName="filterSearchCheckboxesTemplate" name="DietaryClaimsSearchDP" fieldName="DietaryClaimsSearch" populateMethod="' + this.listDietaryClaimsMethodName + '" bind="DataControl" renderingType="checkboxes" contextObject="' + this.listDietaryClaimsContextObject + '" anonymousBoundMethod="' + this.searchMethodName + '"></div>';
+				html += '<div class="advancedSearchCategory">Dietary Claims</div><div id="filterSearchCheckboxesDivDietaryClaims"  templateName="filterSearchCheckboxesTemplate" dataId="DietaryClaimsSearchDP" fieldName="DietaryClaimsSearch" populateMethod="' + this.listDietaryClaimsMethodName + '" bind="DataControl" renderingType="checkboxes" contextObject="' + this.listDietaryClaimsContextObject + '" anonymousBoundMethod="' + this.searchMethodName + '"></div>';
 				return html;
 			},
 
 			renderAdvancedSearchAllergensFilterModule : function(el) {
 				var html = "";
-				html += '<div class="advancedSearchCategory">Allergens</div><div id="filterSearchCheckboxesDivAllergens"  templateName="filterSearchCheckboxesTemplate" name="AllergensSearchDP" fieldName="AllergensSearch"  populateMethod="' + this.listAllergensMethodName + '" bind="DataControl" renderingType="checkboxes" contextObject="' + this.listAllergensContextObject + '"  anonymousBoundMethod="' + this.searchMethodName + '"></div>';
+				html += '<div class="advancedSearchCategory">Allergens</div><div id="filterSearchCheckboxesDivAllergens"  templateName="filterSearchCheckboxesTemplate" dataId="AllergensSearchDP" fieldName="AllergensSearch"  populateMethod="' + this.listAllergensMethodName + '" bind="DataControl" renderingType="checkboxes" contextObject="' + this.listAllergensContextObject + '"  anonymousBoundMethod="' + this.searchMethodName + '"></div>';
 				return html;
 			},
 
 			renderAdvancedSearchCountryOfOriginFilterModule : function(el) {
 				var html = "";
-				html += '<div bind="field" name="CountryOfOriginSearch" anonymousBoundMethod="' + this.searchMethodName + '"><div class="advancedSearchCategory">Country</div><input style="width:200px" id="cbCountry" bind="DataControl" emptyItemLabel="Select" renderingType="dropdownlist" populateMethod="' + this.listCountryOfOriginsMethodName + '" name="CountryOfOriginSearchDP" attribute="value" class="k-textbox" contextObject="' + this.listCountryOfOriginsContextObject + '"/></div>';
+				html += '<div bind="field" name="CountryOfOriginSearch" anonymousBoundMethod="' + this.searchMethodName + '"><div class="advancedSearchCategory">Country</div><input style="width:200px" id="cbCountry" bind="DataControl" emptyItemLabel="Select" renderingType="dropdownlist" populateMethod="' + this.listCountryOfOriginsMethodName + '" dataId="CountryOfOriginSearchDP" attribute="value" class="k-textbox" contextObject="' + this.listCountryOfOriginsContextObject + '"/></div>';
 				return html;
 			},
 
@@ -410,7 +410,7 @@ $(function() {
 
 			renderAdvancedSearchBrandsFilterModule : function(el) {
 				var html = "";
-				html += '<div bind="field" name="BrandsSearch" anonymousBoundMethod="' + this.searchMethodName + '"><div class="advancedSearchCategory">Brand</div><input style="width:200px" id="cbBrand" bind="DataControl" emptyItemLabel="Select" renderingType="dropdownlist" populateMethod="' + this.listBrandsMethodName + '" name="BrandSearchDP" attribute="value" class="k-textbox" contextObject="' + this.listBrandsContextObject + '"  /></div>';
+				html += '<div bind="field" name="BrandsSearch" anonymousBoundMethod="' + this.searchMethodName + '"><div class="advancedSearchCategory">Brand</div><input style="width:200px" id="cbBrand" bind="DataControl" emptyItemLabel="Select" renderingType="dropdownlist" populateMethod="' + this.listBrandsMethodName + '" dataId="BrandSearchDP" attribute="value" class="k-textbox" contextObject="' + this.listBrandsContextObject + '"  /></div>';
 				return html;
 			},
 
@@ -483,7 +483,7 @@ $(function() {
 					html += this.renderDefaultListItemGridTemplate();
 				}
 				html += "<div id='searchResultTitle' class='searchResultTitle' style='display:none'>Showing Results for \"<span id='searchString'></span>\"</div>";
-				html += '<div id="productListDiv" enableConfiguration="' + enableConfiguration + '" noItemText="No item matches your selection" isHTMLTable="' + displayAsTable + '" templateName="' + templateName + '"  itemsPerPage="' + itemsPerPage + '" name="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
+				html += '<div id="productListDiv" enableConfiguration="' + enableConfiguration + '" noItemText="No item matches your selection" isHTMLTable="' + displayAsTable + '" templateName="' + templateName + '"  itemsPerPage="' + itemsPerPage + '" dataId="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 				return html;
 			},
 
@@ -671,7 +671,7 @@ $(function() {
 				html += '<div class="header">My standard orders';
 				html += '</div>';
 				html += '</script>';
-				html += '<div id="listStandardOrders" class="standardOrders" itemsPerPage="10" name="listStandardOrders" bind="DataControl" renderingType="grid" populateMethod="' + this.myStandardOrdersPopMethod + '" contextObject="' + this.myStandardOrdersContextObject + '"></div>';
+				html += '<div id="listStandardOrders" class="standardOrders" itemsPerPage="10" dataId="listStandardOrders" bind="DataControl" renderingType="grid" populateMethod="' + this.myStandardOrdersPopMethod + '" contextObject="' + this.myStandardOrdersContextObject + '"></div>';
 				return html;
 			},
 
@@ -832,7 +832,7 @@ $(function() {
 			* @return html code
 			*/
 			renderCategoriesTreeModule : function(treeEl) {
-				return '<div id="categoriesTree" name="categoriesList" fieldName="' + this.categoryTreeName + '" selectionChangeAnonymousMethod="' + this.categoryTreeSelectionChangeAnonymousMethod + '"  selectionChangeAnonymousContextObject="' + this.categoryTreeSelectionChangeAnonymousContextObject + '" bind="DataControl" renderingType="tree" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="tree"></div>';
+				return '<div id="categoriesTree" dataId="categoriesList" fieldName="' + this.categoryTreeName + '" selectionChangeAnonymousMethod="' + this.categoryTreeSelectionChangeAnonymousMethod + '"  selectionChangeAnonymousContextObject="' + this.categoryTreeSelectionChangeAnonymousContextObject + '" bind="DataControl" renderingType="tree" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="tree"></div>';
 			},
 
 			_executeAfterRenderCategoriesTreeModule : function() {
@@ -894,7 +894,7 @@ $(function() {
 			* @return html code
 			*/
 			renderCategoriesAccordionModule : function(treeEl) {
-				return '<div><ul id="categoriesAccordion" name="' + this.categoryTreeName + '"  bind="DataControl" renderingType="accordion" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="accordion"></ul></div>';
+				return '<div><ul id="categoriesAccordion" fieldName="' + this.categoryTreeName + '" bind="DataControl" renderingType="accordion" populateMethod="' + this.categoryTreePopMethod + '" type="recursiveList" contextObject="' + this.categoryTreeContextObject + '" class="accordion"></ul></div>';
 			},
 
 			_executeAfterRenderCategoriesAccordionModule : function() {
@@ -942,7 +942,7 @@ $(function() {
 				html += '<button methodName="deleteItemFromCart">X</button>';
 				html += window.expanz.html.endDiv();
 				html += '</script>';
-				html += "<div bind='DataControl' noItemText='Empty' renderingType='grid' id='lvMiniCart' name='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
+				html += "<div bind='DataControl' noItemText='Empty' renderingType='grid' id='lvMiniCart' dataId='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
 				return html
 			},
 
@@ -1072,7 +1072,7 @@ $(function() {
 				html += '</script>';
 
 				html += "<div class='checkoutList'>";
-				html += "<div bind='DataControl' renderingType='grid' id='checkoutCart' name='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
+				html += "<div bind='DataControl' renderingType='grid' id='checkoutCart' dataId='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
 
 				html += "</div>";
 
@@ -1255,7 +1255,7 @@ $(function() {
 				html += '<td class="actions"><% if(sortedValues.Status >= 20){ %><button methodName="showInvoice">Show Invoice</button><% } %></td></tr>';
 				html += '</script>';
 
-				html += '<div id="orderHistoryDivList" class="orderHistory" isHTMLTable="true" populateMethod="' + this.orderHistoryPopMethod + '" itemsPerPage="' + itemsPerPage + '" name="' + this.orderHistoryListName + '" bind="DataControl" renderingType="grid" contextObject="' + this.orderHistoryContextObject + '"></div>';
+				html += '<div id="orderHistoryDivList" class="orderHistory" isHTMLTable="true" populateMethod="' + this.orderHistoryPopMethod + '" itemsPerPage="' + itemsPerPage + '" dataId="' + this.orderHistoryListName + '" bind="DataControl" renderingType="grid" contextObject="' + this.orderHistoryContextObject + '"></div>';
 				return html;
 			},
 

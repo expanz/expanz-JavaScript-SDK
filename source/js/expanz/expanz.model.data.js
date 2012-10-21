@@ -81,7 +81,7 @@ $(function() {
 				}
 				/* normal case we send a delta request */
 				else {
-					expanz.Net.DeltaRequest(this.getAttr('dataId'), selectedId, this.getAttr('parent'), callbacks);
+					expanz.Net.DeltaRequest(this.getAttr('fieldName'), selectedId, this.getAttr('parent'), callbacks);
 				}
 			}
 		}
