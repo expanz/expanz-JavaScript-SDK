@@ -1,0 +1,31 @@
+/build/.gradle/1.2/taskArtifacts/taskArtifacts.bin
+/build/.gradle/1.2/taskArtifacts/fileHashes.bin
+/build/.gradle/1.2/taskArtifacts/fileSnapshots.bin
+/build/.gradle/1.2/taskArtifacts/outputFileStates.bin
+/build/jshint-expanz.out
+/build/jshint-adapters.out
+/build/jshint-components.out
+HTMLSDK.*
+#ignore thumbnails created by windows
+Thumbs.db
+#Ignore files build by Visual Studio
+*.csproj
+*.sln
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.bak
+*.cache
+*.ilk
+*.log
+[Bb]in
+[Dd]ebug*/
+*.sbr
+obj/
+[Rr]elease*/
+_ReSharper*/

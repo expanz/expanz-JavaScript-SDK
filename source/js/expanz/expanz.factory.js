@@ -108,10 +108,10 @@ $(function() {
 		 * bindDataControls
 		 */
 		bindDataControls : function(activityModel, el) {
-			_.each(expanz.Factory.DataControl(activityModel.getAttr('id'), activityModel.getAttr('style'), $(el).find('[bind=DataControl]')), function(DataControlModel) {
+			_.each(expanz.Factory.DataControl(activityModel.getAttr('name'), activityModel.getAttr('style'), $(el).find('[bind=DataControl]')), function(DataControlModel) {
 				DataControlModel.setAttr({
 					parent : activityModel,
-					activityId : activityModel.getAttr('id')
+					activityId : activityModel.getAttr('name')
 				});
 				activityModel.addDataControl(DataControlModel);
 
