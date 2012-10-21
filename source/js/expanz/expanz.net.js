@@ -21,7 +21,8 @@ $(function() {
 	window.expanz.helper = window.expanz.helper || {};
 
 	window.expanz.Net = {
-
+        
+	    lastRequest:"", lastResponse:"",
 		// Request Objects -> to be passed to SendRequest
 		CreateSessionRequest : function(username, password, callbacks) {
 			expanz.Storage.clearSession(); /* clear previous existing sessions */
@@ -1405,6 +1406,7 @@ $(function() {
             requestQueue.push([request, responseHandler, isPopup])
 	    }
 	    requestBusy = true;
+	    window.expanz.Net.lastRequest = request;
 	    var isAsync = true;
 	    if (callAsync !== undefined && callAsync) {
 	        isAsync = true;
@@ -1424,6 +1426,7 @@ $(function() {
                 async: isAsync,
 				complete: function (HTTPrequest) {
 				    requestBusy = false;
+				    window.expanz.Net.lastResponse = HTTPrequest.responseText;
 				    $(window.expanz.html.busyIndicator()).trigger("notBusy");
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
@@ -1436,7 +1439,7 @@ $(function() {
 							WinId.document.close();
 						}
 						else {
-							if (responseHandler) {
+						    if (responseHandler) {
 								eval(responseHandler)(HTTPrequest.responseXML);
 							}
 						}
