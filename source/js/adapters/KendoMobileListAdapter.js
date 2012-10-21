@@ -38,7 +38,7 @@ $.fn.KendoMobileListAdapter = function(options) {
 		//var childTag = '';
 
 		// Create template from the server if it doesn't exist
-		if ($("head").find("#${name}")) {
+		if (!$("head").find("#${name}")) {
 			var columnsXml;
 			var gridDataTemplate;
 			
