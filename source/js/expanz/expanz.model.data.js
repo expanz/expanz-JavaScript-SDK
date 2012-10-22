@@ -24,7 +24,7 @@ $(function() {
 
 		update : function(attrs) {
 
-			expanz.Net.DeltaRequest(this.getAttr('fieldId'), attrs.value, this.getAttr('parent'));
+			expanz.Net.DeltaRequest(this.getAttr('dataId'), attrs.value, this.getAttr('parent'));
 			return;
 		},
 
@@ -37,7 +37,7 @@ $(function() {
 				if (this.getAttr('renderingType') == 'tree') {
 					var anonymousFields = [
 						{
-							id : this.getAttr('fieldId'),
+							id : this.getAttr('dataId'),
 							value : selectedId
 						}
 					];
@@ -81,7 +81,7 @@ $(function() {
 				}
 				/* normal case we send a delta request */
 				else {
-					expanz.Net.DeltaRequest(this.getAttr('fieldId'), selectedId, this.getAttr('parent'), callbacks);
+					expanz.Net.DeltaRequest(this.getAttr('fieldName'), selectedId, this.getAttr('parent'), callbacks);
 				}
 			}
 		}
