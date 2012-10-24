@@ -506,7 +506,7 @@ $(function() {
 					this.el.append('<table class="grid" id="' + hostId + '"></table>');
 					hostEl = this.el.find('table#' + hostId);
 				}
-				$(hostEl).html('<thead><tr></tr></thead><tbody></tbody>');
+				$(hostEl).html('<thead><tr class="item"></tr></thead><tbody></tbody>');
 
 				// render column header
 				var el = $(hostEl).find('thead tr');
@@ -947,6 +947,77 @@ $(function() {
 
 	});
 
+	window.expanz.Views.VariantPanelFieldView = expanz.Views.FieldView.extend({
+		width : 'auto',
+
+		cssClass : 'variantPanelView',
+
+		divAttributes : '',
+		
+		initialize : function(attrs) {
+			Backbone.View.prototype.initialize.call(attrs);
+			this.create();
+			//this.renderActions();
+			//this.delegateEvents(this.events);
+
+			/* find the parent popup -> it is the first parentPopup visible */
+			if (window.expanz.currentVariantPanel !== undefined) {
+			}
+			window.expanz.currentVariantPanel = this;
+		},
+
+		events : {
+			//"click button" : "buttonClicked"
+		},
+		
+		renderActions : function() {
+
+		},
+
+		create : function(containerjQ) {
+			// window.expanz.logToConsole("render variantPanel");
+			//var variantPanel = containerjQ.find('#' + this.id);
+			//if (variantPanel.length > 0) {
+			//	variantPanel.remove();
+			//}
+			
+			var content = '';
+			if (this.model.getAttr('visualType') !== undefined && this.model.getAttr('visualType').length > 0) {
+				content = this.model.getAttr('visualType');
+			}
+
+			//containerjQ.append("<div class='" + this.cssClass + "' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");
+			//this.el = containerjQ.find('#' + this.id);
+			//this.createWindowObject();
+		},
+		
+		publishData : function() {
+			/* clean elements */
+			this.el.html();
+			var that = this;
+			/* no external component needed just have to draw the checkboxes and handle the clicks */
+
+			_.each(this.model.getAttr('xml').find('Row'), function(row) {
+				var rowId = $(row).attr('id');
+				var selected = boolValue($(row).attr('selected')) === true ? ' checked="checked" ' : '';
+				_.each($(row).find('Cell'), function(cell) {
+					var text = $(cell).text();
+					var id = that.model.id.replace(/\./g, "_") + "_" + rowId;
+					//that.el.append("<div><input " + selected + " id='" + id + "' value='" + rowId + "' name='radio' type='radio'></input><span>" + text + "</span></div>");
+
+					// handle radio button click 
+					//$(that.el).find("#" + id).click(function() {
+						// send the delta to the server 
+					//	that.model.updateItemSelected($(this).val());
+					//});
+
+				});
+			});
+
+		}
+
+	});
+	
 	window.expanz.Views.PopupView = Backbone.View.extend({
 
 		width : 'auto',
@@ -1015,7 +1086,7 @@ $(function() {
 
 		},
 
-		/* must be redefined depending on the pluggin used */
+		/* must be redefined depending on the plug-in used */
 		createWindowObject : function() {
 			this.el.dialog({
 				modal : true,

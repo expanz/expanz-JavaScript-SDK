@@ -1147,34 +1147,7 @@ $(function() {
 					var id = $(this).attr('id');
 					var field = activity.get(id);
 					if (field && field !== undefined) {
-						if ((field.get('value') && (field.get('value') != $(this).attr('value'))) || !field.get('value')) {
-
-							if ($(this).attr('disabled')) {
-								field.set({
-									disabled : boolValue(this.getAttribute('disabled'))
-								});
-							}
-
-							field.set({
-								items : $(this).find("Item"),
-								text : $(this).attr('text'),
-								value : $(this).attr('value') == '$longData$' ? $(this).text() : $(this).attr('value')
-							});
-						}
-
-						/* remove error message if field is valid */
-						if (boolValue($(this).attr('valid')) && field.get('errorMessage') !== undefined) {
-							field.set({
-								'errorMessage' : undefined
-							});
-
-						}
-
-						if (field.get('url') && (field.get('url') != $(this).attr('url'))) {
-							field.set({
-								value : $(this).attr('url')
-							});
-						}
+						field.publish($(this), activity);
 					}
 				});
 
@@ -1182,17 +1155,16 @@ $(function() {
 				$(execResults).find('File').each(function(data) {
 
 					if ($(this).attr('field') !== undefined && $(this).attr('path') != undefined) {
-						// window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
+						window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
 						expanz.Net.GetBlobRequest($(this).attr('field'), activity, initiator);
 					}
 					else if ($(this).attr('name') !== undefined) {
-						// window.expanz.logToConsole("File found: " + $(this).attr('name'));
+						window.expanz.logToConsole("File found: " + $(this).attr('name'));
 						expanz.Net.GetFileRequest($(this).attr('name'), activity, initiator);
 					}
 					else {
-						// window.expanz.logToConsole("Not implemented yet");
+						window.expanz.logToConsole("Not yet implemented");
 					}
-
 				});
 
 				/* UIMESSAGE CASE */

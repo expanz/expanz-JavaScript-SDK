@@ -39,11 +39,11 @@ $(function() {
 	};
 
 	window.expanz.getMaintenancePage = function() {
-		return window.config._maintenance ? window.config._maintenance : 'maintenance';
+		return window.config._maintenancePage ? window.config._maintenancePage : 'maintenance';
 	};
 
 	window.expanz.isOnMaintenance = function() {
-		var maintenance = window.config.onMaintenance;
+		var maintenance = window.config._onMaintenance;
 		if (maintenance === true) {
 			return true;
 		}
@@ -131,7 +131,7 @@ $(function() {
 		_addMessageByKey : function(messageKey, messageData, messageType, popup) {
 			/* look for the key in message.properties file */
 			var msg = jQuery.i18n.prop(messageKey, messageData);
-			if (msg) {
+			if (msg && msg.length > 0) {
 				if (popup === true) {
 					this.displayPopupMessage(msg, messageType);
 				}
@@ -140,7 +140,7 @@ $(function() {
 				}
 			}
 			else {
-				this.displayMessage(messageKey, messageType);
+				//this.displayMessage(messageKey, messageType);
 				if (window.config._showAllMessages === true) {
 					//this.displayMessage('[Displayed for debugging only]' + messageKey + messageData, messageType);
 					window.expanz.logToConsole(messageType + ': ' + messageKey + messageData);

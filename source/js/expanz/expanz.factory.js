@@ -74,6 +74,24 @@ $(function() {
 
 			});
 
+			_.each(expanz.Factory.VariantPanelField($(el).find('[bind=variantpanelfield]')), function(variantPanelFieldModel) {
+				variantPanelFieldModel.set({
+					parent : activityModel
+				}, {
+					silent : true
+				});
+				activityModel.add(variantPanelFieldModel);
+
+				/* add anonymous fields bound to method */
+				if (variantPanelFieldModel.get('anonymousBoundMethod') != null && variantPanelFieldModel.get('anonymousBoundMethod') != '') {
+					var boundMethod = activityModel.get(variantPanelFieldModel.get('anonymousBoundMethod'));
+					if (boundMethod) {
+						boundMethod.addAnonymousElement(variantPanelFieldModel);
+					}
+				}
+
+			});
+			
 			_.each(expanz.Factory.DashboardField($(el).find('[bind=dashboardfield]')), function(dashboardFieldModel) {
 				var fieldSessionValue = expanz.Storage.getDashboardFieldValue(dashboardFieldModel.get('dashboardName'), dashboardFieldModel.get('name'));
 				dashboardFieldModel.set({
@@ -136,6 +154,29 @@ $(function() {
 					anonymousBoundMethod : $(fieldEl).attr('anonymousBoundMethod')
 				});
 				var view = new expanz.Views.FieldView({
+					el : $(fieldEl),
+					id : $(fieldEl).attr('id'),
+					className : $(fieldEl).attr('class'),
+					model : field,
+					textTransformFunction : $(fieldEl).attr('textTransformFunction')
+				});
+
+				fieldModels.push(field);
+
+			});
+			return fieldModels;
+		},
+
+		VariantPanelField : function(DOMObjects) {
+
+			var fieldModels = [];
+			_.each(DOMObjects, function(fieldEl) {
+				// create a model for each field
+				var field = new expanz.Model.VariantPanelField({
+					id : $(fieldEl).attr('name'),
+					anonymousBoundMethod : $(fieldEl).attr('anonymousBoundMethod')
+				});
+				var view = new expanz.Views.VariantPanelFieldView({
 					el : $(fieldEl),
 					id : $(fieldEl).attr('id'),
 					className : $(fieldEl).attr('class'),
@@ -348,6 +389,14 @@ $(function() {
 							model : dataControlModel
 						});
 					}
+					/*else if ($(dataControlEl).attr('renderingType') == 'variantPanel') {
+						var view = new expanz.Views.VariantPanelFieldView({
+							el : $(dataControlEl),
+							id : $(dataControlEl).attr('id'),
+							className : $(dataControlEl).attr('class'),
+							model : dataControlModel
+						});
+					}*/
 					else {
 						var view = new expanz.Views.DataControlView({
 							el : $(dataControlEl),

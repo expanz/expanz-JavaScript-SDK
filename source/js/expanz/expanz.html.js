@@ -79,6 +79,21 @@ $(function() {
 		return field;
 	};
 
+	/*window.expanz.html.renderVariantPanel = function(xml) {
+		var html = '';
+		var _subType;
+		textBox : null,
+		checkBox : null,
+		radioButtons : null,
+		if (xml.attr('visualType'))
+			_subType = xml.attr('visualType'); // 'rb', 'txt', 'cb'
+		else
+			return '';
+		
+		
+		return _subType;
+	}*/
+	
 	window.expanz.html.renderMethod = function(methodName, buttonLabel, contextObject, hidden) {
 		var method = '';
 		var ctx = contextObject ? ' contextObject = "' + contextObject + '" ' : '';
