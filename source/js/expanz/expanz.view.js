@@ -982,7 +982,7 @@ $(function() {
 			//}
 			
 			var content = '';
-			if (this.model.getAttr('visualType') !== undefined && this.model.getAttr('visualType').length > 0) {
+			if (this.model.getAttr !== undefined && this.model.getAttr('visualType') !== undefined && this.model.getAttr('visualType').length > 0) {
 				content = this.model.getAttr('visualType');
 			}
 
