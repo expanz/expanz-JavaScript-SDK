@@ -471,7 +471,7 @@ $(function() {
 		CreateSession : function(username, password, appsite, authenticationMode) {
 			if (authenticationMode === undefined)
 				authenticationMode = "Primary";
-			return '<CreateSession user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + authenticationMode + '" clientType="HTML" clientVersion="' + window.expanz.clientVersion + '" schemaVersion="2.0"/>';
+			return '<CreateSession source="MixiLink" user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + authenticationMode + '" clientType="HTML" clientVersion="' + window.expanz.clientVersion + '" schemaVersion="2.0"/>';
 		},
 
 		GetSessionData : function() {
