@@ -1378,7 +1378,7 @@ $(function() {
             requestQueue.push([request, responseHandler, isPopup])
 	    }
 	    requestBusy = true;
-	    window.expanz.Net.lastRequest = request;
+	    window.expanz.Net.lastRequest = request.data;
 	    var isAsync = true;
 	    if (callAsync !== undefined && callAsync) {
 	        isAsync = true;
