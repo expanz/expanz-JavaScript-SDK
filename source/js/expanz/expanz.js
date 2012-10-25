@@ -100,7 +100,10 @@ $(function() {
 					if (messageText != "") {
 						this.displayMessage(messageText, messageType);
 						if (window.config._showAllMessages === true && messageText != "") {
-							window.expanz.logToConsole(messageType + ': ' + messageKey + messageData);
+							if (messageKey !== undefined)
+								window.expanz.logToConsole(messageType + ': ' + messageKey + messageData);
+							else
+								window.expanz.logToConsole(messageType + ': ' + messageData);
 						}
 					}
 				}
