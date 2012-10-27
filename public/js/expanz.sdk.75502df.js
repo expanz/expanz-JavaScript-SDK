@@ -81,11 +81,17 @@ $(function() {
 					var moduleEl = window.expanz.html.findComponentModuleElement(that.componentName, module);
 					if (moduleEl !== undefined) {
 						moduleEl.each(function() {
-							// if (moduleEl.attr('loaded') === undefined) {
-							var moduleContent = that['render' + module + 'Module']($(this));
-							$(this).append(moduleContent);
-							moduleEl.attr('loaded', '1');
-							// }
+							if (moduleEl.attr('loaded') === undefined) {
+								var moduleContent = that['render' + module + 'Module']($(this));
+								if (this.canHaveChildren === undefined || this.canHaveChildren)
+									$(this).append(moduleContent);
+								else {
+									var moduleContentDOMNode = document.createElement("div");
+									moduleContentDOMNode.innerHTML = moduleContent;
+									this.parentElement.appendChild(moduleContentDOMNode);
+								}
+								moduleEl.attr('loaded', '1');
+							}
 						});
 
 					}
@@ -178,7 +184,7 @@ $(function() {
 				activityModel.add(fieldModel);
 
 				/* add anonymous fields bound to method */
-				if (fieldModel.get('anonymousBoundMethod') != null && fieldModel.get('anonymousBoundMethod') != '') {
+				if (fieldModel.get('anonymousBoundMethod') !== null && fieldModel.get('anonymousBoundMethod') !== '') {
 					var boundMethod = activityModel.get(fieldModel.get('anonymousBoundMethod'));
 					if (boundMethod) {
 						boundMethod.addAnonymousElement(fieldModel);
@@ -196,7 +202,7 @@ $(function() {
 				activityModel.add(variantPanelFieldModel);
 
 				/* add anonymous fields bound to method */
-				if (variantPanelFieldModel.get('anonymousBoundMethod') != null && variantPanelFieldModel.get('anonymousBoundMethod') != '') {
+				if (variantPanelFieldModel.get('anonymousBoundMethod') !== null && variantPanelFieldModel.get('anonymousBoundMethod') !== '') {
 					var boundMethod = activityModel.get(variantPanelFieldModel.get('anonymousBoundMethod'));
 					if (boundMethod) {
 						boundMethod.addAnonymousElement(variantPanelFieldModel);
@@ -247,7 +253,7 @@ $(function() {
 				activityModel.addDataControl(DataControlModel);
 
 				/* add anonymous datacontrol field bound to method */
-				if (DataControlModel.getAttr('anonymousBoundMethod') != null && DataControlModel.get('anonymousBoundMethod') != '') {
+				if (DataControlModel.getAttr('anonymousBoundMethod') !== null && DataControlModel.get('anonymousBoundMethod') !== '') {
 					var boundMethod = activityModel.get(DataControlModel.getAttr('anonymousBoundMethod'));
 					if (boundMethod) {
 						boundMethod.addAnonymousElement(DataControlModel);
@@ -280,24 +286,28 @@ $(function() {
 			return fieldModels;
 		},
 
+		VariantPanel : function(fieldEl) {
+			// create a model for each field
+			var field = new expanz.Model.VariantPanelField({
+				id : $(fieldEl).attr('name'),
+				anonymousBoundMethod : $(fieldEl).attr('anonymousBoundMethod')
+			});
+			var view = new expanz.Views.VariantPanelFieldView({
+				el : $(fieldEl),
+				id : $(fieldEl).attr('id'),
+				className : $(fieldEl).attr('class'),
+				model : field,
+				textTransformFunction : $(fieldEl).attr('textTransformFunction')
+			});
+			return view;
+		},
+		
 		VariantPanelField : function(DOMObjects) {
 
 			var fieldModels = [];
 			_.each(DOMObjects, function(fieldEl) {
-				// create a model for each field
-				var field = new expanz.Model.VariantPanelField({
-					id : $(fieldEl).attr('name'),
-					anonymousBoundMethod : $(fieldEl).attr('anonymousBoundMethod')
-				});
-				var view = new expanz.Views.VariantPanelFieldView({
-					el : $(fieldEl),
-					id : $(fieldEl).attr('id'),
-					className : $(fieldEl).attr('class'),
-					model : field,
-					textTransformFunction : $(fieldEl).attr('textTransformFunction')
-				});
-
-				fieldModels.push(field);
+				var view = expanz.Factory.VariantPanel(fieldEl);
+				fieldModels.push(view.model);
 
 			});
 			return fieldModels;
@@ -406,10 +416,10 @@ $(function() {
 			var DataControlModels = [];
 
 			_.each(DOMObjects, function(dataControlEl) {
-
+				var dataControlModel;
 				/* case rendering as a grid */
 				if ($(dataControlEl).attr('renderingType') == 'grid' || $(dataControlEl).attr('renderingType') == 'popupGrid' || $(dataControlEl).attr('renderingType') == 'rotatingBar') {
-					var dataControlModel = new expanz.Model.Data.Grid({
+					dataControlModel = new expanz.Model.Data.Grid({
 						id : $(dataControlEl).attr('id'),
 						dataId: $(dataControlEl).attr('dataId') || $(dataControlEl).attr('id') || $(dataControlEl).attr('query') || $(dataControlEl).attr('populateMethod'),
 						query: $(dataControlEl).attr('query'),
@@ -472,10 +482,10 @@ $(function() {
 				/* renderingType is not grid: 'tree' or 'combobox' or checkboxes or empty */
 				/* the attribute fieldName might be defined in case, the datacontrol updates a field value if not specified taking the name */
 				else {
-				    var dataControlModel = new expanz.Model.Data.DataControl({
-				        id: $(dataControlEl).attr('id'),
-				        dataId: $(dataControlEl).attr('id') || $(dataControlEl).attr('query') || $(dataControlEl).attr('populateMethod'),
-				        fieldName: $(dataControlEl).attr('fieldName') || $(dataControlEl).attr('dataId'),
+					dataControlModel = new expanz.Model.Data.DataControl({
+						id: $(dataControlEl).attr('id'),
+						dataId: $(dataControlEl).attr('id') || $(dataControlEl).attr('query') || $(dataControlEl).attr('populateMethod'),
+						fieldName: $(dataControlEl).attr('fieldName') || $(dataControlEl).attr('dataId'),
 						populateMethod : $(dataControlEl).attr('populateMethod'),
 						type : $(dataControlEl).attr('type'),
 						contextObject : $(dataControlEl).attr('contextObject'),
@@ -487,7 +497,7 @@ $(function() {
 					});
 
 					if ($(dataControlEl).attr('renderingType') == 'checkboxes') {
-						var view = new expanz.Views.CheckboxesView({
+						var checkboxesView = new expanz.Views.CheckboxesView({
 							el : $(dataControlEl),
 							id : $(dataControlEl).attr('id'),
 							className : $(dataControlEl).attr('class'),
@@ -495,23 +505,15 @@ $(function() {
 						});
 					}
 					else if ($(dataControlEl).attr('renderingType') == 'radiobuttons') {
-						var view = new expanz.Views.RadioButtonsView({
+						var radioButtonsView = new expanz.Views.RadioButtonsView({
 							el : $(dataControlEl),
 							id : $(dataControlEl).attr('id'),
 							className : $(dataControlEl).attr('class'),
 							model : dataControlModel
 						});
 					}
-					/*else if ($(dataControlEl).attr('renderingType') == 'variantPanel') {
-						var view = new expanz.Views.VariantPanelFieldView({
-							el : $(dataControlEl),
-							id : $(dataControlEl).attr('id'),
-							className : $(dataControlEl).attr('class'),
-							model : dataControlModel
-						});
-					}*/
 					else {
-						var view = new expanz.Views.DataControlView({
+						var dataControlView = new expanz.Views.DataControlView({
 							el : $(dataControlEl),
 							id : $(dataControlEl).attr('id'),
 							className : $(dataControlEl).attr('class'),
@@ -571,7 +573,7 @@ $(function() {
 		var className = 'gridHeader';
 		if (!label)
 			label = '';
-		if (label != '') {
+		if (label !== '') {
 			className += ' gridHeader' + label;
 		}
 		
@@ -634,24 +636,24 @@ $(function() {
 		method += '</span>';
 		return method;
 	};
-	 
-	 
+
+
 	window.expanz.html.renderHeader = function(siteName, siteUrl) {
 		var html = '';
 		if (!siteName)
 			siteName = '';
 		if (!siteUrl)
 			siteUrl = getSiteUrl();
-	 
+
 		html += '<div id="headBackground">';
 		html += '<div class="centerLogoArea">';
 		html += '<div id="siteName">' + siteName + '</div>';
-		if (siteUrl != '')
+		if (siteUrl !== '')
 			html += '<a href="' + siteUrl + '"><div id="logo"></div></a>';
 		html += '</div>';
 		html += '</div>';
 		return html;
-	}
+	};
 	
 	/*window.expanz.html.renderMainMenu = function() {
 		var html = '';
@@ -660,7 +662,7 @@ $(function() {
 		html += '<div id="menuContainer" bind="menu" homeLabel=" " logoutLabel="Log Out" backLabel=" " ></div>';
 		html += '</div>';
 		return html;
-	}
+	};
 	
 	window.expanz.html.renderNotification = function() {
 		var html = '';
@@ -675,7 +677,7 @@ $(function() {
 		html += '</div>';
 		html += '</div>';
 		return html;
-	}*/
+	};*/
 	
 	window.expanz.html.renderFooter = function(copyrightText, footerLinks) {
 		var html = '';
@@ -684,12 +686,12 @@ $(function() {
 		html += '<div class="left footerCopyright">';
 		if (!copyrightText)
 			copyrightText = '';
-		if (copyrightText != '')
+		if (copyrightText !== '')
 			html += '<div>' + copyrightText + '</div>';
 		html += '<div class="footerLinks">';
 		if (!footerLinks)
 			footerLinks = '';
-		if (footerLinks != '')
+		if (footerLinks !== '')
 			html += footerLinks;//'<a href="">Contact Us</a> <a href="">Feedback</a>';
 		html += '</div>';
 		html += '</div>';
@@ -714,7 +716,7 @@ $(function() {
 	window.expanz.html.isEmpty = function(value) {
 		if (value === undefined)
 			return true;
-		return value == "";
+		return value === "";
 	};
 	
 	window.expanz.html.findComponentModuleElement = function(component, module) {
@@ -728,7 +730,7 @@ $(function() {
 			return $(el);
 		}
 		return undefined;
-	}
+	};
 });
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -832,9 +834,9 @@ $(function() {
 					}
 
 					this.set({
-						items : xml.find("Item"),
-						text : xml.attr('text'),
-						value : xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value'),
+						//items : xml.find("Item"),
+						//text : xml.attr('text'),
+						//value : xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value'),
 						visualType : xml.attr('visualType')
 					});
 				}
@@ -916,7 +918,7 @@ $(function() {
 		/* add an anonymous field or datacontrol to the method, will be added to the xml message when the method is called */
 		addAnonymousElement : function(element) {
 			var anonymousFields = this.get('anonymousFields');
-			if (anonymousFields == null) {
+			if (anonymousFields === undefined || anonymousFields === null) {
 				anonymousFields = [];
 			}
 			anonymousFields.push(element);
@@ -974,7 +976,7 @@ $(function() {
 								else {
 
 									/*
-									 * NOT IMPLEMENTED YET...problem with url where sessionHandle and activityHandle are GET parameters var urlBeforeLogin = expanz.Storage.getLastURL(); if(urlBeforeLogin != null && urlBeforeLogin != ''){ expanz.Storage.clearLastURL(); expanz.Views.redirect(urlBeforeLogin);
+									 * NOT IMPLEMENTED YET...problem with url where sessionHandle and activityHandle are GET parameters var urlBeforeLogin = expanz.Storage.getLastURL(); if(urlBeforeLogin !== null && urlBeforeLogin != ''){ expanz.Storage.clearLastURL(); expanz.Views.redirect(urlBeforeLogin);
 									 * return; }
 									 */
 									// redirect to default activity
@@ -1131,7 +1133,7 @@ $(function() {
 					/* unticked */
 					if (selectedId < 0) {
 						var re = new RegExp("(" + (-selectedId) + ";)|(;?" + (-selectedId) + "$)", "g");
-						lastValues = lastValues.replace(re, "")
+						lastValues = lastValues.replace(re, "");
 					}
 					/* ticked */
 					else {
@@ -1385,8 +1387,7 @@ $(function() {
 	window.expanz.helper = window.expanz.helper || {};
 
 	window.expanz.Net = {
-        
-	    lastRequest:"", lastResponse:"",
+		lastRequest:"", lastResponse:"",
 		// Request Objects -> to be passed to SendRequest
 		CreateSessionRequest : function(username, password, callbacks) {
 			expanz.Storage.clearSession(); /* clear previous existing sessions */
@@ -1396,7 +1397,7 @@ $(function() {
 		},
 
 		WebServerPing : function(nbAttempts) {
-			if (nbAttempts == undefined)
+			if (nbAttempts === undefined)
 				nbAttempts = 3;
 			if (window.expanz.pingError === undefined)
 				window.expanz.pingError = 0;
@@ -1539,7 +1540,7 @@ $(function() {
 				SendRequest(RequestObject.AnonymousMethod(name, methodAttributes, context, activity, anonymousFields), parseDeltaResponse(activity, initiator, callbacks),null,true);
 			}
 			else {
-			    SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
+				SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
 			}
 
 		},
@@ -1873,8 +1874,8 @@ $(function() {
 			else {
 				center += '<CreateActivity ';
 				center += 'name="' + activity.getAttr('name') + '"';
-				activity.getAttr('style') ? center += ' style="' + activity.getAttr('style') + '"' : '';
-				activity.getAttr('optimisation') ? center += ' suppressFields="1"' : '';
+				center += activity.getAttr('style') ? ' style="' + activity.getAttr('style') + '"' : '';
+				center += activity.getAttr('optimisation') ? ' suppressFields="1"' : '';
 				center += activity.getAttr('key') ? ' initialKey="' + activity.getAttr('key') + '">' : '>';
 
 				if (activity.getAttr('optimisation') === true) {
@@ -1894,7 +1895,7 @@ $(function() {
 					var type = dataControl.getAttr('type') ? ' type="' + dataControl.getAttr('type') + '"' : '';
 
 					center += '<DataPublication id="' + dataControlId + '"' + query + populateMethod + autoPopulate + type;
-					dataControl.getAttr('contextObject') ? center += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
+					center += dataControl.getAttr('contextObject') ? ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
 					center += '/>';
 
 				});
@@ -1927,7 +1928,7 @@ $(function() {
 						var type = dataControl.getAttr('type') ? ' type="' + dataControl.getAttr('type') + '"' : '';
 
 						body += '<DataPublication id="' + dataControlId + '"' + query + populateMethod + autoPopulate + type;
-						dataControl.getAttr('contextObject') ? body += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
+						body += dataControl.getAttr('contextObject') ? ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
 						body += '/>';
 					});
 				}
@@ -1983,7 +1984,7 @@ $(function() {
 					var type = dataControl.getAttr('type') ? ' type="' + dataControl.getAttr('type') + '"' : '';
 
 					body += '<DataPublication id="' + dataControlId + '"' + query + populateMethod + autoPopulate + type;
-					dataControl.getAttr('contextObject') ? body += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
+					body += dataControl.getAttr('contextObject') ? ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
 					body += '/>';
 				});
 			}
@@ -2070,7 +2071,7 @@ $(function() {
 					if (callbacks && callbacks.error) {
 						callbacks.error(errorString);
 					}
-					window.expanz.logToConsole(errorString + " " + xml);
+					window.expanz.logToConsole(errorString);
 					return;
 				}
 			}
@@ -2102,37 +2103,37 @@ $(function() {
 
 	function parseRoles(xmlElement) {
 
-		if (xmlElement == undefined || xmlElement.length == 0)
+		if (xmlElement === undefined || xmlElement.length === 0)
 			return null;
 		var roles = {};
 		$(xmlElement).children('UserRole').each(function() {
 			roles[$(this).attr('id')] = {
 				id : $(this).attr('id'),
 				name : $(this).text()
-			}
+			};
 		});
 		return roles;
 	}
 
 	function parseDashboards(xmlElement) {
 
-		if (xmlElement == undefined || xmlElement.length == 0)
+		if (xmlElement === undefined || xmlElement.length === 0)
 			return null;
 		var dashboards = {};
 		$(xmlElement).children().each(function() {
 			dashboards[this.tagName] = {
 				'id' : this.tagName
-			}
+			};
 			for ( var j = 0; j < this.attributes.length; j++) {
 				var attribute = this.attributes.item(j);
 				dashboards[this.tagName][attribute.nodeName] = attribute.nodeValue;
 
 				/* update field if in the view */
 				var dashboardField = window.expanz.Dashboards.get(this.tagName + "_" + attribute.nodeName);
-				if (dashboardField != null) {
+				if (dashboardField !== null) {
 					dashboardField.set({
 						value : attribute.nodeValue
-					})
+					});
 				}
 			}
 
@@ -2301,7 +2302,7 @@ $(function() {
 
 				/* DASHBOARD UPDATE CASE */
 				var dashboards = parseDashboards($(execResults).find("Dashboards"));
-				if (dashboards != null) {
+				if (dashboards !== null) {
 					expanz.Storage.setDashboards(dashboards);
 				}
 
@@ -2414,7 +2415,7 @@ $(function() {
 			});
 
 			var execResults = $(xml).find("ExecXResult");
-			if (execResults == null || execResults.length == 0) {
+			if (execResults === null || execResults.length === 0) {
 				execResults = $(xml).find("ExecAnonymousXResult");
 			}
 
@@ -2429,7 +2430,7 @@ $(function() {
 
 				/* DASHBOARD UPDATE CASE */
 				var dashboards = parseDashboards($(execResults).find("Dashboards"));
-				if (dashboards != null) {
+				if (dashboards !== null) {
 					expanz.Storage.setDashboards(dashboards);
 				}
 
@@ -2512,13 +2513,18 @@ $(function() {
 					var field = activity.get(id);
 					if (field && field !== undefined) {
 						field.publish($(this), activity);
+						if (field.attributes.visualType !== undefined) {
+							//loginPopup.el.find('[bind=login]')
+							window.expanz.showVariantPanel(activity);
+							//window.expanz.CreateVariantPanel($(this));
+						}
 					}
 				});
 
 				/* FILE CASE */
 				$(execResults).find('File').each(function(data) {
 
-					if ($(this).attr('field') !== undefined && $(this).attr('path') != undefined) {
+					if ($(this).attr('field') !== undefined && $(this).attr('path') !== undefined) {
 						window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
 						expanz.Net.GetBlobRequest($(this).attr('field'), activity, initiator);
 					}
@@ -2738,16 +2744,16 @@ $(function() {
 	var requestBusy;
 	var requestQueue = [];
 	var SendRequest = function (request, responseHandler, isPopup, callAsync) {
-	    if (false && requestBusy) {
-            requestQueue.push([request, responseHandler, isPopup])
-	    }
-	    requestBusy = true;
-	    window.expanz.Net.lastRequest = request.data;
-	    var isAsync = true;
-	    if (callAsync !== undefined && callAsync) {
-	        isAsync = true;
-	    }
-	    $(window.expanz.html.busyIndicator()).trigger("isBusy");
+		if (false && requestBusy) {
+			requestQueue.push([request, responseHandler, isPopup]);
+		}
+		requestBusy = true;
+		window.expanz.Net.lastRequest = request.data;
+		var isAsync = true;
+		if (callAsync !== undefined && callAsync) {
+			isAsync = true;
+		}
+		$(window.expanz.html.busyIndicator()).trigger("isBusy");
 		if (config._URLproxy !== undefined && config._URLproxy.length > 0) {
 			$.ajax({
 				type : 'POST',
@@ -2759,11 +2765,11 @@ $(function() {
 				},
 				dataType : 'XML',
 				processData: true,
-                async: isAsync,
+				async: isAsync,
 				complete: function (HTTPrequest) {
-				    requestBusy = false;
-				    window.expanz.Net.lastResponse = HTTPrequest.responseText;
-				    $(window.expanz.html.busyIndicator()).trigger("notBusy");
+					requestBusy = false;
+					window.expanz.Net.lastResponse = HTTPrequest.responseText;
+					$(window.expanz.html.busyIndicator()).trigger("notBusy");
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
 					}
@@ -2775,7 +2781,7 @@ $(function() {
 							WinId.document.close();
 						}
 						else {
-						    if (responseHandler) {
+							if (responseHandler) {
 								eval(responseHandler)(HTTPrequest.responseXML);
 							}
 						}
@@ -2997,8 +3003,8 @@ $(function() {
 		/* is used for display but HAVE TO be enforced on the server as well */
 		hasRole : function(id) {
 			var roles = JSON.parse(this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'roles.list'));
-			if (roles != null) {
-				return (roles[id] != undefined)
+			if (roles !== null) {
+				return (roles[id] !== undefined);
 			}
 			return false;
 		},
@@ -3010,7 +3016,7 @@ $(function() {
 
 		getDashboardFieldValue : function(dashboardName, fieldName) {
 			var dashboards = JSON.parse(this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'dashboards'));
-			if (dashboards != null && dashboards[dashboardName] != null) {
+			if (dashboards !== null && dashboards[dashboardName] !== null) {
 				return (dashboards[dashboardName][fieldName]);
 			}
 			return null;
@@ -3178,7 +3184,7 @@ $(function() {
 					if (window.config._homepage) {
 						var homeClass = "";
 						
-						var url = getPageUrl($(this).attr('form'));
+						url = getPageUrl($(this).attr('form'));
 						var urlHome = getPageUrl(window.config._homepage);
 						if (urlHome == currentPage) {
 							homeClass = "selected selectedNew ";
@@ -3245,7 +3251,7 @@ $(function() {
 					if (this.activities.length > 0) {
 						/* replace the link of the parent if only one activity in the menu */
 						if (this.activities.length == 1) {
-							var url = this.activities[0].url;
+							url = this.activities[0].url;
 							el.find("[class='menuTitle']").attr('href', url);
 							/* workaround for kendo issue : bind touchend */
 							el.find("[class='menuTitle']").bind("touchend", function(e) {
@@ -3335,16 +3341,16 @@ function pop(ary, map) { // , name, key ) {
 }
 
 function isVisibleOnScreen(elem) {
-	var $window = $(window)
-	var viewport_top = $window.scrollTop()
-	var viewport_height = $window.height()
-	var viewport_bottom = viewport_top + viewport_height
-	var $elem = $(elem)
-	var top = $elem.offset().top
-	var height = $elem.height()
-	var bottom = top + height
+	var $window = $(window);
+	var viewport_top = $window.scrollTop();
+	var viewport_height = $window.height();
+	var viewport_bottom = viewport_top + viewport_height;
+	var $elem = $(elem);
+	var top = $elem.offset().top;
+	var height = $elem.height();
+	var bottom = top + height;
 
-	return (top >= viewport_top && top < viewport_bottom) || (bottom > viewport_top && bottom <= viewport_bottom) || (height > viewport_height && top <= viewport_top && bottom >= viewport_bottom)
+	return (top >= viewport_top && top < viewport_bottom) || (bottom > viewport_top && bottom <= viewport_bottom) || (height > viewport_height && top <= viewport_top && bottom >= viewport_bottom);
 }
 
 function supports_history_api() {
@@ -3373,10 +3379,10 @@ function getObjectSortAscendingFunction(attribute) {
 		var nameA = a[attribute].toLowerCase();
 		var nameB = b[attribute].toLowerCase();
 		if (nameA < nameB) // sort string ascending
-			return -1
+			return -1;
 		if (nameA > nameB)
-			return 1
-		return 0 // default return value (no sorting)
+			return 1;
+		return 0; // default return value (no sorting)
 	};
 }
 
@@ -3464,13 +3470,14 @@ String.prototype.endsWith = function(suffix) {
 };
 
 XMLDocumentsToXMLString = function(xmlDoc) {
+	var str;
 	if (window.ActiveXObject) {
-		var str = xmlDoc.xml;
+		str = xmlDoc.xml;
 		return str;
 	}
 	// code for Mozilla, Firefox, Opera, etc.
 	else {
-		var str = (new XMLSerializer()).serializeToString(xmlDoc);
+		str = (new XMLSerializer()).serializeToString(xmlDoc);
 		return str;
 	}
 };
@@ -3512,19 +3519,19 @@ isImageValid = function(imagePath) {
 };
 
 function createMailtoLink(emailAddress) {
-	if (emailAddress == null)
+	if (emailAddress === null)
 		return '';
 	return "<a href='mailto:" + emailAddress + "'>" + emailAddress + "</a>";
 }
 
 addDollar = function(price) {
-	if (price == null || price == '')
+	if (price === null || price === '')
 		return '';
 	return "$ " + price;
 };
 
 addPercent = function(number) {
-	if (number == null || number == '')
+	if (number === null || number === '')
 		return '';
 	return number + "%";
 };
@@ -3560,13 +3567,14 @@ function getQueryHashParameterByName(name) {
 }
 
 function loadjscssfile(filename, filetype) {
+	var fileref;
 	if (filetype == "js") { // if filename is a external JavaScript file
-		var fileref = document.createElement('script');
+		fileref = document.createElement('script');
 		fileref.setAttribute("type", "text/javascript");
 		fileref.setAttribute("src", filename);
 	}
 	else if (filetype == "css") { // if filename is an external CSS file
-		var fileref = document.createElement("link");
+		fileref = document.createElement("link");
 		fileref.setAttribute("rel", "stylesheet");
 		fileref.setAttribute("type", "text/css");
 		fileref.setAttribute("href", filename);
@@ -3596,11 +3604,11 @@ jQuery.fn.center = function(params) {
 		var width = $self.width();
 		var height = $self.height();
 		// get the paddings
-		var paddingTop = parseInt($self.css("padding-top"));
-		var paddingBottom = parseInt($self.css("padding-bottom"));
+		var paddingTop = parseInt($self.css("padding-top"), 10);
+		var paddingBottom = parseInt($self.css("padding-bottom"), 10);
 		// get the borders
-		var borderTop = parseInt($self.css("border-top-width"));
-		var borderBottom = parseInt($self.css("border-bottom-width"));
+		var borderTop = parseInt($self.css("border-top-width"), 10);
+		var borderBottom = parseInt($self.css("border-bottom-width"), 10);
 		// get the media of padding and borders
 		var mediaBorder = (borderTop + borderBottom) / 2;
 		var mediaPadding = (paddingTop + paddingBottom) / 2;
@@ -3638,7 +3646,7 @@ jQuery.fn.center = function(params) {
 var keyStr = "ABCDEFGHIJKLMNOP" + "QRSTUVWXYZabcdef" + "ghijklmnopqrstuv" + "wxyz0123456789+/" + "=";
 
 function encode64(input) {
-	if (input == undefined)
+	if (input === undefined)
 		return undefined;
 	var output = "";
 	var chr1, chr2, chr3 = "";
@@ -3671,7 +3679,7 @@ function encode64(input) {
 }
 
 function decode64(input) {
-	if (input == undefined)
+	if (input === undefined)
 		return undefined;
 	var output = "";
 	var chr1, chr2, chr3 = "";
@@ -3803,8 +3811,9 @@ $(function() {
 			return function() {
 				var errorId = 'error' + this.model.get('id').replace(/\./g, "_");
 				if (this.el.attr('showError') !== 'false') {
+					var errorEl;
 					if (this.model.get('errorMessage') !== undefined) {
-						var errorEl = this.el.find('#' + errorId);
+						errorEl = this.el.find('#' + errorId);
 						if (errorEl.length < 1) {
 							this.el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="' + errorId + '"></p>');
 							errorEl = this.el.find('#' + errorId);
@@ -3816,7 +3825,7 @@ $(function() {
 						// window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
 					}
 					else {
-						var errorEl = this.el.find('#' + errorId);
+						errorEl = this.el.find('#' + errorId);
 						if (errorEl) {
 							errorEl.hide();
 						}
@@ -3968,7 +3977,7 @@ $(function() {
 			this.contextMenuEl.html("");
 
 			var data = this.model.get('data');
-			if (data === undefined || data == null)
+			if (data === undefined || data === null)
 				return;
 
 			/* position menu below button */
@@ -4064,7 +4073,7 @@ $(function() {
 						hostEl.append("<div id='pagingBar' class='paging'></div>");
 					}
 
-					var pagingBar = hostEl.find("#pagingBar");
+					pagingBar = hostEl.find("#pagingBar");
 					for ( var i = 0; i < nbPages; i++) {
 						var inputId = this.model.getAttr('id') + "BtnPage" + i;
 						var disabled = "";
@@ -4087,8 +4096,8 @@ $(function() {
 			// window.expanz.logToConsole("GridView rendered for page " + currentPage);
 
 			var rows = this.model.getAllRows();
-			var firstItem = parseInt(currentPage * itemsPerPage);
-			var lastItem = Math.min(firstItem + parseInt(itemsPerPage), rows.length);
+			var firstItem = parseInt(currentPage * itemsPerPage, 10);
+			var lastItem = Math.min(firstItem + parseInt(itemsPerPage, 10), rows.length);
 
 			var hasItem = (lastItem > firstItem);
 
@@ -4123,7 +4132,8 @@ $(function() {
 				else {
 					$(hostEl).addClass("nonEmptyGrid");
 					$(hostEl).removeClass("emptyGrid");
-
+					
+					var that;
 					/* datagrid/list configuration (nb items per page, sorting as combo box) */
 					if (enableConfiguration) {
 						$(hostEl).parent().prepend('<div id="' + hostId + '_Configuration"></div>');
@@ -4140,27 +4150,26 @@ $(function() {
 						}
 						selectEl.append('</select></div>');
 
-						var that = this;
+						that = this;
 						selectEl.change(function() {
-							that.renderWithPaging(currentPage, $(this).val(), currentSortField, !currentSortAsc)
+							that.renderWithPaging(currentPage, $(this).val(), currentSortField, !currentSortAsc);
 						});
 					}
 
 					/* header template if defined */
 					if (headerTemplate && headerTemplate.length > 0) {
-						var that = this;
+						that = this;
 						$(hostEl).append(headerTemplate.html());
 						$(hostEl).find("[sortField]").each(function() {
 							var fieldName = $(this).attr('sortField');
 
 							var defaultSorted = $(this).attr('defaultSorted');
-							if (currentSortField == null && defaultSorted != null) {
+							if (currentSortField === null && defaultSorted !== null) {
 								currentSortAsc = defaultSorted.toLowerCase() == 'desc' ? false : true;
 								currentSortField = fieldName;
 								that.model.sortRows(currentSortField, currentSortAsc);
 								rows = that.model.getAllRows();
 							}
-							;
 
 							$(this).addClass("sortable");
 							if (fieldName == currentSortField) {
@@ -4425,11 +4434,11 @@ $(function() {
 					return false;
 			});
 
-			if ($(el).find("#" + elId + "NextBtn").length == 0) {
+			if ($(el).find("#" + elId + "NextBtn").length === 0) {
 				$(el).find("li.rotatingItem").last().after("<li class='rotatingButton'><button id='" + elId + "NextBtn'>></button></li>");
 				$(el).find("#" + elId + "NextBtn").unbind("click");
 			}
-			if ($("#" + elId + "PrevBtn").length == 0) {
+			if ($("#" + elId + "PrevBtn").length === 0) {
 				$(el).find("li.rotatingItem").first().before("<li class='rotatingButton'><button  id='" + elId + "PrevBtn'><</button></li>");
 				$(el).find("#" + elId + "PrevBtn").unbind("click");
 			}
@@ -5076,7 +5085,7 @@ $(function() {
 		//if (loginUrl === undefined) {
 		//	loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
 			/* if empty mean we are at the root of the website */
-		//	if (loginUrl == "")
+		//	if (loginUrl === "")
 		//		loginUrl = "/";
 		//}
 		// window.expanz.logToConsole("getLoginURL : " + loginUrl);
@@ -5138,17 +5147,14 @@ $(function() {
 					return;
 				}
 				var data = window.expanz.messageController.findKey(messageText);
-				if (data != null) {
+				if (data !== null) {
 					this._addMessageByKey(data['key'], data['data'], messageType, data['popup']);
 				}
 				else {
-					if (messageText != "") {
+					if (messageText !== "") {
 						this.displayMessage(messageText, messageType);
-						if (window.config._showAllMessages === true && messageText != "") {
-							if (messageKey !== undefined)
-								window.expanz.logToConsole(messageType + ': ' + messageKey + messageData);
-							else
-								window.expanz.logToConsole(messageType + ': ' + messageData);
+						if (window.config._showAllMessages === true && messageText !== "") {
+							window.expanz.logToConsole(messageType + ': ' + messageText);
 						}
 					}
 				}
@@ -5290,7 +5296,7 @@ $(function() {
 									messageItem.delay(5000).slideUp(800, function() {
 										messageItem.remove();
 										// if it was the last message in the message notification area, we hide the notification area.
-										if ($(el).find("div").length == 0) {
+										if ($(el).find("div").length === 0) {
 											$(el).hide();
 										}
 									});
@@ -5331,6 +5337,14 @@ $(function() {
 		return;
 	};
 
+	window.expanz.CreateVariantPanel = function(DOMObject, callbacks) {
+
+		DOMObject || (DOMObject = $('body'));
+
+		var login = createVariantPanel(DOMObject, callbacks);
+		return;
+	};
+	
 	// window.expanz.DestroyActivity = function(DOMObject) {
 	//
 	// // find the given activity in list from the DOMObject
@@ -5418,6 +5432,15 @@ $(function() {
 
 		return;
 
+	};
+
+	window.expanz.showVariantPanel = function(activity) {
+		var variantPanel = window.expanz.Factory.VariantPanel($('[bind=variantpanelfield]'));
+
+		expanz.CreateVariantPanel($('[bind=variantpanelfield]'));
+		//CreateVariantPanel(variantPanel.el.find('[bind=variantpanelfield]'));
+
+		return;
 	};
 
 	window.expanz.createActivityWindow = function(parentActivity, id, style, key, title) {
@@ -5557,6 +5580,16 @@ $(function() {
 		return loginView;
 	}
 
+	function createVariantPanel(dom, callbacks) {
+
+		var variantPanelView;
+		if (dom.attr('bind') && (dom.attr('bind').toLowerCase() === 'variantpanelfield')) {
+			variantPanelView = expanz.Factory.VariantPanel(dom);
+		}
+
+		return variantPanelView;
+	}
+
 	function loadMenu(el, displayEmptyItems) {
 
 		// Load Menu & insert it into #menu
@@ -5650,7 +5683,7 @@ $(function() {
 	/* apply security roles -> hide stuff */
 	_.each($("body").find("[requiresRole]"), function(el) {
 		var roles = $(el).attr("requiresRole");
-		if (roles != null && roles != "") {
+		if (roles !== null && roles !== "") {
 			var roleFound = false;
 			roles = roles.split(" ");
 			for ( var i = 0; i < roles.length; i++) {

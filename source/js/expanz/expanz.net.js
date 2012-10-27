@@ -21,8 +21,7 @@ $(function() {
 	window.expanz.helper = window.expanz.helper || {};
 
 	window.expanz.Net = {
-        
-	    lastRequest:"", lastResponse:"",
+		lastRequest:"", lastResponse:"",
 		// Request Objects -> to be passed to SendRequest
 		CreateSessionRequest : function(username, password, callbacks) {
 			expanz.Storage.clearSession(); /* clear previous existing sessions */
@@ -175,7 +174,7 @@ $(function() {
 				SendRequest(RequestObject.AnonymousMethod(name, methodAttributes, context, activity, anonymousFields), parseDeltaResponse(activity, initiator, callbacks),null,true);
 			}
 			else {
-			    SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
+				SendRequest(RequestObject.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
 			}
 
 		},
@@ -734,31 +733,31 @@ $(function() {
 			processAreas.push(processArea);
 		});
 		return processAreas;
-	};
+	}
 
 	function parseRoles(xmlElement) {
 
-		if (xmlElement === undefined || xmlElement.length == 0)
+		if (xmlElement === undefined || xmlElement.length === 0)
 			return null;
 		var roles = {};
 		$(xmlElement).children('UserRole').each(function() {
 			roles[$(this).attr('id')] = {
 				id : $(this).attr('id'),
 				name : $(this).text()
-			}
+			};
 		});
 		return roles;
 	}
 
 	function parseDashboards(xmlElement) {
 
-		if (xmlElement === undefined || xmlElement.length == 0)
+		if (xmlElement === undefined || xmlElement.length === 0)
 			return null;
 		var dashboards = {};
 		$(xmlElement).children().each(function() {
 			dashboards[this.tagName] = {
 				'id' : this.tagName
-			}
+			};
 			for ( var j = 0; j < this.attributes.length; j++) {
 				var attribute = this.attributes.item(j);
 				dashboards[this.tagName][attribute.nodeName] = attribute.nodeValue;
@@ -768,13 +767,13 @@ $(function() {
 				if (dashboardField !== null) {
 					dashboardField.set({
 						value : attribute.nodeValue
-					})
+					});
 				}
 			}
 
 		});
 		return dashboards;
-	};
+	}
 
 	function fillActivityData(processAreas, url, name, style, gridviewList) {
 		$.each(processAreas, function(i, processArea) {
@@ -790,7 +789,7 @@ $(function() {
 
 		});
 
-	};
+	}
 
 	function parseExecAnonymousResponse(callbacks) {
 		return function apply(xml) {
@@ -847,7 +846,7 @@ $(function() {
 				});
 			}
 		};
-	};
+	}
 	
 	function parseGetSessionDataResponse(callbacks) {
 		return function apply(xml) {
@@ -895,7 +894,7 @@ $(function() {
 			});
 
 		};
-	};
+	}
 
 	function parseCreateActivityResponse(activity, callbacks) {
 		return function apply(xml) {
@@ -1036,7 +1035,7 @@ $(function() {
 
 			return;
 		};
-	};
+	}
 
 	function parseDeltaResponse(activity, initiator, callbacks) {
 		return function apply(xml) {
@@ -1050,7 +1049,7 @@ $(function() {
 			});
 
 			var execResults = $(xml).find("ExecXResult");
-			if (execResults === null || execResults.length == 0) {
+			if (execResults === null || execResults.length === 0) {
 				execResults = $(xml).find("ExecAnonymousXResult");
 			}
 
@@ -1331,7 +1330,7 @@ $(function() {
 
 			return;
 		};
-	};
+	}
 
 	function parseDestroyActivityResponse(callbacks) {
 		return function apply(xml) {
@@ -1353,7 +1352,7 @@ $(function() {
 			}
 			return;
 		};
-	};
+	}
 
 	function parseReleaseSessionResponse(callbacks) {
 		return function apply(xml) {
@@ -1371,7 +1370,7 @@ $(function() {
 			}
 			return;
 		};
-	};
+	}
 
 	/*
 	 * Send Request :manage the sending of XML requests to the server, and dispatching of response handlers
@@ -1379,16 +1378,16 @@ $(function() {
 	var requestBusy;
 	var requestQueue = [];
 	var SendRequest = function (request, responseHandler, isPopup, callAsync) {
-	    if (false && requestBusy) {
-            requestQueue.push([request, responseHandler, isPopup])
-	    }
-	    requestBusy = true;
-	    window.expanz.Net.lastRequest = request.data;
-	    var isAsync = true;
-	    if (callAsync !== undefined && callAsync) {
-	        isAsync = true;
-	    }
-	    $(window.expanz.html.busyIndicator()).trigger("isBusy");
+		if (false && requestBusy) {
+			requestQueue.push([request, responseHandler, isPopup]);
+		}
+		requestBusy = true;
+		window.expanz.Net.lastRequest = request.data;
+		var isAsync = true;
+		if (callAsync !== undefined && callAsync) {
+			isAsync = true;
+		}
+		$(window.expanz.html.busyIndicator()).trigger("isBusy");
 		if (config._URLproxy !== undefined && config._URLproxy.length > 0) {
 			$.ajax({
 				type : 'POST',
@@ -1400,11 +1399,11 @@ $(function() {
 				},
 				dataType : 'XML',
 				processData: true,
-                async: isAsync,
+				async: isAsync,
 				complete: function (HTTPrequest) {
-				    requestBusy = false;
-				    window.expanz.Net.lastResponse = HTTPrequest.responseText;
-				    $(window.expanz.html.busyIndicator()).trigger("notBusy");
+					requestBusy = false;
+					window.expanz.Net.lastResponse = HTTPrequest.responseText;
+					$(window.expanz.html.busyIndicator()).trigger("notBusy");
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
 					}
@@ -1416,7 +1415,7 @@ $(function() {
 							WinId.document.close();
 						}
 						else {
-						    if (responseHandler) {
+							if (responseHandler) {
 								eval(responseHandler)(HTTPrequest.responseXML);
 							}
 						}

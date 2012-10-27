@@ -37,8 +37,9 @@ $(function() {
 			return function() {
 				var errorId = 'error' + this.model.get('id').replace(/\./g, "_");
 				if (this.el.attr('showError') !== 'false') {
+					var errorEl;
 					if (this.model.get('errorMessage') !== undefined) {
-						var errorEl = this.el.find('#' + errorId);
+						errorEl = this.el.find('#' + errorId);
 						if (errorEl.length < 1) {
 							this.el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="' + errorId + '"></p>');
 							errorEl = this.el.find('#' + errorId);
@@ -50,7 +51,7 @@ $(function() {
 						// window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
 					}
 					else {
-						var errorEl = this.el.find('#' + errorId);
+						errorEl = this.el.find('#' + errorId);
 						if (errorEl) {
 							errorEl.hide();
 						}
@@ -298,7 +299,7 @@ $(function() {
 						hostEl.append("<div id='pagingBar' class='paging'></div>");
 					}
 
-					var pagingBar = hostEl.find("#pagingBar");
+					pagingBar = hostEl.find("#pagingBar");
 					for ( var i = 0; i < nbPages; i++) {
 						var inputId = this.model.getAttr('id') + "BtnPage" + i;
 						var disabled = "";
@@ -321,8 +322,8 @@ $(function() {
 			// window.expanz.logToConsole("GridView rendered for page " + currentPage);
 
 			var rows = this.model.getAllRows();
-			var firstItem = parseInt(currentPage * itemsPerPage);
-			var lastItem = Math.min(firstItem + parseInt(itemsPerPage), rows.length);
+			var firstItem = parseInt(currentPage * itemsPerPage, 10);
+			var lastItem = Math.min(firstItem + parseInt(itemsPerPage, 10), rows.length);
 
 			var hasItem = (lastItem > firstItem);
 
@@ -357,7 +358,8 @@ $(function() {
 				else {
 					$(hostEl).addClass("nonEmptyGrid");
 					$(hostEl).removeClass("emptyGrid");
-
+					
+					var that;
 					/* datagrid/list configuration (nb items per page, sorting as combo box) */
 					if (enableConfiguration) {
 						$(hostEl).parent().prepend('<div id="' + hostId + '_Configuration"></div>');
@@ -374,15 +376,15 @@ $(function() {
 						}
 						selectEl.append('</select></div>');
 
-						var that = this;
+						that = this;
 						selectEl.change(function() {
-							that.renderWithPaging(currentPage, $(this).val(), currentSortField, !currentSortAsc)
+							that.renderWithPaging(currentPage, $(this).val(), currentSortField, !currentSortAsc);
 						});
 					}
 
 					/* header template if defined */
 					if (headerTemplate && headerTemplate.length > 0) {
-						var that = this;
+						that = this;
 						$(hostEl).append(headerTemplate.html());
 						$(hostEl).find("[sortField]").each(function() {
 							var fieldName = $(this).attr('sortField');
@@ -394,7 +396,6 @@ $(function() {
 								that.model.sortRows(currentSortField, currentSortAsc);
 								rows = that.model.getAllRows();
 							}
-							;
 
 							$(this).addClass("sortable");
 							if (fieldName == currentSortField) {
@@ -659,11 +660,11 @@ $(function() {
 					return false;
 			});
 
-			if ($(el).find("#" + elId + "NextBtn").length == 0) {
+			if ($(el).find("#" + elId + "NextBtn").length === 0) {
 				$(el).find("li.rotatingItem").last().after("<li class='rotatingButton'><button id='" + elId + "NextBtn'>></button></li>");
 				$(el).find("#" + elId + "NextBtn").unbind("click");
 			}
-			if ($("#" + elId + "PrevBtn").length == 0) {
+			if ($("#" + elId + "PrevBtn").length === 0) {
 				$(el).find("li.rotatingItem").first().before("<li class='rotatingButton'><button  id='" + elId + "PrevBtn'><</button></li>");
 				$(el).find("#" + elId + "PrevBtn").unbind("click");
 			}

@@ -135,7 +135,7 @@ $.fn.KendoPanelBarAdapter = function(options) {
 
 			if (!isStatic) {
 
-				var elem = undefined;
+				var elem;
 				$(xmlData).find("[" + labelAttribute + "]").each(function() {
 					if (selectedText === $(this).attr(labelAttribute)) {
 						elem = $(this);

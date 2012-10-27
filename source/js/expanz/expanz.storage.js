@@ -83,7 +83,7 @@ $(function() {
 		hasRole : function(id) {
 			var roles = JSON.parse(this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'roles.list'));
 			if (roles !== null) {
-				return (roles[id] !== undefined)
+				return (roles[id] !== undefined);
 			}
 			return false;
 		},
@@ -263,7 +263,7 @@ $(function() {
 					if (window.config._homepage) {
 						var homeClass = "";
 						
-						var url = getPageUrl($(this).attr('form'));
+						url = getPageUrl($(this).attr('form'));
 						var urlHome = getPageUrl(window.config._homepage);
 						if (urlHome == currentPage) {
 							homeClass = "selected selectedNew ";
@@ -330,7 +330,7 @@ $(function() {
 					if (this.activities.length > 0) {
 						/* replace the link of the parent if only one activity in the menu */
 						if (this.activities.length == 1) {
-							var url = this.activities[0].url;
+							url = this.activities[0].url;
 							el.find("[class='menuTitle']").attr('href', url);
 							/* workaround for kendo issue : bind touchend */
 							el.find("[class='menuTitle']").bind("touchend", function(e) {

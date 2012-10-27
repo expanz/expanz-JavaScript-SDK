@@ -75,7 +75,7 @@ $.fn.KendoTreeAdapter = function(options) {
 			// TODO: Handle more than 2 levels with filtering
 			/* creating a filtered array of data */
 			var regExp = new RegExp(filter, "i");
-			var newData = [];
+			newData = [];
 			_.each(originalData, function(subData) {
 				var parentObj = {};
 				parentObj.text = subData.text;
@@ -233,7 +233,7 @@ $.fn.KendoTreeAdapter = function(options) {
 
 			if (!isStatic) {
 
-				var elem = undefined;
+				var elem;
 				$(xmlData).find("[" + labelAttribute + "]").each(function() {
 					if (selectedText === $(this).attr(labelAttribute)) {
 						elem = $(this);

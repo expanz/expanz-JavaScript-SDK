@@ -1191,7 +1191,7 @@ $(function() {
 				var that = this;
 				$("#lvMiniCart").bind("table:rendered", function() {
 					/* hiding the checkout part if no items and not order submitted message displayed */
-					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === "0" && ($('.k-window-title:contains("Order Submitted")').length == 0) && $('.k-window-title:contains("Order Saved")').length == 0) {
+					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === "0" && ($('.k-window-title:contains("Order Submitted")').length === 0) && $('.k-window-title:contains("Order Saved")').length === 0) {
 						expanz.Views.redirect(that.shoppingCartPage);
 					}
 					else {

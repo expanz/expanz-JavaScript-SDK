@@ -25,16 +25,16 @@ function pop(ary, map) { // , name, key ) {
 }
 
 function isVisibleOnScreen(elem) {
-	var $window = $(window)
-	var viewport_top = $window.scrollTop()
-	var viewport_height = $window.height()
-	var viewport_bottom = viewport_top + viewport_height
-	var $elem = $(elem)
-	var top = $elem.offset().top
-	var height = $elem.height()
-	var bottom = top + height
+	var $window = $(window);
+	var viewport_top = $window.scrollTop();
+	var viewport_height = $window.height();
+	var viewport_bottom = viewport_top + viewport_height;
+	var $elem = $(elem);
+	var top = $elem.offset().top;
+	var height = $elem.height();
+	var bottom = top + height;
 
-	return (top >= viewport_top && top < viewport_bottom) || (bottom > viewport_top && bottom <= viewport_bottom) || (height > viewport_height && top <= viewport_top && bottom >= viewport_bottom)
+	return (top >= viewport_top && top < viewport_bottom) || (bottom > viewport_top && bottom <= viewport_bottom) || (height > viewport_height && top <= viewport_top && bottom >= viewport_bottom);
 }
 
 function supports_history_api() {
@@ -63,10 +63,10 @@ function getObjectSortAscendingFunction(attribute) {
 		var nameA = a[attribute].toLowerCase();
 		var nameB = b[attribute].toLowerCase();
 		if (nameA < nameB) // sort string ascending
-			return -1
+			return -1;
 		if (nameA > nameB)
-			return 1
-		return 0 // default return value (no sorting)
+			return 1;
+		return 0; // default return value (no sorting)
 	};
 }
 
@@ -154,13 +154,14 @@ String.prototype.endsWith = function(suffix) {
 };
 
 XMLDocumentsToXMLString = function(xmlDoc) {
+	var str;
 	if (window.ActiveXObject) {
-		var str = xmlDoc.xml;
+		str = xmlDoc.xml;
 		return str;
 	}
 	// code for Mozilla, Firefox, Opera, etc.
 	else {
-		var str = (new XMLSerializer()).serializeToString(xmlDoc);
+		str = (new XMLSerializer()).serializeToString(xmlDoc);
 		return str;
 	}
 };
@@ -250,13 +251,14 @@ function getQueryHashParameterByName(name) {
 }
 
 function loadjscssfile(filename, filetype) {
+	var fileref;
 	if (filetype == "js") { // if filename is a external JavaScript file
-		var fileref = document.createElement('script');
+		fileref = document.createElement('script');
 		fileref.setAttribute("type", "text/javascript");
 		fileref.setAttribute("src", filename);
 	}
 	else if (filetype == "css") { // if filename is an external CSS file
-		var fileref = document.createElement("link");
+		fileref = document.createElement("link");
 		fileref.setAttribute("rel", "stylesheet");
 		fileref.setAttribute("type", "text/css");
 		fileref.setAttribute("href", filename);
@@ -286,11 +288,11 @@ jQuery.fn.center = function(params) {
 		var width = $self.width();
 		var height = $self.height();
 		// get the paddings
-		var paddingTop = parseInt($self.css("padding-top"));
-		var paddingBottom = parseInt($self.css("padding-bottom"));
+		var paddingTop = parseInt($self.css("padding-top"), 10);
+		var paddingBottom = parseInt($self.css("padding-bottom"), 10);
 		// get the borders
-		var borderTop = parseInt($self.css("border-top-width"));
-		var borderBottom = parseInt($self.css("border-bottom-width"));
+		var borderTop = parseInt($self.css("border-top-width"), 10);
+		var borderBottom = parseInt($self.css("border-bottom-width"), 10);
 		// get the media of padding and borders
 		var mediaBorder = (borderTop + borderBottom) / 2;
 		var mediaPadding = (paddingTop + paddingBottom) / 2;

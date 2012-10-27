@@ -1089,7 +1089,7 @@ $(function() {
 				var CartItemsCountField = this.activity.collection.get('CartItemsCount');
 				if (CartItemsCountField) {
 					CartItemsCountField.collection.bind('change:value', function(el) {
-						if (el.get('value') == 0) {
+						if (el.get('value') === 0) {
 							/* can hidden if wanted */
 							$("#miniCartBox").show();
 						}
@@ -1277,7 +1277,7 @@ $(function() {
 				var that = this;
 				$("#lvMiniCart").bind("table:rendered", function() {
 					/* hiding the checkout part if no items and not order submitted message displayed */
-					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === "0" && ($('.k-window-title:contains("Order Submitted")').length == 0) && $('.k-window-title:contains("Order Saved")').length == 0) {
+					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === "0" && ($('.k-window-title:contains("Order Submitted")').length === 0) && $('.k-window-title:contains("Order Saved")').length === 0) {
 						expanz.Views.redirect(that.shoppingCartPage);
 					}
 					else {
@@ -1358,7 +1358,7 @@ $(function() {
 			},
 
 			isAnonymous : function() {
-				if (this.activity == null)
+				if (this.activity === null)
 					return null;
 				return this.activity.collection.getAttr('allowAnonymous') === true && this.activity.collection.isAnonymous();
 			}
@@ -1392,7 +1392,7 @@ $(function() {
 		xml += '</Method>';
 		xml += '</Activity>';
 		window.expanz.Net.CreateAnonymousRequest(xml);
-	}
+	};
 
 	window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent = function(hostEl, initValue, min, max) {
 		if (min === undefined)
@@ -1440,7 +1440,7 @@ $(function() {
 			});
 
 		});
-	}
+	};
 
 	window.expanz.html.showLostPasswordPopup = function() {
 		var clientMessage = new expanz.Model.ClientMessage({
@@ -1452,7 +1452,7 @@ $(function() {
 			id : clientMessage.id,
 			model : clientMessage
 		}, $('body'));
-	}
+	};
 	
 });
 

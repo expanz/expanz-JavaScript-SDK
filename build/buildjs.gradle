@@ -176,6 +176,18 @@ task jshintadaptersjs(type: com.eriwen.gradle.js.tasks.JsHintTask) {
     source = "${buildDir}/expanz.adapters.all${jsVersion}.js"
     dest = file("${projectDir}/jshint-adapters.out")
 }
+//https://github.com/eriwen/gradle-js-plugin/issues/30
+// https://github.com/serby/jshint-config/blob/master/jshint-config.json
+//task jshintadaptersjs(type: Exec, description: 'runs jshint on all adapter files') {
+//    inputs.file file("${buildDir}/expanz.adapters.all${jsVersion}.js")
+//    outputs.file file("${projectDir}/jshint-adapters.xml")
+//
+//    def inputFile = "${buildDir}/expanz.adapters.all${jsVersion}.js"
+//    def jshintConfig = "${projectDir}/jshint.json"
+//
+//    commandLine = ["jshint", inputFile, "--config", jshintConfig, "--jslint-reporter"]
+//    standardOutput = new BufferedOutputStream(new FileOutputStream("${projectDir}/jshint-adapters.xml"))
+//}
 task jsdocadaptersjs(type: com.eriwen.gradle.js.tasks.JsDocTask) {
     source = javascript.source.adapters.js.files
     destinationDir = file("${jsDocDir}/adapters")

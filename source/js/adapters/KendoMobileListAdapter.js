@@ -84,11 +84,11 @@ $.fn.KendoMobileListAdapter = function(options) {
 				data : dataRows,
 				group : "category"
 			}),
-			 template: "${name}",
-			 
-			 click: function(e) {
-				 	window.expanz.logToConsole(e.dataItem.id);
-		    }
+			template: "${name}",
+
+			click: function(e) {
+				window.expanz.logToConsole(e.dataItem.id);
+			}
 
 		});
 	};
@@ -96,4 +96,4 @@ $.fn.KendoMobileListAdapter = function(options) {
 	/* bind listenner */
 	$(this).bind("publishData", publishData);
 
-}
+};

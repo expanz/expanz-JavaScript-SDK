@@ -103,15 +103,15 @@ $(function() {
 		method += '</span>';
 		return method;
 	};
-	 
-	 
+
+
 	window.expanz.html.renderHeader = function(siteName, siteUrl) {
 		var html = '';
 		if (!siteName)
 			siteName = '';
 		if (!siteUrl)
 			siteUrl = getSiteUrl();
-	 
+
 		html += '<div id="headBackground">';
 		html += '<div class="centerLogoArea">';
 		html += '<div id="siteName">' + siteName + '</div>';
