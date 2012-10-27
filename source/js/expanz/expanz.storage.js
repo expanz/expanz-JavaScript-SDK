@@ -33,7 +33,10 @@ $(function() {
 		},
 
 		_getStorageGlobalName : function() {
-			return "_expanz_" + config._AppSite + "_";
+			var siteCountry = config._siteCountry === undefined ? '' : '_' + config._siteCountry;
+			var siteEnvironment = config._siteEnvironment === undefined ? '' : '_' + config._siteEnvironment;
+		
+			return "_expanz_" + config._AppSite + siteCountry + siteEnvironment + "_";
 		},
 
 		getSessionHandle : function() {
