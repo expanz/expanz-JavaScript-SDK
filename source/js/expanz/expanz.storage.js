@@ -22,7 +22,7 @@ $(function() {
 			if (window['localStorage'] !== null && window.localStorage) {
 				/*
 				 * length is unused but please leave it. I don't know why but sometimes firefox get an empty window.localStorage by mistake Doing this force it to evaluate the window.localStorage object and it seems to work
-				 * SMN Possibly try Modernizer (http://diveintohtml5.info/storage.html)
+				 * SMN Possibly try Modernizr (http://diveintohtml5.info/storage.html)
 				 */
 				var lth = window.localStorage.length;
 				lth = lth;
