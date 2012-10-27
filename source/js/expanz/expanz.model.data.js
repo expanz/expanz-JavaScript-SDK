@@ -59,7 +59,7 @@ $(function() {
 					/* unticked */
 					if (selectedId < 0) {
 						var re = new RegExp("(" + (-selectedId) + ";)|(;?" + (-selectedId) + "$)", "g");
-						lastValues = lastValues.replace(re, "")
+						lastValues = lastValues.replace(re, "");
 					}
 					/* ticked */
 					else {

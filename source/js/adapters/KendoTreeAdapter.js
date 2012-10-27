@@ -184,7 +184,7 @@ $.fn.KendoTreeAdapter = function(options) {
 
 		/* add static element at the position asked */
 		_.each(staticElements, function(elem) {
-			if (elem.position != undefined && elem.position == 'end') {
+			if (elem.position !== undefined && elem.position == 'end') {
 				data.push({
 					text : $(elem).attr('label')
 				});

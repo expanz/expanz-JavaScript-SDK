@@ -202,7 +202,7 @@ $(function() {
 			this.contextMenuEl.html("");
 
 			var data = this.model.get('data');
-			if (data === undefined || data == null)
+			if (data === undefined || data === null)
 				return;
 
 			/* position menu below button */
@@ -388,7 +388,7 @@ $(function() {
 							var fieldName = $(this).attr('sortField');
 
 							var defaultSorted = $(this).attr('defaultSorted');
-							if (currentSortField == null && defaultSorted != null) {
+							if (currentSortField === null && defaultSorted !== null) {
 								currentSortAsc = defaultSorted.toLowerCase() == 'desc' ? false : true;
 								currentSortField = fieldName;
 								that.model.sortRows(currentSortField, currentSortAsc);

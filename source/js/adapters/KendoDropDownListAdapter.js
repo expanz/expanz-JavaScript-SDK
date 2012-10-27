@@ -18,7 +18,7 @@ $.fn.KendoDropDownListAdapter = function() {
 	var publishData = function(event, xml) {
 		var data = [];
 
-		if (emptyItemLabel != null) {
+		if (emptyItemLabel !== null) {
 			data.push({
 				text : emptyItemLabel,
 				value : ''
@@ -30,7 +30,7 @@ $.fn.KendoDropDownListAdapter = function() {
 			_.each($(row).find('Cell'), function(cell) {
 				data.push({
 					text : $(cell).text(),
-					value : rowId == 0 ? $(cell).text() : rowId
+					value : rowId === 0 ? $(cell).text() : rowId
 				});
 			});
 		});

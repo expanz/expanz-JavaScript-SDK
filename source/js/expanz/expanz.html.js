@@ -40,7 +40,7 @@ $(function() {
 		var className = 'gridHeader';
 		if (!label)
 			label = '';
-		if (label != '') {
+		if (label !== '') {
 			className += ' gridHeader' + label;
 		}
 		
@@ -115,12 +115,12 @@ $(function() {
 		html += '<div id="headBackground">';
 		html += '<div class="centerLogoArea">';
 		html += '<div id="siteName">' + siteName + '</div>';
-		if (siteUrl != '')
+		if (siteUrl !== '')
 			html += '<a href="' + siteUrl + '"><div id="logo"></div></a>';
 		html += '</div>';
 		html += '</div>';
 		return html;
-	}
+	};
 	
 	/*window.expanz.html.renderMainMenu = function() {
 		var html = '';
@@ -129,7 +129,7 @@ $(function() {
 		html += '<div id="menuContainer" bind="menu" homeLabel=" " logoutLabel="Log Out" backLabel=" " ></div>';
 		html += '</div>';
 		return html;
-	}
+	};
 	
 	window.expanz.html.renderNotification = function() {
 		var html = '';
@@ -144,7 +144,7 @@ $(function() {
 		html += '</div>';
 		html += '</div>';
 		return html;
-	}*/
+	};*/
 	
 	window.expanz.html.renderFooter = function(copyrightText, footerLinks) {
 		var html = '';
@@ -153,12 +153,12 @@ $(function() {
 		html += '<div class="left footerCopyright">';
 		if (!copyrightText)
 			copyrightText = '';
-		if (copyrightText != '')
+		if (copyrightText !== '')
 			html += '<div>' + copyrightText + '</div>';
 		html += '<div class="footerLinks">';
 		if (!footerLinks)
 			footerLinks = '';
-		if (footerLinks != '')
+		if (footerLinks !== '')
 			html += footerLinks;//'<a href="">Contact Us</a> <a href="">Feedback</a>';
 		html += '</div>';
 		html += '</div>';
@@ -183,7 +183,7 @@ $(function() {
 	window.expanz.html.isEmpty = function(value) {
 		if (value === undefined)
 			return true;
-		return value == "";
+		return value === "";
 	};
 	
 	window.expanz.html.findComponentModuleElement = function(component, module) {
@@ -197,5 +197,5 @@ $(function() {
 			return $(el);
 		}
 		return undefined;
-	}
+	};
 });

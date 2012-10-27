@@ -82,8 +82,8 @@ $(function() {
 		/* is used for display but HAVE TO be enforced on the server as well */
 		hasRole : function(id) {
 			var roles = JSON.parse(this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'roles.list'));
-			if (roles != null) {
-				return (roles[id] != undefined)
+			if (roles !== null) {
+				return (roles[id] !== undefined)
 			}
 			return false;
 		},
@@ -95,7 +95,7 @@ $(function() {
 
 		getDashboardFieldValue : function(dashboardName, fieldName) {
 			var dashboards = JSON.parse(this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'dashboards'));
-			if (dashboards != null && dashboards[dashboardName] != null) {
+			if (dashboards !== null && dashboards[dashboardName] !== null) {
 				return (dashboards[dashboardName][fieldName]);
 			}
 			return null;

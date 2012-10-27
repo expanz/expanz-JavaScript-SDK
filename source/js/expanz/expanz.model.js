@@ -99,9 +99,9 @@ $(function() {
 					}
 
 					this.set({
-						items : xml.find("Item"),
-						text : xml.attr('text'),
-						value : xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value'),
+						//items : xml.find("Item"),
+						//text : xml.attr('text'),
+						//value : xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value'),
 						visualType : xml.attr('visualType')
 					});
 				}
@@ -183,7 +183,7 @@ $(function() {
 		/* add an anonymous field or datacontrol to the method, will be added to the xml message when the method is called */
 		addAnonymousElement : function(element) {
 			var anonymousFields = this.get('anonymousFields');
-			if (anonymousFields == null) {
+			if (anonymousFields === undefined || anonymousFields === null) {
 				anonymousFields = [];
 			}
 			anonymousFields.push(element);
@@ -241,7 +241,7 @@ $(function() {
 								else {
 
 									/*
-									 * NOT IMPLEMENTED YET...problem with url where sessionHandle and activityHandle are GET parameters var urlBeforeLogin = expanz.Storage.getLastURL(); if(urlBeforeLogin != null && urlBeforeLogin != ''){ expanz.Storage.clearLastURL(); expanz.Views.redirect(urlBeforeLogin);
+									 * NOT IMPLEMENTED YET...problem with url where sessionHandle and activityHandle are GET parameters var urlBeforeLogin = expanz.Storage.getLastURL(); if(urlBeforeLogin !== null && urlBeforeLogin != ''){ expanz.Storage.clearLastURL(); expanz.Views.redirect(urlBeforeLogin);
 									 * return; }
 									 */
 									// redirect to default activity

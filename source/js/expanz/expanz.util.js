@@ -202,19 +202,19 @@ isImageValid = function(imagePath) {
 };
 
 function createMailtoLink(emailAddress) {
-	if (emailAddress == null)
+	if (emailAddress === null)
 		return '';
 	return "<a href='mailto:" + emailAddress + "'>" + emailAddress + "</a>";
 }
 
 addDollar = function(price) {
-	if (price == null || price == '')
+	if (price === null || price === '')
 		return '';
 	return "$ " + price;
 };
 
 addPercent = function(number) {
-	if (number == null || number == '')
+	if (number === null || number === '')
 		return '';
 	return number + "%";
 };
@@ -328,7 +328,7 @@ jQuery.fn.center = function(params) {
 var keyStr = "ABCDEFGHIJKLMNOP" + "QRSTUVWXYZabcdef" + "ghijklmnopqrstuv" + "wxyz0123456789+/" + "=";
 
 function encode64(input) {
-	if (input == undefined)
+	if (input === undefined)
 		return undefined;
 	var output = "";
 	var chr1, chr2, chr3 = "";
@@ -361,7 +361,7 @@ function encode64(input) {
 }
 
 function decode64(input) {
-	if (input == undefined)
+	if (input === undefined)
 		return undefined;
 	var output = "";
 	var chr1, chr2, chr3 = "";

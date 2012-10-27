@@ -31,7 +31,7 @@ $(function() {
 		//if (loginUrl === undefined) {
 		//	loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
 			/* if empty mean we are at the root of the website */
-		//	if (loginUrl == "")
+		//	if (loginUrl === "")
 		//		loginUrl = "/";
 		//}
 		// window.expanz.logToConsole("getLoginURL : " + loginUrl);
@@ -93,17 +93,14 @@ $(function() {
 					return;
 				}
 				var data = window.expanz.messageController.findKey(messageText);
-				if (data != null) {
+				if (data !== null) {
 					this._addMessageByKey(data['key'], data['data'], messageType, data['popup']);
 				}
 				else {
-					if (messageText != "") {
+					if (messageText !== "") {
 						this.displayMessage(messageText, messageType);
-						if (window.config._showAllMessages === true && messageText != "") {
-							if (messageKey !== undefined)
-								window.expanz.logToConsole(messageType + ': ' + messageKey + messageData);
-							else
-								window.expanz.logToConsole(messageType + ': ' + messageData);
+						if (window.config._showAllMessages === true && messageText !== "") {
+							window.expanz.logToConsole(messageType + ': ' + messageText);
 						}
 					}
 				}
@@ -286,6 +283,14 @@ $(function() {
 		return;
 	};
 
+	window.expanz.CreateVariantPanel = function(DOMObject, callbacks) {
+
+		DOMObject || (DOMObject = $('body'));
+
+		var login = createVariantPanel(DOMObject, callbacks);
+		return;
+	};
+	
 	// window.expanz.DestroyActivity = function(DOMObject) {
 	//
 	// // find the given activity in list from the DOMObject
@@ -373,6 +378,15 @@ $(function() {
 
 		return;
 
+	};
+
+	window.expanz.showVariantPanel = function(activity) {
+		var variantPanel = window.expanz.Factory.VariantPanel($('[bind=variantpanelfield]'));
+
+		expanz.CreateVariantPanel($('[bind=variantpanelfield]'));
+		//CreateVariantPanel(variantPanel.el.find('[bind=variantpanelfield]'));
+
+		return;
 	};
 
 	window.expanz.createActivityWindow = function(parentActivity, id, style, key, title) {
@@ -512,6 +526,16 @@ $(function() {
 		return loginView;
 	}
 
+	function createVariantPanel(dom, callbacks) {
+
+		var variantPanelView;
+		if (dom.attr('bind') && (dom.attr('bind').toLowerCase() === 'variantpanelfield')) {
+			variantPanelView = expanz.Factory.VariantPanel(dom);
+		}
+
+		return variantPanelView;
+	}
+
 	function loadMenu(el, displayEmptyItems) {
 
 		// Load Menu & insert it into #menu
@@ -605,7 +629,7 @@ $(function() {
 	/* apply security roles -> hide stuff */
 	_.each($("body").find("[requiresRole]"), function(el) {
 		var roles = $(el).attr("requiresRole");
-		if (roles != null && roles != "") {
+		if (roles !== null && roles !== "") {
 			var roleFound = false;
 			roles = roles.split(" ");
 			for ( var i = 0; i < roles.length; i++) {

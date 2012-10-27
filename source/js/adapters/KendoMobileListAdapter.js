@@ -18,15 +18,15 @@ $.fn.KendoMobileListAdapter = function(options) {
 
 	/* handle options */
 	if (options) {
-		if (options['labelAttribute'] != undefined)
+		if (options['labelAttribute'] !== undefined)
 			labelAttribute = options['labelAttribute'];
-		if (options['idAttribute'] != undefined)
+		if (options['idAttribute'] !== undefined)
 			idAttribute = options['idAttribute'];
-		if (options['selectionCallback'] != undefined)
+		if (options['selectionCallback'] !== undefined)
 			selectionCallback = options['selectionCallback'];
-		if (options['onSelection'] != undefined)
+		if (options['onSelection'] !== undefined)
 			onSelection = options['onSelection'];
-		if (options['parentSelectable'] != undefined)
+		if (options['parentSelectable'] !== undefined)
 			parentSelectable = options['parentSelectable'];
 	}
 
@@ -46,7 +46,7 @@ $.fn.KendoMobileListAdapter = function(options) {
 				columnsXml = $(xml).find("Columns");
 			}
 			// TODO Need to cater for isHTMLTable?? = false, width, style, type, etc...
-			if (columnsXml != undefined) {
+			if (columnsXml !== undefined) {
 				gridDataTemplate = "<script type='text/template' id='${name}'><tr class='item listDisplay'";
 				var columnCounter = 0;
 				_.each($(columnsXml).children(), function (columnXml) {
@@ -62,13 +62,13 @@ $.fn.KendoMobileListAdapter = function(options) {
 		
 		/* if xml contains rows tag, this is where starts the real data for the tree */
 		var dataXml;
-		var dataRows = new Array();
+		var dataRows = [];//new Array();
 		if ($(xml).find("Rows").length > 0) {
 			dataXml = $(xml).find("Rows");
 		}
         //turn xml rows into js array
 		_.each($(dataXml).children(), function(rowXml) {
-			var items = new Array();
+			var items = [];//new Array();
 			_.each($(rowXml).children(), function(cellXml) {
 				dataRows.push({
 					name : $(cellXml).attr(labelAttribute),

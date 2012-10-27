@@ -65,7 +65,7 @@ $(function() {
 				activityModel.add(fieldModel);
 
 				/* add anonymous fields bound to method */
-				if (fieldModel.get('anonymousBoundMethod') != null && fieldModel.get('anonymousBoundMethod') != '') {
+				if (fieldModel.get('anonymousBoundMethod') !== null && fieldModel.get('anonymousBoundMethod') !== '') {
 					var boundMethod = activityModel.get(fieldModel.get('anonymousBoundMethod'));
 					if (boundMethod) {
 						boundMethod.addAnonymousElement(fieldModel);
@@ -83,7 +83,7 @@ $(function() {
 				activityModel.add(variantPanelFieldModel);
 
 				/* add anonymous fields bound to method */
-				if (variantPanelFieldModel.get('anonymousBoundMethod') != null && variantPanelFieldModel.get('anonymousBoundMethod') != '') {
+				if (variantPanelFieldModel.get('anonymousBoundMethod') !== null && variantPanelFieldModel.get('anonymousBoundMethod') !== '') {
 					var boundMethod = activityModel.get(variantPanelFieldModel.get('anonymousBoundMethod'));
 					if (boundMethod) {
 						boundMethod.addAnonymousElement(variantPanelFieldModel);
@@ -134,7 +134,7 @@ $(function() {
 				activityModel.addDataControl(DataControlModel);
 
 				/* add anonymous datacontrol field bound to method */
-				if (DataControlModel.getAttr('anonymousBoundMethod') != null && DataControlModel.get('anonymousBoundMethod') != '') {
+				if (DataControlModel.getAttr('anonymousBoundMethod') !== null && DataControlModel.get('anonymousBoundMethod') !== '') {
 					var boundMethod = activityModel.get(DataControlModel.getAttr('anonymousBoundMethod'));
 					if (boundMethod) {
 						boundMethod.addAnonymousElement(DataControlModel);
@@ -167,24 +167,28 @@ $(function() {
 			return fieldModels;
 		},
 
+		VariantPanel : function(fieldEl) {
+			// create a model for each field
+			var field = new expanz.Model.VariantPanelField({
+				id : $(fieldEl).attr('name'),
+				anonymousBoundMethod : $(fieldEl).attr('anonymousBoundMethod')
+			});
+			var view = new expanz.Views.VariantPanelFieldView({
+				el : $(fieldEl),
+				id : $(fieldEl).attr('id'),
+				className : $(fieldEl).attr('class'),
+				model : field,
+				textTransformFunction : $(fieldEl).attr('textTransformFunction')
+			});
+			return view;
+		},
+		
 		VariantPanelField : function(DOMObjects) {
 
 			var fieldModels = [];
 			_.each(DOMObjects, function(fieldEl) {
-				// create a model for each field
-				var field = new expanz.Model.VariantPanelField({
-					id : $(fieldEl).attr('name'),
-					anonymousBoundMethod : $(fieldEl).attr('anonymousBoundMethod')
-				});
-				var view = new expanz.Views.VariantPanelFieldView({
-					el : $(fieldEl),
-					id : $(fieldEl).attr('id'),
-					className : $(fieldEl).attr('class'),
-					model : field,
-					textTransformFunction : $(fieldEl).attr('textTransformFunction')
-				});
-
-				fieldModels.push(field);
+				var view = expanz.Factory.VariantPanel(fieldEl);
+				fieldModels.push(view.model);
 
 			});
 			return fieldModels;
@@ -374,7 +378,7 @@ $(function() {
 					});
 
 					if ($(dataControlEl).attr('renderingType') == 'checkboxes') {
-						var view = new expanz.Views.CheckboxesView({
+						var checkboxesView = new expanz.Views.CheckboxesView({
 							el : $(dataControlEl),
 							id : $(dataControlEl).attr('id'),
 							className : $(dataControlEl).attr('class'),
@@ -382,23 +386,15 @@ $(function() {
 						});
 					}
 					else if ($(dataControlEl).attr('renderingType') == 'radiobuttons') {
-						var view = new expanz.Views.RadioButtonsView({
+						var radioButtonsView = new expanz.Views.RadioButtonsView({
 							el : $(dataControlEl),
 							id : $(dataControlEl).attr('id'),
 							className : $(dataControlEl).attr('class'),
 							model : dataControlModel
 						});
 					}
-					/*else if ($(dataControlEl).attr('renderingType') == 'variantPanel') {
-						var view = new expanz.Views.VariantPanelFieldView({
-							el : $(dataControlEl),
-							id : $(dataControlEl).attr('id'),
-							className : $(dataControlEl).attr('class'),
-							model : dataControlModel
-						});
-					}*/
 					else {
-						var view = new expanz.Views.DataControlView({
+						var dataControlView = new expanz.Views.DataControlView({
 							el : $(dataControlEl),
 							id : $(dataControlEl).attr('id'),
 							className : $(dataControlEl).attr('class'),

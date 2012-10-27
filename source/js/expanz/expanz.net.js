@@ -32,7 +32,7 @@ $(function() {
 		},
 
 		WebServerPing : function(nbAttempts) {
-			if (nbAttempts == undefined)
+			if (nbAttempts === undefined)
 				nbAttempts = 3;
 			if (window.expanz.pingError === undefined)
 				window.expanz.pingError = 0;
@@ -509,8 +509,8 @@ $(function() {
 			else {
 				center += '<CreateActivity ';
 				center += 'name="' + activity.getAttr('name') + '"';
-				activity.getAttr('style') ? center += ' style="' + activity.getAttr('style') + '"' : '';
-				activity.getAttr('optimisation') ? center += ' suppressFields="1"' : '';
+				center += activity.getAttr('style') ? ' style="' + activity.getAttr('style') + '"' : '';
+				center += activity.getAttr('optimisation') ? ' suppressFields="1"' : '';
 				center += activity.getAttr('key') ? ' initialKey="' + activity.getAttr('key') + '">' : '>';
 
 				if (activity.getAttr('optimisation') === true) {
@@ -530,7 +530,7 @@ $(function() {
 					var type = dataControl.getAttr('type') ? ' type="' + dataControl.getAttr('type') + '"' : '';
 
 					center += '<DataPublication id="' + dataControlId + '"' + query + populateMethod + autoPopulate + type;
-					dataControl.getAttr('contextObject') ? center += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
+					center += dataControl.getAttr('contextObject') ? ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
 					center += '/>';
 
 				});
@@ -563,7 +563,7 @@ $(function() {
 						var type = dataControl.getAttr('type') ? ' type="' + dataControl.getAttr('type') + '"' : '';
 
 						body += '<DataPublication id="' + dataControlId + '"' + query + populateMethod + autoPopulate + type;
-						dataControl.getAttr('contextObject') ? body += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
+						body += dataControl.getAttr('contextObject') ? ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
 						body += '/>';
 					});
 				}
@@ -619,7 +619,7 @@ $(function() {
 					var type = dataControl.getAttr('type') ? ' type="' + dataControl.getAttr('type') + '"' : '';
 
 					body += '<DataPublication id="' + dataControlId + '"' + query + populateMethod + autoPopulate + type;
-					dataControl.getAttr('contextObject') ? body += ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
+					body += dataControl.getAttr('contextObject') ? ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
 					body += '/>';
 				});
 			}
@@ -706,7 +706,7 @@ $(function() {
 					if (callbacks && callbacks.error) {
 						callbacks.error(errorString);
 					}
-					window.expanz.logToConsole(errorString + " " + xml);
+					window.expanz.logToConsole(errorString);
 					return;
 				}
 			}
@@ -734,11 +734,11 @@ $(function() {
 			processAreas.push(processArea);
 		});
 		return processAreas;
-	}
+	};
 
 	function parseRoles(xmlElement) {
 
-		if (xmlElement == undefined || xmlElement.length == 0)
+		if (xmlElement === undefined || xmlElement.length == 0)
 			return null;
 		var roles = {};
 		$(xmlElement).children('UserRole').each(function() {
@@ -752,7 +752,7 @@ $(function() {
 
 	function parseDashboards(xmlElement) {
 
-		if (xmlElement == undefined || xmlElement.length == 0)
+		if (xmlElement === undefined || xmlElement.length == 0)
 			return null;
 		var dashboards = {};
 		$(xmlElement).children().each(function() {
@@ -765,7 +765,7 @@ $(function() {
 
 				/* update field if in the view */
 				var dashboardField = window.expanz.Dashboards.get(this.tagName + "_" + attribute.nodeName);
-				if (dashboardField != null) {
+				if (dashboardField !== null) {
 					dashboardField.set({
 						value : attribute.nodeValue
 					})
@@ -774,7 +774,7 @@ $(function() {
 
 		});
 		return dashboards;
-	}
+	};
 
 	function fillActivityData(processAreas, url, name, style, gridviewList) {
 		$.each(processAreas, function(i, processArea) {
@@ -790,7 +790,7 @@ $(function() {
 
 		});
 
-	}
+	};
 
 	function parseExecAnonymousResponse(callbacks) {
 		return function apply(xml) {
@@ -847,7 +847,7 @@ $(function() {
 				});
 			}
 		};
-	}
+	};
 	
 	function parseGetSessionDataResponse(callbacks) {
 		return function apply(xml) {
@@ -895,7 +895,7 @@ $(function() {
 			});
 
 		};
-	}
+	};
 
 	function parseCreateActivityResponse(activity, callbacks) {
 		return function apply(xml) {
@@ -937,7 +937,7 @@ $(function() {
 
 				/* DASHBOARD UPDATE CASE */
 				var dashboards = parseDashboards($(execResults).find("Dashboards"));
-				if (dashboards != null) {
+				if (dashboards !== null) {
 					expanz.Storage.setDashboards(dashboards);
 				}
 
@@ -1036,7 +1036,7 @@ $(function() {
 
 			return;
 		};
-	}
+	};
 
 	function parseDeltaResponse(activity, initiator, callbacks) {
 		return function apply(xml) {
@@ -1050,7 +1050,7 @@ $(function() {
 			});
 
 			var execResults = $(xml).find("ExecXResult");
-			if (execResults == null || execResults.length == 0) {
+			if (execResults === null || execResults.length == 0) {
 				execResults = $(xml).find("ExecAnonymousXResult");
 			}
 
@@ -1065,7 +1065,7 @@ $(function() {
 
 				/* DASHBOARD UPDATE CASE */
 				var dashboards = parseDashboards($(execResults).find("Dashboards"));
-				if (dashboards != null) {
+				if (dashboards !== null) {
 					expanz.Storage.setDashboards(dashboards);
 				}
 
@@ -1148,13 +1148,18 @@ $(function() {
 					var field = activity.get(id);
 					if (field && field !== undefined) {
 						field.publish($(this), activity);
+						if (field.attributes.visualType !== undefined) {
+							//loginPopup.el.find('[bind=login]')
+							window.expanz.showVariantPanel(activity);
+							//window.expanz.CreateVariantPanel($(this));
+						}
 					}
 				});
 
 				/* FILE CASE */
 				$(execResults).find('File').each(function(data) {
 
-					if ($(this).attr('field') !== undefined && $(this).attr('path') != undefined) {
+					if ($(this).attr('field') !== undefined && $(this).attr('path') !== undefined) {
 						window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
 						expanz.Net.GetBlobRequest($(this).attr('field'), activity, initiator);
 					}
@@ -1326,7 +1331,7 @@ $(function() {
 
 			return;
 		};
-	}
+	};
 
 	function parseDestroyActivityResponse(callbacks) {
 		return function apply(xml) {
@@ -1348,7 +1353,7 @@ $(function() {
 			}
 			return;
 		};
-	}
+	};
 
 	function parseReleaseSessionResponse(callbacks) {
 		return function apply(xml) {
@@ -1366,7 +1371,7 @@ $(function() {
 			}
 			return;
 		};
-	}
+	};
 
 	/*
 	 * Send Request :manage the sending of XML requests to the server, and dispatching of response handlers

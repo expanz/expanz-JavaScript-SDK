@@ -28,11 +28,17 @@ $(function() {
 					var moduleEl = window.expanz.html.findComponentModuleElement(that.componentName, module);
 					if (moduleEl !== undefined) {
 						moduleEl.each(function() {
-							// if (moduleEl.attr('loaded') === undefined) {
-							var moduleContent = that['render' + module + 'Module']($(this));
-							$(this).append(moduleContent);
-							moduleEl.attr('loaded', '1');
-							// }
+							if (moduleEl.attr('loaded') === undefined) {
+								var moduleContent = that['render' + module + 'Module']($(this));
+								if (this.canHaveChildren === undefined || this.canHaveChildren)
+									$(this).append(moduleContent);
+								else {
+									var moduleContentDOMNode = document.createElement("div");
+									moduleContentDOMNode.innerHTML = moduleContent;
+									this.parentElement.appendChild(moduleContentDOMNode);
+								}
+								moduleEl.attr('loaded', '1');
+							}
 						});
 
 					}
