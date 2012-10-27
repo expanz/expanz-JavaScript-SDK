@@ -138,10 +138,12 @@ $(function() {
 		},
 
 		clearSession : function() {
-			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'session.handle');
-			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess');
-			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'roles.list');
-			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'dashboards');
+			var storage = this._getBestStorage();
+			var storageGlobalName = expanz.Storage._getStorageGlobalName();
+			storage.remove(storageGlobalName + 'session.handle');
+			storage.remove(storageGlobalName + 'lastPingSuccess');
+			storage.remove(storageGlobalName + 'roles.list');
+			storage.remove(storageGlobalName + 'dashboards');
 			this.clearActivityHandles();
 			return true;
 		},
