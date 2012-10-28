@@ -1388,6 +1388,10 @@ $(function() {
 			isAsync = true;
 		}
 		$(window.expanz.html.busyIndicator()).trigger("isBusy");
+		$.ajaxSetup({
+		    type: 'POST',
+		    headers: { "cache-control": "no-cache" }
+		});
 		if (config._URLproxy !== undefined && config._URLproxy.length > 0) {
 			$.ajax({
 				type : 'POST',

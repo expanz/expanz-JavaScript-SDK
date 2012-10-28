@@ -2754,6 +2754,10 @@ $(function() {
 			isAsync = true;
 		}
 		$(window.expanz.html.busyIndicator()).trigger("isBusy");
+		$.ajaxSetup({
+		    type: 'POST',
+		    headers: { "cache-control": "no-cache" }
+		});
 		if (config._URLproxy !== undefined && config._URLproxy.length > 0) {
 			$.ajax({
 				type : 'POST',
@@ -2943,6 +2947,7 @@ $(function() {
 			if (window['localStorage'] !== null && window.localStorage) {
 				/*
 				 * length is unused but please leave it. I don't know why but sometimes firefox get an empty window.localStorage by mistake Doing this force it to evaluate the window.localStorage object and it seems to work
+				 * SMN Possibly try Modernizr (http://diveintohtml5.info/storage.html)
 				 */
 				var lth = window.localStorage.length;
 				lth = lth;
@@ -2954,7 +2959,10 @@ $(function() {
 		},
 
 		_getStorageGlobalName : function() {
-			return "_expanz_" + config._AppSite + "_";
+			var siteCountry = config._siteCountry === undefined ? '' : '_' + config._siteCountry;
+			var siteEnvironment = config._siteEnvironment === undefined ? '' : '_' + config._siteEnvironment;
+		
+			return "_expanz_" + config._AppSite + siteCountry + siteEnvironment + "_";
 		},
 
 		getSessionHandle : function() {
@@ -3055,10 +3063,12 @@ $(function() {
 		},
 
 		clearSession : function() {
-			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'session.handle');
-			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'lastPingSuccess');
-			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'roles.list');
-			this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'dashboards');
+			var storage = this._getBestStorage();
+			var storageGlobalName = expanz.Storage._getStorageGlobalName();
+			storage.remove(storageGlobalName + 'session.handle');
+			storage.remove(storageGlobalName + 'lastPingSuccess');
+			storage.remove(storageGlobalName + 'roles.list');
+			storage.remove(storageGlobalName + 'dashboards');
 			this.clearActivityHandles();
 			return true;
 		},
