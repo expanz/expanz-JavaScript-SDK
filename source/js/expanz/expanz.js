@@ -248,6 +248,14 @@ $(function() {
 									});
 								}
 							});
+							if (messageItem.length > 0) { // Execute if the slide Up/Down methods fail
+								setTimeout(function(){
+									messageItem.remove();
+									if ($(el).find("div").length === 0) {
+										$(el).hide();
+									}
+								},5000);
+							}	
 						}
 						else {
 							if (!fade) {

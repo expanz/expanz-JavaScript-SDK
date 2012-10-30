@@ -1156,20 +1156,24 @@ $(function() {
 				});
 
 				/* FILE CASE */
-				$(execResults).find('File').each(function(data) {
+				/*if ($(execResults).find('File').length === 0) {
+					expanz.messageController.addErrorMessageByText("Unable to find the requested file");
+				} else {*/
+					$(execResults).find('File').each(function(data) {
 
-					if ($(this).attr('field') !== undefined && $(this).attr('path') !== undefined) {
-						window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
-						expanz.Net.GetBlobRequest($(this).attr('field'), activity, initiator);
-					}
-					else if ($(this).attr('name') !== undefined) {
-						window.expanz.logToConsole("File found: " + $(this).attr('name'));
-						expanz.Net.GetFileRequest($(this).attr('name'), activity, initiator);
-					}
-					else {
-						window.expanz.logToConsole("Not yet implemented");
-					}
-				});
+						if ($(this).attr('field') !== undefined && $(this).attr('path') !== undefined) {
+							window.expanz.logToConsole("Blob found by field: " + $(this).attr('field') + " - " + $(this).attr('path'));
+							expanz.Net.GetBlobRequest($(this).attr('field'), activity, initiator);
+						}
+						else if ($(this).attr('name') !== undefined) {
+							window.expanz.logToConsole("File found by name: " + $(this).attr('name'));
+							expanz.Net.GetFileRequest($(this).attr('name'), activity, initiator);
+						}
+						else {
+							window.expanz.logToConsole("Not yet implemented");
+						}
+					});
+				//}
 
 				/* UIMESSAGE CASE */
 				$(execResults).find('UIMessage').each(function() {
