@@ -1389,7 +1389,6 @@ $(function() {
 		}
 		$(window.expanz.html.busyIndicator()).trigger("isBusy");
 		$.ajaxSetup({
-		    type: 'POST',
 		    headers: { "cache-control": "no-cache" } // http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
 		});
 		if (config._URLproxy !== undefined && config._URLproxy.length > 0) {
