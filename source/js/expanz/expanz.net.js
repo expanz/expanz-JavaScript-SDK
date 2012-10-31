@@ -1147,11 +1147,11 @@ $(function() {
 					var field = activity.get(id);
 					if (field && field !== undefined) {
 						field.publish($(this), activity);
-						if (field.attributes.visualType !== undefined) {
+						/*if (field.attributes.visualType !== undefined) {
 							//loginPopup.el.find('[bind=login]')
 							window.expanz.showVariantPanel(activity);
 							//window.expanz.CreateVariantPanel($(this));
-						}
+						}*/
 					}
 				});
 

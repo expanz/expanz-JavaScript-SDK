@@ -291,13 +291,13 @@ $(function() {
 		return;
 	};
 
-	window.expanz.CreateVariantPanel = function(DOMObject, callbacks) {
+	/*window.expanz.CreateVariantPanel = function(DOMObject, callbacks) {
 
 		DOMObject || (DOMObject = $('body'));
 
 		var login = createVariantPanel(DOMObject, callbacks);
 		return;
-	};
+	};*/
 	
 	// window.expanz.DestroyActivity = function(DOMObject) {
 	//
@@ -388,14 +388,14 @@ $(function() {
 
 	};
 
-	window.expanz.showVariantPanel = function(activity) {
+	/*window.expanz.showVariantPanel = function(activity) {
 		var variantPanel = window.expanz.Factory.VariantPanel($('[bind=variantpanelfield]'));
 
 		expanz.CreateVariantPanel($('[bind=variantpanelfield]'));
 		//CreateVariantPanel(variantPanel.el.find('[bind=variantpanelfield]'));
 
 		return;
-	};
+	};*/
 
 	window.expanz.createActivityWindow = function(parentActivity, id, style, key, title) {
 		var callback = function(activityMetadata) {
@@ -534,7 +534,7 @@ $(function() {
 		return loginView;
 	}
 
-	function createVariantPanel(dom, callbacks) {
+	/*function createVariantPanel(dom, callbacks) {
 
 		var variantPanelView;
 		if (dom.attr('bind') && (dom.attr('bind').toLowerCase() === 'variantpanelfield')) {
@@ -542,7 +542,7 @@ $(function() {
 		}
 
 		return variantPanelView;
-	}
+	}*/
 
 	function loadMenu(el, displayEmptyItems) {
 

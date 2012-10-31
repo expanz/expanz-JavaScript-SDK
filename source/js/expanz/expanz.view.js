@@ -22,6 +22,7 @@ $(function() {
 			this.model.bind("change:items", this.modelUpdate('value'), this);
 			this.model.bind("change:errorMessage", this.displayError(), this);
 			this.model.bind("change:loading", this.loading, this);
+			//this.model.bind("change:visualType",this.modelUpdate('variantPanel'), this);
 		},
 
 		modelUpdate : function(attr) {
@@ -948,7 +949,7 @@ $(function() {
 
 	});
 
-	window.expanz.Views.VariantPanelFieldView = expanz.Views.FieldView.extend({
+	/*window.expanz.Views.VariantPanelFieldView = expanz.Views.FieldView.extend({
 		width : 'auto',
 
 		cssClass : 'variantPanelView',
@@ -961,7 +962,7 @@ $(function() {
 			//this.renderActions();
 			//this.delegateEvents(this.events);
 
-			/* find the parent popup -> it is the first parentPopup visible */
+			// find the parent popup -> it is the first parentPopup visible 
 			if (window.expanz.currentVariantPanel !== undefined) {
 			}
 			window.expanz.currentVariantPanel = this;
@@ -993,10 +994,10 @@ $(function() {
 		},
 		
 		publishData : function() {
-			/* clean elements */
+			// clean elements 
 			this.el.html();
 			var that = this;
-			/* no external component needed just have to draw the checkboxes and handle the clicks */
+			// no external component needed just have to draw the checkboxes and handle the clicks 
 
 			_.each(this.model.getAttr('xml').find('Row'), function(row) {
 				var rowId = $(row).attr('id');
@@ -1017,7 +1018,7 @@ $(function() {
 
 		}
 
-	});
+	});*/
 	
 	window.expanz.Views.PopupView = Backbone.View.extend({
 
@@ -1239,40 +1240,40 @@ $(function() {
 				var value = $(item).attr('value');
 				$(elem).append("<div><input " + disabled + selected + "' value='" + value + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
 			});
-		}
-		else {
-			if ($(elem).is('input')) {
-				// special behaviour for checkbox input
-				if ($(elem).is(":checkbox") || $(elem).is(":radio") ) {
-					$(elem).addClass('checkbox');
-					var checkedValue = $(elem).attr("checkedValue") ? $(elem).attr("checkedValue") : 1;
-					if (value == checkedValue) {
-						$(elem).prop("checked", true);
-					}
-					else {
-						$(elem).prop("checked", false);
-					}
+		} else if ($(elem).is('div') && allAttrs.visualType !== undefined && allAttrs.visualType.length > 0 && attr === 'value')  {
+				$(elem).append(allAttrs.visualType + allAttrs.value);
+		} else if ($(elem).is('input')) {
+			// special behaviour for checkbox input
+			if ($(elem).is(":checkbox") || $(elem).is(":radio") ) {
+				$(elem).addClass('checkbox');
+				var checkedValue = $(elem).attr("checkedValue") ? $(elem).attr("checkedValue") : 1;
+				if (value == checkedValue) {
+					$(elem).prop("checked", true);
 				}
 				else {
-					$(elem).val(value);
-				}
-				$(elem).trigger("valueUpdated", value);
-
-				// if the field is disable apply the disabled attribute and style
-				if (allAttrs["disabled"] === true) {
-					$(elem).attr('disabled', 'disabled');
-					$(elem).addClass('readonlyInput');
-				}
-				else {
-					$(elem).removeAttr('disabled');
-					$(elem).removeClass('readonlyInput');
+					$(elem).prop("checked", false);
 				}
 			}
 			else {
-				/* if value is empty put an unbreakable space instead */
-				$(elem).html(value || '&nbsp;');
+				$(elem).val(value);
+			}
+			$(elem).trigger("valueUpdated", value);
+
+			// if the field is disable apply the disabled attribute and style
+			if (allAttrs["disabled"] === true) {
+				$(elem).attr('disabled', 'disabled');
+				$(elem).addClass('readonlyInput');
+			}
+			else {
+				$(elem).removeAttr('disabled');
+				$(elem).removeClass('readonlyInput');
 			}
 		}
+		else {
+			/* if value is empty put an unbreakable space instead */
+			$(elem).html(value || '&nbsp;');
+		}
+		
 		return elem;
 	}
 

@@ -193,7 +193,7 @@ $(function() {
 
 			});
 
-			_.each(expanz.Factory.VariantPanelField($(el).find('[bind=variantpanelfield]')), function(variantPanelFieldModel) {
+			/*_.each(expanz.Factory.VariantPanelField($(el).find('[bind=variantpanelfield]')), function(variantPanelFieldModel) {
 				variantPanelFieldModel.set({
 					parent : activityModel
 				}, {
@@ -201,7 +201,7 @@ $(function() {
 				});
 				activityModel.add(variantPanelFieldModel);
 
-				/* add anonymous fields bound to method */
+				// add anonymous fields bound to method 
 				if (variantPanelFieldModel.get('anonymousBoundMethod') !== null && variantPanelFieldModel.get('anonymousBoundMethod') !== '') {
 					var boundMethod = activityModel.get(variantPanelFieldModel.get('anonymousBoundMethod'));
 					if (boundMethod) {
@@ -209,7 +209,7 @@ $(function() {
 					}
 				}
 
-			});
+			});*/
 			
 			_.each(expanz.Factory.DashboardField($(el).find('[bind=dashboardfield]')), function(dashboardFieldModel) {
 				var fieldSessionValue = expanz.Storage.getDashboardFieldValue(dashboardFieldModel.get('dashboardName'), dashboardFieldModel.get('name'));
@@ -286,7 +286,7 @@ $(function() {
 			return fieldModels;
 		},
 
-		VariantPanel : function(fieldEl) {
+		/*VariantPanel : function(fieldEl) {
 			// create a model for each field
 			var field = new expanz.Model.VariantPanelField({
 				id : $(fieldEl).attr('name'),
@@ -311,7 +311,7 @@ $(function() {
 
 			});
 			return fieldModels;
-		},
+		},*/
 
 		DashboardField : function(DOMObjects) {
 
@@ -797,7 +797,8 @@ $(function() {
 					this.set({
 						items : xml.find("Item"),
 						text : xml.attr('text'),
-						value : xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value')
+						value : xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value'),
+						visualType : xml.attr('visualType')
 					});
 				}
 
@@ -820,41 +821,6 @@ $(function() {
 		}
 	});
 
-	window.expanz.Model.VariantPanelField = expanz.Model.Field.extend({
-		variantPanel : '',
-		publish : function (xml, activity) {
-			if (xml.attr !== undefined) {
-				//window.expanz.html.renderVariantPanel(xml);
-				if ((this.get('value') && (this.get('value') != xml.attr('value'))) || !this.get('value')) {
-
-					if (xml.attr('disabled')) {
-						this.set({
-							disabled : boolValue(xml.getAttribute('disabled'))
-						});
-					}
-
-					this.set({
-						//items : xml.find("Item"),
-						//text : xml.attr('text'),
-						//value : xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value'),
-						visualType : xml.attr('visualType')
-					});
-				}
-
-				// remove error message if field is valid
-				if (boolValue(xml.attr('valid')) && this.get('errorMessage') !== undefined) {
-					this.set({
-						'errorMessage' : undefined
-					});
-
-				}
-			} else {
-				window.expanz.logToConsole("window.expanz.Model.Field: xml.attr is undefined");
-			}
-		}
-
-	});
-	
 	window.expanz.Model.DashboardField = window.expanz.Model.Field.extend({
 
 		update : function(attrs) {
@@ -2513,29 +2479,33 @@ $(function() {
 					var field = activity.get(id);
 					if (field && field !== undefined) {
 						field.publish($(this), activity);
-						if (field.attributes.visualType !== undefined) {
+						/*if (field.attributes.visualType !== undefined) {
 							//loginPopup.el.find('[bind=login]')
 							window.expanz.showVariantPanel(activity);
 							//window.expanz.CreateVariantPanel($(this));
-						}
+						}*/
 					}
 				});
 
 				/* FILE CASE */
-				$(execResults).find('File').each(function(data) {
+				/*if ($(execResults).find('File').length === 0) {
+					expanz.messageController.addErrorMessageByText("Unable to find the requested file");
+				} else {*/
+					$(execResults).find('File').each(function(data) {
 
-					if ($(this).attr('field') !== undefined && $(this).attr('path') !== undefined) {
-						window.expanz.logToConsole("File found: " + $(this).attr('field') + " - " + $(this).attr('path'));
-						expanz.Net.GetBlobRequest($(this).attr('field'), activity, initiator);
-					}
-					else if ($(this).attr('name') !== undefined) {
-						window.expanz.logToConsole("File found: " + $(this).attr('name'));
-						expanz.Net.GetFileRequest($(this).attr('name'), activity, initiator);
-					}
-					else {
-						window.expanz.logToConsole("Not yet implemented");
-					}
-				});
+						if ($(this).attr('field') !== undefined && $(this).attr('path') !== undefined) {
+							window.expanz.logToConsole("Blob found by field: " + $(this).attr('field') + " - " + $(this).attr('path'));
+							expanz.Net.GetBlobRequest($(this).attr('field'), activity, initiator);
+						}
+						else if ($(this).attr('name') !== undefined) {
+							window.expanz.logToConsole("File found by name: " + $(this).attr('name'));
+							expanz.Net.GetFileRequest($(this).attr('name'), activity, initiator);
+						}
+						else {
+							window.expanz.logToConsole("Not yet implemented");
+						}
+					});
+				//}
 
 				/* UIMESSAGE CASE */
 				$(execResults).find('UIMessage').each(function() {
@@ -2755,8 +2725,7 @@ $(function() {
 		}
 		$(window.expanz.html.busyIndicator()).trigger("isBusy");
 		$.ajaxSetup({
-		    type: 'POST',
-		    headers: { "cache-control": "no-cache" }
+		    headers: { "cache-control": "no-cache" } // http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
 		});
 		if (config._URLproxy !== undefined && config._URLproxy.length > 0) {
 			$.ajax({
@@ -3806,6 +3775,7 @@ $(function() {
 			this.model.bind("change:items", this.modelUpdate('value'), this);
 			this.model.bind("change:errorMessage", this.displayError(), this);
 			this.model.bind("change:loading", this.loading, this);
+			//this.model.bind("change:visualType",this.modelUpdate('variantPanel'), this);
 		},
 
 		modelUpdate : function(attr) {
@@ -4732,7 +4702,7 @@ $(function() {
 
 	});
 
-	window.expanz.Views.VariantPanelFieldView = expanz.Views.FieldView.extend({
+	/*window.expanz.Views.VariantPanelFieldView = expanz.Views.FieldView.extend({
 		width : 'auto',
 
 		cssClass : 'variantPanelView',
@@ -4745,7 +4715,7 @@ $(function() {
 			//this.renderActions();
 			//this.delegateEvents(this.events);
 
-			/* find the parent popup -> it is the first parentPopup visible */
+			// find the parent popup -> it is the first parentPopup visible 
 			if (window.expanz.currentVariantPanel !== undefined) {
 			}
 			window.expanz.currentVariantPanel = this;
@@ -4777,10 +4747,10 @@ $(function() {
 		},
 		
 		publishData : function() {
-			/* clean elements */
+			// clean elements 
 			this.el.html();
 			var that = this;
-			/* no external component needed just have to draw the checkboxes and handle the clicks */
+			// no external component needed just have to draw the checkboxes and handle the clicks 
 
 			_.each(this.model.getAttr('xml').find('Row'), function(row) {
 				var rowId = $(row).attr('id');
@@ -4801,7 +4771,7 @@ $(function() {
 
 		}
 
-	});
+	});*/
 	
 	window.expanz.Views.PopupView = Backbone.View.extend({
 
@@ -5023,40 +4993,40 @@ $(function() {
 				var value = $(item).attr('value');
 				$(elem).append("<div><input " + disabled + selected + "' value='" + value + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
 			});
-		}
-		else {
-			if ($(elem).is('input')) {
-				// special behaviour for checkbox input
-				if ($(elem).is(":checkbox") || $(elem).is(":radio") ) {
-					$(elem).addClass('checkbox');
-					var checkedValue = $(elem).attr("checkedValue") ? $(elem).attr("checkedValue") : 1;
-					if (value == checkedValue) {
-						$(elem).prop("checked", true);
-					}
-					else {
-						$(elem).prop("checked", false);
-					}
+		} else if ($(elem).is('div') && allAttrs.visualType !== undefined && allAttrs.visualType.length > 0 && attr === 'value')  {
+				$(elem).append(allAttrs.visualType + allAttrs.value);
+		} else if ($(elem).is('input')) {
+			// special behaviour for checkbox input
+			if ($(elem).is(":checkbox") || $(elem).is(":radio") ) {
+				$(elem).addClass('checkbox');
+				var checkedValue = $(elem).attr("checkedValue") ? $(elem).attr("checkedValue") : 1;
+				if (value == checkedValue) {
+					$(elem).prop("checked", true);
 				}
 				else {
-					$(elem).val(value);
-				}
-				$(elem).trigger("valueUpdated", value);
-
-				// if the field is disable apply the disabled attribute and style
-				if (allAttrs["disabled"] === true) {
-					$(elem).attr('disabled', 'disabled');
-					$(elem).addClass('readonlyInput');
-				}
-				else {
-					$(elem).removeAttr('disabled');
-					$(elem).removeClass('readonlyInput');
+					$(elem).prop("checked", false);
 				}
 			}
 			else {
-				/* if value is empty put an unbreakable space instead */
-				$(elem).html(value || '&nbsp;');
+				$(elem).val(value);
+			}
+			$(elem).trigger("valueUpdated", value);
+
+			// if the field is disable apply the disabled attribute and style
+			if (allAttrs["disabled"] === true) {
+				$(elem).attr('disabled', 'disabled');
+				$(elem).addClass('readonlyInput');
+			}
+			else {
+				$(elem).removeAttr('disabled');
+				$(elem).removeClass('readonlyInput');
 			}
 		}
+		else {
+			/* if value is empty put an unbreakable space instead */
+			$(elem).html(value || '&nbsp;');
+		}
+		
 		return elem;
 	}
 
@@ -5312,6 +5282,14 @@ $(function() {
 									});
 								}
 							});
+							if (messageItem.length > 0) { // Execute if the slide Up/Down methods fail
+								setTimeout(function(){
+									messageItem.remove();
+									if ($(el).find("div").length === 0) {
+										$(el).hide();
+									}
+								},5000);
+							}	
 						}
 						else {
 							if (!fade) {
@@ -5347,13 +5325,13 @@ $(function() {
 		return;
 	};
 
-	window.expanz.CreateVariantPanel = function(DOMObject, callbacks) {
+	/*window.expanz.CreateVariantPanel = function(DOMObject, callbacks) {
 
 		DOMObject || (DOMObject = $('body'));
 
 		var login = createVariantPanel(DOMObject, callbacks);
 		return;
-	};
+	};*/
 	
 	// window.expanz.DestroyActivity = function(DOMObject) {
 	//
@@ -5444,14 +5422,14 @@ $(function() {
 
 	};
 
-	window.expanz.showVariantPanel = function(activity) {
+	/*window.expanz.showVariantPanel = function(activity) {
 		var variantPanel = window.expanz.Factory.VariantPanel($('[bind=variantpanelfield]'));
 
 		expanz.CreateVariantPanel($('[bind=variantpanelfield]'));
 		//CreateVariantPanel(variantPanel.el.find('[bind=variantpanelfield]'));
 
 		return;
-	};
+	};*/
 
 	window.expanz.createActivityWindow = function(parentActivity, id, style, key, title) {
 		var callback = function(activityMetadata) {
@@ -5590,7 +5568,7 @@ $(function() {
 		return loginView;
 	}
 
-	function createVariantPanel(dom, callbacks) {
+	/*function createVariantPanel(dom, callbacks) {
 
 		var variantPanelView;
 		if (dom.attr('bind') && (dom.attr('bind').toLowerCase() === 'variantpanelfield')) {
@@ -5598,7 +5576,7 @@ $(function() {
 		}
 
 		return variantPanelView;
-	}
+	}*/
 
 	function loadMenu(el, displayEmptyItems) {
 

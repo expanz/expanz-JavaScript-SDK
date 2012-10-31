@@ -74,7 +74,7 @@ $(function() {
 
 			});
 
-			_.each(expanz.Factory.VariantPanelField($(el).find('[bind=variantpanelfield]')), function(variantPanelFieldModel) {
+			/*_.each(expanz.Factory.VariantPanelField($(el).find('[bind=variantpanelfield]')), function(variantPanelFieldModel) {
 				variantPanelFieldModel.set({
 					parent : activityModel
 				}, {
@@ -82,7 +82,7 @@ $(function() {
 				});
 				activityModel.add(variantPanelFieldModel);
 
-				/* add anonymous fields bound to method */
+				// add anonymous fields bound to method 
 				if (variantPanelFieldModel.get('anonymousBoundMethod') !== null && variantPanelFieldModel.get('anonymousBoundMethod') !== '') {
 					var boundMethod = activityModel.get(variantPanelFieldModel.get('anonymousBoundMethod'));
 					if (boundMethod) {
@@ -90,7 +90,7 @@ $(function() {
 					}
 				}
 
-			});
+			});*/
 			
 			_.each(expanz.Factory.DashboardField($(el).find('[bind=dashboardfield]')), function(dashboardFieldModel) {
 				var fieldSessionValue = expanz.Storage.getDashboardFieldValue(dashboardFieldModel.get('dashboardName'), dashboardFieldModel.get('name'));
@@ -167,7 +167,7 @@ $(function() {
 			return fieldModels;
 		},
 
-		VariantPanel : function(fieldEl) {
+		/*VariantPanel : function(fieldEl) {
 			// create a model for each field
 			var field = new expanz.Model.VariantPanelField({
 				id : $(fieldEl).attr('name'),
@@ -192,7 +192,7 @@ $(function() {
 
 			});
 			return fieldModels;
-		},
+		},*/
 
 		DashboardField : function(DOMObjects) {
 

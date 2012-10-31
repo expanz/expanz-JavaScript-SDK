@@ -62,7 +62,8 @@ $(function() {
 					this.set({
 						items : xml.find("Item"),
 						text : xml.attr('text'),
-						value : xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value')
+						value : xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value'),
+						visualType : xml.attr('visualType')
 					});
 				}
 
@@ -85,41 +86,6 @@ $(function() {
 		}
 	});
 
-	window.expanz.Model.VariantPanelField = expanz.Model.Field.extend({
-		variantPanel : '',
-		publish : function (xml, activity) {
-			if (xml.attr !== undefined) {
-				//window.expanz.html.renderVariantPanel(xml);
-				if ((this.get('value') && (this.get('value') != xml.attr('value'))) || !this.get('value')) {
-
-					if (xml.attr('disabled')) {
-						this.set({
-							disabled : boolValue(xml.getAttribute('disabled'))
-						});
-					}
-
-					this.set({
-						//items : xml.find("Item"),
-						//text : xml.attr('text'),
-						//value : xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value'),
-						visualType : xml.attr('visualType')
-					});
-				}
-
-				// remove error message if field is valid
-				if (boolValue(xml.attr('valid')) && this.get('errorMessage') !== undefined) {
-					this.set({
-						'errorMessage' : undefined
-					});
-
-				}
-			} else {
-				window.expanz.logToConsole("window.expanz.Model.Field: xml.attr is undefined");
-			}
-		}
-
-	});
-	
 	window.expanz.Model.DashboardField = window.expanz.Model.Field.extend({
 
 		update : function(attrs) {
