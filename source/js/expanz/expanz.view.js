@@ -1241,7 +1241,15 @@ $(function() {
 				$(elem).append("<div><input " + disabled + selected + "' value='" + value + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
 			});
 		} else if ($(elem).is('div') && allAttrs.visualType !== undefined && allAttrs.visualType.length > 0 && attr === 'value')  {
-				$(elem).append(allAttrs.visualType + allAttrs.value);
+			if (allAttrs.visualType == 'cb') {
+				$(elem).html('cb' + (value || '&nbsp;'));
+			} else if (allAttrs.visualType == 'rb') {
+				$(elem).html('rb' + (value || '&nbsp;'));
+			} else if (allAttrs.visualType == 'txt') {
+				$(elem).html("<input value='" + value + "' name='text' type='text'></input>");
+			} else {
+				$(elem).html(value || '&nbsp;');
+			}
 		} else if ($(elem).is('input')) {
 			// special behaviour for checkbox input
 			if ($(elem).is(":checkbox") || $(elem).is(":radio") ) {
