@@ -29,7 +29,7 @@ $(function() {
 		//var loginUrl = getPageUrl(window.config._loginpage);
 		/* if login url is null try to guess it by removing the filename */
 		//if (loginUrl === undefined) {
-		//	loginUrl = document.location.pathname.substring(0, document.location.pathname.lastIndexOf("/"));
+		//	loginUrl = document.location.href.substring(0, document.location.href.lastIndexOf("/"));
 			/* if empty mean we are at the root of the website */
 		//	if (loginUrl === "")
 		//		loginUrl = "/";
@@ -582,7 +582,7 @@ $(function() {
 	}
 
 	/* check if website is on maintenance or web server is down except on maintenance page */
-	if (document.location.pathname.indexOf(window.expanz.getMaintenancePage()) === -1) {
+	if (document.location.href.indexOf(window.expanz.getMaintenancePage()) === -1) {
 		if (window.expanz.isOnMaintenance()) {
 			expanz.Views.redirect(window.expanz.getMaintenancePage());
 		}

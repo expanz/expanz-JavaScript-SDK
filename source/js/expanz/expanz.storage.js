@@ -250,8 +250,11 @@ $(function() {
 				else {
 					// clear the DOM menu
 
-					var url = window.location.pathname;
+					var url = window.location.href;
 					var currentPage = url.substring(url.lastIndexOf('/') + 1);
+					if (window.config._homepage && currentPage.length == 0) {
+						currentPage = getPageUrl(window.config._homepage);
+					}
 					
 					// load process areas into DOM menu
 					el.append('<ul id="menuUL" class="menu"></ul>');
@@ -305,7 +308,7 @@ $(function() {
 			this.pa = []; /* sub process area */
 
 			this.load = function(el, level, displayAsIcons, parentSubProcesses) {
-				var url = window.location.pathname;
+				var url = window.location.href;
 				var currentPage = url.substring(url.lastIndexOf('/') + 1);
 
 				if (displayAsIcons === true) {
@@ -344,7 +347,7 @@ $(function() {
 							});
 
 							/* add selected class if current */
-							if (url.endsWith(currentPage)) {
+							if (url == currentPage) {
 								el.addClass("selected selectedNew");
 							}
 						}
