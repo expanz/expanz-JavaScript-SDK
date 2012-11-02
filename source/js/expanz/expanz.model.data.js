@@ -282,6 +282,10 @@ $(function() {
 			window.expanz.logToConsole("GridModel:menuActionSelected id:" + selectedId + ' ,menuActionName:' + name + ' , menuActionParams:' + JSON.stringify(params));
 		},
 
+		contextMenuSelected : function(selectedId, contextMenuType, contextObject, params) {
+			window.expanz.logToConsole("GridModel:contextMenuSelected type:" + contextMenuType + " ,id:" + selectedId + ' ,contextObject:' + contextObject + ' , contextMenuParams:' + JSON.stringify(params));
+		},
+		
 		refresh : function() {
 			expanz.Net.DataRefreshRequest(this.getAttr('id'), this.getAttr('parent'));
 		}

@@ -183,10 +183,16 @@ $(function() {
 
 			var j = 0;
 			xml.children("MenuItem").each(function() {
-				var liId = parentUL.id + "_li_" + j++;
+				var liId = (parentUL.id || parentUL[0].id) + "_li_" + j++;
 				parentUL.append("<li id='" + liId + "' action='" + $(this).attr('action') + "'>" + $(this).attr('text') + "</li>");
 				var liEL = parentUL.find("#" + liId);
-				liEL.click(function() {
+				liEL.unbind("click");
+				liEL.click(function(e) {
+					if (!e) var e = window.event; //if (!e) var  = $.event.fix(event || window.event);
+					if (e.stopPropagation)
+						e.stopPropagation();
+					else
+						e.cancelBubble = true;
 					that.model.menuItemSelected($(this).attr("action"));
 					that.contextMenuEl.hide();
 				});
@@ -195,10 +201,14 @@ $(function() {
 		modelUpdate : function() {
 			/* retrieve or create a div to host the context menu */
 			// window.expanz.logToConsole("modelUpdated");
+			var contextMenuId;
 			if (this.contextMenuEl === undefined) {
-				var contextMenuId = this.model.get('id').replace(/\./g, "_") + "_contextMenu";
+				contextMenuId = this.model.get('id').replace(/\./g, "_") + "_contextMenu";
 				this.el.append("<div class='contextMenu' id='" + contextMenuId + "' />");
 				this.contextMenuEl = this.el.find("#" + contextMenuId);
+			}
+			if (contextMenuId === undefined) {
+				contextMenuId = (this.contextMenuEl.id || this.contextMenuEl[0].id);
 			}
 			this.contextMenuEl.hide();
 			this.contextMenuEl.html("");
@@ -219,7 +229,7 @@ $(function() {
 			});
 
 			/* append data to the menu */
-			this.contextMenuEl.append("<ul id='" + this.contextMenuEl.id + "_ul'></ul>");
+			this.contextMenuEl.append("<ul id='" + contextMenuId + "_ul'></ul>");
 			this._createMenu(data, this.contextMenuEl.find("ul"));
 			this.createContextMenu();
 
@@ -233,10 +243,10 @@ $(function() {
 				that.mouseInside = false;
 			});
 
-			$("body").bind('mouseup.' + that.contextMenuEl.id, function() {
+			$("body").bind('mouseup.' + that.contextMenuEl.selector, function() {
 				if (!that.mouseInside) {
 					that.contextMenuEl.hide();
-					$("body").unbind('mouseup.' + that.contextMenuEl.id);
+					$("body").unbind('mouseup.' + contextMenuId);
 				}
 			});
 		},
@@ -263,6 +273,7 @@ $(function() {
 			this.bind("rowDoubleClicked", this.rowDoubleClicked, this);
 			this.bind("actionClicked", this.actionClicked, this);
 			this.bind("menuActionClicked", this.menuActionClicked, this);
+			this.bind("contextMenuClicked", this.contextMenuClicked, this);
 		},
 
 		rowClicked : function(row) {
@@ -284,6 +295,10 @@ $(function() {
 
 		menuActionClicked : function(id, name, params) {
 			this.model.menuActionSelected(id, name, params);
+		},
+
+		contextMenuClicked : function(id, contextMenuType, contextObject, params) {
+			this.model.contextMenuSelected(id, contextMenuType, contextObject, params);
 		},
 
 		renderPagingBar : function(currentPage, itemsPerPage, hostEl, currentSortField, currentSortAsc) {
@@ -496,6 +511,35 @@ $(function() {
 								});
 							}
 						});
+						
+						/* binding contextMenu from template */
+						hostEl.find("#" + itemId + " [contextMenu] ").each(function(index, element) {
+							var action = that.model.getAction($(element).attr('contextMenu'));
+							if (action && action.length > 0) {
+								$(element).click(function() {
+									var rowId = $(this).closest("[rowId]").attr('rowId');
+									var actionParams = action[0].get('actionParams').clone();
+
+									var method;
+									method = new expanz.Model.ContextMenu({
+										id : rowId,
+										contextObject : action[0].get('actionName'),
+										parent : that.model.getAttr('parent')
+									});
+
+									var ctxMenuview = new expanz.Views.ContextMenuView({
+										el : $(this),
+										id : $(this).attr('id'),
+										className : $(this).attr('class'),
+										model : method
+									});
+									window.expanz.currentContextMenu = ctxMenuview.model;
+
+									that._handleContextMenuClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+
+								});
+							}
+						});
 					}
 				}
 			}
@@ -611,6 +655,17 @@ $(function() {
 				};
 
 				$('table#' + hostId + ' tr [bind=menuAction] > button').click(this, onMenuActionClick);
+				
+				/* handle contextMenu click event */
+				var onContextMenuClick = function(event) {
+					var rowId = $(this).closest("tr").attr('id');
+					var parentDiv = $(this).parent();
+					var contextMenuName = parentDiv.attr('name');
+					var actionParams = JSON.parse(parentDiv.attr('actionParams'));
+					that._handleContextMenuClick(rowId, contextMenuName, actionParams, parentDiv);
+				};
+
+				$('table#' + hostId + ' tr [bind=contextMenu] > button').click(this, onContextMenuClick);
 			}
 
 			this.renderPagingBar(currentPage, itemsPerPage, hostEl, currentSortField, currentSortAsc);
@@ -737,6 +792,23 @@ $(function() {
 			});
 
 			this.trigger("menuActionClicked", rowId, menuAction, actionParams);
+		},
+
+		_handleContextMenuClick : function(rowId, contextMenuType, actionParams, divEl) {
+			/* handle user input */
+			var contextObject = '';
+			_.each(actionParams, function(actionParam) {
+				var name = actionParam.name;
+				if (actionParam.value == '@contextId') {
+					actionParam.value = rowId;
+				}
+				if (actionParam.name == 'contextObject') {
+					contextObject = actionParam.value;
+				}
+			});
+			contextObject = contextObject || contextMenuType;
+			
+			this.trigger("contextMenuClicked", rowId, contextMenuType, contextObject, actionParams);
 		}
 
 	});

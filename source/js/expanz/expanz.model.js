@@ -160,6 +160,17 @@ $(function() {
 
 	});
 
+	window.expanz.Model.MenuAction = window.expanz.Model.Method.extend({
+
+		menuItemSelected : function(action) {
+
+			expanz.Net.CreateMenuActionRequest(this.get('parent'), null, null, action);
+			return;
+
+		}
+
+	});
+
 	window.expanz.Model.ContextMenu = window.expanz.Model.Method.extend({
 
 		menuItemSelected : function(action) {

@@ -303,6 +303,31 @@ $(function() {
 			SendRequest(RequestObject.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
 		},
 
+		/* call when selecting something from the tree view (file) or menu action */
+		CreateContextMenuRequest : function(activity, contextId, contextMenuType, contextObject, callbacks) {
+			if (callbacks === undefined)
+				callbacks = activity.callbacks;
+
+			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
+				expanz.Views.requestLogin();
+				return;
+			}
+
+			var initiator = {
+				type : "contextmenu",
+				id : contextId
+			};
+
+			activity.setAttr({
+				'deltaLoading' : {
+					isLoading : true,
+					initiator : initiator
+				}
+			});
+
+			SendRequest(RequestObject.CreateContextMenu(activity, contextId, contextMenuType, contextObject, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
+		},
+
 		/* create an anonymous request */
 		CreateAnonymousRequest : function(xmlData, callbacks) {
 			if (callbacks === undefined)
@@ -427,6 +452,13 @@ $(function() {
 		CreateMenuAction : function(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, sessionHandle) {
 			return {
 				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext)),
+				url : 'ExecX'
+			};
+		},
+
+		CreateContextMenu: function(activity, contextId, contextMenuType, contextObject, sessionHandle) {
+			return {
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateContextMenu(activity, contextId, contextMenuType, contextObject)),
 				url : 'ExecX'
 			};
 		},
@@ -656,6 +688,21 @@ $(function() {
 			}
 			mnuActionStr += contextObjectStr + '/>' + '</Activity>';
 			return mnuActionStr;
+		},
+
+		CreateContextMenu : function(activity, contextId, contextMenuType, contextObject) {
+			var ctxtMenuStr = '<Activity activityHandle="' + activity.getAttr('handle') + '">';
+			var contextObjectStr = contextObject ? ' contextObject="' + contextObject + '"' : '';
+			var contextTypeStr = contextMenuType ? contextMenuType : contextObject;
+
+			if (contextId) {
+				ctxtMenuStr += '<Context id="' + contextId + '"' + contextObjectStr;
+				ctxtMenuStr += contextTypeStr ? " Type='"+contextTypeStr+"' " : "";
+				ctxtMenuStr += '/>';
+			}
+			ctxtMenuStr += '<ContextMenu ';
+			ctxtMenuStr += contextObjectStr + '/>' + '</Activity>';
+			return ctxtMenuStr;
 		},
 
 		DestroyActivity : function(activityHandle, sessionHandle) {
@@ -1001,6 +1048,12 @@ $(function() {
 								dataControlModel.menuActionSelected = function(selectedId, name, params) {
 									expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
 								};
+
+								/* override a method handler for each contextmenu button */
+								dataControlModel.contextMenuSelected = function(selectedId, contextMenuType, contextObject, params) {
+									expanz.Net.CreateContextMenuRequest(this.getAttr('parent'), selectedId, contextMenuType, contextObject, callbacks);
+								};
+								
 							}
 							/* others cases (tree, combobox) */
 							else {
@@ -1130,7 +1183,7 @@ $(function() {
 				$(execResults).find('ContextMenu').each(function() {
 					// window.expanz.logToConsole('ContextMenu received');
 					var caller = window.expanz.currentContextMenu;
-					if (caller !== null) {
+					if (caller !== undefined) {
 						// window.expanz.logToConsole('Caller found');
 						caller.set({
 							data : null

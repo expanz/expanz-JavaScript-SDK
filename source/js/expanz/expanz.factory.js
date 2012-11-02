@@ -245,7 +245,7 @@ $(function() {
 				// create a model for each method
 				var method;
 				if ($(methodEl).attr('type') == 'ContextMenu') {
-					method = new expanz.Model.ContextMenu({
+					method = new expanz.Model.MenuAction({
 						id : $(methodEl).attr('name'),
 						contextObject : $(methodEl).attr('contextObject')
 					});
@@ -350,9 +350,23 @@ $(function() {
 												bindValueFromCellId : $(param).attr('bindValueFromCellId')
 											});
 										});
-										var actionName = $(action).attr('methodName') || $(action).attr('menuAction');
-										var type = $(action).attr('methodName') ? 'method' : 'menuAction';
+										var actionName = $(action).attr('methodName') || $(action).attr('menuAction') || $(action).attr('contextMenu');
+										var type = $(action).attr('methodName') ? 'method' : $(action).attr('menuAction') ? 'menuAction' : 'contextMenu';
 										dataControlModel.addAction(type, $(action).attr('id'), $(action).attr('label'), $(action).attr('width'), actionName, params);
+										
+										/*var method;
+										method = new expanz.Model.MenuAction({
+											id : $(action).attr('id'),
+											contextObject : actionName
+										});
+
+										var ctxMenuview = new expanz.Views.ContextMenuView({
+											el : $(this),
+											id : $(this).attr('id'),
+											className : $(this).attr('class'),
+											model : method
+										});
+										window.expanz.currentContextMenu = ctxMenuview.model;*/
 									});
 								}
 							}
