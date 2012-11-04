@@ -477,13 +477,13 @@ $(function() {
 										method = new expanz.Model.MenuAction({
 											id : $(action).attr('id'),
 											contextObject : actionName
-										});
+										});*/
 
-										var ctxMenuview = new expanz.Views.ContextMenuView({
+										/*var ctxMenuview = new expanz.Views.ContextMenuView({
 											el : $(this),
 											id : $(this).attr('id'),
 											className : $(this).attr('class'),
-											model : method
+											model : dataControlModel
 										});
 										window.expanz.currentContextMenu = ctxMenuview.model;*/
 									});
@@ -1405,6 +1405,7 @@ $(function() {
 					window.expanz.logToConsole("WEB SERVER PING OK");
 				}
 				else {
+					//window.expanz.logToConsole("WEB SERVER PING FAILED" + getURLRestService(RequestObject.WebServerPing().url) + " DATA " + data);
 					window.expanz.pingError++;
 					if (window.expanz.pingError === nbAttempts) {
 						expanz.Views.redirect(window.expanz.getMaintenancePage());
@@ -4019,10 +4020,14 @@ $(function() {
 				that._createMenu($(this), parentUL.find("#" + ulId));
 			});
 
+			var defaultAction = xml.attr('defaultAction');
 			var j = 0;
 			xml.children("MenuItem").each(function() {
 				var liId = (parentUL.id || parentUL[0].id) + "_li_" + j++;
-				parentUL.append("<li id='" + liId + "' action='" + $(this).attr('action') + "'>" + $(this).attr('text') + "</li>");
+				var defaultActionClass = "";
+				if (defaultAction !== undefined && defaultAction == $(this).attr('action'))
+					defaultActionClass = "deafaultAction";
+				parentUL.append("<li id='" + liId + "' action='" + $(this).attr('action') + "' class=' "+defaultActionClass+" '>" + $(this).attr('text') + "</li>");
 				var liEL = parentUL.find("#" + liId);
 				liEL.unbind("click");
 				liEL.click(function(e) {
