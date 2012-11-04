@@ -44,6 +44,7 @@ $(function() {
 					window.expanz.logToConsole("WEB SERVER PING OK");
 				}
 				else {
+					window.expanz.logToConsole("WEB SERVER PING FAILED" + data);
 					window.expanz.pingError++;
 					if (window.expanz.pingError === nbAttempts) {
 						expanz.Views.redirect(window.expanz.getMaintenancePage());
