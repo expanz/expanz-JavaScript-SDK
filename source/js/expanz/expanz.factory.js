@@ -358,13 +358,13 @@ $(function() {
 										method = new expanz.Model.MenuAction({
 											id : $(action).attr('id'),
 											contextObject : actionName
-										});
+										});*/
 
-										var ctxMenuview = new expanz.Views.ContextMenuView({
+										/*var ctxMenuview = new expanz.Views.ContextMenuView({
 											el : $(this),
 											id : $(this).attr('id'),
 											className : $(this).attr('class'),
-											model : method
+											model : dataControlModel
 										});
 										window.expanz.currentContextMenu = ctxMenuview.model;*/
 									});
