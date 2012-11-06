@@ -78,6 +78,16 @@ $(function() {
 			return true;
 		},
 
+		getUserDetailsList : function() {
+			var userDetails = JSON.parse(this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'userDetails.list'));
+			return userDetails;
+		},
+		
+		setUserDetails : function(userDetails) {
+			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'userDetails.list', JSON.stringify(userDetails));
+			return true;
+		},
+		
 		setRolesList : function(roles) {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'roles.list', JSON.stringify(roles));
 			return true;

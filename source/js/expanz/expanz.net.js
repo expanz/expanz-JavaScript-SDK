@@ -766,6 +766,22 @@ $(function() {
 		};
 	};
 
+	function parseUserDetails(xml) {
+		var userDetails = {};
+		var xmlElement = $(xml).find("ESA");
+		var userName = xmlElement.attr('userName');
+		xmlElement = $(xml).find("MyManager");
+		userDetails = {
+			userName : userName,
+			managerName : xmlElement.children('FirstName').text()+' '+xmlElement.children('LastName').text(),
+			managerPhone : xmlElement.children('Phone').text(),
+			managerMobilePhone : xmlElement.children('MobilePhone').text(),
+			managerLevel : xmlElement.children('Level').text()
+		};
+		
+		return userDetails;
+	}
+	
 	function parseProcessAreas(xmlElement) {
 		// window.expanz.logToConsole("start parseProcessAreas");
 		var processAreas = [];
@@ -900,6 +916,9 @@ $(function() {
 		return function apply(xml) {
 			// window.expanz.logToConsole("start parseGetSessionDataResponse");
 
+			var userDetails = parseUserDetails(xml);
+			expanz.Storage.setUserDetails(userDetails);
+			
 			var processAreas = parseProcessAreas($(xml).find("Menu"));
 
 			var roles = parseRoles($(xml).find("Roles"));
