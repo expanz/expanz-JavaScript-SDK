@@ -326,7 +326,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(RequestObject.CreateContextMenu(activity, contextId, contextMenuType, contextObject, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
+			SendRequest(RequestObject.CreateContextMenuAction(activity, contextId, contextMenuType, contextObject, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
 		},
 
 		/* create an anonymous request */
@@ -457,9 +457,9 @@ $(function() {
 			};
 		},
 
-		CreateContextMenu: function(activity, contextId, contextMenuType, contextObject, sessionHandle) {
+		CreateContextMenuAction: function(activity, contextId, contextMenuType, contextObject, sessionHandle) {
 			return {
-				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateContextMenu(activity, contextId, contextMenuType, contextObject)),
+				data : buildRequest('ExecX', XMLNamespace, sessionHandle)(RequestBody.CreateContextMenuAction(activity, contextId, contextMenuType, contextObject)),
 				url : 'ExecX'
 			};
 		},
@@ -691,7 +691,7 @@ $(function() {
 			return mnuActionStr;
 		},
 
-		CreateContextMenu : function(activity, contextId, contextMenuType, contextObject) {
+		CreateContextMenuAction : function(activity, contextId, contextMenuType, contextObject) {
 			var ctxtMenuStr = '<Activity activityHandle="' + activity.getAttr('handle') + '">';
 			var contextObjectStr = contextObject ? ' contextObject="' + contextObject + '"' : '';
 			var contextTypeStr = contextMenuType ? contextMenuType : contextObject;
