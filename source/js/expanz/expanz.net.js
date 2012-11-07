@@ -1024,6 +1024,7 @@ $(function() {
 							mask : $(this).attr('mask'),
 							label : $(this).attr('label'),
 							items : $(this).find("Item"),
+							visualType: $(this).attr("visualType"),
 							value : $(this).attr('value') == '$longData$' ? $(this).text() : $(this).attr('value')
 
 						});
@@ -1365,9 +1366,11 @@ $(function() {
 					}
 					else {
 						var dataControlModels = activity.getDataControl(id);
+					    
 						if (dataControlModels !== undefined) {
 							for ( var i = 0; i < dataControlModels.length; i++) {
 								dataControlModel = dataControlModels[i];
+							    
 								if (dataControlModel.getAttr('renderingType') == 'grid' || dataControlModel.getAttr('renderingType') == 'popupGrid' || dataControlModel.getAttr('renderingType') == 'rotatingBar') {
 									fillGridModel(dataControlModel, $(this));
 
@@ -1389,6 +1392,15 @@ $(function() {
 								}
 							}
 						}
+					    
+					    // Variant fields also can consume data publications, but are handled separately as
+					    // they behave more like fields than data publications (ie. they don't register as 
+					    // data publications with the activity).
+						var variantField = activity.get(id);
+					    
+						if (variantField && variantField !== undefined) {
+						    variantField.publishData($(this), activity);
+					}
 					}
 				});
 

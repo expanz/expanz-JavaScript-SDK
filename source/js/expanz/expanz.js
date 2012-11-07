@@ -380,7 +380,7 @@ $(function() {
 		loginPopup = window.expanz.showManuallyClosedPopup(content, 'Login', 'ExpanzLoginPopup', activity);
 
 		/* set focus on username field */
-		$("#username input").focus()
+	    $("#username input").focus();
 
 		createLogin(loginPopup.el.find('[bind=login]'));
 

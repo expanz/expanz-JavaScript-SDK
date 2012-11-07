@@ -9,33 +9,34 @@
 //  in accordance with the terms of the license agreement accompanying it.
 //
 ////////////////////////////////////////////////////////////////////////////////
-$(function() {
+$(function () {
 
 	window.expanz = window.expanz || {};
 	window.expanz.Views = {};
 
 	window.expanz.Views.FieldView = Backbone.View.extend({
 
-		initialize : function() {
+        initialize: function () {
 			this.model.bind("change:label", this.modelUpdate('label'), this);
 			this.model.bind("change:value", this.modelUpdate('value'), this);
 			this.model.bind("change:items", this.modelUpdate('value'), this);
+            this.model.bind("change:visualType", this.modelUpdate('visualType'), this);
 			this.model.bind("change:errorMessage", this.displayError(), this);
 			this.model.bind("change:loading", this.loading, this);
-			//this.model.bind("change:visualType",this.modelUpdate('variantPanel'), this);
 		},
 
-		modelUpdate : function(attr) {
+        modelUpdate: function (attr) {
 			var view = this;
-			return function() {
+            return function () {
 				var elem = this.el.find('[attribute=' + attr + ']');
 				updateViewElement(view, elem, this.model.attributes, attr);
+                view.render();
 				this.el.trigger('update:field');
 			};
 		},
 
-		displayError : function() {
-			return function() {
+        displayError: function () {
+            return function () {
 				var errorId = 'error' + this.model.get('id').replace(/\./g, "_");
 				if (this.el.attr('showError') !== 'false') {
 					var errorEl;
@@ -64,11 +65,11 @@ $(function() {
 			};
 		},
 
-		events : {
-			"change [attribute=value]" : "viewUpdate"
+        events: {
+            "change [attribute=value]": "viewUpdate"
 		},
 
-		getValue : function() {
+        getValue: function () {
 			var elem = this.el.find('[attribute=value]');
 
 			var value = null;
@@ -85,36 +86,220 @@ $(function() {
 
 		},
 
-		viewUpdate : function(event) {
+        viewUpdate: function (event) {
 			// handle multi-choices
 			if (this.model.get('items') !== undefined && this.model.get('items').length > 0) {
 				this.model.update({
-					value : (event.target.checked ? 1 : -1) * (event.target.value)
+                    value: (event.target.checked ? 1 : -1) * (event.target.value)
 				});
 			}
 			else {
 				this.model.update({
-					value : this.getValue()
+                    value: this.getValue()
 				});
 			}
 
 			this.el.trigger('update:field');
 		},
 
-		loading : function() {
+        loading: function () {
 			/* nothing special done when a field is loading at the moment */
 		}
 
 	});
 
+    // TODO: To extend FieldView???
+    window.expanz.Views.VariantFieldView = Backbone.View.extend({
+
+        template: _.template("<input id='textinput' attribute='value' type='text' style='display: none' /> " +
+	                         "<label id='booleaninput' style='display: none'><input attribute='value' type='checkbox' /> Yes / I Agree</label>" +
+	                         "<div id='options' style='display: none' />"),
+
+        initialize: function () {
+            //this.model.bind("change:label", this.modelUpdate('label'), this);
+            this.model.bind("change:value", this.valueChanged(), this);
+            this.model.bind("change:data", this.dataChanged(), this);
+            this.model.bind("change:visualType", this.visualTypeChanged(), this);
+            this.model.bind("change:errorMessage", this.displayError(), this);
+            this.model.bind("change:loading", this.loading, this);
+
+            $(this.el).html(this.template({ 'name': $(this.el).attr('name') }));
+            
+            this.textInput = this.el.find('[id=textinput]');
+            this.booleanControl = this.el.find('[id=booleaninput]');
+            this.booleanInput = this.booleanControl.find('[attribute=value]');
+            this.optionInput = this.el.find('[id=options]');
+        },
+
+        visualTypeChanged: function () {
+            var view = this;
+            return function () {
+                view.render();
+                this.el.trigger('update:field');
+            };
+        },
+
+        valueChanged: function () {
+            var view = this;
+            return function () {
+                var inputField = this.activeInputField();
+                updateViewElement(view, inputField, this.model.attributes, 'value');
+                this.el.trigger('update:field');
+            };
+        },
+
+        dataChanged: function () {
+            var view = this;
+            return function () {
+                this.optionInput.html("");
+
+                var radioButtonItemTemplate = _.template("<div><label><input id='<%= id %>' name='<%= group %>' value='<%= rowId %>' attribute='value' type='radio' /> <%= label %></label></div>");
+
+                var xml = this.model.get("data");
+                
+                _.each(xml.find('Row'), function (row) {
+                    var fieldName = $(view.el).attr('name');
+                    var rowId = $(row).attr('id');
+
+                    var cell = $(row).find('Cell');
+                    
+                    var label = $(cell).text();
+                    var id = view.model.id.replace(/\./g, "_") + "_" + rowId;
+                        
+                    view.optionInput.append(radioButtonItemTemplate({
+                        'id': id,
+                        'rowId': rowId,
+                        'label': label,
+                        'group': fieldName
+                    }));
+                });
+
+                var selectedCheckBox = this.optionInput.find("[value=" + this.model.get("value") + "]"); // Gets the radio button to be selected
+                selectedCheckBox.prop("checked", true);
+
+                this.el.trigger('update:field');
+            };
+        },
+
+        displayError: function () {
+            return function () {
+                var errorId = 'error' + this.model.get('id').replace(/\./g, "_");
+                if (this.el.attr('showError') !== 'false') {
+                    var errorEl;
+                    if (this.model.get('errorMessage') !== undefined) {
+                        errorEl = this.el.find('#' + errorId);
+                        if (errorEl.length < 1) {
+                            this.el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="' + errorId + '"></p>');
+                            errorEl = this.el.find('#' + errorId);
+                        }
+                        errorEl.html(this.model.get("errorMessage"));
+                        errorEl.show();
+                        errorEl.css('display', 'inline');
+                        this.el.addClass("errorField");
+                        // window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
+                    }
+                    else {
+                        errorEl = this.el.find('#' + errorId);
+                        if (errorEl) {
+                            errorEl.hide();
+                        }
+                        this.el.removeClass("errorField");
+                        // window.expanz.logToConsole("hiding error message");
+                    }
+                }
+
+            };
+        },
+
+        render: function () {
+            this.textInput.hide();
+            this.booleanControl.hide();
+            this.optionInput.hide();
+
+            var inputField = this.activeInputField();
+            
+            if (inputField != null) {
+                updateViewElement(this, inputField, this.model.attributes, 'value');
+
+                this.activeInputControl().show();
+            }
+            
+            return this;
+        },
+
+        events: {
+            "change [attribute=value]": "viewUpdate"
+        },
+
+        viewUpdate: function (event) {
+            this.model.update({
+                value: this.getValue()
+            });
+
+            this.el.trigger('update:field');
+        },
+
+        getValue: function () {
+            var value = null;
+
+            var visualType = this.model.get("visualType");
+
+            if (visualType == "cb") {
+                value = boolString(this.booleanInput.prop("checked"));
+            } else if (visualType == 'rb') {
+                var selectedCheckBox = $(this.el).find(":checked"); // Gets the selected radio button
+                value = selectedCheckBox.val();
+            } else if (visualType == 'txt') {
+                value = this.textInput.val();
+            }
+
+            return value;
+
+        },
+        
+        activeInputControl: function () {
+            var visualType = this.model.get("visualType");
+            var control = null;
+
+            if (visualType == 'cb') {
+                control = this.booleanControl;
+            } else if (visualType == 'rb') {
+                control = this.optionInput;
+            } else if (visualType == 'txt') {
+                control = this.textInput;
+            }
+
+            return control;
+        },
+
+        activeInputField: function () {
+            // Returns the active input field. NOTE: Unlike activeInputControl, this returns the checkbox instance, not its surrounding label element
+            var visualType = this.model.get("visualType");
+            var control = null;
+
+            if (visualType == 'cb') {
+                control = this.booleanInput;
+            } else {
+                control = this.activeInputControl();
+            }
+
+            return control;
+        },
+
+        loading: function () {
+            /* nothing special done when a field is loading at the moment */
+        }
+
+    });
+
 	window.expanz.Views.DependantFieldView = Backbone.View.extend({
 
-		initialize : function() {
+        initialize: function () {
 			this.model.bind("change:value", this.toggle, this);
 			this.el.hide();
 		},
 
-		toggle : function() {
+        toggle: function () {
 			var elem = this.el.find('[attribute=value]');
 			updateViewElement(this, elem, this.model.get('value'));
 
@@ -129,20 +314,20 @@ $(function() {
 	});
 
 	window.expanz.Views.MethodView = Backbone.View.extend({
-		initialize : function() {
+        initialize: function () {
 			this.model.bind("change:loading", this.loading, this);
 		},
 
-		events : {
-			"click [attribute=submit]" : "submit"
+        events: {
+            "click [attribute=submit]": "submit"
 		},
 
-		submit : function() {
+        submit: function () {
 			this.model.submit();
 			this.el.trigger('submit:' + this.model.get('id'));
 		},
 
-		loading : function() {
+        loading: function () {
 			// window.expanz.logToConsole('method loading ' + this.model.get('id'));
 			if (this.model.get('loading') === true) {
 				if (this.el.is(":button")) {
@@ -168,14 +353,14 @@ $(function() {
 	});
 
 	window.expanz.Views.ContextMenuView = window.expanz.Views.MethodView.extend({
-		initialize : function() {
+        initialize: function () {
 			this.model.bind("change:data", this.modelUpdate, this);
 		},
 
-		_createMenu : function(xml, parentUL) {
+        _createMenu: function (xml, parentUL) {
 			var that = this;
 			var i = 0;
-			xml.children("Menu").each(function() {
+            xml.children("Menu").each(function () {
 				var ulId = parentUL.id + "_" + i++;
 				parentUL.append("<li>" + $(this).attr('name') + "<ul id='" + ulId + "'><ul></li>");
 				that._createMenu($(this), parentUL.find("#" + ulId));
@@ -183,7 +368,7 @@ $(function() {
 
 			var defaultAction = xml.attr('defaultAction');
 			var j = 0;
-			xml.children("MenuItem").each(function() {
+            xml.children("MenuItem").each(function () {
 				var liId = (parentUL.id || parentUL[0].id) + "_li_" + j++;
 				var defaultActionClass = "";
 				if (defaultAction !== undefined && defaultAction == $(this).attr('action'))
@@ -202,7 +387,7 @@ $(function() {
 				});
 			});
 		},
-		modelUpdate : function() {
+        modelUpdate: function () {
 			/* retrieve or create a div to host the context menu */
 			// window.expanz.logToConsole("modelUpdated");
 			var contextMenuId;
@@ -227,9 +412,9 @@ $(function() {
 			var top = pos.top + this.el.find("button").outerHeight() + 2;
 
 			this.contextMenuEl.css({
-				position : "absolute",
-				top : top + "px",
-				left : (pos.left + 10) + "px"
+                position: "absolute",
+                top: top + "px",
+                left: (pos.left + 10) + "px"
 			});
 
 			/* append data to the menu */
@@ -241,9 +426,9 @@ $(function() {
 			var that = this;
 
 			this.mouseInside = true;
-			this.contextMenuEl.hover(function() {
+            this.contextMenuEl.hover(function () {
 				that.mouseInside = true;
-			}, function() {
+            }, function () {
 				that.mouseInside = false;
 			});
 
@@ -254,7 +439,7 @@ $(function() {
 				}
 			});
 		},
-		submit : function() {
+        submit: function () {
 			/* register current context menu */
 			// window.expanz.logToConsole("Registering current context menu");
 			window.expanz.currentContextMenu = this.model;
@@ -263,7 +448,7 @@ $(function() {
 		},
 
 		/* must be overidden if a custom context menu is wanted */
-		createContextMenu : function() {
+        createContextMenu: function () {
 			this.contextMenuEl.show();
 		}
 
@@ -271,7 +456,7 @@ $(function() {
 
 	window.expanz.Views.GridView = Backbone.View.extend({
 
-		initialize : function() {
+        initialize: function () {
 			this.model.bind("update:grid", this.render, this);
 			this.bind("rowClicked", this.rowClicked, this);
 			this.bind("rowDoubleClicked", this.rowDoubleClicked, this);
@@ -280,24 +465,24 @@ $(function() {
 			this.bind("contextMenuClicked", this.contextMenuClicked, this);
 		},
 
-		rowClicked : function(row) {
+        rowClicked: function (row) {
 			if (row.attr('id') != this.selectedId) {
 				this.selectedId = row.attr('id');
 				this.model.updateRowSelected(this.selectedId, row.attr('type'));
 			}
 		},
 
-		rowDoubleClicked : function(row) {
+        rowDoubleClicked: function (row) {
 			this.model.updateRowDoubleClicked(row.attr('id'), row.attr('type'));
 		},
 
-		actionClicked : function(id, name, params, actionEl) {
+        actionClicked: function (id, name, params, actionEl) {
 			actionEl.attr('disabled', 'disabled');
 			actionEl.addClass('actionLoading');
 			this.model.actionSelected(id, name, params);
 		},
 
-		menuActionClicked : function(id, name, params) {
+        menuActionClicked: function (id, name, params) {
 			this.model.menuActionSelected(id, name, params);
 		},
 
@@ -320,7 +505,7 @@ $(function() {
 					}
 
 					pagingBar = hostEl.find("#pagingBar");
-					for ( var i = 0; i < nbPages; i++) {
+                    for (var i = 0; i < nbPages; i++) {
 						var inputId = this.model.getAttr('id') + "BtnPage" + i;
 						var disabled = "";
 						if (i == currentPage)
@@ -329,7 +514,7 @@ $(function() {
 						pagingBar.append("<input id='" + inputId + "' type='button' value='" + (i + 1) + "' " + disabled + " />");
 
 						var that = this;
-						$(pagingBar).find("#" + inputId).click(function() {
+                        $(pagingBar).find("#" + inputId).click(function () {
 							that.renderWithPaging(this.value - 1, itemsPerPage, currentSortField, currentSortAsc);
 						});
 					}
@@ -338,7 +523,7 @@ $(function() {
 			}
 		},
 
-		renderWithPaging : function(currentPage, itemsPerPage, currentSortField, currentSortAsc) {
+        renderWithPaging: function (currentPage, itemsPerPage, currentSortField, currentSortAsc) {
 			// window.expanz.logToConsole("GridView rendered for page " + currentPage);
 
 			var rows = this.model.getAllRows();
@@ -378,7 +563,7 @@ $(function() {
 				else {
 					$(hostEl).addClass("nonEmptyGrid");
 					$(hostEl).removeClass("emptyGrid");
-					
+
 					var that;
 					/* datagrid/list configuration (nb items per page, sorting as combo box) */
 					if (enableConfiguration) {
@@ -390,14 +575,14 @@ $(function() {
 						];
 						$confEl.append('<div class="ItemsPerPage" >' + nbItemsPerPageText + '<select id="' + hostId + '_Configuration_ItemsPerPage" name="ItemsPerPage">');
 						var selectEl = $confEl.find("#" + hostId + "_Configuration_ItemsPerPage");
-						for ( var i = 0; i < itemsPerPageChoices.length; i++) {
+                        for (var i = 0; i < itemsPerPageChoices.length; i++) {
 							var defString = itemsPerPage == itemsPerPageChoices[i] ? ' selected="selected" ' : '';
 							selectEl.append('<option ' + defString + ' value="' + itemsPerPageChoices[i] + '">' + itemsPerPageChoices[i] + '</option>');
 						}
 						selectEl.append('</select></div>');
 
 						that = this;
-						selectEl.change(function() {
+                        selectEl.change(function () {
 							that.renderWithPaging(currentPage, $(this).val(), currentSortField, !currentSortAsc);
 						});
 					}
@@ -406,7 +591,7 @@ $(function() {
 					if (headerTemplate && headerTemplate.length > 0) {
 						that = this;
 						$(hostEl).append(headerTemplate.html());
-						$(hostEl).find("[sortField]").each(function() {
+                        $(hostEl).find("[sortField]").each(function () {
 							var fieldName = $(this).attr('sortField');
 
 							var defaultSorted = $(this).attr('defaultSorted');
@@ -427,7 +612,7 @@ $(function() {
 								}
 							}
 
-							$(this).click(function() {
+                            $(this).click(function () {
 
 								var sortAsc = true;
 								if (fieldName == currentSortField) {
@@ -469,7 +654,7 @@ $(function() {
 						}
 
 						/* add row id to prefix id for eventual user inputs */
-						$(result).find("[id*='userinput_']").each(function() {
+                        $(result).find("[id*='userinput_']").each(function () {
 							$(this).attr('id', row.getAttr('id') + "_" + $(this).attr('id'));
 						});
 
@@ -477,10 +662,10 @@ $(function() {
 
 						/* binding method from template */
 						var that = this;
-						gridItems.find("#" + itemId + " [methodName] ").each(function(index, element) {
+                        gridItems.find("#" + itemId + " [methodName] ").each(function (index, element) {
 							var action = that.model.getAction($(element).attr('methodName'));
 							if (action && action.length > 0) {
-								$(element).click(function() {
+                                $(element).click(function () {
 									var rowId = $(this).closest("[rowId]").attr('rowId');
 									var actionParams = action[0].get('actionParams').clone();
 
@@ -490,7 +675,7 @@ $(function() {
 						});
 
 						/* trigger a method call if a user field include a change attribute */
-						gridItems.find("#" + itemId + "  [autoUpdate] ").change(function(elem) {
+                        gridItems.find("#" + itemId + "  [autoUpdate] ").change(function (elem) {
 							var action = that.model.getAction($(this).attr('autoUpdate'));
 							if (action && action.length > 0) {
 								var rowId = $(this).closest("[rowId]").attr('rowId');
@@ -503,10 +688,10 @@ $(function() {
 						});
 
 						/* binding menuAction from template */
-						hostEl.find("#" + itemId + " [menuAction] ").each(function(index, element) {
+                        hostEl.find("#" + itemId + " [menuAction] ").each(function (index, element) {
 							var action = that.model.getAction($(element).attr('menuAction'));
 							if (action && action.length > 0) {
-								$(element).click(function() {
+                                $(element).click(function () {
 									var rowId = $(this).closest("[rowId]").attr('rowId');
 									var actionParams = action[0].get('actionParams').clone();
 
@@ -560,7 +745,7 @@ $(function() {
 
 				// render column header
 				var el = $(hostEl).find('thead tr');
-				_.each(this.model.getAllColumns(), function(cell) {
+                _.each(this.model.getAllColumns(), function (cell) {
 					var html = '<th ';
 					// html += cell.get('width') ? ' width="' + cell.get('width') + '"' : '';
 					html += '>' + cell.get('label') + '</th>';
@@ -581,7 +766,7 @@ $(function() {
 					var html = '<tr id="' + row.getAttr('id') + '" type="' + row.getAttr('type') + '" ' + alternate + '>';
 
 					var values = {};
-					_.each(row.getAllCells(), function(cell) {
+                    _.each(row.getAllCells(), function (cell) {
 						html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="row' + row.getAttr('id') + ' column' + cell.get('id') + '">';
 						if (model.getColumn(cell.get('id')) && model.getColumn(cell.get('id')).get('datatype') === 'BLOB') {
 							html += '<img width="' + model.getColumn(cell.get('id')).get('width') + '" src="' + cell.get('value') + '"/>';
@@ -595,12 +780,12 @@ $(function() {
 
 					if (this.model.getAttr('hasActions')) {
 						html += '<td>';
-						_.each(this.model.getActions(), function(cell) {
+                        _.each(this.model.getActions(), function (cell) {
 							var buttonId = model.getAttr('id') + "_" + row.getAttr('id') + "_" + cell.get('actionName');
 							var actionParams = cell.get('actionParams');
 
 							var userInputs = "";
-							_.each(actionParams, function(actionParams) {
+                            _.each(actionParams, function (actionParams) {
 								var name = actionParams.name;
 								var value = actionParams.value;
 								var label = actionParams.label;
@@ -625,12 +810,12 @@ $(function() {
 				}
 
 				/* handle row click event */
-				var onRowClick = function(event) {
+                var onRowClick = function (event) {
 					event.data.trigger("rowClicked", $(this));
 				};
 
 				/* handle double row click event */
-				var onRowDoubleClick = function(event) {
+                var onRowDoubleClick = function (event) {
 					event.data.trigger("rowDoubleClicked", $(this));
 				};
 
@@ -639,7 +824,7 @@ $(function() {
 
 				var that = this;
 				/* handle button/actions click event */
-				var onActionClick = function(event) {
+                var onActionClick = function (event) {
 					var rowId = $(this).closest("tr").attr('id');
 					var parentDiv = $(this).parent();
 					var methodName = parentDiv.attr('name');
@@ -650,7 +835,7 @@ $(function() {
 				$('table#' + hostId + ' tr [bind=method] > button').click(this, onActionClick);
 
 				/* handle menuAction click event */
-				var onMenuActionClick = function(event) {
+                var onMenuActionClick = function (event) {
 					var rowId = $(this).closest("tr").attr('id');
 					var parentDiv = $(this).parent();
 					var menuActionName = parentDiv.attr('name');
@@ -678,15 +863,15 @@ $(function() {
 
 			if (this.model.getAttr('renderingType') == 'popupGrid') {
 				var clientMessage = new expanz.Model.ClientMessage({
-					id : hostId + 'PopUp',
-					title : '',
-					text : '',
-					parent : this.model.getAttr('parent')
+                    id: hostId + 'PopUp',
+                    title: '',
+                    text: '',
+                    parent: this.model.getAttr('parent')
 				});
 
 				var picklistWindow = new window.expanz.Views.PopupView({
-					id : clientMessage.id,
-					model : clientMessage
+                    id: clientMessage.id,
+                    model: clientMessage
 				}, $('body'));
 
 				picklistWindow.el.append(hostEl);
@@ -701,7 +886,7 @@ $(function() {
 			return this;
 		},
 
-		renderAsRotationBar : function(el, itemPerPage, rotationStep, firstItem) {
+        renderAsRotationBar: function (el, itemPerPage, rotationStep, firstItem) {
 			var totalItems = $(el).find("li.rotatingItem").length;
 			var that = this;
 			var elId = $(el).attr('id');
@@ -710,7 +895,7 @@ $(function() {
 
 			var i = 0;
 
-			$(el).find("li.rotatingItem").each(function() {
+            $(el).find("li.rotatingItem").each(function () {
 
 				if (i >= firstItem) {
 					$(this).show();
@@ -731,7 +916,7 @@ $(function() {
 
 			/* show pre button if needed */
 			if (firstItem > 0) {
-				$(el).find("#" + elId + "PrevBtn").click(function() {
+                $(el).find("#" + elId + "PrevBtn").click(function () {
 					that.renderAsRotationBar($(el), itemPerPage, rotationStep, Math.max(firstItem - rotationStep, 0));
 				});
 				$(el).find("#" + elId + "PrevBtn").show();
@@ -742,7 +927,7 @@ $(function() {
 
 			/* show next button if needed */
 			if (i < totalItems) {
-				$(el).find("#" + elId + "NextBtn").click(function() {
+                $(el).find("#" + elId + "NextBtn").click(function () {
 					that.renderAsRotationBar($(el), itemPerPage, rotationStep, Math.min(firstItem + rotationStep, totalItems - itemPerPage));
 				});
 				$(el).find("#" + elId + "NextBtn").show();
@@ -752,7 +937,7 @@ $(function() {
 			}
 		},
 
-		render : function() {
+        render: function () {
 
 			var itemsPerPage = this.options['itemsPerPage'];
 			if (!itemsPerPage || itemsPerPage <= 0) {
@@ -763,10 +948,10 @@ $(function() {
 			return this;
 		},
 
-		_handleActionClick : function(actionEl, rowId, methodName, actionParams, divEl) {
+        _handleActionClick: function (actionEl, rowId, methodName, actionParams, divEl) {
 			var inputValid = true;
 			/* handle user input */
-			_.each(actionParams, function(actionParam) {
+            _.each(actionParams, function (actionParam) {
 				var name = actionParam.name;
 				if (actionParam.value == '@userInput.textinput' || actionParam.value == '@userInput.numericinput') {
 					var valueInput = divEl.find("#" + rowId + "_userinput_" + name);
@@ -786,9 +971,9 @@ $(function() {
 				this.trigger("actionClicked", rowId, methodName, actionParams, actionEl);
 		},
 
-		_handleMenuActionClick : function(rowId, menuAction, actionParams, divEl) {
+        _handleMenuActionClick: function (rowId, menuAction, actionParams, divEl) {
 			/* handle user input */
-			_.each(actionParams, function(actionParam) {
+            _.each(actionParams, function (actionParam) {
 				var name = actionParam.name;
 				if (actionParam.value == '@contextId') {
 					actionParam.value = rowId;
@@ -819,14 +1004,14 @@ $(function() {
 
 	window.expanz.Views.LoginView = Backbone.View.extend({
 
-		initialize : function() {
+        initialize: function () {
 		},
 
-		events : {
-			"click [type*='submit']" : "attemptLogin"
+        events: {
+            "click [type*='submit']": "attemptLogin"
 		},
 
-		attemptLogin : function() {
+        attemptLogin: function () {
 			var usernameEl = this.el.find("#username input");
 			var passwordEl = this.el.find("#password input");
 
@@ -841,12 +1026,12 @@ $(function() {
 			}
 			else {
 				this.collection.add({
-					id : "username",
-					value : usernameEl.val()
+                    id: "username",
+                    value: usernameEl.val()
 				});
 				this.collection.add({
-					id : "password",
-					value : passwordEl.val()
+                    id: "password",
+                    value: passwordEl.val()
 				});
 				this.collection.login();
 			}
@@ -857,7 +1042,7 @@ $(function() {
 
 	window.expanz.Views.ActivityView = Backbone.View.extend({
 
-		initialize : function(attrs) {
+        initialize: function (attrs) {
 			Backbone.View.prototype.initialize.call(attrs);
 			if (attrs.key) {
 				this.key = attrs.key;
@@ -867,20 +1052,20 @@ $(function() {
 			this.collection.bind("update:deltaLoading", this.deltaLoading, this);
 		},
 
-		updateError : function(model, error) {
+        updateError: function (model, error) {
 			expanz.messageController.addErrorMessageByText(error);
 		},
 
-		events : {
-			"update:field" : "update"
+        events: {
+            "update:field": "update"
 		},
 
-		update : function() {
+        update: function () {
 			// perform full activity validation after a field updates ... if
 			// necessary
 		},
 
-		loading : function() {
+        loading: function () {
 			var loadingId = "Loading_" + this.id.replace(/\./g, "_");
 			var loadingEL = $(this.el).find("#" + loadingId);
 			if (loadingEL.length === 0) {
@@ -914,7 +1099,7 @@ $(function() {
 
 		},
 
-		deltaLoading : function() {
+        deltaLoading: function () {
 			var deltaLoading = this.collection.getAttr('deltaLoading');
 
 			var initiatorID = deltaLoading.initiator.id;
@@ -924,7 +1109,7 @@ $(function() {
 			if (initiator) {
 				// window.expanz.logToConsole("delta method loading " + deltaLoading.isLoading + " " + initiatorID);
 				initiator.set({
-					loading : deltaLoading.isLoading
+                    loading: deltaLoading.isLoading
 				});
 			}
 			else {
@@ -946,16 +1131,16 @@ $(function() {
 
 	window.expanz.Views.DataControlView = Backbone.View.extend({
 
-		initialize : function(attrs) {
+        initialize: function (attrs) {
 			Backbone.View.prototype.initialize.call(attrs);
 			this.model.bind("update:xml", this.publishData, this);
 		},
 
-		itemSelected : function(itemId, callbacks) {
+        itemSelected: function (itemId, callbacks) {
 			this.model.updateItemSelected(itemId, callbacks);
 		},
 
-		publishData : function() {
+        publishData: function () {
 			this.el.trigger("publishData", [
 				this.model.getAttr('xml'), this
 			]);
@@ -964,22 +1149,22 @@ $(function() {
 	});
 
 	window.expanz.Views.CheckboxesView = expanz.Views.DataControlView.extend({
-		publishData : function() {
+        publishData: function () {
 			/* clean elements */
 			this.el.html();
 			var that = this;
 			/* no external component needed just have to draw the checkboxes and handle the clicks */
 
-			_.each(this.model.getAttr('xml').find('Row'), function(row) {
+            _.each(this.model.getAttr('xml').find('Row'), function (row) {
 				var rowId = $(row).attr('id');
 				var selected = boolValue($(row).attr('selected')) === true ? ' checked="checked" ' : '';
-				_.each($(row).find('Cell'), function(cell) {
+                _.each($(row).find('Cell'), function (cell) {
 					var text = $(cell).text();
 					var id = that.model.id.replace(/\./g, "_") + "_" + rowId;
 					that.el.append("<div><input " + selected + " id='" + id + "' value='" + rowId + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
 
 					/* handle checkboxes click */
-					$(that.el).find("#" + id).click(function() {
+                    $(that.el).find("#" + id).click(function () {
 						// window.expanz.logToConsole(that.model.id + " filtered with " + $(this).val());
 						/* send negative value of id to say it has been unselected */
 						var val = $(this).val();
@@ -998,22 +1183,22 @@ $(function() {
 	});
 
 	window.expanz.Views.RadioButtonsView = expanz.Views.DataControlView.extend({
-		publishData : function() {
+        publishData: function () {
 			/* clean elements */
 			this.el.html();
 			var that = this;
 			/* no external component needed just have to draw the checkboxes and handle the clicks */
 
-			_.each(this.model.getAttr('xml').find('Row'), function(row) {
+            _.each(this.model.getAttr('xml').find('Row'), function (row) {
 				var rowId = $(row).attr('id');
 				var selected = boolValue($(row).attr('selected')) === true ? ' checked="checked" ' : '';
-				_.each($(row).find('Cell'), function(cell) {
+                _.each($(row).find('Cell'), function (cell) {
 					var text = $(cell).text();
 					var id = that.model.id.replace(/\./g, "_") + "_" + rowId;
 					that.el.append("<div><input " + selected + " id='" + id + "' value='" + rowId + "' name='radio' type='radio'></input><span>" + text + "</span></div>");
 
 					/* handle radio button click */
-					$(that.el).find("#" + id).click(function() {
+                    $(that.el).find("#" + id).click(function () {
 						/* send the delta to the server */
 						that.model.updateItemSelected($(this).val());
 					});
@@ -1095,16 +1280,16 @@ $(function() {
 		}
 
 	});*/
-	
+
 	window.expanz.Views.PopupView = Backbone.View.extend({
 
-		width : 'auto',
+        width: 'auto',
 
-		cssClass : 'popupView',
+        cssClass: 'popupView',
 
-		divAttributes : '',
+        divAttributes: '',
 
-		initialize : function(attrs, containerjQ) {
+        initialize: function (attrs, containerjQ) {
 			Backbone.View.prototype.initialize.call(attrs);
 			this.create(containerjQ);
 			this.renderActions();
@@ -1126,15 +1311,15 @@ $(function() {
 
 		},
 
-		events : {
-			"click button" : "buttonClicked"
+        events: {
+            "click button": "buttonClicked"
 		},
 
-		renderActions : function() {
+        renderActions: function () {
 
 		},
 
-		create : function(containerjQ) {
+        create: function (containerjQ) {
 			// window.expanz.logToConsole("render popupWindow");
 			var popupWindow = containerjQ.find('#' + this.id);
 			if (popupWindow.length > 0) {
@@ -1153,7 +1338,7 @@ $(function() {
 			if (this.model.getAttr('url') !== undefined && this.model.getAttr('url').length > 0) {
 				var url = this.model.getAttr('url');
 				var that = this;
-				this.el.load(url, function() {
+                this.el.load(url, function () {
 					that.center();
 					that.trigger('contentLoaded');
 				});
@@ -1165,48 +1350,48 @@ $(function() {
 		},
 
 		/* must be redefined depending on the plug-in used */
-		createWindowObject : function() {
+        createWindowObject: function () {
 			this.el.dialog({
-				modal : true,
-				width : this.width,
-				title : this.model.getAttr('title')
+                modal: true,
+                width: this.width,
+                title: this.model.getAttr('title')
 			});
 		},
 
-		buttonClicked : function() {
+        buttonClicked: function () {
 			this.closeWindow();
 		},
 
-		closeWindow : function() {
+        closeWindow: function () {
 			this.trigger('popupClosed');
 			this.close();
 		},
 
 		/* may be redifined depending on the pluggin used */
-		close : function() {
+        close: function () {
 			this.remove();
 		},
 
 		/* may be redifined depending on the pluggin used */
-		center : function() {
+        center: function () {
 			this.el.dialog("option", "position", 'center');
 		}
 
 	});
 
 	window.expanz.Views.PicklistWindowView = window.expanz.Views.PopupView.extend({
-		divAttributes : " bind='DataControl' renderingType='grid' ",
-		cssClass : 'pickListPopup popupView'
+        divAttributes: " bind='DataControl' renderingType='grid' ",
+        cssClass: 'pickListPopup popupView'
 	});
 
 	window.expanz.Views.UIMessage = window.expanz.Views.PopupView.extend({
 
-		width : '500px',
+        width: '500px',
 
-		cssClass : 'uiMessage popupView',
+        cssClass: 'uiMessage popupView',
 
-		renderActions : function() {
-			this.model.each(function(action) {
+        renderActions: function () {
+            this.model.each(function (action) {
 				if (this.el.find("[attribute=submit]").length === 0) {
 					this.el.append("<br/>");
 				}
@@ -1220,9 +1405,9 @@ $(function() {
 				else if (action.id !== this.model.id) {
 					this.el.append('<div style="float:left" bind="method" name="' + action.id + '" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
 					var methodView = new expanz.Views.MethodView({
-						el : $('div#' + action.id, this.el),
-						id : action.id,
-						model : action
+                        el: $('div#' + action.id, this.el),
+                        id: action.id,
+                        model: action
 					});
 				}
 
@@ -1231,7 +1416,7 @@ $(function() {
 					var button = this.el.find('#' + divId + ' button');
 					var that = this;
 
-					button.click(function() {
+                    button.click(function () {
 						that.postCloseActions(that.model.getAttr('title'));
 
 						if (action.get('response').find("closeWindow")) {
@@ -1249,7 +1434,7 @@ $(function() {
 			}, this);
 
 		},
-		postCloseActions : function(windowTitle) {
+        postCloseActions: function (windowTitle) {
 			if (windowTitle == "Order Submitted" || windowTitle == "Order Saved") {
 				/* clear activity cookies and reload the page */
 				window.expanz.Storage.clearActivityHandles();
@@ -1259,19 +1444,19 @@ $(function() {
 	});
 
 	window.expanz.Views.ManuallyClosedPopup = window.expanz.Views.UIMessage.extend({
-		width : 'auto',
+        width: 'auto',
 
 		/* do not close on button click */
-		buttonClicked : function() {
+        buttonClicked: function () {
 		}
 	});
 
 	// Public Functions
-	window.expanz.Views.redirect = function(page) {
+    window.expanz.Views.redirect = function (page) {
 		window.location.href = getPageUrl(page);
 	};
 
-	window.expanz.Views.requestLogin = function() {
+    window.expanz.Views.requestLogin = function () {
 		/* if redirection to login page store the last page to be able to redirect the user once logged in */
 		window.expanz.Storage.setLastURL(document.URL);
 		window.expanz.Views.redirect(expanz.getLoginPage());
@@ -1281,6 +1466,10 @@ $(function() {
 
 	function updateViewElement(view, elem, allAttrs, attr) {
 		var datatype = allAttrs['datatype'];
+        var id = allAttrs['id'];
+        var label = allAttrs['label'];
+        var value1 = allAttrs['value'];
+
 		if (datatype && datatype.toLowerCase() === 'blob' && attr && attr === 'value') {
 			var width = allAttrs['width'];
 			var imgElem = '<img src="' + window.config._URLblobs + allAttrs['value'] + '"';
@@ -1310,25 +1499,26 @@ $(function() {
 		/* multi choice field -> display as checkboxes */
 		if (allAttrs.items !== undefined && allAttrs.items.length > 0 && attr === 'value') {
 			var disabled = boolValue(elem.attr('editable')) ? "" : "disabled='disabled'";
-			_.each(allAttrs.items, function(item) {
+            _.each(allAttrs.items, function (item) {
 				var selected = boolValue($(item).attr('selected')) === true ? ' checked="checked" ' : '';
 				var text = $(item).attr('text');
 				var value = $(item).attr('value');
 				$(elem).append("<div><input " + disabled + selected + "' value='" + value + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
 			});
 		} else if ($(elem).is('div') && allAttrs.visualType !== undefined && allAttrs.visualType.length > 0 && attr === 'value')  {
-			if (allAttrs.visualType == 'cb') {
-				$(elem).html('cb' + (value || '&nbsp;'));
-			} else if (allAttrs.visualType == 'rb') {
-				$(elem).html('rb' + (value || '&nbsp;'));
-			} else if (allAttrs.visualType == 'txt') {
-				$(elem).html("<input value='" + value + "' name='text' type='text'></input>");
-			} else {
-				$(elem).html(value || '&nbsp;');
-			}
+            //$(elem).html(allAttrs.visualType || '&nbsp;');
+            //if (allAttrs.visualType == 'cb') {
+            //	$(elem).html('cb' + (value || '&nbsp;'));
+            //} else if (allAttrs.visualType == 'rb') {
+            //	$(elem).html('rb' + (value || '&nbsp;'));
+            //} else if (allAttrs.visualType == 'txt') {
+            //	$(elem).html("<input value='" + value + "' name='text' type='text'></input>");
+            //} else {
+            //	$(elem).html(value || '&nbsp;');
+            //}
 		} else if ($(elem).is('input')) {
 			// special behaviour for checkbox input
-			if ($(elem).is(":checkbox") || $(elem).is(":radio") ) {
+            if ($(elem).is(":checkbox") || $(elem).is(":radio")) {
 				$(elem).addClass('checkbox');
 				var checkedValue = $(elem).attr("checkedValue") ? $(elem).attr("checkedValue") : 1;
 				if (value == checkedValue) {
@@ -1357,7 +1547,7 @@ $(function() {
 			/* if value is empty put an unbreakable space instead */
 			$(elem).html(value || '&nbsp;');
 		}
-		
+
 		return elem;
 	}
 

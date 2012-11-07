@@ -28,9 +28,10 @@ $(function() {
 
 		_type : 'Field',
 
-		defaults : function() {
+		defaults: function () {
+		    
 			return {
-				error : false
+			    error: false
 			};
 		},
 
@@ -49,6 +50,7 @@ $(function() {
 			}
 			return;
 		},
+		
 		publish : function (xml) {
 			if (xml.attr !== undefined) {
 				if ((this.get('value') && (this.get('value') != xml.attr('value'))) || !this.get('value')) {
@@ -62,9 +64,14 @@ $(function() {
 					this.set({
 						items : xml.find("Item"),
 						text : xml.attr('text'),
-						value : xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value'),
-						visualType : xml.attr('visualType')
+						value : xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value')
 					});
+				}
+
+				if (xml.attr('visualType')) {
+				    this.set({
+				        visualType: xml.attr('visualType')
+				    });
 				}
 
 				/* remove error message if field is valid */
@@ -83,7 +90,18 @@ $(function() {
 			} else {
 				window.expanz.logToConsole("window.expanz.Model.Field: xml.attr is undefined");
 			}
+		},
+		
+		publishData: function (xml) {
+		    // Only variant panels will use this method. They consume data publications, but 
+		    // they behave more like fields than data publications (ie. they don't register as 
+		    // data publications with the activity).
+		    if (xml.attr !== undefined) {
+		        this.set({
+		            data : xml
+		        });
 		}
+	    }
 	});
 
 	window.expanz.Model.DashboardField = window.expanz.Model.Field.extend({
@@ -276,10 +294,12 @@ $(function() {
 			}, this);
 		},
 
-		addDataControl : function(DataControl) {
-			if (this.dataControls[DataControl.id] === undefined)
-				this.dataControls[DataControl.id] = [];
-			this.dataControls[DataControl.id].push(DataControl);
+		addDataControl: function (DataControl) {
+		    var id = DataControl.id || DataControl.getAttr('dataId');
+		    
+			if (this.dataControls[id] === undefined)
+				this.dataControls[id] = [];
+			this.dataControls[id].push(DataControl);
 			return;
 		},
 		getDataControl : function(id) {

@@ -74,23 +74,23 @@ $(function() {
 
 			});
 
-			/*_.each(expanz.Factory.VariantPanelField($(el).find('[bind=variantpanelfield]')), function(variantPanelFieldModel) {
-				variantPanelFieldModel.set({
+			_.each(expanz.Factory.VariantField($(el).find('[bind=variantfield]')), function(variantFieldModel) {
+				variantFieldModel.set({
 					parent : activityModel
 				}, {
 					silent : true
 				});
-				activityModel.add(variantPanelFieldModel);
+				activityModel.add(variantFieldModel);
 
 				// add anonymous fields bound to method 
-				if (variantPanelFieldModel.get('anonymousBoundMethod') !== null && variantPanelFieldModel.get('anonymousBoundMethod') !== '') {
-					var boundMethod = activityModel.get(variantPanelFieldModel.get('anonymousBoundMethod'));
+				if (variantFieldModel.get('anonymousBoundMethod') !== null && variantFieldModel.get('anonymousBoundMethod') !== '') {
+				    var boundMethod = activityModel.get(variantFieldModel.get('anonymousBoundMethod'));
 					if (boundMethod) {
-						boundMethod.addAnonymousElement(variantPanelFieldModel);
+					    boundMethod.addAnonymousElement(variantFieldModel);
 					}
 				}
 
-			});*/
+			});
 			
 			_.each(expanz.Factory.DashboardField($(el).find('[bind=dashboardfield]')), function(dashboardFieldModel) {
 				var fieldSessionValue = expanz.Storage.getDashboardFieldValue(dashboardFieldModel.get('dashboardName'), dashboardFieldModel.get('name'));
@@ -166,33 +166,30 @@ $(function() {
 			});
 			return fieldModels;
 		},
-
-		/*VariantPanel : function(fieldEl) {
-			// create a model for each field
-			var field = new expanz.Model.VariantPanelField({
-				id : $(fieldEl).attr('name'),
-				anonymousBoundMethod : $(fieldEl).attr('anonymousBoundMethod')
-			});
-			var view = new expanz.Views.VariantPanelFieldView({
-				el : $(fieldEl),
-				id : $(fieldEl).attr('id'),
-				className : $(fieldEl).attr('class'),
-				model : field,
-				textTransformFunction : $(fieldEl).attr('textTransformFunction')
-			});
-			return view;
-		},
 		
-		VariantPanelField : function(DOMObjects) {
+		VariantField : function(DOMObjects) {
 
-			var fieldModels = [];
-			_.each(DOMObjects, function(fieldEl) {
-				var view = expanz.Factory.VariantPanel(fieldEl);
-				fieldModels.push(view.model);
+		    var fieldModels = [];
+		    _.each(DOMObjects, function (fieldEl) {
+		        // Create a model and a view for each variant field
+		        var field = new expanz.Model.Field({
+		            id: $(fieldEl).attr('name'),
+		            anonymousBoundMethod: $(fieldEl).attr('anonymousBoundMethod')
+			});
+		
+		        var view = new expanz.Views.VariantFieldView({
+		            el: $(fieldEl),
+		            id: $(fieldEl).attr('id'),
+		            className: $(fieldEl).attr('class'),
+		            model: field,
+		            textTransformFunction: $(fieldEl).attr('textTransformFunction')
+		        });
+
+		        fieldModels.push(field);
 
 			});
 			return fieldModels;
-		},*/
+		},
 
 		DashboardField : function(DOMObjects) {
 
@@ -302,7 +299,7 @@ $(function() {
 				if ($(dataControlEl).attr('renderingType') == 'grid' || $(dataControlEl).attr('renderingType') == 'popupGrid' || $(dataControlEl).attr('renderingType') == 'rotatingBar') {
 					dataControlModel = new expanz.Model.Data.Grid({
 						id : $(dataControlEl).attr('id'),
-						dataId: $(dataControlEl).attr('dataId') || $(dataControlEl).attr('id') || $(dataControlEl).attr('query') || $(dataControlEl).attr('populateMethod'),
+						dataId: $(dataControlEl).attr('dataId') || $(dataControlEl).attr('id') || $(dataControlEl).attr('name') || $(dataControlEl).attr('query') || $(dataControlEl).attr('populateMethod'),
 						query: $(dataControlEl).attr('query'),
 						fieldName: $(dataControlEl).attr('fieldName') || $(dataControlEl).attr('dataId'),
 						populateMethod : $(dataControlEl).attr('populateMethod'),
@@ -379,7 +376,7 @@ $(function() {
 				else {
 					dataControlModel = new expanz.Model.Data.DataControl({
 						id: $(dataControlEl).attr('id'),
-						dataId: $(dataControlEl).attr('id') || $(dataControlEl).attr('query') || $(dataControlEl).attr('populateMethod'),
+						dataId: $(dataControlEl).attr('id') || $(dataControlEl).attr('name') || $(dataControlEl).attr('query') || $(dataControlEl).attr('populateMethod'),
 						fieldName: $(dataControlEl).attr('fieldName') || $(dataControlEl).attr('dataId'),
 						populateMethod : $(dataControlEl).attr('populateMethod'),
 						type : $(dataControlEl).attr('type'),
