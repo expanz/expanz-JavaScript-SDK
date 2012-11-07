@@ -1400,7 +1400,7 @@ $(function() {
 					    
 						if (variantField && variantField !== undefined) {
 						    variantField.publishData($(this), activity);
-					}
+					    }
 					}
 				});
 

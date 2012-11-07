@@ -97,10 +97,17 @@ $(function() {
 		    // they behave more like fields than data publications (ie. they don't register as 
 		    // data publications with the activity).
 		    if (xml.attr !== undefined) {
+		        // Unset required, as the set function in FireFox and IE doesn't seem to recognise
+		        // that the data has changed, and thus doesn't actually change the value or raise
+		        // the change event
+		        this.unset("data", {
+		            silent: true
+		        });
+		        
 		        this.set({
 		            data : xml
 		        });
-		}
+		    }
 	    }
 	});
 
