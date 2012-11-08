@@ -14,8 +14,7 @@ $(function () {
     window.expanz = window.expanz || {};
     window.expanz.views = window.expanz.views || {};
 
-    // TODO: To extend FieldView???
-    window.expanz.views.VariantFieldView = Backbone.View.extend({
+    window.expanz.views.VariantFieldView = window.expanz.views.FieldView.extend({
 
         template: _.template("<input id='textinput' attribute='value' type='text' style='display: none' /> " +
 	                         "<label id='booleaninput' style='display: none'><input attribute='value' type='checkbox' /> Yes / I Agree</label>" +
@@ -87,36 +86,6 @@ $(function () {
             };
         },
 
-        displayError: function () {
-            return function () {
-                var errorId = 'error' + this.model.get('id').replace(/\./g, "_");
-                if (this.el.attr('showError') !== 'false') {
-                    var errorEl;
-                    if (this.model.get('errorMessage') !== undefined) {
-                        errorEl = this.el.find('#' + errorId);
-                        if (errorEl.length < 1) {
-                            this.el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="' + errorId + '"></p>');
-                            errorEl = this.el.find('#' + errorId);
-                        }
-                        errorEl.html(this.model.get("errorMessage"));
-                        errorEl.show();
-                        errorEl.css('display', 'inline');
-                        this.el.addClass("errorField");
-                        // window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
-                    }
-                    else {
-                        errorEl = this.el.find('#' + errorId);
-                        if (errorEl) {
-                            errorEl.hide();
-                        }
-                        this.el.removeClass("errorField");
-                        // window.expanz.logToConsole("hiding error message");
-                    }
-                }
-
-            };
-        },
-
         render: function () {
             this.textInput.hide();
             this.booleanControl.hide();
@@ -131,18 +100,6 @@ $(function () {
             }
 
             return this;
-        },
-
-        events: {
-            "change [attribute=value]": "viewUpdate"
-        },
-
-        viewUpdate: function (event) {
-            this.model.update({
-                value: this.getValue()
-            });
-
-            this.el.trigger('update:field');
         },
 
         getValue: function () {
@@ -190,10 +147,6 @@ $(function () {
             }
 
             return control;
-        },
-
-        loading: function () {
-            /* nothing special done when a field is loading at the moment */
         }
 
     });

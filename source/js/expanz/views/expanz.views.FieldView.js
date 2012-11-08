@@ -30,7 +30,7 @@ $(function () {
             return function () {
                 var elem = this.el.find('[attribute=' + attr + ']');
                 expanz.views.updateViewElement(view, elem, this.model.attributes, attr);
-                view.render();
+                //view.render();
                 this.el.trigger('update:field');
             };
         },
