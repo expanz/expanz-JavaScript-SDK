@@ -11,7 +11,7 @@ function useKendo() {
 	useKendoPopups();
 
 	/* context menu overriding creation method */
-	window.expanz.Views.ContextMenuView.prototype.createContextMenu = function() {
+	window.expanz.views.ContextMenuView.prototype.createContextMenu = function() {
 		this.contextMenuEl.find("ul").kendoMenu({
 			orientation : 'vertical'
 		});

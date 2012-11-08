@@ -47,7 +47,7 @@ $(function() {
 					//window.expanz.logToConsole("WEB SERVER PING FAILED" + getURLRestService(RequestObject.WebServerPing().url) + " DATA " + data);
 					window.expanz.pingError++;
 					if (window.expanz.pingError === nbAttempts) {
-						expanz.Views.redirect(window.expanz.getMaintenancePage());
+						expanz.views.redirect(window.expanz.getMaintenancePage());
 					}
 					else {
 						// ping again
@@ -61,7 +61,7 @@ $(function() {
 		GetSessionDataRequest : function(callbacks) {
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-				expanz.Views.requestLogin();
+				expanz.views.requestLogin();
 				return;
 			}
 
@@ -74,7 +74,7 @@ $(function() {
 
 			if (activity.getAttr('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-					expanz.Views.requestLogin();
+					expanz.views.requestLogin();
 					return;
 				}
 			}
@@ -106,7 +106,7 @@ $(function() {
 
 			if (activity.getAttr('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-					expanz.Views.requestLogin();
+					expanz.views.requestLogin();
 					return;
 				}
 			}
@@ -127,7 +127,7 @@ $(function() {
 
 			if (activity.getAttr('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-					expanz.Views.requestLogin();
+					expanz.views.requestLogin();
 					return;
 				}
 			}
@@ -153,7 +153,7 @@ $(function() {
 
 			if (activity.getAttr('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-					expanz.Views.requestLogin();
+					expanz.views.requestLogin();
 					return;
 				}
 			}
@@ -204,7 +204,7 @@ $(function() {
 		DestroyActivityRequest : function(activityHandle, callbacks) {
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-				expanz.Views.requestLogin();
+				expanz.views.requestLogin();
 				return;
 			}
 
@@ -216,7 +216,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-				expanz.Views.requestLogin();
+				expanz.views.requestLogin();
 				return;
 			}
 
@@ -237,7 +237,7 @@ $(function() {
 
 		ReleaseSessionRequest : function(callbacks) {
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-				expanz.Views.requestLogin();
+				expanz.views.requestLogin();
 				return;
 			}
 			SendRequest(RequestObject.ReleaseSession(expanz.Storage.getSessionHandle()), parseReleaseSessionResponse(callbacks));
@@ -246,7 +246,7 @@ $(function() {
 		GetBlobRequest : function(blobId, activity, initiator) {
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-				expanz.Views.requestLogin();
+				expanz.views.requestLogin();
 				return;
 			}
 
@@ -264,7 +264,7 @@ $(function() {
 		GetFileRequest : function(filename, activity, initiator) {
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-				expanz.Views.requestLogin();
+				expanz.views.requestLogin();
 				return;
 			}
 
@@ -285,7 +285,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-				expanz.Views.requestLogin();
+				expanz.views.requestLogin();
 				return;
 			}
 
@@ -310,7 +310,7 @@ $(function() {
 				callbacks = activity.callbacks;
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
-				expanz.Views.requestLogin();
+				expanz.views.requestLogin();
 				return;
 			}
 
@@ -971,7 +971,7 @@ $(function() {
 			$(xml).find('errors').each(function() {
 				if ($(xml).find('errors').text().indexOf(':Your session cannot be contacted') != -1) {
 					if (activity.getAttr('allowAnonymous') === false) {
-						expanz.Views.redirect(window.expanz.getMaintenancePage());
+						expanz.views.redirect(window.expanz.getMaintenancePage());
 					}
 				}
 			});
@@ -1118,7 +1118,7 @@ $(function() {
 			/* Errors case -> server is most likely not running */
 			$(xml).find('errors').each(function() {
 				if ($(xml).find('errors').text().indexOf(':Your session cannot be contacted') != -1) {
-					expanz.Views.redirect(window.expanz.getMaintenancePage());
+					expanz.views.redirect(window.expanz.getMaintenancePage());
 				}
 			});
 
@@ -1252,7 +1252,7 @@ $(function() {
 				/* UIMESSAGE CASE */
 				$(execResults).find('UIMessage').each(function() {
 
-					var clientMessage = new expanz.Model.ClientMessage({
+					var clientMessage = new expanz.models.ClientMessage({
 						id : 'ExpanzClientMessage',
 						title : $(this).attr('title'),
 						text : $(this).attr('text'),
@@ -1282,7 +1282,7 @@ $(function() {
 							});
 						}
 
-						var actionModel = new expanz.Model.Method({
+						var actionModel = new expanz.models.Method({
 							id : $('Request > Method', this)[0] ? $($('Request > Method', this)[0]).attr('name') : 'close',
 							label : $(this).attr('label'),
 							response : $('Response', this)[0] ? $($('Response', this)[0]).children() : undefined,
@@ -1292,7 +1292,7 @@ $(function() {
 						clientMessage.add(actionModel);
 					});
 
-					var uiMsg = new window.expanz.Views.UIMessage({
+					var uiMsg = new window.expanz.views.UIMessage({
 						id : clientMessage.id,
 						model : clientMessage
 					}, $('body'));
@@ -1307,7 +1307,7 @@ $(function() {
 						// window.expanz.logToConsole("picklist received");
 						var elId = id + pickfield.replace(/ /g, "_");
 
-						var clientMessage = new expanz.Model.ClientMessage({
+						var clientMessage = new expanz.models.ClientMessage({
 							id : elId,
 							title : pickfield,
 							text : '',
@@ -1316,7 +1316,7 @@ $(function() {
 
 						var gridEl = $("#" + elId);
 
-						var picklistWindow = new window.expanz.Views.PicklistWindowView({
+						var picklistWindow = new window.expanz.views.PicklistWindowView({
 							id : clientMessage.id,
 							model : clientMessage
 						}, $('body'));

@@ -252,7 +252,7 @@ $(function() {
 							$("#logout a").hide();
 							$("#logout").unbind("click");
 							$("#logout").click(function() {
-								expanz.Views.requestLogin();
+								expanz.views.requestLogin();
 							});
 
 							$("#logout").append('<a class="login menuTitle">Login</a>');
@@ -1197,7 +1197,7 @@ $(function() {
 				$("#lvMiniCart").bind("table:rendered", function() {
 					/* hiding the checkout part if no items and not order submitted message displayed */
 					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === "0" && ($('.k-window-title:contains("Order Submitted")').length === 0) && $('.k-window-title:contains("Order Saved")').length === 0) {
-						expanz.Views.redirect(that.shoppingCartPage);
+						expanz.views.redirect(that.shoppingCartPage);
 					}
 					else {
 						$("#cartCheckout").show();
@@ -1362,12 +1362,12 @@ $(function() {
 	};
 
 	window.expanz.html.showLostPasswordPopup = function() {
-		var clientMessage = new expanz.Model.ClientMessage({
+		var clientMessage = new expanz.models.ClientMessage({
 			id : 'lostPasswordPopup',
 			title : 'Lost password',
 			url : 'lostPassword.html'
 		});
-		var lostPwdPopup = new window.expanz.Views.UIMessage({
+		var lostPwdPopup = new window.expanz.views.UIMessage({
 			id : clientMessage.id,
 			model : clientMessage
 		}, $('body'));

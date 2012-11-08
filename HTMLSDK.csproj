@@ -130,17 +130,44 @@
     <Content Include="source\js\components\.gitignore" />
     <Content Include="source\js\components\core.js" />
     <Content Include="source\js\components\shoppingCart.js" />
+    <Content Include="source\js\expanz\models\data\expanz.models.data.DataControl.js" />
+    <Content Include="source\js\expanz\models\data\expanz.models.data.Grid.js" />
+    <Content Include="source\js\expanz\models\data\expanz.models.data.Row.js" />
+    <Content Include="source\js\expanz\models\data\expanz.models.data.Cell.js" />
+    <Content Include="source\js\expanz\models\expanz.models.Activity.js" />
+    <Content Include="source\js\expanz\models\expanz.models.ClientMessage.js" />
+    <Content Include="source\js\expanz\models\expanz.models.Bindable.js" />
+    <Content Include="source\js\expanz\models\expanz.models.Field.js" />
+    <Content Include="source\js\expanz\models\expanz.models.DashboardField.js" />
+    <Content Include="source\js\expanz\models\expanz.models.ContextMenu.js" />
+    <Content Include="source\js\expanz\models\expanz.models.Dashboards.js" />
+    <Content Include="source\js\expanz\models\expanz.models.Login.js" />
+    <Content Include="source\js\expanz\models\expanz.models.MenuAction.js" />
+    <Content Include="source\js\expanz\models\expanz.models.Method.js" />
+    <Content Include="source\js\expanz\views\expanz.views.ManuallyClosedPopup.js" />
+    <Content Include="source\js\expanz\views\expanz.views.UIMessage.js" />
+    <Content Include="source\js\expanz\views\expanz.views.PicklistWindowView.js" />
+    <Content Include="source\js\expanz\views\expanz.views.PopupView.js" />
+    <Content Include="source\js\expanz\views\expanz.views.RadioButtonsView.js" />
+    <Content Include="source\js\expanz\views\expanz.views.CheckboxesView.js" />
+    <Content Include="source\js\expanz\views\expanz.views.DataControlView.js" />
+    <Content Include="source\js\expanz\views\expanz.views.ActivityView.js" />
+    <Content Include="source\js\expanz\views\expanz.views.LoginView.js" />
+    <Content Include="source\js\expanz\views\expanz.views.GridView.js" />
+    <Content Include="source\js\expanz\views\expanz.views.ContextMenuView.js" />
+    <Content Include="source\js\expanz\views\expanz.views.MethodView.js" />
+    <Content Include="source\js\expanz\views\expanz.views.DependantFieldView.js" />
+    <Content Include="source\js\expanz\views\expanz.views.FieldView.js" />
     <Content Include="source\js\expanz\expanz.collection.js" />
     <Content Include="source\js\expanz\expanz.component.js" />
     <Content Include="source\js\expanz\expanz.factory.js" />
     <Content Include="source\js\expanz\expanz.html.js" />
     <Content Include="source\js\expanz\expanz.js" />
-    <Content Include="source\js\expanz\expanz.model.data.js" />
-    <Content Include="source\js\expanz\expanz.model.js" />
     <Content Include="source\js\expanz\expanz.net.js" />
     <Content Include="source\js\expanz\expanz.storage.js" />
     <Content Include="source\js\expanz\expanz.util.js" />
-    <Content Include="source\js\expanz\expanz.view.js" />
+    <Content Include="source\js\expanz\views\expanz.views.js" />
+    <Content Include="source\js\expanz\views\expanz.views.VariantFieldView.js" />
     <Content Include="source\js\vendor\archive\backbone\backbone-min-0.9.2.js" />
     <Content Include="source\js\vendor\archive\jquery\jquery-1.7.1.js" />
     <Content Include="source\js\vendor\archive\jquery\jquery-1.7.1.min.js" />
@@ -179,6 +206,7 @@
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
