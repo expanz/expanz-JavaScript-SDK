@@ -18,11 +18,11 @@ $(function() {
 
 		Login : function(loginEl) {
 
-			var loginModel = new window.expanz.Model.Login({
+			var loginModel = new window.expanz.models.Login({
 				name : $(loginEl).attr('name'),
 				type : $(loginEl).attr('type')
 			});
-			var loginView = new window.expanz.Views.LoginView({
+			var loginView = new window.expanz.views.LoginView({
 				el : $(loginEl),
 				id : $(loginEl).attr('name'),
 				collection : loginModel
@@ -33,7 +33,7 @@ $(function() {
 
 		Activity : function(activityEl) {
 			// create a collection for each activity
-			var activityModel = new expanz.Model.Activity({ // expanz.Model.Login.Activity
+			var activityModel = new expanz.models.Activity({ // expanz.models.Login.Activity
 				name : $(activityEl).attr('name'),
 				title : $(activityEl).attr('title'),
 				url : $(activityEl).attr('url'),
@@ -42,7 +42,7 @@ $(function() {
 				optimisation : $(activityEl).attr('optimisation') ? boolValue($(activityEl).attr('optimisation')) : true,
 				allowAnonymous : $(activityEl).attr('allowAnonymous') ? boolValue($(activityEl).attr('allowAnonymous')) : false
 			});
-			var activityView = new expanz.Views.ActivityView({
+			var activityView = new expanz.views.ActivityView({
 				el : $(activityEl),
 				id : $(activityEl).attr('name'),
 				key : $(activityEl).attr('key'),
@@ -149,11 +149,11 @@ $(function() {
 			var fieldModels = [];
 			_.each(DOMObjects, function(fieldEl) {
 				// create a model for each field
-				var field = new expanz.Model.Field({
+				var field = new expanz.models.Field({
 					id : $(fieldEl).attr('name'),
 					anonymousBoundMethod : $(fieldEl).attr('anonymousBoundMethod')
 				});
-				var view = new expanz.Views.FieldView({
+				var view = new expanz.views.FieldView({
 					el : $(fieldEl),
 					id : $(fieldEl).attr('id'),
 					className : $(fieldEl).attr('class'),
@@ -172,12 +172,12 @@ $(function() {
 		    var fieldModels = [];
 		    _.each(DOMObjects, function (fieldEl) {
 		        // Create a model and a view for each variant field
-		        var field = new expanz.Model.Field({
+		        var field = new expanz.models.Field({
 		            id: $(fieldEl).attr('name'),
 		            anonymousBoundMethod: $(fieldEl).attr('anonymousBoundMethod')
 			});
 		
-		        var view = new expanz.Views.VariantFieldView({
+		        var view = new expanz.views.VariantFieldView({
 		            el: $(fieldEl),
 		            id: $(fieldEl).attr('id'),
 		            className: $(fieldEl).attr('class'),
@@ -196,12 +196,12 @@ $(function() {
 			var fieldModels = [];
 			_.each(DOMObjects, function(fieldEl) {
 				// create a model for each field
-				var field = new expanz.Model.DashboardField({
+				var field = new expanz.models.DashboardField({
 					id : $(fieldEl).attr('dashboardName') + "_" + $(fieldEl).attr('name'),
 					name : $(fieldEl).attr('name'),
 					dashboardName : $(fieldEl).attr('dashboardName')
 				});
-				var view = new expanz.Views.FieldView({
+				var view = new expanz.views.FieldView({
 					el : $(fieldEl),
 					id : $(fieldEl).attr('id'),
 					className : $(fieldEl).attr('class'),
@@ -220,10 +220,10 @@ $(function() {
 			var fieldModels = [];
 			_.each(DOMObjects, function(fieldEl) {
 				// create a model for each field
-				var field = new expanz.Model.Bindable({
+				var field = new expanz.models.Bindable({
 					id : $(fieldEl).attr('name')
 				});
-				var view = new expanz.Views.DependantFieldView({
+				var view = new expanz.views.DependantFieldView({
 					el : $(fieldEl),
 					id : $(fieldEl).attr('id'),
 					className : $(fieldEl).attr('class'),
@@ -242,12 +242,12 @@ $(function() {
 				// create a model for each method
 				var method;
 				if ($(methodEl).attr('type') == 'ContextMenu') {
-					method = new expanz.Model.MenuAction({
+					method = new expanz.models.MenuAction({
 						id : $(methodEl).attr('name'),
 						contextObject : $(methodEl).attr('contextObject')
 					});
 
-					var ctxMenuview = new expanz.Views.ContextMenuView({
+					var ctxMenuview = new expanz.views.ContextMenuView({
 						el : $(methodEl),
 						id : $(methodEl).attr('id'),
 						className : $(methodEl).attr('class'),
@@ -270,13 +270,13 @@ $(function() {
 						});
 					}
 
-					method = new expanz.Model.Method({
+					method = new expanz.models.Method({
 						id : $(methodEl).attr('name'),
 						contextObject : $(methodEl).attr('contextObject'),
 						methodAttributes : methodAttributes
 					});
 
-					var view = new expanz.Views.MethodView({
+					var view = new expanz.views.MethodView({
 						el : $(methodEl),
 						id : $(methodEl).attr('id'),
 						className : $(methodEl).attr('class'),
@@ -297,7 +297,7 @@ $(function() {
 				var dataControlModel;
 				/* case rendering as a grid */
 				if ($(dataControlEl).attr('renderingType') == 'grid' || $(dataControlEl).attr('renderingType') == 'popupGrid' || $(dataControlEl).attr('renderingType') == 'rotatingBar') {
-					dataControlModel = new expanz.Model.Data.Grid({
+					dataControlModel = new expanz.models.data.Grid({
 						id : $(dataControlEl).attr('id'),
 						dataId: $(dataControlEl).attr('dataId') || $(dataControlEl).attr('id') || $(dataControlEl).attr('name') || $(dataControlEl).attr('query') || $(dataControlEl).attr('populateMethod'),
 						query: $(dataControlEl).attr('query'),
@@ -311,7 +311,7 @@ $(function() {
 						anonymousBoundMethod : $(dataControlEl).attr('anonymousBoundMethod')
 					});
 
-					var view = new expanz.Views.GridView({
+					var view = new expanz.views.GridView({
 						el : $(dataControlEl),
 						id : $(dataControlEl).attr('id'),
 						className : $(dataControlEl).attr('class'),
@@ -352,12 +352,12 @@ $(function() {
 										dataControlModel.addAction(type, $(action).attr('id'), $(action).attr('label'), $(action).attr('width'), actionName, params);
 										
 										/*var method;
-										method = new expanz.Model.MenuAction({
+										method = new expanz.models.MenuAction({
 											id : $(action).attr('id'),
 											contextObject : actionName
 										});*/
 
-										/*var ctxMenuview = new expanz.Views.ContextMenuView({
+										/*var ctxMenuview = new expanz.views.ContextMenuView({
 											el : $(this),
 											id : $(this).attr('id'),
 											className : $(this).attr('class'),
@@ -374,7 +374,7 @@ $(function() {
 				/* renderingType is not grid: 'tree' or 'combobox' or checkboxes or empty */
 				/* the attribute fieldName might be defined in case, the datacontrol updates a field value if not specified taking the name */
 				else {
-					dataControlModel = new expanz.Model.Data.DataControl({
+					dataControlModel = new expanz.models.data.DataControl({
 						id: $(dataControlEl).attr('id'),
 						dataId: $(dataControlEl).attr('id') || $(dataControlEl).attr('name') || $(dataControlEl).attr('query') || $(dataControlEl).attr('populateMethod'),
 						fieldName: $(dataControlEl).attr('fieldName') || $(dataControlEl).attr('dataId'),
@@ -389,7 +389,7 @@ $(function() {
 					});
 
 					if ($(dataControlEl).attr('renderingType') == 'checkboxes') {
-						var checkboxesView = new expanz.Views.CheckboxesView({
+						var checkboxesView = new expanz.views.CheckboxesView({
 							el : $(dataControlEl),
 							id : $(dataControlEl).attr('id'),
 							className : $(dataControlEl).attr('class'),
@@ -397,7 +397,7 @@ $(function() {
 						});
 					}
 					else if ($(dataControlEl).attr('renderingType') == 'radiobuttons') {
-						var radioButtonsView = new expanz.Views.RadioButtonsView({
+						var radioButtonsView = new expanz.views.RadioButtonsView({
 							el : $(dataControlEl),
 							id : $(dataControlEl).attr('id'),
 							className : $(dataControlEl).attr('class'),
@@ -405,7 +405,7 @@ $(function() {
 						});
 					}
 					else {
-						var dataControlView = new expanz.Views.DataControlView({
+						var dataControlView = new expanz.views.DataControlView({
 							el : $(dataControlEl),
 							id : $(dataControlEl).attr('id'),
 							className : $(dataControlEl).attr('class'),

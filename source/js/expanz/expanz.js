@@ -290,14 +290,6 @@ $(function() {
 		var login = createLogin(DOMObject, callbacks);
 		return;
 	};
-
-	/*window.expanz.CreateVariantPanel = function(DOMObject, callbacks) {
-
-		DOMObject || (DOMObject = $('body'));
-
-		var login = createVariantPanel(DOMObject, callbacks);
-		return;
-	};*/
 	
 	// window.expanz.DestroyActivity = function(DOMObject) {
 	//
@@ -325,7 +317,7 @@ $(function() {
 	window.expanz.Logout = function() {
 		function redirect() {
 			expanz.Storage.clearSession();
-			expanz.Views.redirect(expanz.getLoginPage());
+			expanz.views.redirect(expanz.getLoginPage());
 		}
 		expanz.Net.ReleaseSessionRequest({
 			success : redirect,
@@ -337,14 +329,14 @@ $(function() {
 
 		content = unescape(content);
 
-		var clientMessage = new expanz.Model.ClientMessage({
+		var clientMessage = new expanz.models.ClientMessage({
 			id : id,
 			title : title,
 			text : content,
 			parent : activity
 		});
 
-		var loginPopup = new window.expanz.Views.ManuallyClosedPopup({
+		var loginPopup = new window.expanz.views.ManuallyClosedPopup({
 			id : clientMessage.id,
 			model : clientMessage
 		}, $('body'));
@@ -388,15 +380,6 @@ $(function() {
 
 	};
 
-	/*window.expanz.showVariantPanel = function(activity) {
-		var variantPanel = window.expanz.Factory.VariantPanel($('[bind=variantpanelfield]'));
-
-		expanz.CreateVariantPanel($('[bind=variantpanelfield]'));
-		//CreateVariantPanel(variantPanel.el.find('[bind=variantpanelfield]'));
-
-		return;
-	};*/
-
 	window.expanz.createActivityWindow = function(parentActivity, id, style, key, title) {
 		var callback = function(activityMetadata) {
 			if (activityMetadata.url === null) {
@@ -409,14 +392,14 @@ $(function() {
 				/* an activity request shouldn't be reloaded from any state -> clean an eventual cookie if popup was not closed properly */
 				window.expanz.Storage.clearActivityHandle(id, style);
 
-				var clientMessage = new expanz.Model.ClientMessage({
+				var clientMessage = new expanz.models.ClientMessage({
 					id : 'ActivityRequest',
 					url : activityMetadata.url + "&random=" + new Date().getTime(),
 					parent : parentActivity,
 					title : unescape(title || activityMetadata.title || '')
 				});
 
-				var popup = new window.expanz.Views.ManuallyClosedPopup({
+				var popup = new window.expanz.views.ManuallyClosedPopup({
 					id : clientMessage.id,
 					model : clientMessage
 				}, $('body'));
@@ -534,16 +517,6 @@ $(function() {
 		return loginView;
 	}
 
-	/*function createVariantPanel(dom, callbacks) {
-
-		var variantPanelView;
-		if (dom.attr('bind') && (dom.attr('bind').toLowerCase() === 'variantpanelfield')) {
-			variantPanelView = expanz.Factory.VariantPanel(dom);
-		}
-
-		return variantPanelView;
-	}*/
-
 	function loadMenu(el, displayEmptyItems) {
 
 		// Load Menu & insert it into #menu
@@ -584,7 +557,7 @@ $(function() {
 	/* check if website is on maintenance or web server is down except on maintenance page */
 	if (document.location.href.indexOf(window.expanz.getMaintenancePage()) === -1) {
 		if (window.expanz.isOnMaintenance()) {
-			expanz.Views.redirect(window.expanz.getMaintenancePage());
+			expanz.views.redirect(window.expanz.getMaintenancePage());
 		}
 
 		/* check if web server is down and last success was more than 1 minutes ago */
@@ -617,7 +590,7 @@ $(function() {
 	}
 
 	/* init dashboards object */
-	window.expanz.Dashboards = new window.expanz.Model.Dashboards();
+	window.expanz.Dashboards = new window.expanz.models.Dashboards();
 
 	window.expanz.messageController.initialize();
 
