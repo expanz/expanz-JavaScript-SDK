@@ -68,6 +68,12 @@ $(function() {
 					});
 				}
 
+				if (xml.attr('text')) {
+				    this.set({
+				        text: xml.attr('text')
+				    });
+				}
+				
 				if (xml.attr('visualType')) {
 				    this.set({
 				        visualType: xml.attr('visualType')
