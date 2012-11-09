@@ -24,7 +24,7 @@ $(function() {
 
 		update : function(attrs) {
 
-			expanz.Net.DeltaRequest(this.getAttr('dataId'), attrs.value, this.getAttr('parent'));
+			expanz.net.DeltaRequest(this.getAttr('dataId'), attrs.value, this.getAttr('parent'));
 			return;
 		},
 
@@ -42,7 +42,7 @@ $(function() {
 						}
 					];
 
-					expanz.Net.MethodRequest(this.getAttr('selectionChangeAnonymousMethod'), [
+					expanz.net.MethodRequest(this.getAttr('selectionChangeAnonymousMethod'), [
 						{
 							name : "contextObject",
 							value : this.getAttr('selectionChangeAnonymousContextObject')
@@ -77,11 +77,11 @@ $(function() {
 			else {
 				/* exception for documents we have to send a MenuAction request */
 				if (this.getAttr('id') == 'documents') {
-					expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, "File", null, "1", callbacks);
+					expanz.net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, "File", null, "1", callbacks);
 				}
 				/* normal case we send a delta request */
 				else {
-					expanz.Net.DeltaRequest(this.getAttr('fieldName'), selectedId, this.getAttr('parent'), callbacks);
+					expanz.net.DeltaRequest(this.getAttr('fieldName'), selectedId, this.getAttr('parent'), callbacks);
 				}
 			}
 		}

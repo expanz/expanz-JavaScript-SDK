@@ -20,7 +20,7 @@ $(function() {
 
 	window.expanz.helper = window.expanz.helper || {};
 
-	window.expanz.Net = {
+	window.expanz.net = {
 		lastRequest:"", lastResponse:"",
 		// Request Objects -> to be passed to SendRequest
 		CreateSessionRequest : function(username, password, callbacks) {
@@ -51,7 +51,7 @@ $(function() {
 					}
 					else {
 						// ping again
-						window.expanz.Net.WebServerPing(nbAttempts);
+						window.expanz.net.WebServerPing(nbAttempts);
 					}
 				}
 			});
@@ -1062,17 +1062,17 @@ $(function() {
 
 								/* add a method handler for each action button */
 								dataControlModel.actionSelected = function(selectedId, name, params) {
-									expanz.Net.MethodRequest(name, params, null, activity);
+									expanz.net.MethodRequest(name, params, null, activity);
 								};
 
 								/* override a method handler for each menuaction button */
 								dataControlModel.menuActionSelected = function(selectedId, name, params) {
-									expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
+									expanz.net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
 								};
 
 								/* override a method handler for each contextmenu button */
 								dataControlModel.contextMenuSelected = function(selectedId, contextMenuType, contextObject, params) {
-									expanz.Net.CreateContextMenuRequest(this.getAttr('parent'), selectedId, contextMenuType, contextObject, callbacks);
+									expanz.net.CreateContextMenuRequest(this.getAttr('parent'), selectedId, contextMenuType, contextObject, callbacks);
 								};
 								
 							}
@@ -1237,11 +1237,11 @@ $(function() {
 
 						if ($(this).attr('field') !== undefined && $(this).attr('path') !== undefined) {
 							window.expanz.logToConsole("Blob found by field: " + $(this).attr('field') + " - " + $(this).attr('path'));
-							expanz.Net.GetBlobRequest($(this).attr('field'), activity, initiator);
+							expanz.net.GetBlobRequest($(this).attr('field'), activity, initiator);
 						}
 						else if ($(this).attr('name') !== undefined) {
 							window.expanz.logToConsole("File found by name: " + $(this).attr('name'));
-							expanz.Net.GetFileRequest($(this).attr('name'), activity, initiator);
+							expanz.net.GetFileRequest($(this).attr('name'), activity, initiator);
 						}
 						else {
 							window.expanz.logToConsole("Not yet implemented");
@@ -1351,7 +1351,7 @@ $(function() {
 											}
 										];
 
-										expanz.Net.MethodRequest('SetIdFromContext', methodAttributes, context, activity);
+										expanz.net.MethodRequest('SetIdFromContext', methodAttributes, context, activity);
 
 									}
 									picklistWindow.close();
@@ -1376,12 +1376,12 @@ $(function() {
 
 									/* override the method handler for each action button */
 									dataControlModel.actionSelected = function(selectedId, name, params) {
-										expanz.Net.MethodRequest(name, params, null, activity);
+										expanz.net.MethodRequest(name, params, null, activity);
 									};
 
 									/* override a method handler for each menuaction button */
 									dataControlModel.menuActionSelected = function(selectedId, name, params) {
-										expanz.Net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
+										expanz.net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
 									};
 								}
 								else {
@@ -1471,7 +1471,7 @@ $(function() {
 			requestQueue.push([request, responseHandler, isPopup]);
 		}
 		requestBusy = true;
-		window.expanz.Net.lastRequest = request.data;
+		window.expanz.net.lastRequest = request.data;
 		var isAsync = true;
 		if (callAsync !== undefined && callAsync) {
 			isAsync = true;
@@ -1494,7 +1494,7 @@ $(function() {
 				async: isAsync,
 				complete: function (HTTPrequest) {
 					requestBusy = false;
-					window.expanz.Net.lastResponse = HTTPrequest.responseText;
+					window.expanz.net.lastResponse = HTTPrequest.responseText;
 					$(window.expanz.html.busyIndicator()).trigger("notBusy");
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');

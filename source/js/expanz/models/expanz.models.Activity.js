@@ -68,11 +68,11 @@ $(function() {
 	    },
 
 	    load: function () {
-	        expanz.Net.CreateActivityRequest(this, this.callbacks);
+	        expanz.net.CreateActivityRequest(this, this.callbacks);
 	    },
 
 	    destroy: function () {
-	        expanz.Net.DestroyActivityRequest(this.getAttr('handle'));
+	        expanz.net.DestroyActivityRequest(this.getAttr('handle'));
 	        expanz.Collection.prototype.destroy.call(this, this.callbacks);
 	    }
 	});

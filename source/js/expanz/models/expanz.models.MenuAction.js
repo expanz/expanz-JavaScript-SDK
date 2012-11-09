@@ -18,7 +18,7 @@ $(function() {
 
 	    menuItemSelected: function (action) {
 
-	        expanz.Net.CreateMenuActionRequest(this.get('parent'), null, null, action);
+	        expanz.net.CreateMenuActionRequest(this.get('parent'), null, null, action);
 	        return;
 
 	    }

@@ -60,7 +60,7 @@ $(function() {
 	            }
 	        }
 
-	        expanz.Net.MethodRequest(this.get('id'), methodAttributes, null, this.get('parent'), anonymousFields);
+	        expanz.net.MethodRequest(this.get('id'), methodAttributes, null, this.get('parent'), anonymousFields);
 	        return;
 
 	    },

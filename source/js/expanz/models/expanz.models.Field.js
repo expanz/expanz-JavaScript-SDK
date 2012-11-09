@@ -36,7 +36,7 @@ $(function() {
 	            });
 	        }
 	        else {
-	            expanz.Net.DeltaRequest(this.get('id'), attrs.value, this.get('parent'));
+	            expanz.net.DeltaRequest(this.get('id'), attrs.value, this.get('parent'));
 	        }
 	        return;
 	    },

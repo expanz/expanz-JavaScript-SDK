@@ -27,7 +27,7 @@ $(function () {
             this.model.bind("change:visualType", this.visualTypeChanged(), this);
             this.model.bind("change:errorMessage", this.displayError(), this);
             this.model.bind("change:loading", this.loading, this);
-
+            
             $(this.el).html(this.template({ 'name': $(this.el).attr('name') }));
 
             this.textInput = this.el.find('[id=textinput]');
@@ -59,9 +59,9 @@ $(function () {
                 this.optionInput.html("");
 
                 var radioButtonItemTemplate = _.template("<div><label><input id='<%= id %>' name='<%= group %>' value='<%= rowId %>' attribute='value' type='radio' /> <%= label %></label></div>");
-
+                
                 var xml = this.model.get("data");
-
+                
                 _.each(xml.find('Row'), function (row) {
                     var fieldName = $(view.el).attr('name');
                     var rowId = $(row).attr('id');

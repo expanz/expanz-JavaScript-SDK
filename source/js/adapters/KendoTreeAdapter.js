@@ -214,7 +214,7 @@ $.fn.KendoTreeAdapter = function(options) {
 					if (selectedText === elem.label) {
 						isStatic = true;
 						/* call the method associated */
-						expanz.Net.MethodRequest(elem.method, [
+						expanz.net.MethodRequest(elem.method, [
 							{
 								name : "contextObject",
 								value : elem.contextObject

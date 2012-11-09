@@ -171,7 +171,7 @@ $(function() {
 			var ah = this.getActivityHandle(activityName, activityStyle);
 			if (ah !== undefined) {
 				this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle);
-				expanz.Net.DestroyActivityRequest(ah);
+				expanz.net.DestroyActivityRequest(ah);
 			}
 			return ah;
 

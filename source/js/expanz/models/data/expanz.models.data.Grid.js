@@ -154,7 +154,7 @@ $(function() {
 		},
 		
 		refresh : function() {
-			expanz.Net.DataRefreshRequest(this.getAttr('id'), this.getAttr('parent'));
+			expanz.net.DataRefreshRequest(this.getAttr('id'), this.getAttr('parent'));
 		}
 
 	});

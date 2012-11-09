@@ -319,7 +319,7 @@ $(function() {
 			expanz.Storage.clearSession();
 			expanz.views.redirect(expanz.getLoginPage());
 		}
-		expanz.Net.ReleaseSessionRequest({
+		expanz.net.ReleaseSessionRequest({
 			success : redirect,
 			error : redirect
 		});
@@ -564,7 +564,7 @@ $(function() {
 		var currentTime = (new Date()).getTime();
 		var lastSuccess = window.expanz.Storage.getLastPingSuccess();
 		if (lastSuccess === undefined || (currentTime - lastSuccess) > (1 * 60 * 1000)) {
-			expanz.Net.WebServerPing(3);
+			expanz.net.WebServerPing(3);
 		}
 	}
 

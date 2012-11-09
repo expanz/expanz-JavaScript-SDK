@@ -244,7 +244,7 @@ $(function() {
 								$("#ItemSearch input").val(search);
 							}
 
-							expanz.Net.AnonymousMethodsRequest(dataModelList, that.activity.collection);
+							expanz.net.AnonymousMethodsRequest(dataModelList, that.activity.collection);
 
 							/* hide unwanted stuff when anonymous */
 							$("[loginNeeded='true']").hide();
@@ -262,7 +262,7 @@ $(function() {
 							/* initial load as a logged in user -> user has copied the url, reloaded the page */
 							var methodAttributes = [];
 							if (from == 'tree') {
-								expanz.Net.DeltaRequest(that.categoryTreeName, catId, that.activity.collection);
+								expanz.net.DeltaRequest(that.categoryTreeName, catId, that.activity.collection);
 								that.lastCategory = catName;
 								that.lastCategoryParent = catParentName;
 							}
@@ -273,7 +273,7 @@ $(function() {
 										value : that.listItemsOnSpecialMethodContextObject
 									}
 								];
-								expanz.Net.MethodRequest(that.listItemsOnSpecialMethodName, methodAttributes, null, that.activity.collection);
+								expanz.net.MethodRequest(that.listItemsOnSpecialMethodName, methodAttributes, null, that.activity.collection);
 							}
 							else if (from == 'newItems') {
 								methodAttributes = [
@@ -282,7 +282,7 @@ $(function() {
 										value : that.listItemsNewMethodContextObject
 									}
 								];
-								expanz.Net.MethodRequest(that.listItemsNewMethodName, methodAttributes, null, that.activity.collection);
+								expanz.net.MethodRequest(that.listItemsNewMethodName, methodAttributes, null, that.activity.collection);
 							}
 							else if (from == 'endOfLine') {
 								methodAttributes = [
@@ -291,7 +291,7 @@ $(function() {
 										value : that.listItemsEndOfLineMethodContextObject
 									}
 								];
-								expanz.Net.MethodRequest(that.listItemsEndOfLineMethodName, methodAttributes, null, that.activity.collection);
+								expanz.net.MethodRequest(that.listItemsEndOfLineMethodName, methodAttributes, null, that.activity.collection);
 							}
 							else if (from == 'previously') {
 								methodAttributes = [
@@ -300,7 +300,7 @@ $(function() {
 										value : that.listPreviouslyOrderedContextObject
 									}
 								];
-								expanz.Net.MethodRequest(that.listPreviouslyOrderedMethodName, methodAttributes, null, that.activity.collection);
+								expanz.net.MethodRequest(that.listPreviouslyOrderedMethodName, methodAttributes, null, that.activity.collection);
 							}
 							else if (from == 'search') {
 								// TODO support search initial load for logged in user
@@ -647,7 +647,7 @@ $(function() {
 					$("#displayAsGrid").removeClass("selectedDisplay");
 					productListAsTable.show();
 					productListAsGrid.hide();
-					expanz.Net.GetSavePreferencesRequest(that.activity.collection, "DefaultShoppingCartView", 'displayAsList', true);
+					expanz.net.GetSavePreferencesRequest(that.activity.collection, "DefaultShoppingCartView", 'displayAsList', true);
 				});
 
 				$("#displayAsGrid").click(function() {
@@ -655,7 +655,7 @@ $(function() {
 					$("#displayAsGrid").addClass("selectedDisplay");
 					productListAsTable.hide();
 					productListAsGrid.show();
-					expanz.Net.GetSavePreferencesRequest(that.activity.collection, "DefaultShoppingCartView", 'displayAsGrid', true);
+					expanz.net.GetSavePreferencesRequest(that.activity.collection, "DefaultShoppingCartView", 'displayAsGrid', true);
 				});
 
 			},
@@ -1305,7 +1305,7 @@ $(function() {
 		xml += '<Method name="resetMyPasswordAnon">';
 		xml += '</Method>';
 		xml += '</Activity>';
-		window.expanz.Net.CreateAnonymousRequest(xml);
+		window.expanz.net.CreateAnonymousRequest(xml);
 	};
 
 	window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent = function(hostEl, initValue, min, max) {

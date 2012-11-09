@@ -42,7 +42,7 @@ $(function() {
 	                    });
 	                }
 	                else {
-	                    expanz.Net.GetSessionDataRequest({
+	                    expanz.net.GetSessionDataRequest({
 	                        success: function (url) {
 	                            if (that.getAttr('type') == 'popup') {
 	                                // reload the page
@@ -62,7 +62,7 @@ $(function() {
 	                    });
 	                }
 	            };
-	            expanz.Net.CreateSessionRequest(this.get('username').get('value'), this.get('password').get('value'), {
+	            expanz.net.CreateSessionRequest(this.get('username').get('value'), this.get('password').get('value'), {
 	                success: loginCallback,
 	                error: function (message) {
 	                    expanz.messageController.addErrorMessageByText(message);
