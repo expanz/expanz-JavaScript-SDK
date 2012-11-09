@@ -16,6 +16,7 @@ $(function () {
 
     window.expanz.views.MethodView = Backbone.View.extend({
         initialize: function () {
+            this.model.bind("change:label", this.labelChanged(), this);
             this.model.bind("change:loading", this.loading, this);
         },
 
@@ -28,27 +29,44 @@ $(function () {
             this.el.trigger('submit:' + this.model.get('id'));
         },
 
+        labelChanged: function () {
+            return function () {
+                this.getButton().text(this.model.get("label"));
+            };
+        },
+
         loading: function () {
-            // window.expanz.logToConsole('method loading ' + this.model.get('id'));
             if (this.model.get('loading') === true) {
-                if (this.el.is(":button")) {
-                    this.el.attr('disabled', 'disabled');
-                }
-                else {
-                    this.el.find("button").attr('disabled', 'disabled');
-                }
+                this.getButton().attr('disabled', 'disabled');
                 this.el.addClass('methodLoading');
             }
             else {
-                if (this.el.is(":button")) {
-                    this.el.removeAttr('disabled');
-                }
-                else {
-                    this.el.find("button").removeAttr('disabled');
-                }
+                this.getButton().removeAttr('disabled');
                 this.el.removeClass('methodLoading');
             }
+        },
 
+        getButton: function () {
+            var buttonElement = [];
+            
+            if (this.el.is(":button")) {
+                buttonElement = this.el;
+            }
+            else {
+                var buttons = this.el.find("button");
+                
+                if (buttons.length != 0) {
+                    buttonElement = buttons;
+                }
+                else {
+                    var hyperlinks = this.el.find("a");
+                    
+                    if (hyperlinks.length != 0)
+                        buttonElement = hyperlinks;
+                }
+            }
+
+            return buttonElement;
         }
 
     });

@@ -65,6 +65,18 @@ $(function() {
 
 	    },
 
+	    publish: function (xml) {
+	        if (xml.attr !== undefined) {
+	            if (xml.attr('label')) {
+	                this.set({
+	                    label: xml.attr('label')
+	                });
+	            }
+	        } else {
+	            window.expanz.logToConsole("window.expanz.models.Method: xml.attr is undefined");
+	        }
+	    },
+
 	    /* add an anonymous field or datacontrol to the method, will be added to the xml message when the method is called */
 	    addAnonymousElement: function (element) {
 	        var anonymousFields = this.get('anonymousFields');

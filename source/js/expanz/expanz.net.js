@@ -1229,6 +1229,20 @@ $(function() {
 					}
 				});
 
+				/* METHOD CASE */
+				$(execResults).find('Method').each(function() {
+					var id = $(this).attr('id');
+					var method = activity.get(id);
+					if (method && method !== undefined) {
+						method.publish($(this), activity);
+						/*if (field.attributes.visualType !== undefined) {
+							//loginPopup.el.find('[bind=login]')
+							window.expanz.showVariantPanel(activity);
+							//window.expanz.CreateVariantPanel($(this));
+						}*/
+					}
+				});
+
 				/* FILE CASE */
 				/*if ($(execResults).find('File').length === 0) {
 					expanz.messageController.addErrorMessageByText("Unable to find the requested file");
