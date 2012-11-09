@@ -19,6 +19,7 @@ $(function () {
         initialize: function () {
             this.model.bind("change:label", this.modelUpdate('label'), this);
             this.model.bind("change:value", this.modelUpdate('value'), this);
+            this.model.bind("change:text", this.modelUpdate('text'), this);
             this.model.bind("change:items", this.modelUpdate('value'), this);
             this.model.bind("change:visualType", this.modelUpdate('visualType'), this);
             this.model.bind("change:errorMessage", this.displayError(), this);

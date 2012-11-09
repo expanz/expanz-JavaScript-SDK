@@ -94,14 +94,19 @@ $(function() {
 		return _subType;
 	}*/
 	
-	window.expanz.html.renderMethod = function(methodName, buttonLabel, contextObject, hidden) {
-		var method = '';
+	window.expanz.html.renderMethod = function(methodName, methodLabel, cssClass, contextObject, hidden) {
+		var thisCssClass = cssClass ? cssClass : 'methodButton';
 		var ctx = contextObject ? ' contextObject = "' + contextObject + '" ' : '';
 		var visible = hidden ? ' style="display:none" ' : '';
-		method += '<span bind="method" id="' + methodName + '" name="' + methodName + '" ' + ctx + visible + ' class="method" >';
-		method += '<button type="button" attribute="submit" >' + buttonLabel + '</button>';
-		method += '</span>';
-		return method;
+		var html = '';
+		html += '<div bind="method" id="' + methodName + '" name="' + methodName + '" ' + ctx + visible + ' class="'+cssClass+'">';
+		switch (cssClass)
+		{
+			default:
+				html += '<a attribute="submit"><span>' + methodLabel + '</span></button>';
+		}
+		html += '</div>';
+		return html;
 	};
 
 
