@@ -27,9 +27,6 @@ $(function () {
 
     window.expanz.views.updateViewElement = function(view, elem, allAttrs, attr) {
         var datatype = allAttrs['datatype'];
-        var id = allAttrs['id'];
-        var label = allAttrs['label'];
-        var value1 = allAttrs['value'];
 
         if (datatype && datatype.toLowerCase() === 'blob' && attr && attr === 'value') {
             var width = allAttrs['width'];
@@ -99,6 +96,8 @@ $(function () {
                 $(elem).removeAttr('disabled');
                 $(elem).removeClass('readonlyInput');
             }
+        } else if ($(elem).is('textarea')) {
+            $(elem).val(value);
         } else {
             /* if value is empty put an unbreakable space instead */
             $(elem).html(value || '&nbsp;');
