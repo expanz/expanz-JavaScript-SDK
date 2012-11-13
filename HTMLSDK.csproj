@@ -57,7 +57,17 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="packages.config" />
+    <None Include="Scripts\jquery-1.8.2.intellisense.js" />
+    <Content Include="Scripts\backbone.js" />
+    <Content Include="Scripts\backbone.min.js" />
+    <Content Include="Scripts\jquery-1.8.2.js" />
+    <Content Include="Scripts\jquery-1.8.2.min.js" />
+    <Content Include="Scripts\underscore.js" />
+    <Content Include="Scripts\underscore.min.js" />
     <Content Include="source\js\adapters\.gitignore" />
+    <Content Include="source\js\adapters\KendoTimePickerAdapter.js" />
+    <Content Include="source\js\adapters\KendoDatePickerAdapter.js" />
     <Content Include="source\js\adapters\KendoAdapter.js" />
     <Content Include="source\js\adapters\KendoComboBoxAdapter.js" />
     <Content Include="source\js\adapters\KendoDropDownListAdapter.js" />
@@ -71,6 +81,12 @@
     <Content Include="source\js\adapters\min\expanz.kendo.adapters.all.ycomp.js" />
     <Content Include="source\js\components\core.js" />
     <Content Include="source\js\components\shoppingCart.js" />
+    <Content Include="source\js\expanz\client\ActivityInfo.js" />
+    <Content Include="source\js\expanz\client\GridViewInfo.js" />
+    <Content Include="source\js\expanz\client\ProcessArea.js" />
+    <Content Include="source\js\expanz\client\requestBody.js" />
+    <Content Include="source\js\expanz\client\requestBuilder.js" />
+    <Content Include="source\js\expanz\client\responseParser.js" />
     <Content Include="source\js\expanz\models\data\expanz.models.data.DataControl.js" />
     <Content Include="source\js\expanz\models\data\expanz.models.data.Grid.js" />
     <Content Include="source\js\expanz\models\data\expanz.models.data.Row.js" />
