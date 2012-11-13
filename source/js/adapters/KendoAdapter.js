@@ -37,6 +37,19 @@ function renderKendoComponents(el) {
 		});
 	}
 
+    // Date/time pickers
+	if (el.find("[renderingType=datepicker]").length > 0) {
+	    el.find("[renderingType=datepicker]").each(function () {
+			$(this).KendoDatePickerAdapter();
+		});
+	}
+
+	if (el.find("[renderingType=timepicker]").length > 0) {
+	    el.find("[renderingType=timepicker]").each(function () {
+			$(this).KendoTimePickerAdapter();
+		});
+	}
+
 	/* bind menus to kendo ui menu */
 	if (el.find('[bind=menu] > ul.menu').length > 0)
 		el.find('[bind=menu] > ul.menu').each(function() {
