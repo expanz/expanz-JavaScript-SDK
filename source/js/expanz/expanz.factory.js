@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //  EXPANZ
-//  Author: Kim Damevin
+//  Author: Kim Damevin, Chris Anderson
 //  Copyright 2008-2012 EXPANZ
 //  All Rights Reserved.
 //
@@ -16,12 +16,13 @@ $(function() {
 
 	window.expanz.Factory = {
 
-		Login : function(loginEl) {
+		createLoginView : function(loginEl) {
 
 			var loginModel = new window.expanz.models.Login({
 				name : $(loginEl).attr('name'),
 				type : $(loginEl).attr('type')
 			});
+		    
 			var loginView = new window.expanz.views.LoginView({
 				el : $(loginEl),
 				id : $(loginEl).attr('name'),
@@ -31,7 +32,7 @@ $(function() {
 			return loginView;
 		},
 
-		Activity : function(activityEl) {
+		createActivityView : function(activityEl) {
 			// create a collection for each activity
 			var activityModel = new expanz.models.Activity({ // expanz.models.Login.Activity
 				name : $(activityEl).attr('name'),
@@ -42,6 +43,7 @@ $(function() {
 				optimisation : $(activityEl).attr('optimisation') ? boolValue($(activityEl).attr('optimisation')) : true,
 				allowAnonymous : $(activityEl).attr('allowAnonymous') ? boolValue($(activityEl).attr('allowAnonymous')) : false
 			});
+		    
 			var activityView = new expanz.views.ActivityView({
 				el : $(activityEl),
 				id : $(activityEl).attr('name'),
@@ -52,21 +54,24 @@ $(function() {
 			expanz.Factory.bindMethods(activityModel, activityEl);
 			expanz.Factory.bindDataControls(activityModel, activityEl);
 			expanz.Factory.bindFields(activityModel, activityEl);
+		    
 			return activityView;
 		},
 
 		bindFields : function(activityModel, el) {
-			_.each(expanz.Factory.Field($(el).find('[bind=field]')), function(fieldModel) {
+		    _.each(expanz.Factory.createFieldView($(el).find('[bind=field]')), function (fieldModel) {
 				fieldModel.set({
 					parent : activityModel
 				}, {
 					silent : true
 				});
+		        
 				activityModel.add(fieldModel);
 
 				/* add anonymous fields bound to method */
 				if (fieldModel.get('anonymousBoundMethod') !== null && fieldModel.get('anonymousBoundMethod') !== '') {
-					var boundMethod = activityModel.get(fieldModel.get('anonymousBoundMethod'));
+				    var boundMethod = activityModel.get(fieldModel.get('anonymousBoundMethod'));
+				    
 					if (boundMethod) {
 						boundMethod.addAnonymousElement(fieldModel);
 					}
@@ -74,26 +79,28 @@ $(function() {
 
 			});
 
-			_.each(expanz.Factory.VariantField($(el).find('[bind=variantfield]')), function(variantFieldModel) {
+			_.each(expanz.Factory.createVariantFieldView($(el).find('[bind=variantfield]')), function(variantFieldModel) {
 				variantFieldModel.set({
 					parent : activityModel
 				}, {
 					silent : true
 				});
+			    
 				activityModel.add(variantFieldModel);
 
 				// add anonymous fields bound to method 
 				if (variantFieldModel.get('anonymousBoundMethod') !== null && variantFieldModel.get('anonymousBoundMethod') !== '') {
 				    var boundMethod = activityModel.get(variantFieldModel.get('anonymousBoundMethod'));
+				    
 					if (boundMethod) {
 					    boundMethod.addAnonymousElement(variantFieldModel);
 					}
 				}
-
 			});
 			
-			_.each(expanz.Factory.DashboardField($(el).find('[bind=dashboardfield]')), function(dashboardFieldModel) {
-				var fieldSessionValue = expanz.Storage.getDashboardFieldValue(dashboardFieldModel.get('dashboardName'), dashboardFieldModel.get('name'));
+			_.each(expanz.Factory.createDashboardFieldView($(el).find('[bind=dashboardfield]')), function(dashboardFieldModel) {
+			    var fieldSessionValue = expanz.Storage.getDashboardFieldValue(dashboardFieldModel.get('dashboardName'), dashboardFieldModel.get('name'));
+			    
 				dashboardFieldModel.set({
 					value : fieldSessionValue || ''
 				});
@@ -101,23 +108,25 @@ $(function() {
 				expanz.Dashboards.add(dashboardFieldModel);
 			});
 
-			_.each(expanz.Factory.DependantField($(el).find('[bind=dependant]')), function(dependantFieldModel) {
+			_.each(expanz.Factory.createDependantFieldView($(el).find('[bind=dependant]')), function(dependantFieldModel) {
 				dependantFieldModel.set({
 					parent : activityModel
 				}, {
 					silent : true
 				});
+			    
 				activityModel.add(dependantFieldModel);
 			});
 		},
 
 		bindMethods : function(activityModel, el) {
-			_.each(expanz.Factory.Method($(el).find('[bind=method]')), function(methodModel) {
+		    _.each(expanz.Factory.createMethodView($(el).find('[bind=method]')), function (methodModel) {
 				methodModel.set({
 					parent : activityModel
 				}, {
 					silent : true
 				});
+			    
 				activityModel.add(methodModel);
 			});
 		},
@@ -126,33 +135,37 @@ $(function() {
 		 * bindDataControls
 		 */
 		bindDataControls : function(activityModel, el) {
-			_.each(expanz.Factory.DataControl(activityModel.getAttr('name'), activityModel.getAttr('style'), $(el).find('[bind=DataControl]')), function(DataControlModel) {
-				DataControlModel.setAttr({
+		    _.each(expanz.Factory.createDataControlView(activityModel.getAttr('name'), activityModel.getAttr('style'), $(el).find('[bind=DataControl]')), function (dataControlModel) {
+				dataControlModel.setAttr({
 					parent : activityModel,
 					activityId : activityModel.getAttr('name')
 				});
-				activityModel.addDataControl(DataControlModel);
+			    
+				activityModel.addDataControl(dataControlModel);
 
 				/* add anonymous datacontrol field bound to method */
-				if (DataControlModel.getAttr('anonymousBoundMethod') !== null && DataControlModel.get('anonymousBoundMethod') !== '') {
-					var boundMethod = activityModel.get(DataControlModel.getAttr('anonymousBoundMethod'));
+				if (dataControlModel.getAttr('anonymousBoundMethod') !== null && dataControlModel.get('anonymousBoundMethod') !== '') {
+				    var boundMethod = activityModel.get(dataControlModel.getAttr('anonymousBoundMethod'));
+				    
 					if (boundMethod) {
-						boundMethod.addAnonymousElement(DataControlModel);
+						boundMethod.addAnonymousElement(dataControlModel);
 					}
 				}
 
 			});
 		},
 
-		Field : function(DOMObjects) {
+		createFieldView : function(DOMObjects) {
 
-			var fieldModels = [];
+		    var fieldModels = [];
+		    
 			_.each(DOMObjects, function(fieldEl) {
 				// create a model for each field
 				var field = new expanz.models.Field({
 					id : $(fieldEl).attr('name'),
 					anonymousBoundMethod : $(fieldEl).attr('anonymousBoundMethod')
 				});
+			    
 				var view = new expanz.views.FieldView({
 					el : $(fieldEl),
 					id : $(fieldEl).attr('id'),
@@ -162,14 +175,15 @@ $(function() {
 				});
 
 				fieldModels.push(field);
-
 			});
+		    
 			return fieldModels;
 		},
 		
-		VariantField : function(DOMObjects) {
+		createVariantFieldView : function(DOMObjects) {
 
 		    var fieldModels = [];
+		    
 		    _.each(DOMObjects, function (fieldEl) {
 		        // Create a model and a view for each variant field
 		        var field = new expanz.models.Field({
@@ -186,14 +200,15 @@ $(function() {
 		        });
 
 		        fieldModels.push(field);
-
-			});
+		    });
+		    
 			return fieldModels;
 		},
 
-		DashboardField : function(DOMObjects) {
+		createDashboardFieldView : function(DOMObjects) {
 
-			var fieldModels = [];
+		    var fieldModels = [];
+		    
 			_.each(DOMObjects, function(fieldEl) {
 				// create a model for each field
 				var field = new expanz.models.DashboardField({
@@ -201,6 +216,7 @@ $(function() {
 					name : $(fieldEl).attr('name'),
 					dashboardName : $(fieldEl).attr('dashboardName')
 				});
+			    
 				var view = new expanz.views.FieldView({
 					el : $(fieldEl),
 					id : $(fieldEl).attr('id'),
@@ -210,19 +226,21 @@ $(function() {
 				});
 
 				fieldModels.push(field);
-
 			});
+		    
 			return fieldModels;
 		},
 
-		DependantField : function(DOMObjects) {
+		createDependantFieldView : function(DOMObjects) {
 
-			var fieldModels = [];
+		    var fieldModels = [];
+		    
 			_.each(DOMObjects, function(fieldEl) {
 				// create a model for each field
 				var field = new expanz.models.Bindable({
 					id : $(fieldEl).attr('name')
 				});
+			    
 				var view = new expanz.views.DependantFieldView({
 					el : $(fieldEl),
 					id : $(fieldEl).attr('id'),
@@ -232,22 +250,25 @@ $(function() {
 
 				fieldModels.push(field);
 			});
+		    
 			return fieldModels;
 		},
 
-		Method : function(DOMObjects) {
+		createMethodView : function(DOMObjects) {
 
-			var methodModels = [];
+		    var methodModels = [];
+		    
 			_.each(DOMObjects, function(methodEl) {
 				// create a model for each method
-				var method;
+			    var method;
+			    
 				if ($(methodEl).attr('type') == 'ContextMenu') {
 					method = new expanz.models.MenuAction({
 						id : $(methodEl).attr('name'),
 						contextObject : $(methodEl).attr('contextObject')
 					});
 
-					var ctxMenuview = new expanz.views.ContextMenuView({
+					var ctxMenuView = new expanz.views.ContextMenuView({
 						el : $(methodEl),
 						id : $(methodEl).attr('id'),
 						className : $(methodEl).attr('class'),
@@ -257,7 +278,8 @@ $(function() {
 				else {
 					/* look for potential methodAttributes - format is name:value;name2:value2; */
 
-					var methodAttributes = [];
+				    var methodAttributes = [];
+				    
 					if ($(methodEl).attr('methodAttributes')) {
 						_.each($(methodEl).attr('methodAttributes').split(';'), function(val) {
 							var split = val.split(':');
@@ -286,12 +308,13 @@ $(function() {
 
 				methodModels.push(method);
 			});
+		    
 			return methodModels;
 		},
 
-		DataControl : function(activityName, activityStyle, DOMObjects) {
+		createDataControlView : function(activityName, activityStyle, DOMObjects) {
 
-			var DataControlModels = [];
+			var dataControlModelCollection = [];
 
 			_.each(DOMObjects, function(dataControlEl) {
 				var dataControlModel;
@@ -331,10 +354,12 @@ $(function() {
 							var activityInfo = _.find($(defaultsXML).find('activity'), function(activityXML) {
 								return $(activityXML).attr('name') === activityName && $(activityXML).attr('style') === activityStyle;
 							});
+						    
 							if (activityInfo) {
 								var gridviewInfo = _.find($(activityInfo).find('gridview'), function(gridviewXML) {
 									return $(gridviewXML).attr('id') === dataControlModel.getAttr('id');
 								});
+							    
 								if (gridviewInfo) {
 									// add actions
 									_.each($(gridviewInfo).find('action'), function(action) {
@@ -347,8 +372,10 @@ $(function() {
 												bindValueFromCellId : $(param).attr('bindValueFromCellId')
 											});
 										});
+									    
 										var actionName = $(action).attr('methodName') || $(action).attr('menuAction') || $(action).attr('contextMenu');
 										var type = $(action).attr('methodName') ? 'method' : $(action).attr('menuAction') ? 'menuAction' : 'contextMenu';
+
 										dataControlModel.addAction(type, $(action).attr('id'), $(action).attr('label'), $(action).attr('width'), actionName, params);
 										
 										/*var method;
@@ -414,11 +441,10 @@ $(function() {
 					}
 				}
 
-				DataControlModels.push(dataControlModel);
+				dataControlModelCollection.push(dataControlModel);
 			});
-			return DataControlModels;
+		    
+			return dataControlModelCollection;
 		}
-
 	};
-
 });
