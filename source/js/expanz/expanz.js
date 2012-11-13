@@ -291,7 +291,7 @@ $(function() {
 		return;
 	};
 	
-	// window.expanz.DestroyActivity = function(DOMObject) {
+	// window.expanz.CloseActivity = function(DOMObject) {
 	//
 	// // find the given activity in list from the DOMObject
 	// if ($(DOMObject).attr('bind').toLowerCase() === 'activity') {
@@ -492,7 +492,7 @@ $(function() {
 
 		_.each(domActivities, function(activityEl) {
 
-			var activityView = expanz.Factory.Activity(dom);
+		    var activityView = expanz.Factory.createActivityView(dom);
 
 			/* look for initial key in the query parameters */
 			var initialKey = paramInitialKey || getQueryParameterByName(activityView.collection.getAttr('name') + (activityView.collection.getAttr('style') || '') + 'initialKey');
@@ -511,7 +511,7 @@ $(function() {
 
 		var loginView;
 		if ($(dom).attr('bind') && ($(dom).attr('bind').toLowerCase() === 'login')) {
-			loginView = expanz.Factory.Login(dom);
+		    loginView = expanz.Factory.createLoginView(dom);
 		}
 
 		return loginView;
