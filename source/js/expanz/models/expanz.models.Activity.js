@@ -72,7 +72,7 @@ $(function() {
 	    },
 
 	    destroy: function () {
-	        expanz.net.DestroyActivityRequest(this.getAttr('handle'));
+	        expanz.net.CloseActivityRequest(this.getAttr('handle'));
 	        expanz.Collection.prototype.destroy.call(this, this.callbacks);
 	    }
 	});
