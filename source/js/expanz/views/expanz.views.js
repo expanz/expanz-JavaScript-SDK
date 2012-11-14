@@ -37,12 +37,7 @@ $(function () {
             return;
         }
 
-        var value;
-        if ($(elem).attr("showTextValue") == "true") {
-            value = allAttrs["text"];
-        } else {
-            value = allAttrs[attr];
-        }
+        var value = allAttrs[attr];
 
         if (view.options['textTransformFunction'] && attr === 'value') {
             try {
@@ -51,6 +46,17 @@ $(function () {
                 window.expanz.logToConsole("Value could not be transformed with function (check function exists) " + view.options['textTransformFunction']);
             }
 
+        }
+        
+        if (elem !== null && elem.attr('renderingType') === 'time') {
+            // Time fields should render their value using the corresponding 12hr/24hr value provided by the model, the
+            // choice of which is specified as a configuration property
+            var timeFormat = $(view).attr('timeFormat') !== undefined ? $(view).attr('timeFormat') : window.config._timeFormat;
+
+            if (timeFormat === undefined)
+                timeFormat = 12;
+            
+            value = (timeFormat == 12 ? allAttrs["timeAMPM"] : allAttrs["time24"]);
         }
 
         /* multi choice field -> display as checkboxes */
@@ -62,22 +68,12 @@ $(function () {
                 var value = $(item).attr('value');
                 $(elem).append("<div><input " + disabled + selected + "' value='" + value + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
             });
-        } else if ($(elem).is('div') && allAttrs.visualType !== undefined && allAttrs.visualType.length > 0 && attr === 'value') {
-            //$(elem).html(allAttrs.visualType || '&nbsp;');
-            //if (allAttrs.visualType == 'cb') {
-            //	$(elem).html('cb' + (value || '&nbsp;'));
-            //} else if (allAttrs.visualType == 'rb') {
-            //	$(elem).html('rb' + (value || '&nbsp;'));
-            //} else if (allAttrs.visualType == 'txt') {
-            //	$(elem).html("<input value='" + value + "' name='text' type='text'></input>");
-            //} else {
-            //	$(elem).html(value || '&nbsp;');
-            //}
         } else if ($(elem).is('input')) {
             // special behaviour for checkbox input
             if ($(elem).is(":checkbox") || $(elem).is(":radio")) {
                 $(elem).addClass('checkbox');
                 var checkedValue = $(elem).attr("checkedValue") ? $(elem).attr("checkedValue") : 1;
+                
                 if (value == checkedValue) {
                     $(elem).prop("checked", true);
                 } else {
@@ -86,6 +82,7 @@ $(function () {
             } else {
                 $(elem).val(value);
             }
+            
             $(elem).trigger("valueUpdated", value);
 
             // if the field is disable apply the disabled attribute and style
