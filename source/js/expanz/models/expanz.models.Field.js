@@ -43,17 +43,32 @@ $(function() {
 
 	    publish: function (xml) {
 	        if (xml.attr !== undefined) {
-	            if ((this.get('value') && (this.get('value') != xml.attr('value'))) || !this.get('value')) {
-
-	                if (xml.attr('disabled')) {
-	                    this.set({
-	                        disabled: boolValue(xml.getAttribute !== undefined ? xml.getAttribute('disabled') : xml.attr('disabled'))
-	                    });
+	            // Assign all the attributes on the XML element to the model, except for
+	            // those that need special processing later.
+	            var ignoreAttributeList = ['id', 'value', 'disabled', 'visualType']; // Attributes in this list will be handled manually later, as they need special processing
+	            var model = this;
+	            
+	            _.each(xml[0].attributes, function (item) {
+	                var processAttribute = _.indexOf(ignoreAttributeList, item.name) === -1;
+	                
+	                if (processAttribute) {
+	                    // TODO: Should use the 'set' function, but it throws an exception for an unknown reason
+	                    //model.set(item.name, item.value);
+	                    model.attributes[item.name] = item.value;
 	                }
-
+	            });
+	            
+	            // Now do special attribute processing. Reasons for processing these attributes separately include
+	            // needing to be processed in a specific order, or needing their values transformed (e.g. converted to bool)
+	            if (xml.attr('disabled')) {
+	                this.set({
+	                    disabled: boolValue(xml.getAttribute !== undefined ? xml.getAttribute('disabled') : xml.attr('disabled'))
+	                });
+	            }
+	            
+	            if ((this.get('value') && (this.get('value') != xml.attr('value'))) || !this.get('value')) {
 	                this.set({
 	                    items: xml.find("Item"),
-	                    text: xml.attr('text'),
 	                    value: xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value')
 	                });
 	            }
