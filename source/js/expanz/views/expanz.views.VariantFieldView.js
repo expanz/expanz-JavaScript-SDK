@@ -47,9 +47,7 @@ $(function () {
         valueChanged: function () {
             var view = this;
             return function () {
-                var inputField = this.activeInputField();
-                expanz.views.updateViewElement(view, inputField, this.model.attributes, 'value');
-                this.el.trigger('update:field');
+                this.updateActiveInputValue(this.model.get("value"));
             };
         },
 
@@ -79,8 +77,7 @@ $(function () {
                     }));
                 });
 
-                var selectedCheckBox = this.optionInput.find("[value=" + this.model.get("value") + "]"); // Gets the radio button to be selected
-                selectedCheckBox.prop("checked", true);
+                this.updateActiveInputValue(this.model.get("value"));
 
                 this.el.trigger('update:field');
             };
@@ -94,7 +91,7 @@ $(function () {
             var inputField = this.activeInputField();
 
             if (inputField != null) {
-                expanz.views.updateViewElement(this, inputField, this.model.attributes, 'value');
+                this.updateActiveInputValue(this.model.get("value"));
 
                 this.activeInputControl().show();
             }
@@ -110,7 +107,7 @@ $(function () {
             if (visualType == "cb") {
                 value = boolString(this.booleanInput.prop("checked"));
             } else if (visualType == 'rb') {
-                var selectedCheckBox = $(this.el).find(":checked"); // Gets the selected radio button
+                var selectedCheckBox = this.optionInput.find(":checked"); // Gets the selected radio button
                 value = selectedCheckBox.val();
             } else if (visualType == 'txt') {
                 value = this.textInput.val();
@@ -147,7 +144,19 @@ $(function () {
             }
 
             return control;
+        },
+        
+        updateActiveInputValue: function (value) {
+            var visualType = this.model.get("visualType");
+            
+            if (visualType == 'cb') {
+                this.booleanInput.prop("checked", value == 1);
+            } else if (visualType == 'rb') {
+                var selectedCheckBox = this.optionInput.find("[value=" + value + "]"); // Gets the radio button to be selected
+                selectedCheckBox.prop("checked", true);
+            } else if (visualType == 'txt') {
+                this.textInput.val(value);
+            }
         }
-
     });
 });
