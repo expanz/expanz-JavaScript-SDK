@@ -45,7 +45,6 @@ $(function () {
             } catch(err) {
                 window.expanz.logToConsole("Value could not be transformed with function (check function exists) " + view.options['textTransformFunction']);
             }
-
         }
         
         if (elem !== null && elem.attr('renderingType') === 'time') {
@@ -57,6 +56,10 @@ $(function () {
                 timeFormat = 12;
             
             value = (timeFormat == 12 ? allAttrs["timeAMPM"] : allAttrs["time24"]);
+        }
+        
+        if (allAttrs["null"] === true) {
+            value = null;
         }
 
         /* multi choice field -> display as checkboxes */
