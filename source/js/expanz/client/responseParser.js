@@ -481,11 +481,6 @@ function parseDeltaResponse(activity, initiator, callbacks) {
                 var field = activity.get(id);
                 if (field && field !== undefined) {
                     field.publish($(this), activity);
-                    /*if (field.attributes.visualType !== undefined) {
-                        //loginPopup.el.find('[bind=login]')
-                        window.expanz.showVariantPanel(activity);
-                        //window.expanz.CreateVariantPanel($(this));
-                    }*/
                 }
             });
 
@@ -495,11 +490,6 @@ function parseDeltaResponse(activity, initiator, callbacks) {
                 var method = activity.get(id);
                 if (method && method !== undefined) {
                     method.publish($(this), activity);
-                    /*if (field.attributes.visualType !== undefined) {
-                        //loginPopup.el.find('[bind=login]')
-                        window.expanz.showVariantPanel(activity);
-                        //window.expanz.CreateVariantPanel($(this));
-                    }*/
                 }
             });
 
