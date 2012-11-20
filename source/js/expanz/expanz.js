@@ -520,7 +520,7 @@ $(function() {
 	function loadMenu(el, displayEmptyItems) {
 
 		// Load Menu & insert it into #menu
-		var menu = new expanz.Storage.AppSiteMenu();
+		var menu = new expanz.menu.AppSiteMenu();
 		var processAreas = loadProcessArea(expanz.Storage.getProcessAreaList(), displayEmptyItems);
 		if (processAreas.length > 0)
 			menu.processAreas = processAreas;
@@ -531,14 +531,14 @@ $(function() {
 		var processAreasMenu = [];
 		_.each(processAreas, function(processArea) {
 			if (displayEmptyItems || processArea.activities.length > 0 || processArea.pa.length > 0) {
-				var menuItem = new expanz.Storage.ProcessAreaMenu(processArea.id, processArea.title);
+				var menuItem = new expanz.menu.ProcessAreaMenu(processArea.id, processArea.title);
 
 				if (parentProcessAreaMenu)
 					menuItem.parent = parentProcessAreaMenu;
 
 				_.each(processArea.activities, function(activity) {
 					if (displayEmptyItems || (activity.url !== '' && activity.url.length > 1)) {
-						menuItem.activities.push(new expanz.Storage.ActivityMenu(activity.name, activity.style, activity.title, activity.url, activity.img));
+						menuItem.activities.push(new expanz.menu.ActivityMenu(activity.name, activity.style, activity.title, activity.url, activity.img));
 					}
 				});
 
