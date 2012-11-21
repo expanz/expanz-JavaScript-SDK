@@ -15,7 +15,6 @@ $(function() {
 	window.expanz = window.expanz || {};
 
 	window.expanz.Storage = {
-
 		// functions
 
 		_getBestStorage : function() {
@@ -148,6 +147,19 @@ $(function() {
 			return this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'UserPreference' + key);
 		},
 
+		setFormMapping: function (value) {
+		    this._formMappingData = value;
+		    this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'FormMapping', this.serializeXML(value));
+			return true;
+		},
+
+		getFormMapping: function () {
+		    if (this._formMappingData === undefined)
+		        this._formMappingData = this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'FormMapping');
+		    
+		    return $.parseXML(this._formMappingData);
+		},
+
 		clearSession : function() {
 			var storage = this._getBestStorage();
 			var storageGlobalName = expanz.Storage._getStorageGlobalName();
@@ -235,6 +247,49 @@ $(function() {
 			remove : function(key) {
 				return window.localStorage.removeItem(key);
 			}
+		},
+		
+		sessionStorage: {
+		    name: 'sessionStorage',
+		    set: function (key, data) {
+		        window.sessionStorage.setItem(key, data);
+		    },
+
+		    get: function (key) {
+		        return window.sessionStorage.getItem(key);
+		    },
+
+		    getKeys: function (pattern) {
+		        var keys = [];
+		        for (i = 0; i < window.sessionStorage.length; i++) {
+		            key = window.sessionStorage.key(i);
+		            if (pattern) {
+		                if (key.indexOf(pattern) >= 0) {
+		                    keys.push(key);
+		                }
+
+		            }
+		            else {
+		                keys.push(key);
+		            }
+		        }
+
+		        return keys;
+		    },
+
+		    remove: function (key) {
+		        return window.sessionStorage.removeItem(key);
+		    }
+		},
+		
+	    // Serialize an XML Document or Element and return it as a string.
+		serializeXML: function(xmlElement) {
+		    if (typeof XMLSerializer != "undefined")
+		        return (new XMLSerializer()).serializeToString(xmlElement) ;
+		    else if (xmlElement.xml) 
+		        return xmlElement.xml;
+		    else 
+		        throw "Browser cannot serialize objects to XML";
 		}
 	};
 });
