@@ -346,57 +346,52 @@ $(function() {
 						model : dataControlModel
 					});
 
-					// load pre-defined gridview information from formmapping.xml
-					$.ajax({
-						url : './formmapping.xml',
-						async : false,
-						success : function(defaultsXML) {
-							var activityInfo = _.find($(defaultsXML).find('activity'), function(activityXML) {
-								return $(activityXML).attr('name') === activityName && $(activityXML).attr('style') === activityStyle;
-							});
-						    
-							if (activityInfo) {
-								var gridviewInfo = _.find($(activityInfo).find('gridview'), function(gridviewXML) {
-									return $(gridviewXML).attr('id') === dataControlModel.getAttr('id');
-								});
-							    
-								if (gridviewInfo) {
-									// add actions
-									_.each($(gridviewInfo).find('action'), function(action) {
-										var params = [];
-										_.each($(action).find('param'), function(param) {
-											params.push({
-												name : $(param).attr('name'),
-												value : $(param).attr('value'),
-												label : $(param).attr('label'),
-												bindValueFromCellId : $(param).attr('bindValueFromCellId')
-											});
-										});
-									    
-										var actionName = $(action).attr('methodName') || $(action).attr('menuAction') || $(action).attr('contextMenu');
-										var type = $(action).attr('methodName') ? 'method' : $(action).attr('menuAction') ? 'menuAction' : 'contextMenu';
-
-										dataControlModel.addAction(type, $(action).attr('id'), $(action).attr('label'), $(action).attr('width'), actionName, params);
-										
-										/*var method;
-										method = new expanz.models.MenuAction({
-											id : $(action).attr('id'),
-											contextObject : actionName
-										});*/
-
-										/*var ctxMenuview = new expanz.views.ContextMenuView({
-											el : $(this),
-											id : $(this).attr('id'),
-											className : $(this).attr('class'),
-											model : dataControlModel
-										});
-										window.expanz.currentContextMenu = ctxMenuview.model;*/
-									});
-								}
-							}
-						}
+				    // load pre-defined gridview information from formmapping.xml
+					var formMapping = expanz.Storage.getFormMapping();
+				    
+					var activityInfo = _.find($(formMapping).find('activity'), function (activityXML) {
+						return $(activityXML).attr('name') === activityName && $(activityXML).attr('style') === activityStyle;
 					});
+						    
+					if (activityInfo) {
+						var gridviewInfo = _.find($(activityInfo).find('gridview'), function(gridviewXML) {
+							return $(gridviewXML).attr('id') === dataControlModel.getAttr('id');
+						});
+							    
+						if (gridviewInfo) {
+							// add actions
+							_.each($(gridviewInfo).find('action'), function(action) {
+								var params = [];
+								_.each($(action).find('param'), function(param) {
+									params.push({
+										name : $(param).attr('name'),
+										value : $(param).attr('value'),
+										label : $(param).attr('label'),
+										bindValueFromCellId : $(param).attr('bindValueFromCellId')
+									});
+								});
+									    
+								var actionName = $(action).attr('methodName') || $(action).attr('menuAction') || $(action).attr('contextMenu');
+								var type = $(action).attr('methodName') ? 'method' : $(action).attr('menuAction') ? 'menuAction' : 'contextMenu';
 
+								dataControlModel.addAction(type, $(action).attr('id'), $(action).attr('label'), $(action).attr('width'), actionName, params);
+										
+								/*var method;
+								method = new expanz.models.MenuAction({
+									id : $(action).attr('id'),
+									contextObject : actionName
+								});*/
+
+								/*var ctxMenuview = new expanz.views.ContextMenuView({
+									el : $(this),
+									id : $(this).attr('id'),
+									className : $(this).attr('class'),
+									model : dataControlModel
+								});
+								window.expanz.currentContextMenu = ctxMenuview.model;*/
+							});
+						}
+					}
 				}
 				/* renderingType is not grid: 'tree' or 'combobox' or checkboxes or empty */
 				/* the attribute fieldName might be defined in case, the datacontrol updates a field value if not specified taking the name */
