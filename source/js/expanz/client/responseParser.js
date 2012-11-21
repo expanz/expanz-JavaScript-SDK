@@ -193,7 +193,8 @@ function parseGetSessionDataResponse(callbacks) {
         });
 
         $.get('./formmapping.xml', function (data) {
-
+            expanz.Storage.setFormMapping(data);
+            
             $(data).find('activity').each(function () {
                 var name = $(this).attr('name');
                 var url = getPageUrl($(this).attr('form'));
@@ -670,7 +671,7 @@ function parseDeltaResponse(activity, initiator, callbacks) {
 
             //if (callbacks && callbacks.success) {
             //callbacks.success('Delta handled: ' + execResults);
-            window.expanz.logToConsole('Delta handled: ' + execResults);
+            //window.expanz.logToConsole('Delta handled: ' + execResults);
             //}
         }
 
