@@ -31,5 +31,4 @@ function createActivityWithKendoTabs(tabElement, ajaxTabContents, callbacks) {
 	_.each(tabElement.data("kendoTabStrip").tabGroup.children().not('[class*=k-state-active]').not('[class*=k-tab-on-top]'), function(child) {
 		tabElement.data("kendoTabStrip").reload($(child));
 	});
-
 }
