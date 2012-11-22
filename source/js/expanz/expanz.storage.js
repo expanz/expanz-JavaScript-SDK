@@ -154,10 +154,14 @@ $(function() {
 		},
 
 		getFormMapping: function () {
-		    if (this._formMappingData === undefined)
-		        this._formMappingData = this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'FormMapping');
+		    if (this._formMappingData === undefined) {
+		        var formMappingXml = this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'FormMapping');
+		        
+		        if (formMappingXml != null)
+		            this._formMappingData = $.parseXML(formMappingXml);
+		    }
 		    
-		    return $.parseXML(this._formMappingData);
+		    return this._formMappingData;
 		},
 
 		clearSession : function() {
@@ -284,10 +288,10 @@ $(function() {
 		
 	    // Serialize an XML Document or Element and return it as a string.
 		serializeXML: function(xmlElement) {
-		    if (typeof XMLSerializer != "undefined")
-		        return (new XMLSerializer()).serializeToString(xmlElement) ;
-		    else if (xmlElement.xml) 
+		    if (xmlElement.xml) 
 		        return xmlElement.xml;
+		    else if (typeof XMLSerializer != "undefined")
+		        return (new XMLSerializer()).serializeToString(xmlElement) ;
 		    else 
 		        throw "Browser cannot serialize objects to XML";
 		}
