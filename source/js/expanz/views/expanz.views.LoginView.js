@@ -17,6 +17,7 @@ $(function () {
     window.expanz.views.LoginView = Backbone.View.extend({
 
         initialize: function () {
+            this.model.bind("change:isLoggingIn", this.isLoggingInChanged(), this);
         },
 
         events: {
@@ -26,29 +27,29 @@ $(function () {
         attemptLogin: function () {
             var usernameEl = this.el.find("#username input");
             var passwordEl = this.el.find("#password input");
-
+            
             if (usernameEl.length === 0 || passwordEl.length === 0) {
                 expanz.messageController.addErrorMessageByText("username or password field cannot be found on the page");
-                return;
             }
-
-            if (usernameEl.val().length === 0 || passwordEl.val().length === 0) {
+            else if (usernameEl.val().length === 0 || passwordEl.val().length === 0) {
                 expanz.messageController.addErrorMessageByKey("loginOrPasswordEmpty");
-                return;
             }
             else {
-                this.collection.add({
-                    id: "username",
-                    value: usernameEl.val()
-                });
-                this.collection.add({
-                    id: "password",
-                    value: passwordEl.val()
-                });
-                this.collection.login();
+                this.model.login(usernameEl.val(), passwordEl.val(), this.el.attr('type') == 'popup');
             }
+        },
 
-        }
+        isLoggingInChanged: function () {
+            var view = this;
+            return function () {
+                var isLoggingIn = this.model.get("isLoggingIn");
 
+                if (isLoggingIn) {
+                    $("#signinButton").attr("disabled", true);
+                } else {
+                    $("#signinButton").removeAttr("disabled");
+                }
+            };
+        },
     });
 });
