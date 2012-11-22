@@ -352,32 +352,50 @@ $(function() {
 		if (false && requestBusy) {
 			requestQueue.push([request, responseHandler, isPopup]);
 		}
+
+		window.expanz.logToConsole("REQUEST:");
+		window.expanz.logToConsole(request.data);
+
 		requestBusy = true;
 		window.expanz.net.lastRequest = request.data;
+	    
 		var isAsync = true;
-		if (callAsync !== undefined && callAsync) {
-			isAsync = true;
-		}
+		//if (callAsync !== undefined && callAsync) {
+		//	isAsync = true;
+		//}
+	    
 		$(window.expanz.html.busyIndicator()).trigger("isBusy");
+	    
 		$.ajaxSetup({
 		    headers: { "cache-control": "no-cache" } // http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
 		});
+	    
 		if (config._URLproxy !== undefined && config._URLproxy.length > 0) {
 			$.ajax({
 				type : 'POST',
-				url : config._URLproxy,
-				data : {
+
+				url: config._URLproxy,
+
+				data: {
 					url : getUrlRestService(request.url),
 					data : request.data,
 					method : request.method || "POST"
 				},
-				dataType : 'XML',
+
+				dataType: 'XML',
+
 				processData: true,
+				
 				async: isAsync,
+
 				complete: function (HTTPrequest) {
 					requestBusy = false;
 					window.expanz.net.lastResponse = HTTPrequest.responseText;
 					$(window.expanz.html.busyIndicator()).trigger("notBusy");
+
+					window.expanz.logToConsole("RESPONSE:");
+					window.expanz.logToConsole(HTTPrequest.responseText);
+				    
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
 					}
@@ -399,11 +417,16 @@ $(function() {
 		}
 		else {
 			$.ajax({
-				type : request.method || "POST",
-				url: getUrlRestService(request.url),
-				data : request.data,
-				dataType : 'XML',
-				processData : true,
+			    type: request.method || "POST",
+			    
+			    url: getUrlRestService(request.url),
+			    
+			    data: request.data,
+			    
+			    dataType: 'XML',
+			    
+			    processData: true,
+			    
 				complete : function(HTTPrequest) {
 					if (HTTPrequest.status != 200) {
 						eval(responseHandler)('There was a problem with the last request.');
