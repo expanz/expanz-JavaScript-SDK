@@ -18,15 +18,13 @@ $(function() {
 
 		createLoginView : function(loginEl) {
 
-			var loginModel = new window.expanz.models.Login({
-				name : $(loginEl).attr('name'),
-				type : $(loginEl).attr('type')
-			});
+			var loginModel = new window.expanz.models.Login();
 		    
 			var loginView = new window.expanz.views.LoginView({
 				el : $(loginEl),
 				id : $(loginEl).attr('name'),
-				collection : loginModel
+				type : $(loginEl).attr('type'),
+				model : loginModel
 			});
 
 			return loginView;
@@ -59,7 +57,7 @@ $(function() {
 		},
 
 		bindFields : function(activityModel, el) {
-		    _.each(expanz.Factory.createFieldView($(el).find('[bind=field]')), function (fieldModel) {
+		    _.each(expanz.Factory.createFieldViews($(el).find('[bind=field]')), function (fieldModel) {
 				fieldModel.set({
 					parent : activityModel
 				}, {
@@ -79,7 +77,7 @@ $(function() {
 
 			});
 
-			_.each(expanz.Factory.createVariantFieldView($(el).find('[bind=variantfield]')), function(variantFieldModel) {
+			_.each(expanz.Factory.createVariantFieldViews($(el).find('[bind=variantfield]')), function(variantFieldModel) {
 				variantFieldModel.set({
 					parent : activityModel
 				}, {
@@ -98,7 +96,7 @@ $(function() {
 				}
 			});
 			
-			_.each(expanz.Factory.createDashboardFieldView($(el).find('[bind=dashboardfield]')), function(dashboardFieldModel) {
+			_.each(expanz.Factory.createDashboardFieldViews($(el).find('[bind=dashboardfield]')), function(dashboardFieldModel) {
 			    var fieldSessionValue = expanz.Storage.getDashboardFieldValue(dashboardFieldModel.get('dashboardName'), dashboardFieldModel.get('name'));
 			    
 				dashboardFieldModel.set({
@@ -108,7 +106,7 @@ $(function() {
 				expanz.Dashboards.add(dashboardFieldModel);
 			});
 
-			_.each(expanz.Factory.createDependantFieldView($(el).find('[bind=dependant]')), function(dependantFieldModel) {
+			_.each(expanz.Factory.createDependantFieldViews($(el).find('[bind=dependant]')), function(dependantFieldModel) {
 				dependantFieldModel.set({
 					parent : activityModel
 				}, {
@@ -120,7 +118,7 @@ $(function() {
 		},
 
 		bindMethods : function(activityModel, el) {
-		    _.each(expanz.Factory.createMethodView($(el).find('[bind=method]')), function (methodModel) {
+		    _.each(expanz.Factory.createMethodViews($(el).find('[bind=method]')), function (methodModel) {
 				methodModel.set({
 					parent : activityModel
 				}, {
@@ -135,7 +133,7 @@ $(function() {
 		 * bindDataControls
 		 */
 		bindDataControls : function(activityModel, el) {
-		    _.each(expanz.Factory.createDataControlView(activityModel.getAttr('name'), activityModel.getAttr('style'), $(el).find('[bind=DataControl]')), function (dataControlModel) {
+		    _.each(expanz.Factory.createDataControlViews(activityModel.getAttr('name'), activityModel.getAttr('style'), $(el).find('[bind=DataControl]')), function (dataControlModel) {
 				dataControlModel.setAttr({
 					parent : activityModel,
 					activityId : activityModel.getAttr('name')
@@ -155,7 +153,7 @@ $(function() {
 			});
 		},
 
-		createFieldView : function(DOMObjects) {
+		createFieldViews : function(DOMObjects) {
 
 		    var fieldModels = [];
 		    
@@ -180,7 +178,7 @@ $(function() {
 			return fieldModels;
 		},
 		
-		createVariantFieldView : function(DOMObjects) {
+		createVariantFieldViews : function(DOMObjects) {
 
 		    var fieldModels = [];
 		    
@@ -205,7 +203,7 @@ $(function() {
 			return fieldModels;
 		},
 
-		createDashboardFieldView : function(DOMObjects) {
+		createDashboardFieldViews : function(DOMObjects) {
 
 		    var fieldModels = [];
 		    
@@ -231,7 +229,7 @@ $(function() {
 			return fieldModels;
 		},
 
-		createDependantFieldView : function(DOMObjects) {
+		createDependantFieldViews : function(DOMObjects) {
 
 		    var fieldModels = [];
 		    
@@ -254,7 +252,7 @@ $(function() {
 			return fieldModels;
 		},
 
-		createMethodView : function(DOMObjects) {
+		createMethodViews : function(DOMObjects) {
 
 		    var methodModels = [];
 		    
@@ -312,7 +310,7 @@ $(function() {
 			return methodModels;
 		},
 
-		createDataControlView : function(activityName, activityStyle, DOMObjects) {
+		createDataControlViews : function(activityName, activityStyle, DOMObjects) {
 
 			var dataControlModelCollection = [];
 
