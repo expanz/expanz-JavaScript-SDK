@@ -681,6 +681,8 @@ $(function() {
 
 			/**
 			* Method used in the list component to render the template of an item in the grid
+              NOTE: Button click event handlers are added by expanz.factory.js, according to 
+              data obtained from the formmapping.xml file.
 			*/
 			renderDefaultListItemGridTemplate : function() {
 				var html = '';
