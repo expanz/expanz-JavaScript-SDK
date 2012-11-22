@@ -15,60 +15,68 @@ $(function() {
 	window.expanz.models = window.expanz.models || {};
 	window.expanz.models.Login = {};
 
-	window.expanz.models.Login = expanz.Collection.extend({
+	window.expanz.models.Login = expanz.models.Bindable.extend({
 
-	    collection: expanz.models.Bindable,
-
-	    initialize: function (attrs) {
-	        expanz.Collection.prototype.initialize.call(this, attrs);
+	    defaults: function () {
+	        return {
+	            error: false,
+	            isLoggingIn: false
+	        };
 	    },
 
-	    validate: function () {
-	        if (!this.get('username').get('error') && !this.get('password').get('error')) {
-	            return true;
-	        }
-	        else {
-	            return false;
-	        }
+	    initialize: function () {
 	    },
 
-	    login: function () {
-	        if (this.validate()) {
-	            var that = this;
-	            var loginCallback = function (error) {
-	                if (error && error.length > 0) {
-	                    this.get('error').set({
-	                        value: error
-	                    });
-	                }
-	                else {
-	                    expanz.net.GetSessionDataRequest({
-	                        success: function (url) {
-	                            if (that.getAttr('type') == 'popup') {
-	                                // reload the page
-	                                window.location.reload();
-	                            }
-	                            else {
+	    login: function (userName, password, isPopup) {
+	        var that = this;
 
-	                                /*
-									 * NOT IMPLEMENTED YET...problem with url where sessionHandle and activityHandle are GET parameters var urlBeforeLogin = expanz.Storage.getLastURL(); if(urlBeforeLogin !== null && urlBeforeLogin != ''){ expanz.Storage.clearLastURL(); expanz.views.redirect(urlBeforeLogin);
-									 * return; }
-									 */
-	                                // redirect to default activity
-	                                expanz.views.redirect(url);
-	                            }
-
+	        this.set({
+	             isLoggingIn: true
+	        });
+	            
+	        var loginCallback = function (error) {
+	            if (error && error.length > 0) {
+	                this.get('error').set({
+	                    value: error
+	                });
+	            }
+	            else {
+	                expanz.net.GetSessionDataRequest({
+	                    success: function (url) {
+	                        if (isPopup) {
+	                            // reload the page
+	                            window.location.reload();
 	                        }
-	                    });
-	                }
-	            };
-	            expanz.net.CreateSessionRequest(this.get('username').get('value'), this.get('password').get('value'), {
-	                success: loginCallback,
-	                error: function (message) {
-	                    expanz.messageController.addErrorMessageByText(message);
-	                }
-	            });
-	        }
+	                        else {
+
+	                            /*
+									* NOT IMPLEMENTED YET...problem with url where sessionHandle and activityHandle are GET parameters var urlBeforeLogin = expanz.Storage.getLastURL(); if(urlBeforeLogin !== null && urlBeforeLogin != ''){ expanz.Storage.clearLastURL(); expanz.views.redirect(urlBeforeLogin);
+									* return; }
+									*/
+	                            // redirect to default activity
+	                            expanz.views.redirect(url);
+	                        }
+	                    },
+	                        
+	                    error: function (message) {
+	                        that.set({
+	                            isLoggingIn: false
+	                        });
+	                    }
+	                });
+	            }
+	        };
+	            
+	        expanz.net.CreateSessionRequest(userName, password, {
+	            success: loginCallback,
+	            error: function (message) {
+	                expanz.messageController.addErrorMessageByText(message);
+	                
+	                that.set({
+	                    isLoggingIn: false
+	                });
+	            }
+	        });
 	    }
 	});
 });
