@@ -362,7 +362,7 @@ $(function() {
 		content += '<input class="loginInput" attribute="value" type="password" placeholder="Password"/>';
 		content += '</div>';
 		content += '<div name="login" id="login">';
-		content += '<button type="submit" attribute="submit">login</button>';
+		content += '<button id="signinButton" type="submit" attribute="submit"></button>';
 		content += '</div>';
 		content += '<div bind="message" type="error" class="error">';
 		content += '<span attribute="value"></span>';
