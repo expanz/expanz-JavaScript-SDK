@@ -355,18 +355,18 @@ $(function() {
 		}
 
 		content += '<form bind="login" type="popup" name="login" action="javascript:">';
-		content += '<div name="username" id="username">';
-		content += '<input class="loginInput"  attribute="value" type="text" placeholder="Username"/>';
-		content += '</div>';
-		content += '<div name="password" id="password">';
-		content += '<input class="loginInput" attribute="value" type="password" placeholder="Password"/>';
-		content += '</div>';
-		content += '<div name="login" id="login">';
-		content += '<button id="signinButton" type="submit" attribute="submit"></button>';
-		content += '</div>';
-		content += '<div bind="message" type="error" class="error">';
-		content += '<span attribute="value"></span>';
-		content += '</div>';
+		content += '  <div name="username" id="username">';
+		content += '    <input class="loginInput"  attribute="value" type="text" placeholder="Username"/>';
+		content += '  </div>';
+		content += '  <div name="password" id="password">';
+		content += '    <input class="loginInput" attribute="value" type="password" placeholder="Password"/>';
+		content += '  </div>';
+		content += '  <div name="login" id="login">';
+		content += '    <button id="signinButton" type="submit" attribute="submit"></button>';
+		content += '  </div>';
+		content += '  <div bind="message" type="error" class="error">';
+		content += '    <span attribute="value"></span>';
+		content += '  </div>';
 		content += '</form>';
 
 		loginPopup = window.expanz.showManuallyClosedPopup(content, 'Login', 'ExpanzLoginPopup', activity);
@@ -451,23 +451,23 @@ $(function() {
 		return null;
 	};
 
-	window.expanz.helper.findActivityMetadata = function(activityName, activityStyle, callback) {
-		var jqxhr = $.get('./formmapping.xml', function(data) {
-			$(data).find('activity').each(function() {
-				var name = $(this).attr('name');
-				var url = getPageUrl($(this).attr('form'));
-				var onRequest = $(this).attr('onRequest');
-				var title = $(this).attr('title');
-				var style = $(this).attr('style');
-				if (name == activityName && style == activityStyle) {
-					var activityMetadata = {};
-					activityMetadata.url = url;
-					activityMetadata.onRequest = onRequest;
-					activityMetadata.title = title;
-					callback(activityMetadata);
-					return;
-				}
-			});
+	window.expanz.helper.findActivityMetadata = function (activityName, activityStyle, callback) {
+	    var data = expanz.Storage.getFormMapping();
+
+	    $(data).find('activity').each(function () {
+			var name = $(this).attr('name');
+			var url = getPageUrl($(this).attr('form'));
+			var onRequest = $(this).attr('onRequest');
+			var title = $(this).attr('title');
+			var style = $(this).attr('style');
+			if (name == activityName && style == activityStyle) {
+				var activityMetadata = {};
+				activityMetadata.url = url;
+				activityMetadata.onRequest = onRequest;
+				activityMetadata.title = title;
+				callback(activityMetadata);
+				return;
+			}
 		});
 	};
 
