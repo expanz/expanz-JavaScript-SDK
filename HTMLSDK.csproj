@@ -87,6 +87,9 @@
     <Content Include="source\js\expanz\client\requestBody.js" />
     <Content Include="source\js\expanz\client\requestBuilder.js" />
     <Content Include="source\js\expanz\client\responseParser.js" />
+    <Content Include="source\js\expanz\menu\AppSiteMenu.js" />
+    <Content Include="source\js\expanz\menu\ActivityMenu.js" />
+    <Content Include="source\js\expanz\menu\ProcessAreaMenu.js" />
     <Content Include="source\js\expanz\models\data\expanz.models.data.DataControl.js" />
     <Content Include="source\js\expanz\models\data\expanz.models.data.Grid.js" />
     <Content Include="source\js\expanz\models\data\expanz.models.data.Row.js" />
