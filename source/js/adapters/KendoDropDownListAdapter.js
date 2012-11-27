@@ -50,7 +50,10 @@ $.fn.KendoDropDownListAdapter = function() {
 	};
 
 	/* when the field gets a new value from the server, update the combobox element */
-	var onValueUpdated = function(event, newValue) {
+	var onValueUpdated = function (event, newValue) {
+	    if (newValue === null || newValue === undefined)
+	        newValue = ''; // Select the "empty" item
+	    
 		list.value(newValue);
 	};
 
