@@ -70,14 +70,21 @@ $(function () {
                 return;
 
             /* position menu below button */
-            var pos = this.el.find("button").position();
-
-            var top = pos.top + this.el.find("button").outerHeight() + 2;
+            var pos = 0;
+	
+	    if (this.el.find("button").length > 0) {
+		pos = this.el.find("button").position();
+		var top = pos.top + this.el.find("button").outerHeight() + 2;
+	    } else {
+		pos = this.el.find("span").position();
+		var top = pos.top + this.el.find("span").outerHeight() + 2;
+	    }
 
             this.contextMenuEl.css({
                 position: "absolute",
                 top: top + "px",
-                left: (pos.left + 10) + "px"
+                left: (pos.left + 10) + "px",	
+		zIndex: 9999
             });
 
             /* append data to the menu */
