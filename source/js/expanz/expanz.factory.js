@@ -49,11 +49,41 @@ $(function() {
 				collection : activityModel
 			});
 
+			expanz.Factory.bindMessageControl(activityModel, activityView);
 			expanz.Factory.bindMethods(activityModel, activityEl);
 			expanz.Factory.bindDataControls(activityModel, activityEl);
 			expanz.Factory.bindFields(activityModel, activityEl);
 		    
 			return activityView;
+		},
+
+		bindMessageControl: function (activityModel, activityView) {
+		    var messageControl = activityView.el.find('[bind=messageControl]');
+		    
+		    if (messageControl.length === 0) {
+		        messageControl = $('[bind=messageControl]'); // Activity level message control not found - try looking for an application level message ccontrol
+
+		        if (messageControl.length !== 0) {
+		            // See if there is already a view defined for this message control - if not create one
+		            // Then rewire the activityModel's messageCollection property to the application-level messages view's messageCollection
+		            //activityModel.messageCollection = messageCollection;
+		            // TODO: Complete support for application level message controls
+		        }
+		    } else {
+		        // Create a view for the messages control
+		        var $messageControl = $(messageControl);
+		        
+		        var view = new expanz.views.MessagesView({
+		            //el: $messageControl,
+		            id: $messageControl.attr('id'),
+		            //className: $messageControl.attr('class'),
+		            collection: activityModel.messageCollection
+		        });
+
+		        $messageControl.html(view.render().el);
+		    }
+
+		    activityView.messageControl = messageControl;
 		},
 
 		bindFields : function(activityModel, el) {
