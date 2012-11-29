@@ -14,7 +14,7 @@ $(function() {
 	//
 	// Global Namespace definitions
 	//
-	window.App = [];
+	window.openActivityViews = [];
 	window.expanz = window.expanz || {};
 	window.expanz.helper = window.expanz.helper || {};
 	window.expanz.Storage = window.expanz.Storage || {};
@@ -23,19 +23,6 @@ $(function() {
 		if (typeof (console) != "undefined" && console.log) {
 			console.log(message);
 		}
-	};
-
-	window.expanz.getLoginPage = function() {
-		//var loginUrl = getPageUrl(window.config._loginpage);
-		/* if login url is null try to guess it by removing the filename */
-		//if (loginUrl === undefined) {
-		//	loginUrl = document.location.href.substring(0, document.location.href.lastIndexOf("/"));
-			/* if empty mean we are at the root of the website */
-		//	if (loginUrl === "")
-		//		loginUrl = "/";
-		//}
-		// window.expanz.logToConsole("getLoginURL : " + loginUrl);
-		return window.config._loginpage ? window.config._loginpage : 'login';
 	};
 
 	window.expanz.getMaintenancePage = function() {
@@ -58,18 +45,12 @@ $(function() {
 		DOMObject || (DOMObject = $('body'));
 
 		var activities = createActivity(DOMObject, callbacks, initialKey);
-		_.each(activities, function(activity) {
-			window.App.push(activity);
+	    
+		_.each(activities, function(activityView) {
+		    window.openActivityViews.push(activityView); // Push the view to the collection of open activity views
 		});
+	    
 		return activities;
-	};
-
-	window.expanz.CreateLogin = function(DOMObject, callbacks) {
-
-		DOMObject || (DOMObject = $('body'));
-
-		var login = createLogin(DOMObject, callbacks);
-		return;
 	};
 	
 	// window.expanz.CloseActivity = function(DOMObject) {
@@ -95,26 +76,15 @@ $(function() {
 	// return;
 	// };
 
-	window.expanz.Logout = function() {
-		function redirect() {
-			expanz.Storage.clearSession();
-			expanz.views.redirect(expanz.getLoginPage());
-		}
-		expanz.net.ReleaseSessionRequest({
-			success : redirect,
-			error : redirect
-		});
-	};
-
-	window.expanz.showManuallyClosedPopup = function(content, title, id, activity) {
+	window.expanz.showManuallyClosedPopup = function(content, title, id) {
 
 		content = unescape(content);
 
 		var clientMessage = new expanz.models.ClientMessage({
 			id : id,
 			title : title,
-			text : content,
-			parent : activity
+			text : content //,
+			//parent : activity
 		});
 
 		var loginPopup = new window.expanz.views.ManuallyClosedPopup({
@@ -126,42 +96,7 @@ $(function() {
 
 	};
 
-	window.expanz.showLoginPopup = function(activity, sessionLost) {
-		var content = '';
-		if (sessionLost === true) {
-			content = '<div class="loginMsg">Sorry, your session timed out, please log in again.</div>';
-		}
-		else {
-			content = '<div class="loginMsg">Please log in.</div>';
-		}
-
-		content += '<form bind="login" type="popup" name="login" action="javascript:">';
-		content += '  <div name="username" id="username">';
-		content += '    <input class="loginInput"  attribute="value" type="text" placeholder="Username"/>';
-		content += '  </div>';
-		content += '  <div name="password" id="password">';
-		content += '    <input class="loginInput" attribute="value" type="password" placeholder="Password"/>';
-		content += '  </div>';
-		content += '  <div name="login" id="login">';
-		content += '    <button id="signinButton" type="submit" attribute="submit"></button>';
-		content += '  </div>';
-		content += '  <div bind="message" type="error" class="error">';
-		content += '    <span attribute="value"></span>';
-		content += '  </div>';
-		content += '</form>';
-
-		loginPopup = window.expanz.showManuallyClosedPopup(content, 'Login', 'ExpanzLoginPopup', activity);
-
-		/* set focus on username field */
-	    $("#username input").focus();
-
-		createLogin(loginPopup.el.find('[bind=login]'));
-
-		return;
-
-	};
-
-	window.expanz.createActivityWindow = function(parentActivity, id, style, key, title) {
+	window.expanz.createActivityWindow = function(id, style, key, title) {
 		var callback = function(activityMetadata) {
 			if (activityMetadata.url === null) {
 				window.expanz.logToConsole("Url of activity not found");
@@ -176,7 +111,7 @@ $(function() {
 				var clientMessage = new expanz.models.ClientMessage({
 					id : 'ActivityRequest',
 					url : activityMetadata.url + "&random=" + new Date().getTime(),
-					parent : parentActivity,
+					//parent : parentActivity,
 					title : unescape(title || activityMetadata.title || '')
 				});
 
@@ -209,14 +144,15 @@ $(function() {
 	// Helper Functions
 	//
 
-	window.expanz.helper.findActivity = function(activityId) {
-		if (window && window.App) {
-			for ( var i = 0; i < window.App.length; i++) {
-				if (window.App[i].id == activityId) {
-					return window.App[i];
+	window.expanz.findOpenActivityView = function(activityId) {
+	    if (window && window.openActivityViews) {
+	        for (var i = 0; i < window.openActivityViews.length; i++) {
+	            if (window.openActivityViews[i].collection.getAttr("handle") == activityId) {
+	                return window.openActivityViews[i];
 				}
 			}
 		}
+	    
 		return null;
 	};
 
@@ -276,27 +212,17 @@ $(function() {
 		return activities;
 	}
 
-	function createLogin(dom, callbacks) {
-
-		var loginView;
-		if ($(dom).attr('bind') && ($(dom).attr('bind').toLowerCase() === 'login')) {
-		    loginView = expanz.Factory.createLoginView(dom);
-		}
-
-		return loginView;
-	}
-
 	function loadMenu(el, displayEmptyItems) {
 
 		// Load Menu & insert it into #menu
 		var menu = new expanz.menu.AppSiteMenu();
-		var processAreas = loadProcessArea(expanz.Storage.getProcessAreaList(), displayEmptyItems);
+		var processAreas = loadProcessMap(expanz.Storage.getProcessAreaList(), displayEmptyItems);
 		if (processAreas.length > 0)
 			menu.processAreas = processAreas;
 		menu.load(el);
 	}
 
-	function loadProcessArea(processAreas, displayEmptyItems, parentProcessAreaMenu) {
+	function loadProcessMap(processAreas, displayEmptyItems, parentProcessAreaMenu) {
 		var processAreasMenu = [];
 		_.each(processAreas, function(processArea) {
 			if (displayEmptyItems || processArea.activities.length > 0 || processArea.pa.length > 0) {
@@ -369,7 +295,7 @@ $(function() {
 	});
 
 	/* create login if exists */
-	expanz.CreateLogin($('[bind=login]'));
+	expanz.security.createLogin($('[bind=login]'));
 
 	/* create all activities where autoLoad attribute is not set to false */
 	_.each($('[bind=activity][autoLoad!="false"]'), function(el) {
