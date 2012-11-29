@@ -68,7 +68,7 @@
                 el.append('<div style="clear:both"></div>');
 
                 $(el.find('#logout')[0]).click(function(e) {
-                    expanz.Logout();
+                    expanz.security.logout();
                 });
             }
         };
