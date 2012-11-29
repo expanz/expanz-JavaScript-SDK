@@ -1301,17 +1301,21 @@ $(function() {
 
 	window.expanz.html.anonymousPersonActivity = "ERP.Person";
 
-	window.expanz.html.submitLostPasswordForm = function(loginCode, EmailAdress) {
-		var xml = '<Activity id="' + window.expanz.html.anonymousPersonActivity + '">';
+	window.expanz.html.submitLostPasswordForm = function(loginCode, emailAddress) {
+	    var xml = '<Activity id="' + window.expanz.html.anonymousPersonActivity + '">';
+	    
 		if (loginCode) {
 			xml += '<Delta id="LoginCode" value="' + loginCode + '" />';
 		}
-		if (EmailAdress) {
-			xml += '<Delta id="EmailAddress" value="' + EmailAdress + '" />';
+	    
+		if (emailAddress) {
+			xml += '<Delta id="EmailAddress" value="' + emailAddress + '" />';
 		}
+	    
 		xml += '<Method name="resetMyPasswordAnon">';
 		xml += '</Method>';
 		xml += '</Activity>';
+	    
 		window.expanz.net.CreateAnonymousRequest(xml);
 	};
 
