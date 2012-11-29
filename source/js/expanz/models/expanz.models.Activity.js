@@ -22,6 +22,7 @@ $(function() {
 	        return !this.getAttr('handle');
 	    },
 
+        // TODO: Remove?
 	    callbacks: {
 	        success: function (message) {
 	            expanz.messageController.addSuccessMessageByText(message);
@@ -33,9 +34,13 @@ $(function() {
 	            expanz.messageController.addInfoMessageByText(message);
 	        }
 	    },
+	    
+        defaults: {
+        },
 
 	    initialize: function (attrs) {
 	        this.dataControls = {};
+	        this.messageCollection = new expanz.models.MessageCollection();
 	        this.loading = false;
 	        expanz.Collection.prototype.initialize.call(this, attrs);
 	    },
@@ -47,18 +52,21 @@ $(function() {
 	        }, this);
 	    },
 
-	    addDataControl: function (DataControl) {
-	        var id = DataControl.id || DataControl.getAttr('dataId');
+	    addDataControl: function (dataControl) {
+	        var id = dataControl.id || dataControl.getAttr('dataId');
 
 	        if (this.dataControls[id] === undefined)
 	            this.dataControls[id] = [];
-	        this.dataControls[id].push(DataControl);
+	        
+	        this.dataControls[id].push(dataControl);
+	        
 	        return;
 	    },
 	    
 	    getDataControl: function (id) {
 	        return this.dataControls[id];
 	    },
+	    
 	    getDataControls: function () {
 	        return this.dataControls;
 	    },
