@@ -90,7 +90,7 @@ function parseRoles(xmlElement) {
 }
 
 function parseDashboards(xmlElement) {
-
+    // TODO: test and validate working
     if (xmlElement === undefined || xmlElement.length === 0)
         return null;
     var dashboards = {};
@@ -224,6 +224,7 @@ function parseGetSessionDataResponse(callbacks) {
     };
 }
 
+// TODO: Merge into core response handler
 function parseCreateActivityResponse(activity, callbacks) {
     return function apply(xml) {
         // window.expanz.logToConsole("start parseCreateActivityResponse");
@@ -246,7 +247,7 @@ function parseCreateActivityResponse(activity, callbacks) {
                     if (sessionLost || activityNotFound) {
                         expanz.Storage.clearSession();
                         if (activity.getAttr('allowAnonymous') === false) {
-                            window.expanz.showLoginPopup(activity, true);
+                            window.expanz.security.showLoginPopup();
                             return;
                         }
                     }
@@ -372,320 +373,449 @@ function parseCreateActivityResponse(activity, callbacks) {
     };
 }
 
-function parseDeltaResponse(activity, initiator, callbacks) {
+function parseResponse(activity, initiator, callbacks) {
     return function apply(xml) {
-        // window.expanz.logToConsole("start parseDeltaResponse");
-
         /* Errors case -> server is most likely not running */
-        $(xml).find('errors').each(function () {
+        $(xml).find('errors').each(function() {
             if ($(xml).find('errors').text().indexOf(':Your session cannot be contacted') != -1) {
                 expanz.views.redirect(window.expanz.getMaintenancePage());
             }
         });
 
         var execResults = $(xml).find("ExecXResult");
+
         if (execResults === null || execResults.length === 0) {
             execResults = $(xml).find("ExecAnonymousXResult");
         }
 
         if (execResults) {
+            // REMOVED as I don't know why it would do this
             /* remove other activities from the xml except for anonymous activity */
-            if (!activity.isAnonymous()) {
-                $(execResults).find("Activity[activityHandle!='" + activity.getAttr('handle') + "']").remove();
-            }
-
-            var errors = [];
-            var infos = [];
-
-            /* DASHBOARD UPDATE CASE */
-            var dashboards = parseDashboards($(execResults).find("Dashboards"));
-            if (dashboards !== null) {
-                expanz.Storage.setDashboards(dashboards);
-            }
-
-            /* MESSAGE CASE */
-            $(execResults).find('Message').each(function () {
-                if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
-                    var sessionLost = /Session .* not found/.test($(this).text());
-                    var activityNotFound = /Activity .* not found/.test($(this).text());
-                    if (sessionLost || activityNotFound) {
-                        window.expanz.showLoginPopup(activity, true);
-                        return;
-                    }
-
-                    var source = $(this).attr('source');
-                    if (source && source !== undefined) {
-                        var field = activity.get(source);
-                        if (field && field !== undefined) {
-                            field.set({
-                                errorMessage: (this.textContent || this.innerText),
-                                error: true
-                            });
-                        }
-                    }
-
-                    errors.push($(this).text());
-
-                }
-                else if ($(this).attr('type') == 'Info') {
-                    infos.push($(this).text());
-                }
-            });
-
-            if (callbacks && callbacks.error) {
-                if (errors) {
-                    callbacks.error(errors);
-                }
-                else {
-                    callbacks.error(null);
-                }
-            }
-
-            if (callbacks && callbacks.info) {
-                if (infos) {
-                    //window.expanz.logToConsole(infos)
-                    callbacks.info(infos);
-                }
-                else {
-                    callbacks.info(null);
-                }
-            }
-
-            /* Activity Request CASE */
-            $(execResults).find('ActivityRequest').each(function () {
-                var id = $(this).attr('id');
-                var key = $(this).attr('key');
-                var style = $(this).attr('style') || "";
-
-                window.expanz.createActivityWindow(activity, id, style, key);
-
-            });
-
-            /* Activity Request CASE */
-            $(execResults).find('ContextMenu').each(function () {
-                // window.expanz.logToConsole('ContextMenu received');
-                var caller = window.expanz.currentContextMenu;
-                if (caller !== undefined) {
-                    // window.expanz.logToConsole('Caller found');
-                    caller.set({
-                        data: null
-                    });
-                    caller.set({
-                        data: $(this)
-                    });
-                }
-            });
-
-            /* FIELD CASE */
-            $(execResults).find('Field').each(function () {
-                var id = $(this).attr('id');
-                var field = activity.get(id);
-                if (field && field !== undefined) {
-                    field.publish($(this), activity);
-                }
-            });
-
-            /* METHOD CASE */
-            $(execResults).find('Method').each(function () {
-                var id = $(this).attr('id');
-                var method = activity.get(id);
-                if (method && method !== undefined) {
-                    method.publish($(this), activity);
-                }
-            });
-
-            /* FILE CASE */
-            /*if ($(execResults).find('File').length === 0) {
-                expanz.messageController.addErrorMessageByText("Unable to find the requested file");
-            } else {*/
-            $(execResults).find('File').each(function (data) {
-
-                if ($(this).attr('field') !== undefined && $(this).attr('path') !== undefined) {
-                    window.expanz.logToConsole("Blob found by field: " + $(this).attr('field') + " - " + $(this).attr('path'));
-                    expanz.net.GetBlobRequest($(this).attr('field'), activity, initiator);
-                }
-                else if ($(this).attr('name') !== undefined) {
-                    window.expanz.logToConsole("File found by name: " + $(this).attr('name'));
-                    expanz.net.GetFileRequest($(this).attr('name'), activity, initiator);
-                }
-                else {
-                    window.expanz.logToConsole("Not yet implemented");
-                }
-            });
+            //if (!activity.isAnonymous()) {
+            //    $(execResults).find("Activity[activityHandle!='" + activity.getAttr('handle') + "']").remove();
             //}
 
-            /* UIMESSAGE CASE */
-            $(execResults).find('UIMessage').each(function () {
+            var esaNode = execResults.children("ESA");
 
-                var clientMessage = new expanz.models.ClientMessage({
-                    id: 'ExpanzClientMessage',
-                    title: $(this).attr('title'),
-                    text: $(this).attr('text'),
-                    parent: activity
+            if (esaNode.length !== 0) {
+                esaNode.children().each(function () {
+                    var currentElement = this;
+                    
+                    switch (currentElement.localName) {
+                        case "Activity":
+                            parseActivityResponse(currentElement);
+                            break;
+                        case "ActivityRequest":
+                            parseActivityRequestResponse(currentElement);
+                            break;
+                        case "Messages":
+                            parseApplicationMessagesResponse(currentElement);
+                            break;
+                        case "Dashboards":
+                            parseDashboardsResponse(currentElement);
+                            break;
+                        case "Files":
+                            parseFilesResponse(currentElement);
+                            break;
+                        default:
+                            expanz.logToConsole("Unexpected element '" + currentElement.localName + "' found in response. Ignored.");
+                            break;
+                    }
                 });
-
-                $(this).find('Action').each(function (action) {
-
-                    if (!window.XMLSerializer) {
-                        window.XMLSerializer = function () {
-                        };
-
-                        window.XMLSerializer.prototype.serializeToString = function (XMLObject) {
-                            return XMLObject.xml || '';
-                        };
-                    }
-
-                    var methodAttributes = [];
-                    if ($('Request > Method', this)[0] && $('Request > Method', this)[0].attributes.length > 0) {
-                        _.each($('Request > Method', this)[0].attributes, function (attribute) {
-                            if (attribute.name != 'name') {
-                                methodAttributes.push({
-                                    name: attribute.name,
-                                    value: attribute.value
-                                });
-                            }
-                        });
-                    }
-
-                    var actionModel = new expanz.models.Method({
-                        id: $('Request > Method', this)[0] ? $($('Request > Method', this)[0]).attr('name') : 'close',
-                        label: $(this).attr('label'),
-                        response: $('Response', this)[0] ? $($('Response', this)[0]).children() : undefined,
-                        parent: activity,
-                        methodAttributes: methodAttributes
-                    });
-                    clientMessage.add(actionModel);
-                });
-
-                var uiMsg = new window.expanz.views.UIMessage({
-                    id: clientMessage.id,
-                    model: clientMessage
-                }, $('body'));
-            });
-
-            /* DATA */
-            $(execResults).find('Data').each(function () {
-                var id = $(this).attr('id');
-                var pickfield = $(this).attr('pickField');
-                var contextObject = $(this).attr('contextObject');
-                if (id == 'picklist') {
-                    // window.expanz.logToConsole("picklist received");
-                    var elId = id + pickfield.replace(/ /g, "_");
-
-                    var clientMessage = new expanz.models.ClientMessage({
-                        id: elId,
-                        title: pickfield,
-                        text: '',
-                        parent: activity
-                    });
-
-                    var gridEl = $("#" + elId);
-
-                    var picklistWindow = new window.expanz.views.PicklistWindowView({
-                        id: clientMessage.id,
-                        model: clientMessage
-                    }, $('body'));
-
-                    expanz.Factory.bindDataControls(activity, picklistWindow.el.parent());
-
-                    var gridModels = activity.getDataControl(elId);
-
-                    if (gridModels !== undefined) {
-                        for (var i = 0; i < gridModels.length; i++) {
-                            gridModel = gridModels[i];
-                            fillGridModel(gridModel, $(this));
-                            picklistWindow.center();
-                            gridModel.updateRowSelected = function (selectedId, type) {
-                                // window.expanz.logToConsole("From parseDeltaResponse:updateRowSelected id:" + selectedId + ' ,type:' + type);
-
-                                var clientFunction = window["picklistUpdateRowSelected" + type];
-                                if (typeof (clientFunction) == "function") {
-                                    clientFunction(selectedId);
-                                }
-                                else {
-                                    var context = {
-                                        id: selectedId,
-                                        contextObject: contextObject,
-                                        type: type
-                                    };
-
-                                    var methodAttributes = [
-                                        {
-                                            name: "contextObject",
-                                            value: contextObject
-                                        }
-                                    ];
-
-                                    expanz.net.MethodRequest('SetIdFromContext', methodAttributes, context, activity);
-
-                                }
-                                picklistWindow.close();
-                            };
-
-                        }
-                    }
-                    else {
-                        alert("Unexpected error while trying to display the picklist");
-                    }
-
-                }
-                else {
-                    var dataControlModels = activity.getDataControl(id);
-
-                    if (dataControlModels !== undefined) {
-                        for (var i = 0; i < dataControlModels.length; i++) {
-                            dataControlModel = dataControlModels[i];
-
-                            if (dataControlModel.getAttr('renderingType') == 'grid' || dataControlModel.getAttr('renderingType') == 'popupGrid' || dataControlModel.getAttr('renderingType') == 'rotatingBar') {
-                                fillGridModel(dataControlModel, $(this));
-
-                                /* override the method handler for each action button */
-                                dataControlModel.actionSelected = function (selectedId, name, params) {
-                                    expanz.net.MethodRequest(name, params, null, activity);
-                                };
-
-                                /* override a method handler for each menuaction button */
-                                dataControlModel.menuActionSelected = function (selectedId, name, params) {
-                                    expanz.net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
-                                };
-                            }
-                            else {
-                                /* update the xml data in the model, view will get a event if bound */
-                                dataControlModel.setAttr({
-                                    xml: $(this)
-                                });
-                            }
-                        }
-                    }
-
-                    // Variant fields also can consume data publications, but are handled separately as
-                    // they behave more like fields than data publications (ie. they don't register as 
-                    // data publications with the activity).
-                    var variantField = activity.get(id);
-
-                    if (variantField && variantField !== undefined) {
-                        variantField.publishData($(this), activity);
-                    }
-                }
-            });
-
-            //if (callbacks && callbacks.success) {
-            //callbacks.success('Delta handled: ' + execResults);
-            //window.expanz.logToConsole('Delta handled: ' + execResults);
-            //}
+            }
         }
-
+        
+        // TODO: Check if this should really be here, and what it actually does
         activity.setAttr({
             'deltaLoading': {
                 isLoading: false,
                 initiator: initiator
             }
         });
-
-        return;
     };
 }
 
+function parseActivityResponse(activityElement) {
+    // Find the corresponding activity in the list of open activities
+    var $activityElement = $(activityElement);
+    var activityHandle = $activityElement.attr('activityHandle');
+    var activityView = window.expanz.findOpenActivityView(activityHandle);
+    
+    if (activityView != null) {
+        // Activity found, so parse the XML in the response for it, and apply it to the model
+        var activityModel = activityView.collection;
+        
+        // Clear any current errors being displayed
+        activityModel.messageCollection.reset();
+
+        $activityElement.children().each(function () {
+            var currentElement = this;
+
+            switch (currentElement.localName) {
+                case "Field":
+                    parseFieldResponse(currentElement, activityModel);
+                    break;
+                case "Method":
+                    parseMethodResponse(currentElement, activityModel);
+                    break;
+                case "Data":
+                    parseDataResponse(currentElement, activityModel);
+                    break;
+                case "Messages":
+                    parseActivityLevelMessagesResponse(currentElement, activityModel);
+                    break;
+                case "UIMessage":
+                    parseUIMessageResponse(currentElement, activityModel);
+                    break;
+                case "ModelObject":
+                    parseModelObjectResponse(currentElement, activityModel);
+                    break;
+                case "Graph":
+                    // Not currently supported - placeholder for the future
+                    expanz.logToConsole("Graph data is not currently supported by this SDK. Ignored.");
+                    break;
+                case "ContextMenu":
+                    parseContextMenuResponse(currentElement, activityModel);
+                    break;
+                case "CustomContent":
+                    // Not currently supported - placeholder for the future
+                    expanz.logToConsole("CustomContent data is not currently supported by this SDK. Ignored.");
+                    break;
+                case "Types":
+                    // Ignore
+                    break;
+                default:
+                    expanz.logToConsole("Unexpected element '" + currentElement.localName + "' found in response. Ignored.");
+                    break;
+            }
+        });
+    } else {
+        // Houston, we have a problem. For now at least, just ignore.
+        expanz.logToConsole("An activity with handle '" + activityHandle + "' is not found!");
+    }
+}
+
+function parseFieldResponse(fieldElement, activityModel) {
+    var $fieldElement = $(fieldElement);
+    var id = $fieldElement.attr('id');
+    var field = activityModel.get(id);
+    
+    if (field && field !== undefined) {
+        field.publish($fieldElement);
+    }
+}
+
+function parseMethodResponse(methodElement, activityModel) {
+    var $methodElement = $(methodElement);
+    var id = $methodElement.attr('id');
+    var method = activityModel.get(id);
+    
+    if (method && method !== undefined) {
+        method.publish($methodElement);
+    }
+}
+
+function parseDataResponse(dataElement, activityModel) {
+    var $dataElement = $(dataElement);
+    var id = $dataElement.attr('id');
+    var pickfield = $dataElement.attr('pickField');
+    var contextObject = $dataElement.attr('contextObject');
+    
+    if (id == 'picklist') {
+        // window.expanz.logToConsole("picklist received");
+        var elId = id + pickfield.replace(/ /g, "_");
+
+        var clientMessage = new expanz.models.ClientMessage({
+            id: elId,
+            title: pickfield,
+            text: '',
+            parent: activityModel
+        });
+
+        var gridEl = $("#" + elId);
+
+        var picklistWindow = new window.expanz.views.PicklistWindowView({
+            id: clientMessage.id,
+            model: clientMessage
+        }, $('body'));
+
+        expanz.Factory.bindDataControls(activityModel, picklistWindow.el.parent());
+
+        var gridModels = activityModel.getDataControl(elId);
+
+        if (gridModels !== undefined) {
+            for (var i = 0; i < gridModels.length; i++) {
+                gridModel = gridModels[i];
+                fillGridModel(gridModel, $dataElement);
+                picklistWindow.center();
+                gridModel.updateRowSelected = function (selectedId, type) {
+                    // window.expanz.logToConsole("From parseDeltaResponse:updateRowSelected id:" + selectedId + ' ,type:' + type);
+
+                    var clientFunction = window["picklistUpdateRowSelected" + type];
+                    if (typeof (clientFunction) == "function") {
+                        clientFunction(selectedId);
+                    }
+                    else {
+                        var context = {
+                            id: selectedId,
+                            contextObject: contextObject,
+                            type: type
+                        };
+
+                        var methodAttributes = [
+                            {
+                                name: "contextObject",
+                                value: contextObject
+                            }
+                        ];
+
+                        expanz.net.MethodRequest('SetIdFromContext', methodAttributes, context, activityModel);
+
+                    }
+                    picklistWindow.close();
+                };
+
+            }
+        }
+        else {
+            alert("Unexpected error while trying to display the picklist");
+        }
+    }
+    else {
+        var dataControlModels = activityModel.getDataControl(id);
+
+        if (dataControlModels !== undefined) {
+            for (var i = 0; i < dataControlModels.length; i++) {
+                dataControlModel = dataControlModels[i];
+
+                if (dataControlModel.getAttr('renderingType') == 'grid' || dataControlModel.getAttr('renderingType') == 'popupGrid' || dataControlModel.getAttr('renderingType') == 'rotatingBar') {
+                    fillGridModel(dataControlModel, $dataElement);
+
+                    /* override the method handler for each action button */
+                    dataControlModel.actionSelected = function (selectedId, name, params) {
+                        expanz.net.MethodRequest(name, params, null, activityModel);
+                    };
+
+                    /* override a method handler for each menuaction button */
+                    dataControlModel.menuActionSelected = function (selectedId, name, params) {
+                        expanz.net.CreateMenuActionRequest($dataElement.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
+                    };
+                }
+                else {
+                    /* update the xml data in the model, view will get a event if bound */
+                    dataControlModel.setAttr({
+                        xml: $dataElement
+                    });
+                }
+            }
+        }
+
+        // Variant fields also can consume data publications, but are handled separately as
+        // they behave more like fields than data publications (ie. they don't register as 
+        // data publications with the activity).
+        var variantField = activityModel.get(id);
+
+        if (variantField && variantField !== undefined) {
+            variantField.publishData($dataElement, activityModel);
+        }
+    }
+}
+
+function parseActivityLevelMessagesResponse(messagesElement, activityModel) {
+    var $messagesElement = $(messagesElement);
+
+    $messagesElement.children('Message').each(function () {
+        var $messageElement = $(this);
+
+        var messageModel = {
+            type: $messageElement.attr('type'),
+            key: $messageElement.attr('key'),
+            source: $messageElement.attr('source'),
+            messageSource: $messageElement.attr('messageSource'),
+            message: $messageElement.text()
+        };
+        
+        activityModel.messageCollection.add(messageModel);
+        
+        if (messageModel.type == 'Error' || messageModel.type == 'Warning') {
+            var source = messageModel.source;
+
+            if (source && source !== undefined) {
+                var field = activityModel.get(source);
+
+                if (field && field !== undefined) {
+                    field.set({
+                        errorMessage: (this.textContent || this.innerText),
+                        error: true
+                    });
+                }
+            }
+
+            //errors.push($messageElement.text());
+        }
+        else if (messageModel.type == 'Info') {
+            //infos.push($messageElement.text());
+        }
+    });
+
+    //if (callbacks && callbacks.error) {
+    //    if (errors) {
+    //        callbacks.error(errors);
+    //    }
+    //    else {
+    //        callbacks.error(null);
+    //    }
+    //}
+
+    //if (callbacks && callbacks.info) {
+    //    if (infos) {
+    //        //window.expanz.logToConsole(infos)
+    //        callbacks.info(infos);
+    //    }
+    //    else {
+    //        callbacks.info(null);
+    //    }
+    //}
+}
+
+function parseUIMessageResponse(uiMessageElement, activityModel) {
+    var $uiMessageElement = $(uiMessageElement);
+    
+    var clientMessage = new expanz.models.ClientMessage({
+        id: 'ExpanzClientMessage',
+        title: $uiMessageElement.attr('title'),
+        text: $uiMessageElement.attr('text'),
+        parent: activityModel
+    });
+
+    $uiMessageElement.find('Action').each(function (action) {
+
+        if (!window.XMLSerializer) {
+            window.XMLSerializer = function () {
+            };
+
+            window.XMLSerializer.prototype.serializeToString = function (XMLObject) {
+                return XMLObject.xml || '';
+            };
+        }
+
+        var methodAttributes = [];
+        if ($('Request > Method', $uiMessageElement)[0] && $('Request > Method', $uiMessageElement)[0].attributes.length > 0) {
+            _.each($('Request > Method', $uiMessageElement)[0].attributes, function (attribute) {
+                if (attribute.name != 'name') {
+                    methodAttributes.push({
+                        name: attribute.name,
+                        value: attribute.value
+                    });
+                }
+            });
+        }
+
+        var actionModel = new expanz.models.Method({
+            id: $('Request > Method', $uiMessageElement)[0] ? $($('Request > Method', $uiMessageElement)[0]).attr('name') : 'close',
+            label: $uiMessageElement.attr('label'),
+            response: $('Response', $uiMessageElement)[0] ? $($('Response', $uiMessageElement)[0]).children() : undefined,
+            parent: activityModel,
+            methodAttributes: methodAttributes
+        });
+        
+        clientMessage.add(actionModel);
+    });
+
+    var uiMsg = new window.expanz.views.UIMessage({
+        id: clientMessage.id,
+        model: clientMessage
+    }, $('body'));
+}
+
+function parseModelObjectResponse(modelObjectElement, activityModel) {
+    // TODO: Not currently handled
+}
+
+function parseContextMenuResponse(contextMenuElement, activityModel) {
+    var $contextMenuElement = $(contextMenuElement);
+    var caller = window.expanz.currentContextMenu;
+    
+    if (caller !== undefined && caller !== null) {
+        caller.set({
+            data: null
+        });
+        
+        caller.set({
+            data: $contextMenuElement
+        });
+    }
+}
+
+function parseActivityRequestResponse(activityRequestElement) {
+    var $activityRequestElement = $(activityRequestElement);
+    
+    var id = $activityRequestElement.attr('id');
+    var key = $activityRequestElement.attr('key');
+    var style = $activityRequestElement.attr('style') || "";
+
+    window.expanz.createActivityWindow(id, style, key);
+}
+
+function parseApplicationMessagesResponse(messagesElement) {
+    var $messagesElement = $(messagesElement);
+    
+    var message = "";
+    
+    $messagesElement.children('Message').each(function () {
+        var $messageElement = $(this);
+        
+        // First check if the message relates to the session being lost.
+        // If so, ask the user to log in again.
+        var sessionLost = /Session .* not found/.test($messageElement.text());
+        var activityNotFound = /Activity .* not found/.test($messageElement.text());
+
+        if (sessionLost || activityNotFound) {
+            window.expanz.security.showLoginPopup();
+        } else {
+            // Add any other messages to a list to be displayed to the user in a message box
+            message += "\n\n";
+            message += $messageElement.text();
+        }
+    });
+
+    if (message.length !== 0) {
+        alert("The following message(s) have been returned from the server:" + message);
+    }
+}
+
+function parseDashboardsResponse(dashboardsElement) {
+    var $dashboardsElement = $(dashboardsElement);
+    
+    // TODO: test and validate working
+    var dashboards = parseDashboards($dashboardsElement.find("Dashboards"));
+    
+    if (dashboards !== null) {
+        expanz.Storage.setDashboards(dashboards);
+    }
+}
+
+function parseFilesResponse(filesElement) {
+    var $filesElement = $(filesElement);
+
+    $filesElement.children('File').each(function (data) {
+        var $fileElement = $(this);
+        
+        if ($fileElement.attr('field') !== undefined && $fileElement.attr('path') !== undefined) {
+            window.expanz.logToConsole("Blob found by field: " + $fileElement.attr('field') + " - " + $fileElement.attr('path'));
+            expanz.net.GetBlobRequest($fileElement.attr('field'), activity, initiator);
+        }
+        else if ($fileElement.attr('name') !== undefined) {
+            window.expanz.logToConsole("File found by name: " + $fileElement.attr('name'));
+            expanz.net.GetFileRequest($fileElement.attr('name'), activity, initiator);
+        }
+        else {
+            window.expanz.logToConsole("Not yet implemented");
+        }
+    });
+}
+
+// TODO: Merge into core response handler
 function parseCloseActivityResponse(callbacks) {
     return function apply(xml) {
         // window.expanz.logToConsole("start parseCloseActivityResponse");
