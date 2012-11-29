@@ -147,7 +147,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks),null,true);
+			SendRequest(requestBuilder.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks),null,true);
 		},
 
 		MethodRequest : function(name, methodAttributes, context, activity, anonymousFields, callbacks) {
@@ -175,10 +175,10 @@ $(function() {
 
 			// activity allows anonymous and user not logged in
 			if (activity.isAnonymous()) {
-				SendRequest(requestBuilder.AnonymousMethod(name, methodAttributes, context, activity, anonymousFields), parseDeltaResponse(activity, initiator, callbacks),null,true);
+			    SendRequest(requestBuilder.AnonymousMethod(name, methodAttributes, context, activity, anonymousFields), parseResponse(activity, initiator, callbacks), null, true);
 			}
 			else {
-				SendRequest(requestBuilder.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
+			    SendRequest(requestBuilder.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
 			}
 
 		},
@@ -200,7 +200,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.AnonymousMethods(methods, activity), parseDeltaResponse(activity, initiator, callbacks), null, true);
+			SendRequest(requestBuilder.AnonymousMethods(methods, activity), parseResponse(activity, initiator, callbacks), null, true);
 
 		},
 
@@ -235,7 +235,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.DataRefresh(dataId, activity, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
+			SendRequest(requestBuilder.DataRefresh(dataId, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
 		},
 
 		ReleaseSessionRequest : function(callbacks) {
@@ -304,7 +304,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
+			SendRequest(requestBuilder.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
 		},
 
 		/* call when selecting something from the tree view (file) or menu action */
@@ -329,7 +329,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.CreateContextMenuAction(activity, contextId, contextMenuType, contextObject, expanz.Storage.getSessionHandle()), parseDeltaResponse(activity, initiator, callbacks), null, true);
+			SendRequest(requestBuilder.CreateContextMenuAction(activity, contextId, contextMenuType, contextObject, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
 		},
 
 		/* create an anonymous request */
