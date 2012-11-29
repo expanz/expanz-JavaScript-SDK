@@ -22,7 +22,7 @@ $(function () {
     window.expanz.views.requestLogin = function () {
 		/* if redirection to login page store the last page to be able to redirect the user once logged in */
 		window.expanz.Storage.setLastURL(document.URL);
-		window.expanz.views.redirect(expanz.getLoginPage());
+		window.expanz.views.redirect(expanz.security.getLoginPage());
 	};
 
     window.expanz.views.updateViewElement = function(view, elem, allAttrs, attr) {
