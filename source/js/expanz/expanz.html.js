@@ -102,6 +102,9 @@ $(function() {
 		html += '<div bind="method" id="' + methodName + '" name="' + methodName + '" ' + ctx + visible + ' class="'+cssClass+'">';
 		switch (cssClass)
 		{
+			case 'button':
+				html += '<button attribute="submit" type="button">' + methodLabel + '</button>';
+				break;
 			default:
 				html += '<a attribute="submit"><span>' + methodLabel + '</span></button>';
 		}
