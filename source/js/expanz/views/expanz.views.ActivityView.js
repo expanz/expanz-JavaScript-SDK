@@ -21,6 +21,9 @@ $(function () {
             if (attrs.key) {
                 this.key = attrs.key;
             }
+
+            this.messageControl = null;
+            
             this.collection.bind("error", this.updateError, this);
             this.collection.bind("update:loading", this.loading, this);
             this.collection.bind("update:deltaLoading", this.deltaLoading, this);
