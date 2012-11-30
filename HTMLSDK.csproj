@@ -87,7 +87,6 @@
     <Content Include="source\js\expanz\client\requestBody.js" />
     <Content Include="source\js\expanz\client\requestBuilder.js" />
     <Content Include="source\js\expanz\client\responseParser.js" />
-    <Content Include="source\js\expanz\expanz.messageController.js" />
     <Content Include="source\js\expanz\expanz.security.js" />
     <Content Include="source\js\expanz\menu\AppSiteMenu.js" />
     <Content Include="source\js\expanz\menu\ActivityMenu.js" />
