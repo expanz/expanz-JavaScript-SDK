@@ -688,8 +688,9 @@ function parseUIMessageResponse(uiMessageElement, activityModel) {
         parent: activityModel
     });
 
-    $uiMessageElement.find('Action').each(function (action) {
-
+    $uiMessageElement.find('Action').each(function () {
+        var $actionElement = $(this);
+        
         if (!window.XMLSerializer) {
             window.XMLSerializer = function () {
             };
@@ -700,8 +701,9 @@ function parseUIMessageResponse(uiMessageElement, activityModel) {
         }
 
         var methodAttributes = [];
-        if ($('Request > Method', $uiMessageElement)[0] && $('Request > Method', $uiMessageElement)[0].attributes.length > 0) {
-            _.each($('Request > Method', $uiMessageElement)[0].attributes, function (attribute) {
+        
+        if ($('Request > Method', $actionElement)[0] && $('Request > Method', $actionElement)[0].attributes.length > 0) {
+            _.each($('Request > Method', $actionElement)[0].attributes, function (attribute) {
                 if (attribute.name != 'name') {
                     methodAttributes.push({
                         name: attribute.name,
@@ -712,9 +714,9 @@ function parseUIMessageResponse(uiMessageElement, activityModel) {
         }
 
         var actionModel = new expanz.models.Method({
-            id: $('Request > Method', $uiMessageElement)[0] ? $($('Request > Method', $uiMessageElement)[0]).attr('name') : 'close',
-            label: $uiMessageElement.attr('label'),
-            response: $('Response', $uiMessageElement)[0] ? $($('Response', $uiMessageElement)[0]).children() : undefined,
+            id: $('Request > Method', $actionElement)[0] ? $($('Request > Method', $actionElement)[0]).attr('name') : 'close',
+            label: $actionElement.attr('label'),
+            response: $('Response', $actionElement)[0] ? $($('Response', $actionElement)[0]).children() : undefined,
             parent: activityModel,
             methodAttributes: methodAttributes
         });
