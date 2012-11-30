@@ -81,6 +81,7 @@ $(function () {
             // Set the className for this element based upon the type of the message (i.e. the error level)
             // TODO: Make this more easily user definable?  Class names should also be more meaningful
             switch (this.model.get("type").toLowerCase()) {
+                case "fatal":
                 case "error":
                 case "warning":
                     this.el.className = "error";
