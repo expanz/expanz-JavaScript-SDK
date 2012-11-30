@@ -16,6 +16,8 @@ $(function () {
 
     window.expanz.views.MessagesView = Backbone.View.extend({
         tagName: "ul",
+        
+        className: "notificationArea",
 
         initialize: function () {
             this.collection.bind('add', this.messageAdded, this);
@@ -24,11 +26,42 @@ $(function () {
         },
         
         messageAdded: function (message) {
-            var messageView = new window.expanz.views.MessageView({
+            var messageItemView = new window.expanz.views.MessageItemView({
                model: message 
             });
 
-            $(this.el).append(messageView.render().el);
+            var $messageControlElement = $(this.el);
+            var $messageItemElement = $(messageItemView.el);
+            
+            $messageControlElement.append(messageItemView.render().el);
+            $messageItemElement.show();
+
+            var fade = true;
+            //if ($(el).attr('fade') && boolValue($(el).attr('fade')) === false) {
+            //    fade = false;
+            //}
+            
+            $messageItemElement.slideDown(100, function () {
+                if (fade) {
+                    $messageItemElement.delay(5000).slideUp(800, function () {
+                        $messageItemElement.remove();
+                        // if it was the last message in the message notification area, we hide the notification area.
+                        //if ($(el).find("div").length === 0) {
+                        //    $(el).hide();
+                        //}
+                    });
+                }
+            });
+
+            if ($messageItemElement.length > 0) { // Execute if the slide Up/Down methods fail
+                setTimeout(function () {
+                    $messageItemElement.remove();
+                    
+                    //if ($(el).find("div").length === 0) {
+                    //    $(el).hide();
+                    //}
+                }, 5000);
+            }
         },
         
         messageRemoved: function (message) {
@@ -41,13 +74,28 @@ $(function () {
     });
     
     // View for individual messages
-    window.expanz.views.MessageView = Backbone.View.extend({
+    window.expanz.views.MessageItemView = Backbone.View.extend({
         tagName: "li",
-
-        className: "error",
         
         render: function () {
+            // Set the className for this element based upon the type of the message (i.e. the error level)
+            // TODO: Make this more easily user definable?  Class names should also be more meaningful
+            switch (this.model.get("type").toLowerCase()) {
+                case "error":
+                case "warning":
+                    this.el.className = "error";
+                    break;
+                case "info":
+                case "success":
+                    this.el.className = "info";
+                    break;
+                default:
+                    this.el.className = "info";
+                    break;
+            }
+
             $(this.el).html(this.model.get("message"));
+            
             return this;
         }
     });
