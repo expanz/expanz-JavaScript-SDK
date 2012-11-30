@@ -34,7 +34,7 @@ $(function () {
                 var liId = (parentUL.id || parentUL[0].id) + "_li_" + j++;
                 var defaultActionClass = "";
                 if (defaultAction !== undefined && defaultAction == $(this).attr('action'))
-                    defaultActionClass = "deafaultAction";
+                    defaultActionClass = "defaultAction";
                 parentUL.append("<li id='" + liId + "' action='" + $(this).attr('action') + "' class=' " + defaultActionClass + " '>" + $(this).attr('text') + "</li>");
                 var liEL = parentUL.find("#" + liId);
                 liEL.unbind("click");
