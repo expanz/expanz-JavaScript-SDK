@@ -289,8 +289,6 @@ $(function() {
 	/* init dashboards object */
 	window.expanz.Dashboards = new window.expanz.models.Dashboards();
 
-	window.expanz.messageController.initialize();
-
 	/* Load the Expanz Process Area menu without empty items */
 	_.each($('[bind=menu]'), function(el) {
 		loadMenu($(el), false);
