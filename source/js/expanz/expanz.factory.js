@@ -59,19 +59,35 @@ $(function() {
 
 		bindMessageControl: function (activityModel, activityView) {
 		    var messageControl = activityView.el.find('[bind=messageControl]');
+		    var $messageControl = null;
 		    
 		    if (messageControl.length === 0) {
-		        messageControl = $('[bind=messageControl]'); // Activity level message control not found - try looking for an application level message ccontrol
+		        // Activity level message control not found - use the application level message control if available
+		        if (window.messageControlView === null) {
+		            // An application level message control is not currently intialised - look for it
+		            messageControl = $('[bind=messageControl]');
 
-		        if (messageControl.length !== 0) {
-		            // See if there is already a view defined for this message control - if not create one
-		            // Then rewire the activityModel's messageCollection property to the application-level messages view's messageCollection
-		            //activityModel.messageCollection = messageCollection;
-		            // TODO: Complete support for application level message controls
+		            if (messageControl.length !== 0) {
+		                // An application level message ccontrol has been found, so initialise it
+		                $messageControl = $(messageControl);
+
+		                window.messageControlView = new expanz.views.MessagesView({
+		                    id: $messageControl.attr('id'),
+		                    //className: $messageControl.attr('class'),
+		                    collection: new expanz.models.MessageCollection()
+		                });
+
+		                $messageControl.html(window.messageControlView.render().el);
+		            }
+		        }
+
+		        if (window.messageControlView !== null) {
+		            // Now rewire the activityModel's messageCollection property to the application-level messages view's messageCollection
+		            activityModel.messageCollection = window.messageControlView.collection;
 		        }
 		    } else {
 		        // Create a view for the messages control
-		        var $messageControl = $(messageControl);
+		        $messageControl = $(messageControl);
 		        
 		        var view = new expanz.views.MessagesView({
 		            //el: $messageControl,
