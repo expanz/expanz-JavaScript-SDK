@@ -637,45 +637,21 @@ function parseActivityLevelMessagesResponse(messagesElement, activityModel) {
         
         activityModel.messageCollection.addMessage(messageModel);
         
-        if (messageModel.type == 'Error' || messageModel.type == 'Warning') {
-            var source = messageModel.source;
+        // Now look for any fields with the same id as the source specified by the message, and
+        // pass them the message if there are.
+        var source = messageModel.source;
 
-            if (source && source !== undefined) {
-                var field = activityModel.get(source);
+        if (source && source !== undefined) {
+            var field = activityModel.get(source);
 
-                if (field && field !== undefined) {
-                    field.set({
-                        errorMessage: (this.textContent || this.innerText),
-                        error: true
-                    });
-                }
+            if (field && field !== undefined) {
+                field.set({
+                    errorMessage: messageModel.message,
+                    error: true
+                });
             }
-
-            //errors.push($messageElement.text());
-        }
-        else if (messageModel.type == 'Info') {
-            //infos.push($messageElement.text());
         }
     });
-
-    //if (callbacks && callbacks.error) {
-    //    if (errors) {
-    //        callbacks.error(errors);
-    //    }
-    //    else {
-    //        callbacks.error(null);
-    //    }
-    //}
-
-    //if (callbacks && callbacks.info) {
-    //    if (infos) {
-    //        //window.expanz.logToConsole(infos)
-    //        callbacks.info(infos);
-    //    }
-    //    else {
-    //        callbacks.info(null);
-    //    }
-    //}
 }
 
 function parseUIMessageResponse(uiMessageElement, activityModel) {
@@ -723,6 +699,7 @@ function parseUIMessageResponse(uiMessageElement, activityModel) {
 
 function parseModelObjectResponse(modelObjectElement, activityModel) {
     // TODO: Not currently handled
+    // NOTE: Only passes the dirty status of the model objects included in the activity
 }
 
 function parseContextMenuResponse(contextMenuElement, activityModel) {
