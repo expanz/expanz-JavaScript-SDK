@@ -353,7 +353,7 @@ function parseCreateActivityResponse(activity, callbacks) {
             //if (activity.name !== undefined) {
             //	callbacks.success('Activity (' + activity.name + ') has been loaded: ' + execResults);
             //} else {
-            window.expanz.logToConsole('Activity (' + activity.name + ') has been loaded: ' + execResults);
+            //window.expanz.logToConsole('Activity (' + activity.name + ') has been loaded: ' + execResults);
             //}
             //}
 
@@ -635,7 +635,7 @@ function parseActivityLevelMessagesResponse(messagesElement, activityModel) {
             message: $messageElement.text()
         };
         
-        activityModel.messageCollection.add(messageModel);
+        activityModel.messageCollection.addMessage(messageModel);
         
         if (messageModel.type == 'Error' || messageModel.type == 'Warning') {
             var source = messageModel.source;
