@@ -149,7 +149,7 @@ $(function() {
 
 		setFormMapping: function (value) {
 		    this._formMappingData = value;
-		    this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'FormMapping', this.serializeXML(value));
+		    this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'FormMapping', serializeXML(value));
 			return true;
 		},
 
@@ -284,16 +284,6 @@ $(function() {
 		    remove: function (key) {
 		        return window.sessionStorage.removeItem(key);
 		    }
-		},
-		
-	    // Serialize an XML Document or Element and return it as a string.
-		serializeXML: function(xmlElement) {
-		    if (xmlElement.xml) 
-		        return xmlElement.xml;
-		    else if (typeof XMLSerializer != "undefined")
-		        return (new XMLSerializer()).serializeToString(xmlElement) ;
-		    else 
-		        throw "Browser cannot serialize objects to XML";
 		}
 	};
 });
