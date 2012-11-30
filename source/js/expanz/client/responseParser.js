@@ -401,7 +401,7 @@ function parseResponse(activity, initiator, callbacks) {
                 esaNode.children().each(function () {
                     var currentElement = this;
                     
-                    switch (currentElement.localName) {
+                    switch (currentElement.nodeName) {
                         case "Activity":
                             parseActivityResponse(currentElement);
                             break;
@@ -418,7 +418,7 @@ function parseResponse(activity, initiator, callbacks) {
                             parseFilesResponse(currentElement);
                             break;
                         default:
-                            expanz.logToConsole("Unexpected element '" + currentElement.localName + "' found in response. Ignored.");
+                            expanz.logToConsole("Unexpected element '" + currentElement.nodeName + "' found in response. Ignored.");
                             break;
                     }
                 });
@@ -451,7 +451,7 @@ function parseActivityResponse(activityElement) {
         $activityElement.children().each(function () {
             var currentElement = this;
 
-            switch (currentElement.localName) {
+            switch (currentElement.nodeName) {
                 case "Field":
                     parseFieldResponse(currentElement, activityModel);
                     break;
@@ -485,7 +485,7 @@ function parseActivityResponse(activityElement) {
                     // Ignore
                     break;
                 default:
-                    expanz.logToConsole("Unexpected element '" + currentElement.localName + "' found in response. Ignored.");
+                    expanz.logToConsole("Unexpected element '" + currentElement.nodeName + "' found in response. Ignored.");
                     break;
             }
         });
@@ -690,15 +690,6 @@ function parseUIMessageResponse(uiMessageElement, activityModel) {
 
     $uiMessageElement.find('Action').each(function () {
         var $actionElement = $(this);
-        
-        if (!window.XMLSerializer) {
-            window.XMLSerializer = function () {
-            };
-
-            window.XMLSerializer.prototype.serializeToString = function (XMLObject) {
-                return XMLObject.xml || '';
-            };
-        }
 
         var methodAttributes = [];
         
@@ -900,7 +891,7 @@ function fillGridModel(gridModel, data) {
         // add cells to this row
         _.each($(row).find('Cell'), function (cell) {
             // nextline is quick fix for htmlunit
-            cell = XMLDocumentsToXMLString(cell);
+            cell = serializeXML(cell);
             gridModel.addCell(rowId, $(cell).attr('id'), $(cell).text(), columnMap[$(cell).attr('id')], $(cell).attr('sortValue'));
         });
     });
