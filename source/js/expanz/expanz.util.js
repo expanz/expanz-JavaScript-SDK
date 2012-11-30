@@ -152,18 +152,15 @@ if (!Array.prototype.indexOf) {
 String.prototype.endsWith = function(suffix) {
 	return this.indexOf(suffix, this.length - suffix.length) !== -1;
 };
-
-XMLDocumentsToXMLString = function(xmlDoc) {
-	var str;
-	if (window.ActiveXObject) {
-		str = xmlDoc.xml;
-		return str;
-	}
-	// code for Mozilla, Firefox, Opera, etc.
-	else {
-		str = (new XMLSerializer()).serializeToString(xmlDoc);
-		return str;
-	}
+		
+// Serialize an XML Document or Element and return it as a string.
+serializeXML = function (xmlElement) {
+    if (xmlElement.xml)
+        return xmlElement.xml;
+    else if (typeof XMLSerializer != "undefined")
+        return (new XMLSerializer()).serializeToString(xmlElement);
+    else
+        throw "Browser cannot serialize objects to XML";
 };
 
 boolValue = function(val) {
