@@ -61,8 +61,7 @@ $(function() {
         content += '  <div name="login" id="login">';
         content += '    <button id="signinButton" type="submit" attribute="submit"></button>';
         content += '  </div>';
-        content += '  <div bind="message" type="error" class="error">';
-        content += '    <span attribute="value"></span>';
+        content += '  <div bind="messageControl" class="error">';
         content += '  </div>';
         content += '</form>';
 
