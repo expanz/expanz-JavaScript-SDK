@@ -18,20 +18,119 @@ $(function() {
 
 	    model: expanz.models.Message,
 
-	    //callbacks: {
-	    //    success: function (message) {
-	    //        expanz.messageController.addSuccessMessageByText(message);
-	    //    },
-	    //    error: function (message) {
-	    //        expanz.messageController.addErrorMessageByText(message);
-	    //    },
-	    //    info: function (message) {
-	    //        expanz.messageController.addInfoMessageByText(message);
-	    //    }
-	    //},
-
 	    initialize: function () {
 	        this.loading = false;
-	    }
+	        this.loadMessageResources();
+	    },
+	    
+	    addMessage: function (messageInfo) {
+	        this._addMessageByText(messageInfo.message, messageInfo.type);
+	    },
+
+        loadMessageResources: function () {
+            /* load resource bundle */
+            if (window.config._useBundle !== false) {
+                jQuery.i18n.properties({
+                    name: 'Messages',
+                    path: 'assets/bundle/',
+                    mode: 'map',
+                    language: ' ', /* set to en to load Messages-en.properties as well, set to '' to load as well Messages-en-XX.properties - add to config.js if different for some customers */
+                    cache: true,
+                    callback: function () {
+                        // window.expanz.logToConsole("Bundle loaded");
+                    }
+                });
+            }
+        },
+
+	    // TODO: Turn the following 4 methods into 1, with an enumeration parameter?
+        addErrorMessageByText: function (messageText) {
+            this._addMessageByText(messageText, 'error');
+        },
+
+        addWarningMessageByText: function (messageText) {
+            this._addMessageByText(messageText, 'warning');
+        },
+
+        addInfoMessageByText: function (messageText) {
+            this._addMessageByText(messageText, 'info');
+        },
+
+        addSuccessMessageByText: function (messageText) {
+            this._addMessageByText(messageText, 'success');
+        },
+	    
+        _addMessageByText: function (messageText, messageType) {
+            if (window.config._useBundle === true) {
+                // Pass the message to an implementation specific message converter, that may
+                // transform the message from the server to something more suitable for display
+                var data = null;
+                
+                if (typeof window.expanz.findMessageKey == 'function') {
+                    data = window.expanz.findMessageKey(messageText);
+                } else {
+                    expanz.logToConsole("window.expanz.findMessageKey not found in your implementation");
+                }
+                
+                if (data !== null) {
+                    this._addMessageByKey(data['key'], data['data'], messageType, data['popup']);
+                } else {
+                    if (messageText !== "") {
+                        this.add({
+                            type: messageType,
+                            message: messageText
+                        });
+                        
+                        if (window.config._showAllMessages === true && messageText !== "") {
+                            window.expanz.logToConsole(messageType + ': ' + messageText);
+                        }
+                    }
+                }
+            } else {
+                this.add({
+                    type: messageType,
+                    message: messageText
+                });
+            }
+        },
+
+        // TODO: Turn the following 4 methods into 1, with an enumeration parameter?
+        addErrorMessageByKey: function (messageKey, messageData) {
+            this._addMessageByKey(messageKey, messageData, 'error');
+        },
+
+        addInfoMessageByKey: function (messageKey, messageData) {
+            this._addMessageByKey(messageKey, messageData, 'info');
+        },
+
+        addWarningMessageByKey: function (messageKey, messageData) {
+            this._addMessageByKey(messageKey, messageData, 'warning');
+        },
+
+        addSuccessMessageByKey: function (messageKey, messageData) {
+            this._addMessageByKey(messageKey, messageData, 'success');
+        },
+
+        _addMessageByKey: function (messageKey, messageData, messageType, popup) {
+            // Look for the key in message.properties file, and convert it to a message
+            var messageText = jQuery.i18n.prop(messageKey, messageData);
+            
+            if (messageText && messageText.length > 0) {
+                var messageModel = {
+                    type: messageType,
+                    key: messageKey,
+                    source: null,
+                    messageSource: null,
+                    message: messageText,
+                    popup: popup
+                };
+
+                this.add(messageModel);
+            } else {
+                if (window.config._showAllMessages === true) {
+                    window.expanz.logToConsole(messageType + ': ' + messageKey + messageData);
+                }
+            }
+        }
 	});
 });
