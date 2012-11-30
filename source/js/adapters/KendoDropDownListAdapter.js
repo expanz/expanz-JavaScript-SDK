@@ -1,16 +1,23 @@
 $.fn.KendoDropDownListAdapter = function() {
 
-	/* instantiate Kendo Control */
-	var cb = $(this).kendoDropDownList({
+    /* instantiate Kendo Control */
+    var $this = $(this);
+    
+	var cb = $this.kendoDropDownList({
 		dataTextField : "text",
 		dataValueField : "value"
 	});
+    
 	var list = cb.data("kendoDropDownList");
 
 	var emptyItemLabel = null;
+	var emptyItemValue = '';
 
-	if ($(this).attr('emptyItemLabel') !== undefined)
-		emptyItemLabel = $(this).attr('emptyItemLabel');
+	if ($this.attr('emptyItemLabel') !== undefined)
+		emptyItemLabel = $this.attr('emptyItemLabel');
+
+	if ($this.attr('emptyItemValue') !== undefined)
+	    emptyItemValue = $this.attr('emptyItemValue');
 
 	/**
 	 * define publishData which is called when list of data is ready, xml data is passed as argument after the event
@@ -21,7 +28,7 @@ $.fn.KendoDropDownListAdapter = function() {
 		if (emptyItemLabel !== null) {
 			data.push({
 				text : emptyItemLabel,
-				value : ''
+				value: emptyItemValue
 			});
 		}
 
@@ -52,7 +59,7 @@ $.fn.KendoDropDownListAdapter = function() {
 	/* when the field gets a new value from the server, update the combobox element */
 	var onValueUpdated = function (event, newValue) {
 	    if (newValue === null || newValue === undefined)
-	        newValue = ''; // Select the "empty" item
+	        newValue = emptyItemValue; // Select the "empty" item
 	    
 		list.value(newValue);
 	};
