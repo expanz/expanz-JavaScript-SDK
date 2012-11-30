@@ -14,10 +14,12 @@ $(function() {
 	//
 	// Global Namespace definitions
 	//
-	window.openActivityViews = [];
 	window.expanz = window.expanz || {};
 	window.expanz.helper = window.expanz.helper || {};
 	window.expanz.Storage = window.expanz.Storage || {};
+
+	window.openActivityViews = [];
+    window.messageControlView = null; // Application-wide default message control view will be assigned to this
 
 	window.expanz.logToConsole = function(message) {
 		if (typeof (console) != "undefined" && console.log) {
