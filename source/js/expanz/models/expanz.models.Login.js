@@ -25,6 +25,7 @@ $(function() {
 	    },
 
 	    initialize: function () {
+	        this.messageCollection = new expanz.models.MessageCollection();
 	    },
 
 	    login: function (userName, password, isPopup) {
@@ -70,7 +71,7 @@ $(function() {
 	        expanz.net.CreateSessionRequest(userName, password, {
 	            success: loginCallback,
 	            error: function (message) {
-	                expanz.messageController.addErrorMessageByText(message);
+	                that.messageCollection.addErrorMessageByText(message);
 	                
 	                that.set({
 	                    isLoggingIn: false
