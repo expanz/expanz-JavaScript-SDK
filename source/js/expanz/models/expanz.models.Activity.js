@@ -21,19 +21,6 @@ $(function() {
 	    isAnonymous: function () {
 	        return !this.getAttr('handle');
 	    },
-
-        // TODO: Remove?
-	    callbacks: {
-	        success: function (message) {
-	            expanz.messageController.addSuccessMessageByText(message);
-	        },
-	        error: function (message) {
-	            expanz.messageController.addErrorMessageByText(message);
-	        },
-	        info: function (message) {
-	            expanz.messageController.addInfoMessageByText(message);
-	        }
-	    },
 	    
         defaults: {
         },
