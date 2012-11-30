@@ -30,7 +30,7 @@ $(function () {
         },
 
         updateError: function (model, error) {
-            expanz.messageController.addErrorMessageByText(error);
+            this.collection.messageCollection.addErrorMessageByText(error);
         },
 
         events: {
