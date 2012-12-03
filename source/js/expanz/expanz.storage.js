@@ -186,9 +186,8 @@ $(function() {
 		clearActivityHandle : function(activityName, activityStyle) {
 			/* send a request to the servr to remove it as well */
 			var ah = this.getActivityHandle(activityName, activityStyle);
-			if (ah !== undefined) {
+			if (ah !== undefined && ah !== null) {
 				this._getBestStorage().remove(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle);
-				expanz.net.CloseActivityRequest(ah);
 			}
 			return ah;
 

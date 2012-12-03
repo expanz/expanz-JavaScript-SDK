@@ -68,7 +68,7 @@ $(function () {
         postCloseActions: function (windowTitle) {
             if (windowTitle == "Order Submitted" || windowTitle == "Order Saved") {
                 /* clear activity cookies and reload the page */
-                window.expanz.Storage.clearActivityHandles();
+                //window.expanz.Storage.clearActivityHandles();
                 $("body").trigger("CheckoutFinished");
             }
         }

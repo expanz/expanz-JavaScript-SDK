@@ -42,7 +42,7 @@ $(function() {
 	//
 	// Public Functions & Objects in the Expanz Namespace
 	//
-	window.expanz.CreateActivity = function(DOMObject, callbacks, initialKey) {
+	window.expanz.CreateActivity = function(DOMObject, callbacks, initialKey, container) {
 
 		DOMObject || (DOMObject = $('body'));
 
@@ -50,6 +50,10 @@ $(function() {
 	    
 		_.each(activities, function(activityView) {
 		    window.openActivityViews.push(activityView); // Push the view to the collection of open activity views
+		    
+            if (container !== undefined) {
+                container.setActivityView(activityView);
+            }
 		});
 	    
 		return activities;
@@ -98,7 +102,7 @@ $(function() {
 
 	};
 
-	window.expanz.createActivityWindow = function(id, style, key, title) {
+	window.expanz.openActivity = function(id, style, key, title) {
 		var callback = function(activityMetadata) {
 			if (activityMetadata.url === null) {
 				window.expanz.logToConsole("Url of activity not found");
@@ -107,10 +111,15 @@ $(function() {
 			/* case 'popup' */
 			if (activityMetadata.onRequest == 'popup') {
 
-				/* an activity request shouldn't be reloaded from any state -> clean an eventual cookie if popup was not closed properly */
-				window.expanz.Storage.clearActivityHandle(id, style);
+			    /* an activity request shouldn't be reloaded from any state -> clean an eventual cookie if popup was not closed properly */
+			    var existingHandle = window.expanz.Storage.getActivityHandle(id, style);
 
-				var clientMessage = new expanz.models.ClientMessage({
+			    if (existingHandle !== undefined) {
+			        window.expanz.Storage.clearActivityHandle(id, style);
+			        expanz.net.CloseActivityRequest(existingHandle); // Tell the server to close the existig activity
+			    }
+			    
+			    var clientMessage = new expanz.models.ClientMessage({
 					id : 'ActivityRequest',
 					url : activityMetadata.url + "&random=" + new Date().getTime(),
 					//parent : parentActivity,
@@ -123,18 +132,13 @@ $(function() {
 				}, $('body'));
 
 				popup.bind('contentLoaded', function() {
-					expanz.CreateActivity($(popup.el).find("[bind=activity]"), null, key);
-				});
-
-				popup.bind('popupClosed', function() {
-					window.expanz.Storage.clearActivityHandle(id, style);
+				    expanz.CreateActivity($(popup.el).find("[bind=activity]"), null, key, popup);
 				});
 			}
 			/* case 'navigate' or default */
 			else {
 				window.location = activityMetadata.url + "&random=" + new Date().getTime() + "&" + id + style + "initialKey=" + key;
 			}
-
 		};
 
 		/* find url of activity */
@@ -149,13 +153,25 @@ $(function() {
 	window.expanz.findOpenActivityView = function(activityId) {
 	    if (window && window.openActivityViews) {
 	        for (var i = 0; i < window.openActivityViews.length; i++) {
-	            if (window.openActivityViews[i].collection.getAttr("handle") == activityId) {
+	            if (window.openActivityViews[i] !== undefined && window.openActivityViews[i].collection.getAttr("handle") == activityId) {
 	                return window.openActivityViews[i];
 				}
 			}
 		}
 	    
 		return null;
+	};
+
+	window.expanz.OnActivityClosed = function (activityId) {
+	    // Remove the activity with the matching ID from the list of open activities
+	    if (window && window.openActivityViews) {
+	        for (var i = 0; i < window.openActivityViews.length; i++) {
+	            if (window.openActivityViews[i] !== undefined && window.openActivityViews[i].collection.getAttr("handle") == activityId) {
+	                delete window.openActivityViews[i];
+	                return;
+				}
+			}
+		}
 	};
 
 	window.expanz.helper.findActivityMetadata = function (activityName, activityStyle, callback) {

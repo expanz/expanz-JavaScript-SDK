@@ -30,7 +30,7 @@ $(function() {
 			return loginView;
 		},
 
-		createActivityView : function(activityEl) {
+		createActivityView: function (activityEl) {
 			// create a collection for each activity
 			var activityModel = new expanz.models.Activity({ // expanz.models.Login.Activity
 				name : $(activityEl).attr('name'),
@@ -46,7 +46,7 @@ $(function() {
 				el : $(activityEl),
 				id : $(activityEl).attr('name'),
 				key : $(activityEl).attr('key'),
-				collection : activityModel
+				collection: activityModel
 			});
 
 			expanz.Factory.bindMessageControl(activityModel, activityView);

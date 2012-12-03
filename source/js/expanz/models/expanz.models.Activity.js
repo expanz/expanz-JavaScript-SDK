@@ -29,6 +29,10 @@ $(function() {
 	        this.dataControls = {};
 	        this.messageCollection = new expanz.models.MessageCollection();
 	        this.loading = false;
+
+	        this.name = attrs["name"];
+	        this.style = attrs["style"];
+
 	        expanz.Collection.prototype.initialize.call(this, attrs);
 	    },
 
@@ -65,9 +69,21 @@ $(function() {
 	    load: function () {
 	        expanz.net.CreateActivityRequest(this, this.callbacks);
 	    },
+	    
+	    closeActivity: function () {
+	        // Remove the cached activity handle
+	        window.expanz.Storage.clearActivityHandle(this.name, this.style);
+
+	        // Remove the activity from the list of open activities
+	        window.expanz.OnActivityClosed(this.getAttr('handle'));
+
+	        // Close the activity on the server
+	        expanz.net.CloseActivityRequest(this.getAttr('handle'));
+	        
+	        this.destroy();
+	    },
 
 	    destroy: function () {
-	        expanz.net.CloseActivityRequest(this.getAttr('handle'));
 	        expanz.Collection.prototype.destroy.call(this, this.callbacks);
 	    }
 	});

@@ -40,8 +40,9 @@ $(function () {
                 }
 
             }
-            window.expanz.currentPopup = this;
-
+            
+            window.expanz.currentPopup = this; // TODO: This should be removed
+            this._activityView = null;
         },
 
         events: {
@@ -90,25 +91,42 @@ $(function () {
                 title: this.model.getAttr('title')
             });
         },
-
-        buttonClicked: function () {
-            this.closeWindow();
+        
+        setActivityView: function (activityView) {
+            this._activityView = activityView;
+            activityView.bind("closingActivity", this.onActivityClosing, this);
         },
-
-        closeWindow: function () {
-            this.trigger('popupClosed');
+        
+        onActivityClosing: function () {
+            // Called when the activity view's closingActivity event is raised
+            this.isActivityClosing = true; // This stops the popup from telling the activity to close, as it will already be closing
             this.close();
         },
 
-        /* may be redifined depending on the pluggin used */
-        close: function () {
-            this.remove();
+        buttonClicked: function () {
+            this.close();
         },
 
-        /* may be redifined depending on the pluggin used */
+        onCloseWindow: function () {
+            this.trigger('popupClosed');
+
+            if (this._activityView !== null && !this.isActivityClosing) {
+                this._activityView.closeActivity();
+            }
+            
+            if (this.postCloseActions)
+                this.postCloseActions(this.model.getAttr('title'));
+        },
+
+        /* may be redifined depending on the plug-in used */
+        close: function () {
+            this.remove();
+            this.onCloseWindow();
+        },
+
+        /* may be redifined depending on the plug-in used */
         center: function () {
             this.el.dialog("option", "position", 'center');
         }
-
     });
 });

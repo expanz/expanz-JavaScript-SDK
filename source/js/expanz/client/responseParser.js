@@ -489,6 +489,14 @@ function parseActivityResponse(activityElement) {
                     break;
             }
         });
+        
+        // Check if the activity is to be closed
+        if ($activityElement.attr("closeWindow") !== undefined && boolValue($activityElement.attr("closeWindow"))) {
+            activityView.closeActivity();
+        }
+        
+        // Check if the focus is to be set to a specific field
+        // TODO
     } else {
         // Houston, we have a problem. For now at least, just ignore.
         expanz.logToConsole("An activity with handle '" + activityHandle + "' is not found!");
@@ -724,7 +732,7 @@ function parseActivityRequestResponse(activityRequestElement) {
     var key = $activityRequestElement.attr('key');
     var style = $activityRequestElement.attr('style') || "";
 
-    window.expanz.createActivityWindow(id, style, key);
+    window.expanz.openActivity(id, style, key);
 }
 
 function parseApplicationMessagesResponse(messagesElement) {

@@ -14,7 +14,7 @@ $(function () {
     window.expanz = window.expanz || {};
     window.expanz.views = window.expanz.views || {};
 
-    window.expanz.views.ManuallyClosedPopup = window.expanz.views.UIMessage.extend({
+    window.expanz.views.ManuallyClosedPopup = window.expanz.views.PopupView.extend({
         width: 'auto',
 
         /* do not close on button click */
