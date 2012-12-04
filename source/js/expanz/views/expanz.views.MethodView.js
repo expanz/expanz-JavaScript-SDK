@@ -48,7 +48,7 @@ $(function () {
         },
 
         getButton: function () {
-            var buttonElement = [];
+            var buttonElement = this.el;
             
             if (this.el.is(":button")) {
                 buttonElement = this.el;
