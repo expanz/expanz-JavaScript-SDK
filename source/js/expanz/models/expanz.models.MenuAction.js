@@ -14,11 +14,17 @@ $(function() {
 	window.expanz = window.expanz || {};
 	window.expanz.models = window.expanz.models || {};
 
-	window.expanz.models.MenuAction = window.expanz.models.Method.extend({
+	window.expanz.models.MenuAction = window.expanz.models.Bindable.extend({
+
+	    _type: 'MenuAction',
+
+	    initialize: function () {
+
+	    },
 
 	    menuItemSelected: function (action) {
 
-	        expanz.net.CreateMenuActionRequest(this.get('parent'), null, null, action);
+	        expanz.net.CreateMenuActionRequest(this.get('parentActivity'), null, null, action);
 	        return;
 
 	    }

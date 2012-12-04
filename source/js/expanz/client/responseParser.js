@@ -711,17 +711,23 @@ function parseModelObjectResponse(modelObjectElement, activityModel) {
 }
 
 function parseContextMenuResponse(contextMenuElement, activityModel) {
-    var $contextMenuElement = $(contextMenuElement);
     var caller = window.expanz.currentContextMenu;
     
     if (caller !== undefined && caller !== null) {
-        caller.set({
-            data: null
-        });
-        
-        caller.set({
-            data: $contextMenuElement
-        });
+        if (caller.loadMenu !== undefined) {
+            // If the caller was a context menu model, then this method will exist
+            caller.loadMenu(contextMenuElement, activityModel);
+        } else {
+            // If the caller was a method model, then we'll need to create a
+            // context menu view and model
+            var contextMenuModel = new expanz.models.ContextMenu({
+                id: caller.id + "_contextmenu",
+                parentActivity: activityModel
+            });
+
+            contextMenuModel.loadMenu(contextMenuElement, activityModel);
+            caller.setContextMenu(contextMenuModel);
+        }
     }
 }
 

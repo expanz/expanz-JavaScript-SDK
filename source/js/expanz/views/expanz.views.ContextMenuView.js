@@ -14,114 +14,120 @@ $(function () {
     window.expanz = window.expanz || {};
     window.expanz.views = window.expanz.views || {};
 
-    window.expanz.views.ContextMenuView = window.expanz.views.MethodView.extend({
+    window.expanz.views.ContextMenuView = Backbone.View.extend({
         initialize: function () {
-            this.model.bind("change:data", this.modelUpdate, this);
+            this.collection.bind("menuLoaded", this.render, this);
         },
 
-        _createMenu: function (xml, parentUL) {
-            var that = this;
-            var i = 0;
-            xml.children("Menu").each(function () {
-                var ulId = parentUL.id + "_" + i++;
-                parentUL.append("<li>" + $(this).attr('name') + "<ul id='" + ulId + "'><ul></li>");
-                that._createMenu($(this), parentUL.find("#" + ulId));
-            });
-
-            var defaultAction = xml.attr('defaultAction');
-            var j = 0;
-            xml.children("MenuItem").each(function () {
-                var liId = (parentUL.id || parentUL[0].id) + "_li_" + j++;
-                var defaultActionClass = "";
-                if (defaultAction !== undefined && defaultAction == $(this).attr('action'))
-                    defaultActionClass = "defaultAction";
-                parentUL.append("<li id='" + liId + "' action='" + $(this).attr('action') + "' class=' " + defaultActionClass + " '>" + $(this).attr('text') + "</li>");
-                var liEL = parentUL.find("#" + liId);
-                liEL.unbind("click");
-                liEL.click(function (e) {
-                    if (!e) var e = window.event; //if (!e) var  = $.event.fix(event || window.event);
-                    if (e.stopPropagation)
-                        e.stopPropagation();
-                    else
-                        e.cancelBubble = true;
-                    that.model.menuItemSelected($(this).attr("action"));
-                    that.contextMenuEl.hide();
-                });
-            });
-        },
-        
-        modelUpdate: function () {
+        render: function () {
             /* retrieve or create a div to host the context menu */
             // window.expanz.logToConsole("modelUpdated");
+            if (this.collection.length === 0) {
+                return;
+            }
+
             var contextMenuId;
+
             if (this.contextMenuEl === undefined) {
-                contextMenuId = this.model.get('id').replace(/\./g, "_") + "_contextMenu";
+                contextMenuId = this.collection.id.replace(/\./g, "_") + "_contextMenu";
                 this.el.append("<div class='contextMenu' id='" + contextMenuId + "' />");
                 this.contextMenuEl = this.el.find("#" + contextMenuId);
             }
+
             if (contextMenuId === undefined) {
                 contextMenuId = (this.contextMenuEl.id || this.contextMenuEl[0].id);
             }
+
             this.contextMenuEl.hide();
             this.contextMenuEl.html("");
 
-            var data = this.model.get('data');
-            if (data === undefined || data === null)
-                return;
-
             /* position menu below button */
             var pos = 0;
-	
-	    if (this.el.find("button").length > 0) {
-		pos = this.el.find("button").position();
-		var top = pos.top + this.el.find("button").outerHeight() + 2;
-	    } else {
-		pos = this.el.find("span").position();
-		var top = pos.top + this.el.find("span").outerHeight() + 2;
-	    }
+            var top = 0;
+
+            if (this.el.find("button").length > 0) {
+                pos = this.el.find("button").position();
+                top = pos.top + this.el.find("button").outerHeight() + 2;
+            } else {
+                pos = this.el.find("span").position();
+                top = pos.top + this.el.find("span").outerHeight() + 2;
+            }
 
             this.contextMenuEl.css({
                 position: "absolute",
                 top: top + "px",
-                left: (pos.left + 10) + "px",	
-		zIndex: 9999
+                left: (pos.left + 10) + "px",
+                zIndex: 9999
             });
 
             /* append data to the menu */
             this.contextMenuEl.append("<ul id='" + contextMenuId + "_ul'></ul>");
-            this._createMenu(data, this.contextMenuEl.find("ul"));
-            this.createContextMenu();
+            this.appendMenuItems(this.contextMenuEl.find("ul"));
+            this.createContextMenu(); // Extensibility point for third party libraries to render the context menu
 
             /* hide if clicked outside */
             var that = this;
 
-            this.mouseInside = true;
+            this.mouseInside = false;
             this.contextMenuEl.hover(function () {
                 that.mouseInside = true;
-            }, function () {
-                that.mouseInside = false;
-            });
+            },
+                function () {
+                    that.mouseInside = false;
+                });
 
             $("body").bind('mouseup.' + that.contextMenuEl.selector, function () {
                 if (!that.mouseInside) {
-                    that.contextMenuEl.hide();
+                    that.contextMenuEl.remove(); 
                     $("body").unbind('mouseup.' + contextMenuId);
                 }
             });
         },
-        
-        submit: function () {
-            /* register current context menu */
-            // window.expanz.logToConsole("Registering current context menu");
-            window.expanz.currentContextMenu = this.model;
-            this.model.submit();
-            this.el.trigger('submit:' + this.model.get('id'));
+
+        appendMenuItems: function (parentUL) {
+            var that = this;
+            var menuItemIndex = 0;
+            
+            // NOTE: Sub-menus are not currently supported
+            this.collection.forEach(function(menuItem) {
+                var liId = (parentUL.id || parentUL[0].id) + "_li_" + menuItemIndex++;
+
+                // TODO: Use a template, or make each item a sub-view
+                parentUL.append("<li id='" + liId + "' action='" + menuItem.get('action') + "' class=' " + (menuItem.get('isDefaultAction') ? "defaultAction" : "") + " '>" + menuItem.get('text') + "</li>");
+                var liEL = parentUL.find("#" + liId);
+                liEL.unbind("click");
+
+                liEL.click(function(e) {
+                    if (!e)
+                        e = window.event; //if (!e) var  = $.event.fix(event || window.event);
+
+                    if (e.stopPropagation)
+                        e.stopPropagation();
+                    else
+                        e.cancelBubble = true;
+
+                    menuItem.menuItemSelected(menuItem.get('action'));
+                    that.contextMenuEl.remove();
+                });
+            });
         },
 
         /* must be overidden if a custom context menu is wanted */
         createContextMenu: function () {
             this.contextMenuEl.show();
-        }
+        },
+        
+        destroyView: function () {
 
+            // COMPLETELY UNBIND THE VIEW
+            this.undelegateEvents();
+
+            $(this.contextMenuEl).removeData().unbind();
+
+            // Remove view from DOM
+            this.contextMenuEl.remove();
+            Backbone.View.prototype.remove.call(this);
+
+        }
     });
 });

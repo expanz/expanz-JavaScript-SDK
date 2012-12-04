@@ -9,19 +9,46 @@
 //  in accordance with the terms of the license agreement accompanying it.
 //
 ////////////////////////////////////////////////////////////////////////////////
-$(function() {
+$(function () {
 
-	window.expanz = window.expanz || {};
-	window.expanz.models = window.expanz.models || {};
+    window.expanz = window.expanz || {};
+    window.expanz.models = window.expanz.models || {};
 
-	window.expanz.models.ContextMenu = window.expanz.models.Method.extend({
+    window.expanz.models.ContextMenu = expanz.Collection.extend({
 
-	    menuItemSelected: function (action) {
+        model: expanz.models.MenuAction,
 
-	        expanz.net.CreateMenuActionRequest(this.get('parent'), null, null, action);
-	        return;
+        initialize: function (attrs) {
+            this.loading = false;
 
-	    }
+            this.id = attrs["id"];
+        },
 
-	});
+        loadMenu: function (menuData, activityModel) {
+            var $menuData = $(menuData);
+
+            this.reset();
+
+            var contextMenu = this;
+            var defaultAction = $menuData.attr('defaultAction');
+
+            $menuData.children().each(function () {
+                var $this = $(this);
+
+                if (this.nodeName === "MenuItem") {
+                    contextMenu.add({
+                        action: $this.attr('action'),
+                        text: $this.attr('text'),
+                        clientAction: $this.attr('clientAction'),
+                        isDefaultAction: defaultAction === $this.attr('action'),
+                        parentActivity: activityModel
+                    });
+                } else if (this.nodeName === "Menu") {
+                    // Sub-menus not currently supported
+                }
+            });
+
+            this.trigger("menuLoaded");
+        }
+    });
 });

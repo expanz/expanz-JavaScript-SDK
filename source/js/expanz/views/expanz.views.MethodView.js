@@ -18,6 +18,7 @@ $(function () {
         initialize: function () {
             this.model.bind("change:label", this.labelChanged(), this);
             this.model.bind("change:loading", this.loading, this);
+            this.model.bind("contextMenuLoaded", this.onContextMenuLoaded, this);
         },
 
         events: {
@@ -67,7 +68,19 @@ $(function () {
             }
 
             return buttonElement;
-        }
+        },
 
+        onContextMenuLoaded: function () {
+            if (this.model.contextMenuModel.length !== 0) {
+                var contextMenuView = new expanz.views.ContextMenuView({
+                    el: this.el,
+                    id: this.model.id,
+                    //className: $(this).attr('class'),
+                    collection: this.model.contextMenuModel
+                });
+
+                contextMenuView.render();
+            }
+        }
     });
 });

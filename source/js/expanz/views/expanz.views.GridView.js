@@ -280,9 +280,10 @@ $(function () {
                                         el: $(this),
                                         id: $(this).attr('id'),
                                         className: $(this).attr('class'),
-                                        model: method
+                                        collection: method
                                     });
-                                    window.expanz.currentContextMenu = ctxMenuview.model;
+                                    
+                                    window.expanz.currentContextMenu = ctxMenuview.collection;
 
                                     that._handleContextMenuClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
 

@@ -19,6 +19,7 @@ $(function() {
 	    _type: 'Method',
 
 	    submit: function () {
+	        window.expanz.currentContextMenu = this; // Used for context menu buttons, as need a way to know which button was pressed when handling response. TODO: Find a better way.
 
 	        var anonymousFields = [];
 	        if (this.get('anonymousFields')) {
@@ -87,7 +88,11 @@ $(function() {
 	        this.set({
 	            anonymousFields: anonymousFields
 	        });
+	    },
+        
+	    setContextMenu: function(contextMenuModel) {
+	        this.contextMenuModel = contextMenuModel;
+	        this.trigger("contextMenuLoaded"); // The view will respond to this and create and render the context menu view
 	    }
-
 	});
 });

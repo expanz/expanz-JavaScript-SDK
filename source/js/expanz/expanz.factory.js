@@ -165,13 +165,24 @@ $(function() {
 
 		bindMethods : function(activityModel, el) {
 		    _.each(expanz.Factory.createMethodViews($(el).find('[bind=method]')), function (methodModel) {
-				methodModel.set({
-					parent : activityModel
-				}, {
-					silent : true
-				});
-			    
-				activityModel.add(methodModel);
+		        if (methodModel.set) { // Context menus are collections, and don't have the set function
+		            methodModel.set({
+		                    parent: activityModel
+		                }, {
+		                    silent: true
+		                });
+		        } else if (methodModel.collection) {
+		            // Go through each model in the collection and set the parent activity
+		            methodModel.collection.forEach(function(menuItem) {
+		                menuItem.set({
+		                        parentActivity: activityModel
+		                    }, {
+		                        silent: true
+		                    });
+		            });
+		        }
+		        
+		        activityModel.add(methodModel);
 			});
 		},
 
@@ -304,51 +315,33 @@ $(function() {
 		    
 			_.each(DOMObjects, function(methodEl) {
 				// create a model for each method
-			    var method;
-			    
-				if ($(methodEl).attr('type') == 'ContextMenu') {
-					method = new expanz.models.MenuAction({
-						id : $(methodEl).attr('name'),
-						contextObject : $(methodEl).attr('contextObject')
-					});
-
-					var ctxMenuView = new expanz.views.ContextMenuView({
-						el : $(methodEl),
-						id : $(methodEl).attr('id'),
-						className : $(methodEl).attr('class'),
-						model : method
-					});
-				}
-				else {
-					/* look for potential methodAttributes - format is name:value;name2:value2; */
-
-				    var methodAttributes = [];
+				/* look for potential methodAttributes - format is name:value;name2:value2; */
+				var methodAttributes = [];
 				    
-					if ($(methodEl).attr('methodAttributes')) {
-						_.each($(methodEl).attr('methodAttributes').split(';'), function(val) {
-							var split = val.split(':');
-							if (split.length == 2) {
-								methodAttributes.push({
-									name : split[0],
-									value : split[1]
-								});
-							}
-						});
-					}
-
-					method = new expanz.models.Method({
-						id : $(methodEl).attr('name'),
-						contextObject : $(methodEl).attr('contextObject'),
-						methodAttributes : methodAttributes
-					});
-
-					var view = new expanz.views.MethodView({
-						el : $(methodEl),
-						id : $(methodEl).attr('id'),
-						className : $(methodEl).attr('class'),
-						model : method
+				if ($(methodEl).attr('methodAttributes')) {
+					_.each($(methodEl).attr('methodAttributes').split(';'), function(val) {
+						var split = val.split(':');
+						if (split.length == 2) {
+							methodAttributes.push({
+								name : split[0],
+								value : split[1]
+							});
+						}
 					});
 				}
+
+				var method = new expanz.models.Method({
+					id : $(methodEl).attr('name'),
+					contextObject : $(methodEl).attr('contextObject'),
+					methodAttributes : methodAttributes
+				});
+
+				var view = new expanz.views.MethodView({
+					el : $(methodEl),
+					id : $(methodEl).attr('id'),
+					className : $(methodEl).attr('class'),
+					model : method
+				});
 
 				methodModels.push(method);
 			});
