@@ -103,6 +103,10 @@ $(function () {
                 }
             }
         },
+        
+        setFieldFocus: function(focusField) {
+            //alert(focusField);
+        },
 
         closeActivity: function () {
             this.trigger("closingActivity"); // The container (such as a popup window) can respond to this event, and close accordingly

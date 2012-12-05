@@ -415,7 +415,7 @@ function parseResponse(activity, initiator, callbacks) {
                             parseDashboardsResponse(currentElement);
                             break;
                         case "Files":
-                            parseFilesResponse(currentElement);
+                            parseFilesResponse(currentElement, activity, initiator);
                             break;
                         default:
                             expanz.logToConsole("Unexpected element '" + currentElement.nodeName + "' found in response. Ignored.");
@@ -496,7 +496,11 @@ function parseActivityResponse(activityElement) {
         }
         
         // Check if the focus is to be set to a specific field
-        // TODO
+        var focusField = $activityElement.attr("focusField");
+        
+        if (focusField !== undefined) {
+            activityView.setFieldFocus(focusField);
+        }
     } else {
         // Houston, we have a problem. For now at least, just ignore.
         expanz.logToConsole("An activity with handle '" + activityHandle + "' is not found!");
@@ -779,7 +783,7 @@ function parseDashboardsResponse(dashboardsElement) {
     }
 }
 
-function parseFilesResponse(filesElement) {
+function parseFilesResponse(filesElement, activity, initiator) {
     var $filesElement = $(filesElement);
 
     $filesElement.children('File').each(function (data) {
