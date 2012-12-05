@@ -510,11 +510,10 @@ function parseActivityResponse(activityElement) {
 function parseFieldResponse(fieldElement, activityModel) {
     var $fieldElement = $(fieldElement);
     var id = $fieldElement.attr('id');
-    var field = activityModel.get(id);
 
-    if (field && field !== undefined) {
+    activityModel.forEachChildWithMatchingId(id, function(field) {
         field.publish($fieldElement);
-    }
+    });
 }
 
 function parseMethodResponse(methodElement, activityModel) {

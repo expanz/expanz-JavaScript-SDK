@@ -87,22 +87,22 @@ $(function() {
 	    
 	    setFieldFocus: function (focusFieldId) {
 	        // Find the field
-	        var focusField = this.firstChildWithMatchingId(focusFieldId);
+	        var focusField = this.getFirstChildWithMatchingId(focusFieldId);
 	        
 	        // Now set focus to it
 	        if (focusField != null)
 	            focusField.setFocus();
 	    },
 	    
-	    childrenWithMatchingId: function (childId) {
+	    getChildrenWithMatchingId: function (childId) {
             return this.filter(function(child) {
                 return (child !== undefined && child.id === childId);
             });
         },
 	    
-	    firstChildWithMatchingId: function (childId) {
+	    getFirstChildWithMatchingId: function (childId) {
 	        // NOTE: get() function returns *last* child with a matching ID
-	        var matches = this.childrenWithMatchingId(childId);
+	        var matches = this.getChildrenWithMatchingId(childId);
 
 	        if (matches.length !== 0)
 	            return matches[0];
@@ -111,7 +111,7 @@ $(function() {
 	    },
 	    
         forEachChildWithMatchingId: function (childId, callback) {
-            this.childrenWithMatchingId.forEach(function (child) {
+            this.getChildrenWithMatchingId(childId).forEach(function (child) {
                 callback(child);
             });
         },
