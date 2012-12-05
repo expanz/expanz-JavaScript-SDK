@@ -22,11 +22,18 @@ $(function () {
                 this.key = attrs.key;
             }
 
+            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
+
             this.messageControl = null;
+            
+            this.fieldViewCollection = {};
+            this.methodViewCollection = {};
+            this.dataControlViewCollection = {};
             
             this.collection.bind("error", this.updateError, this);
             this.collection.bind("update:loading", this.loading, this);
             this.collection.bind("update:deltaLoading", this.deltaLoading, this);
+            this.collection.bind("closingActivity", this.closeActivity, this);
         },
 
         updateError: function (model, error) {
@@ -103,16 +110,36 @@ $(function () {
                 }
             }
         },
-        
-        setFieldFocus: function(focusField) {
-            //alert(focusField);
-        },
 
         closeActivity: function () {
             this.trigger("closingActivity"); // The container (such as a popup window) can respond to this event, and close accordingly
-            
-            // Tell the model to handle closing the activity
-            this.collection.closeActivity();
+        },
+
+        addFieldView: function (fieldView) {
+            if (this.fieldViewCollection[fieldView.id] === undefined)
+                this.fieldViewCollection[fieldView.id] = [];
+
+            this.fieldViewCollection[fieldView.id].push(fieldView);
+
+            return;
+        },
+
+        addMethodView: function (methodView) {
+            if (this.methodViewCollection[methodView.id] === undefined)
+                this.methodViewCollection[methodView.id] = [];
+
+            this.methodViewCollection[methodView.id].push(methodView);
+
+            return;
+        },
+
+        addDataControlView: function (dataControlView) {
+            if (this.dataControlViewCollection[dataControlView.id] === undefined)
+                this.dataControlViewCollection[dataControlView.id] = [];
+
+            this.dataControlViewCollection[dataControlView.id].push(dataControlView);
+
+            return;
         }
     });
 });

@@ -17,6 +17,8 @@ $(function () {
     window.expanz.views.ContextMenuView = Backbone.View.extend({
         initialize: function () {
             this.collection.bind("menuLoaded", this.render, this);
+
+            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
         },
 
         render: function () {
@@ -30,8 +32,8 @@ $(function () {
 
             if (this.contextMenuEl === undefined) {
                 contextMenuId = this.collection.id.replace(/\./g, "_") + "_contextMenu";
-                this.el.append("<div class='contextMenu' id='" + contextMenuId + "' />");
-                this.contextMenuEl = this.el.find("#" + contextMenuId);
+                this.$el.append("<div class='contextMenu' id='" + contextMenuId + "' />");
+                this.contextMenuEl = this.$el.find("#" + contextMenuId);
             }
 
             if (contextMenuId === undefined) {
@@ -45,12 +47,12 @@ $(function () {
             var pos = 0;
             var top = 0;
 
-            if (this.el.find("button").length > 0) {
-                pos = this.el.find("button").position();
-                top = pos.top + this.el.find("button").outerHeight() + 2;
+            if (this.$el.find("button").length > 0) {
+                pos = this.$el.find("button").position();
+                top = pos.top + this.$el.find("button").outerHeight() + 2;
             } else {
-                pos = this.el.find("span").position();
-                top = pos.top + this.el.find("span").outerHeight() + 2;
+                pos = this.$el.find("span").position();
+                top = pos.top + this.$el.find("span").outerHeight() + 2;
             }
 
             this.contextMenuEl.css({

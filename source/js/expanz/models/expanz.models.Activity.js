@@ -71,6 +71,8 @@ $(function() {
 	    },
 	    
 	    closeActivity: function () {
+	        this.trigger("closingActivity");
+	        
 	        // Remove the cached activity handle
 	        window.expanz.Storage.clearActivityHandle(this.name, this.style);
 
@@ -82,6 +84,37 @@ $(function() {
 	        
 	        this.destroy();
 	    },
+	    
+	    setFieldFocus: function (focusFieldId) {
+	        // Find the field
+	        var focusField = this.firstChildWithMatchingId(focusFieldId);
+	        
+	        // Now set focus to it
+	        if (focusField != null)
+	            focusField.setFocus();
+	    },
+	    
+	    childrenWithMatchingId: function (childId) {
+            return this.filter(function(child) {
+                return (child !== undefined && child.id === childId);
+            });
+        },
+	    
+	    firstChildWithMatchingId: function (childId) {
+	        // NOTE: get() function returns *last* child with a matching ID
+	        var matches = this.childrenWithMatchingId(childId);
+
+	        if (matches.length !== 0)
+	            return matches[0];
+	        else
+	            return null;
+	    },
+	    
+        forEachChildWithMatchingId: function (childId, callback) {
+            this.childrenWithMatchingId.forEach(function (child) {
+                callback(child);
+            });
+        },
 
 	    destroy: function () {
 	        expanz.Collection.prototype.destroy.call(this, this.callbacks);

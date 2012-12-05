@@ -27,20 +27,22 @@ $(function () {
             this.model.bind("change:visualType", this.visualTypeChanged(), this);
             this.model.bind("change:errorMessage", this.displayError(), this);
             this.model.bind("change:loading", this.loading, this);
-            
-            $(this.el).html(this.template({ 'name': $(this.el).attr('name') }));
 
-            this.textInput = this.el.find('[id=textinput]');
-            this.booleanControl = this.el.find('[id=booleaninput]');
+            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
+            
+            this.$el.html(this.template({ 'name': this.$el.attr('name') }));
+
+            this.textInput = this.$el.find('[id=textinput]');
+            this.booleanControl = this.$el.find('[id=booleaninput]');
             this.booleanInput = this.booleanControl.find('[attribute=value]');
-            this.optionInput = this.el.find('[id=options]');
+            this.optionInput = this.$el.find('[id=options]');
         },
 
         visualTypeChanged: function () {
             var view = this;
             return function () {
                 view.render();
-                this.el.trigger('update:field');
+                this.$el.trigger('update:field');
             };
         },
 
@@ -79,7 +81,7 @@ $(function () {
 
                 this.updateActiveInputValue(this.model.get("value"));
 
-                this.el.trigger('update:field');
+                this.$el.trigger('update:field');
             };
         },
 

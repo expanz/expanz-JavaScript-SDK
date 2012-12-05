@@ -18,7 +18,9 @@ $(function () {
 
         initialize: function (attrs) {
             Backbone.View.prototype.initialize.call(attrs);
-            this.model.bind("update:xml", this.publishData, this);
+            this.model.bind("update:xml", this.publishData, this); 
+
+            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
         },
 
         itemSelected: function (itemId, callbacks) {
@@ -26,7 +28,7 @@ $(function () {
         },
 
         publishData: function () {
-            this.el.trigger("publishData", [
+            this.$el.trigger("publishData", [
 				this.model.getAttr('xml'), this
             ]);
         }

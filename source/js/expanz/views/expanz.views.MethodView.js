@@ -19,6 +19,8 @@ $(function () {
             this.model.bind("change:label", this.labelChanged(), this);
             this.model.bind("change:loading", this.loading, this);
             this.model.bind("contextMenuLoaded", this.onContextMenuLoaded, this);
+
+            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
         },
 
         events: {
@@ -27,7 +29,7 @@ $(function () {
 
         submit: function () {
             this.model.submit();
-            this.el.trigger('submit:' + this.model.get('id'));
+            this.$el.trigger('submit:' + this.model.get('id'));
         },
 
         labelChanged: function () {
@@ -39,28 +41,28 @@ $(function () {
         loading: function () {
             if (this.model.get('loading') === true) {
                 this.getButton().attr('disabled', 'disabled');
-                this.el.addClass('methodLoading');
+                this.$el.addClass('methodLoading');
             }
             else {
                 this.getButton().removeAttr('disabled');
-                this.el.removeClass('methodLoading');
+                this.$el.removeClass('methodLoading');
             }
         },
 
         getButton: function () {
-            var buttonElement = this.el;
+            var buttonElement = this.$el;
             
-            if (this.el.is(":button")) {
-                buttonElement = this.el;
+            if (this.$el.is(":button")) {
+                buttonElement = this.$el;
             }
             else {
-                var buttons = this.el.find("button");
+                var buttons = this.$el.find("button");
                 
                 if (buttons.length != 0) {
                     buttonElement = buttons;
                 }
                 else {
-                    var hyperlinks = this.el.find("a");
+                    var hyperlinks = this.$el.find("a");
                     
                     if (hyperlinks.length != 0)
                         buttonElement = hyperlinks;

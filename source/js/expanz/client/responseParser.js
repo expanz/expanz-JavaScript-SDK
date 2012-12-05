@@ -35,7 +35,7 @@
                 callbacks.success();
             }
         }
-        
+
         return;
     };
 };
@@ -194,7 +194,7 @@ function parseGetSessionDataResponse(callbacks) {
 
         $.get('./formmapping.xml', function (data) {
             expanz.Storage.setFormMapping(data);
-            
+
             $(data).find('activity').each(function () {
                 var name = $(this).attr('name');
                 var url = getPageUrl($(this).attr('form'));
@@ -376,7 +376,7 @@ function parseCreateActivityResponse(activity, callbacks) {
 function parseResponse(activity, initiator, callbacks) {
     return function apply(xml) {
         /* Errors case -> server is most likely not running */
-        $(xml).find('errors').each(function() {
+        $(xml).find('errors').each(function () {
             if ($(xml).find('errors').text().indexOf(':Your session cannot be contacted') != -1) {
                 expanz.views.redirect(window.expanz.getMaintenancePage());
             }
@@ -400,7 +400,7 @@ function parseResponse(activity, initiator, callbacks) {
             if (esaNode.length !== 0) {
                 esaNode.children().each(function () {
                     var currentElement = this;
-                    
+
                     switch (currentElement.nodeName) {
                         case "Activity":
                             parseActivityResponse(currentElement);
@@ -424,7 +424,7 @@ function parseResponse(activity, initiator, callbacks) {
                 });
             }
         }
-        
+
         // TODO: Check if this should really be here, and what it actually does
         activity.setAttr({
             'deltaLoading': {
@@ -440,11 +440,11 @@ function parseActivityResponse(activityElement) {
     var $activityElement = $(activityElement);
     var activityHandle = $activityElement.attr('activityHandle');
     var activityView = window.expanz.findOpenActivityView(activityHandle);
-    
+
     if (activityView != null) {
         // Activity found, so parse the XML in the response for it, and apply it to the model
         var activityModel = activityView.collection;
-        
+
         // Clear any current errors being displayed
         activityModel.messageCollection.reset();
 
@@ -459,7 +459,7 @@ function parseActivityResponse(activityElement) {
                     parseMethodResponse(currentElement, activityModel);
                     break;
                 case "Data":
-                    parseDataResponse(currentElement, activityModel);
+                    parseDataResponse(currentElement, activityModel, activityView);
                     break;
                 case "Messages":
                     parseActivityLevelMessagesResponse(currentElement, activityModel);
@@ -489,17 +489,17 @@ function parseActivityResponse(activityElement) {
                     break;
             }
         });
-        
+
         // Check if the activity is to be closed
         if ($activityElement.attr("closeWindow") !== undefined && boolValue($activityElement.attr("closeWindow"))) {
-            activityView.closeActivity();
+            activityModel.closeActivity();
         }
-        
+
         // Check if the focus is to be set to a specific field
-        var focusField = $activityElement.attr("focusField");
-        
-        if (focusField !== undefined) {
-            activityView.setFieldFocus(focusField);
+        var focusFieldId = $activityElement.attr("focusField");
+
+        if (focusFieldId !== undefined) {
+            activityModel.setFieldFocus(focusFieldId);
         }
     } else {
         // Houston, we have a problem. For now at least, just ignore.
@@ -511,7 +511,7 @@ function parseFieldResponse(fieldElement, activityModel) {
     var $fieldElement = $(fieldElement);
     var id = $fieldElement.attr('id');
     var field = activityModel.get(id);
-    
+
     if (field && field !== undefined) {
         field.publish($fieldElement);
     }
@@ -521,18 +521,18 @@ function parseMethodResponse(methodElement, activityModel) {
     var $methodElement = $(methodElement);
     var id = $methodElement.attr('id');
     var method = activityModel.get(id);
-    
+
     if (method && method !== undefined) {
         method.publish($methodElement);
     }
 }
 
-function parseDataResponse(dataElement, activityModel) {
+function parseDataResponse(dataElement, activityModel, activityView) {
     var $dataElement = $(dataElement);
     var id = $dataElement.attr('id');
     var pickfield = $dataElement.attr('pickField');
     var contextObject = $dataElement.attr('contextObject');
-    
+
     if (id == 'picklist') {
         // window.expanz.logToConsole("picklist received");
         var elId = id + pickfield.replace(/ /g, "_");
@@ -551,7 +551,7 @@ function parseDataResponse(dataElement, activityModel) {
             model: clientMessage
         }, $('body'));
 
-        expanz.Factory.bindDataControls(activityModel, picklistWindow.el.parent());
+        expanz.Factory.bindDataControls(activityView, picklistWindow.el.parent());
 
         var gridModels = activityModel.getDataControl(elId);
 
@@ -646,9 +646,9 @@ function parseActivityLevelMessagesResponse(messagesElement, activityModel) {
             messageSource: $messageElement.attr('messageSource'),
             message: $messageElement.text()
         };
-        
+
         activityModel.messageCollection.addMessage(messageModel);
-        
+
         // Now look for any fields with the same id as the source specified by the message, and
         // pass them the message if there are.
         var source = messageModel.source;
@@ -668,7 +668,7 @@ function parseActivityLevelMessagesResponse(messagesElement, activityModel) {
 
 function parseUIMessageResponse(uiMessageElement, activityModel) {
     var $uiMessageElement = $(uiMessageElement);
-    
+
     var clientMessage = new expanz.models.ClientMessage({
         id: 'ExpanzClientMessage',
         title: $uiMessageElement.attr('title'),
@@ -680,7 +680,7 @@ function parseUIMessageResponse(uiMessageElement, activityModel) {
         var $actionElement = $(this);
 
         var methodAttributes = [];
-        
+
         if ($('Request > Method', $actionElement)[0] && $('Request > Method', $actionElement)[0].attributes.length > 0) {
             _.each($('Request > Method', $actionElement)[0].attributes, function (attribute) {
                 if (attribute.name != 'name') {
@@ -699,7 +699,7 @@ function parseUIMessageResponse(uiMessageElement, activityModel) {
             parent: activityModel,
             methodAttributes: methodAttributes
         });
-        
+
         clientMessage.add(actionModel);
     });
 
@@ -716,7 +716,7 @@ function parseModelObjectResponse(modelObjectElement, activityModel) {
 
 function parseContextMenuResponse(contextMenuElement, activityModel) {
     var caller = window.expanz.currentContextMenu;
-    
+
     if (caller !== undefined && caller !== null) {
         if (caller.loadMenu !== undefined) {
             // If the caller was a context menu model, then this method will exist
@@ -737,7 +737,7 @@ function parseContextMenuResponse(contextMenuElement, activityModel) {
 
 function parseActivityRequestResponse(activityRequestElement) {
     var $activityRequestElement = $(activityRequestElement);
-    
+
     var id = $activityRequestElement.attr('id');
     var key = $activityRequestElement.attr('key');
     var style = $activityRequestElement.attr('style') || "";
@@ -747,12 +747,12 @@ function parseActivityRequestResponse(activityRequestElement) {
 
 function parseApplicationMessagesResponse(messagesElement) {
     var $messagesElement = $(messagesElement);
-    
+
     var message = "";
-    
+
     $messagesElement.children('Message').each(function () {
         var $messageElement = $(this);
-        
+
         // First check if the message relates to the session being lost.
         // If so, ask the user to log in again.
         var sessionLost = /Session .* not found/.test($messageElement.text());
@@ -774,10 +774,10 @@ function parseApplicationMessagesResponse(messagesElement) {
 
 function parseDashboardsResponse(dashboardsElement) {
     var $dashboardsElement = $(dashboardsElement);
-    
+
     // TODO: test and validate working
     var dashboards = parseDashboards($dashboardsElement.find("Dashboards"));
-    
+
     if (dashboards !== null) {
         expanz.Storage.setDashboards(dashboards);
     }
@@ -788,7 +788,7 @@ function parseFilesResponse(filesElement, activity, initiator) {
 
     $filesElement.children('File').each(function (data) {
         var $fileElement = $(this);
-        
+
         if ($fileElement.attr('field') !== undefined && $fileElement.attr('path') !== undefined) {
             window.expanz.logToConsole("Blob found by field: " + $fileElement.attr('field') + " - " + $fileElement.attr('path'));
             expanz.net.GetBlobRequest($fileElement.attr('field'), activity, initiator);

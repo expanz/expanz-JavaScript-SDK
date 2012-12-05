@@ -24,41 +24,44 @@ $(function () {
             this.model.bind("change:visualType", this.modelUpdate('visualType'), this);
             this.model.bind("change:errorMessage", this.displayError(), this);
             this.model.bind("change:loading", this.loading, this);
+            this.model.bind("setFocus", this.setFocus, this);
+
+            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
         },
 
         modelUpdate: function (attr) {
             var view = this;
             return function () {
-                var elem = this.el.find('[attribute=' + attr + ']');
+                var elem = this.$el.find('[attribute=' + attr + ']');
                 expanz.views.updateViewElement(view, elem, this.model.attributes, attr);
                 view.render();
-                this.el.trigger('update:field');
+                this.$el.trigger('update:field');
             };
         },
 
         displayError: function () {
             return function () {
                 var errorId = 'error' + this.model.get('id').replace(/\./g, "_");
-                if (this.el.attr('showError') !== 'false') {
+                if (this.$el.attr('showError') !== 'false') {
                     var errorEl;
                     if (this.model.get('errorMessage') !== undefined) {
-                        errorEl = this.el.find('#' + errorId);
+                        errorEl = this.$el.find('#' + errorId);
                         if (errorEl.length < 1) {
-                            this.el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="' + errorId + '"></p>');
-                            errorEl = this.el.find('#' + errorId);
+                            this.$el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="' + errorId + '"></p>');
+                            errorEl = this.$el.find('#' + errorId);
                         }
                         errorEl.html(this.model.get("errorMessage"));
                         errorEl.show();
                         errorEl.css('display', 'inline');
-                        this.el.addClass("errorField");
+                        this.$el.addClass("errorField");
                         // window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
                     }
                     else {
-                        errorEl = this.el.find('#' + errorId);
+                        errorEl = this.$el.find('#' + errorId);
                         if (errorEl) {
                             errorEl.hide();
                         }
-                        this.el.removeClass("errorField");
+                        this.$el.removeClass("errorField");
                         // window.expanz.logToConsole("hiding error message");
                     }
                 }
@@ -69,9 +72,13 @@ $(function () {
         events: {
             "change [attribute=value]": "viewUpdate"
         },
+        
+        getInputElement: function() {
+            return this.$el.find('[attribute=value]');
+        },
 
         getValue: function () {
-            var elem = this.el.find('[attribute=value]');
+            var elem = this.$el.find('[attribute=value]');
 
             var value = null;
             // handle checkbox field case
@@ -100,12 +107,18 @@ $(function () {
                 });
             }
 
-            this.el.trigger('update:field');
+            this.$el.trigger('update:field');
         },
 
         loading: function () {
             /* nothing special done when a field is loading at the moment */
-        }
+        },
 
+        setFocus: function () {
+            var inputElement = this.getInputElement();
+            
+            if (inputElement != undefined && inputElement != null)
+                inputElement.focus();
+        }
     });
 });

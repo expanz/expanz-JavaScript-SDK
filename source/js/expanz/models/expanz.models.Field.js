@@ -126,6 +126,10 @@ $(function() {
 	                data: xml
 	            });
 	        }
+	    },
+
+	    setFocus: function () {
+	        this.trigger("setFocus");
 	    }
 	});
 });

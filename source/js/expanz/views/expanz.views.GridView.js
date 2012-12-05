@@ -23,6 +23,8 @@ $(function () {
             this.bind("actionClicked", this.actionClicked, this);
             this.bind("menuActionClicked", this.menuActionClicked, this);
             this.bind("contextMenuClicked", this.contextMenuClicked, this);
+
+            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
         },
 
         rowClicked: function (row) {
@@ -107,10 +109,10 @@ $(function () {
             if (itemTemplate && itemTemplate.length > 0) {
 
                 /* create a div to host our grid if not existing yet */
-                hostEl = this.el.find(wrapperElement + '#' + hostId);
+                hostEl = this.$el.find(wrapperElement + '#' + hostId);
                 if (hostEl.length < 1) {
-                    this.el.append('<' + wrapperElement + ' id="' + hostId + '"></' + wrapperElement + '>');
-                    hostEl = this.el.find(wrapperElement + '#' + hostId);
+                    this.$el.append('<' + wrapperElement + ' id="' + hostId + '"></' + wrapperElement + '>');
+                    hostEl = this.$el.find(wrapperElement + '#' + hostId);
                 }
                 $(hostEl).html('');
                 $(hostEl).parent().find("#" + hostId + "_Configuration").remove();
@@ -297,10 +299,10 @@ $(function () {
             else {
 
                 // set table scaffold
-                hostEl = this.el.find('table#' + hostId);
+                hostEl = this.$el.find('table#' + hostId);
                 if (hostEl.length < 1) {
-                    this.el.append('<table class="grid" id="' + hostId + '"></table>');
-                    hostEl = this.el.find('table#' + hostId);
+                    this.$el.append('<table class="grid" id="' + hostId + '"></table>');
+                    hostEl = this.$el.find('table#' + hostId);
                 }
                 $(hostEl).html('<thead><tr class="item"></tr></thead><tbody></tbody>');
 
