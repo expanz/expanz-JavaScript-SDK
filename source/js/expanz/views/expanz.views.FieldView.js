@@ -21,7 +21,8 @@ $(function () {
             this.model.bind("change:value", this.modelUpdate('value'), this);
             this.model.bind("change:text", this.modelUpdate('text'), this);
             this.model.bind("change:items", this.modelUpdate('value'), this);
-            this.model.bind("change:visualType", this.modelUpdate('visualType'), this);
+            this.model.bind("change:disabled", this.onDisabledChanged, this);
+            this.model.bind("change:hidden", this.onHiddenChanged, this);
             this.model.bind("change:errorMessage", this.displayError(), this);
             this.model.bind("change:loading", this.loading, this);
             this.model.bind("setFocus", this.setFocus, this);
@@ -37,6 +38,33 @@ $(function () {
                 view.render();
                 this.$el.trigger('update:field');
             };
+        },
+        
+        onDisabledChanged: function () {
+            // If the field is disabled, apply the disabled attribute and style
+            if (this.model.get("disabled") === true) {
+                this.$el.attr('disabled', true);
+                this.$el.addClass('readonlyInput');
+            } else {
+                this.$el.removeAttr('disabled');
+                this.$el.removeClass('readonlyInput');
+            }
+            
+            var inputElement = this.getInputElement();
+
+            if (inputElement === undefined || inputElement === null)
+                inputElement = this.$el;
+            
+            inputElement.trigger("disabledChanged", this.model.get("disabled"));
+        },
+        
+        onHiddenChanged: function () {
+            // If the field is hidden, hide the element
+            var isVisible = !this.model.get("hidden");
+
+            setVisibility(this.$el, isVisible);
+            
+            this.$el.trigger("visibilityChanged", isVisible);
         },
 
         displayError: function () {

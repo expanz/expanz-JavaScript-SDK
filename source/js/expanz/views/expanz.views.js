@@ -90,7 +90,7 @@ $(function () {
 
             // if the field is disable apply the disabled attribute and style
             if (allAttrs["disabled"] === true) {
-                $(elem).attr('disabled', 'disabled');
+                $(elem).attr('disabled', true);
                 $(elem).addClass('readonlyInput');
             } else {
                 $(elem).removeAttr('disabled');

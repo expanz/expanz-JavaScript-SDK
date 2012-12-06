@@ -64,8 +64,17 @@ $.fn.KendoDropDownListAdapter = function() {
 		list.value(newValue);
 	};
 
+    var onDisabledChanged = function(eventinfo, isDisabled) {
+        list.enable(!isDisabled);
+    };
+
+    var onVisibilityChanged = function(eventinfo, isVisible) {
+        // TODO
+    };
+
 	/* bind listenners */
 	cb.bind("publishData", publishData);
 	cb.bind("valueUpdated", onValueUpdated);
-
+	cb.bind("disabledChanged", onDisabledChanged);
+	cb.bind("visibilityChanged", onVisibilityChanged);
 };

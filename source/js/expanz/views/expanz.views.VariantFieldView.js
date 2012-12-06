@@ -25,6 +25,8 @@ $(function () {
             this.model.bind("change:value", this.valueChanged(), this);
             this.model.bind("change:data", this.dataChanged(), this);
             this.model.bind("change:visualType", this.visualTypeChanged(), this);
+            this.model.bind("change:disabled", this.onDisabledChanged, this);
+            this.model.bind("change:hidden", this.onHiddenChanged, this);
             this.model.bind("change:errorMessage", this.displayError(), this);
             this.model.bind("change:loading", this.loading, this);
 

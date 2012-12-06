@@ -37,6 +37,15 @@ function isVisibleOnScreen(elem) {
 	return (top >= viewport_top && top < viewport_bottom) || (bottom > viewport_top && bottom <= viewport_bottom) || (height > viewport_height && top <= viewport_top && bottom >= viewport_bottom);
 }
 
+function setVisibility(element, isVisible) {
+    if (element !== undefined && isVisible != undefined) {
+        if (isVisible)
+            element.show();
+        else 
+            element.hide();
+    }
+}
+
 function supports_history_api() {
 	return !!(window.history && history.pushState);
 }

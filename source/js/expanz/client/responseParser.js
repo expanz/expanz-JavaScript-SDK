@@ -281,7 +281,8 @@ function parseCreateActivityResponse(activity, callbacks) {
                 if (field) {
                     field.set({
                         text: $(this).attr('text'),
-                        disabled: boolValue(this.getAttribute('disabled')),
+                        disabled: boolValue($(this).attr('disabled')),
+                        hidden: boolValue($(this).attr('hidden')),
                         maxLength: $(this).attr('maxLength'),
                         mask: $(this).attr('mask'),
                         label: $(this).attr('label'),
