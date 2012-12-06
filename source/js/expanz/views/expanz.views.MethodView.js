@@ -64,8 +64,14 @@ $(function () {
                 else {
                     var hyperlinks = this.$el.find("a");
                     
-                    if (hyperlinks.length != 0)
-                        buttonElement = hyperlinks;
+                    if (hyperlinks.length != 0) {
+			var spans = this.$el.find("span");
+			if (spans.length != 0) {
+				buttonElement = spans;
+			} else {
+				buttonElement = hyperlinks;
+			}
+		    }
                 }
             }
 
