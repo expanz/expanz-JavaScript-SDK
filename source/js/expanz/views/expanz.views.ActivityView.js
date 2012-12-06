@@ -86,26 +86,27 @@ $(function () {
         deltaLoading: function () {
             var deltaLoading = this.collection.getAttr('deltaLoading');
 
-            var initiatorID = deltaLoading.initiator.id;
-            var initiatorType = deltaLoading.initiator.type;
+            if (deltaLoading.initiator !== undefined && deltaLoading.initiator !== null) {
+                var initiatorID = deltaLoading.initiator.id;
+                var initiatorType = deltaLoading.initiator.type;
 
-            var initiator = this.collection.get(initiatorID);
-            if (initiator) {
-                // window.expanz.logToConsole("delta method loading " + deltaLoading.isLoading + " " + initiatorID);
-                initiator.set({
-                    loading: deltaLoading.isLoading
-                });
-            }
-            else {
-                /* most probably coming from a grid/list view */
-                /* in that case the button has already been set in a loading state so we just switch it back to normal when loading is finished */
-                if (initiatorType == 'method' && !deltaLoading.isLoading) {
-                    /* can be either a element with methodName or a name */
-                    var actionSelector = ".actionLoading[methodName='" + initiatorID + "'], [name='" + initiatorID + "'] .actionLoading, .actionLoading[autoUpdate='" + initiatorID + "']";
-                    var dataControlEl = this.el.find(actionSelector).first().closest("[bind='DataControl']");
-                    if (dataControlEl && dataControlEl.length > 0) {
-                        dataControlEl.find(actionSelector).removeAttr('disabled');
-                        dataControlEl.find(actionSelector).removeClass('actionLoading');
+                var initiator = this.collection.get(initiatorID);
+                if (initiator) {
+                    // window.expanz.logToConsole("delta method loading " + deltaLoading.isLoading + " " + initiatorID);
+                    initiator.set({
+                        loading: deltaLoading.isLoading
+                    });
+                } else {
+                    /* most probably coming from a grid/list view */
+                    /* in that case the button has already been set in a loading state so we just switch it back to normal when loading is finished */
+                    if (initiatorType == 'method' && !deltaLoading.isLoading) {
+                        /* can be either a element with methodName or a name */
+                        var actionSelector = ".actionLoading[methodName='" + initiatorID + "'], [name='" + initiatorID + "'] .actionLoading, .actionLoading[autoUpdate='" + initiatorID + "']";
+                        var dataControlEl = this.el.find(actionSelector).first().closest("[bind='DataControl']");
+                        if (dataControlEl && dataControlEl.length > 0) {
+                            dataControlEl.find(actionSelector).removeAttr('disabled');
+                            dataControlEl.find(actionSelector).removeClass('actionLoading');
+                        }
                     }
                 }
             }

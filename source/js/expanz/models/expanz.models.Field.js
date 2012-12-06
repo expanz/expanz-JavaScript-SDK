@@ -91,9 +91,9 @@ $(function() {
 	                    'errorMessage': undefined
 	                });
 	            }
-
-                // TODO: Remove?
-	            if (this.get('url') && (this.get('url') != xml.attr('url'))) {
+	            
+                // TODO: Unsure why this is handled as such - to investigate
+	            if (this.get('datatype') && this.get('datatype').toLowerCase() === 'blob' && xml.attr('url')) {
 	                this.set({
 	                    value: xml.attr('url')
 	                });

@@ -98,7 +98,7 @@ $(function() {
 					loading : true
 				});
 
-				SendRequest(requestBuilder.CreateActivity(activity, expanz.Storage.getSessionHandle()), parseCreateActivityResponse(activity, callbacks));
+				SendRequest(requestBuilder.CreateActivity(activity, expanz.Storage.getSessionHandle()), parseResponse(activity, null, callbacks));
 			}
 			else {
 				/* anonymous case because no session handle is set */

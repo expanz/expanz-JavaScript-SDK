@@ -224,156 +224,6 @@ function parseGetSessionDataResponse(callbacks) {
     };
 }
 
-// TODO: Merge into core response handler
-function parseCreateActivityResponse(activity, callbacks) {
-    return function apply(xml) {
-        // window.expanz.logToConsole("start parseCreateActivityResponse");
-
-        /* Errors case -> server is most likely not running */
-        $(xml).find('errors').each(function () {
-            if ($(xml).find('errors').text().indexOf(':Your session cannot be contacted') != -1) {
-                if (activity.getAttr('allowAnonymous') === false) {
-                    expanz.views.redirect(window.expanz.getMaintenancePage());
-                }
-            }
-        });
-
-        var execResults = $(xml).find("ExecXResult");
-        if (execResults) {
-            $(execResults).find('Message').each(function () {
-                if ($(this).attr('type') == 'Error' || $(this).attr('type') == 'Warning') {
-                    var sessionLost = /Session .* not found/.test($(this).text());
-                    var activityNotFound = /Activity .* not found/.test($(this).text());
-                    if (sessionLost || activityNotFound) {
-                        expanz.Storage.clearSession();
-                        if (activity.getAttr('allowAnonymous') === false) {
-                            window.expanz.security.showLoginPopup();
-                            return;
-                        }
-                    }
-
-                    if (callbacks && callbacks.error) {
-                        callbacks.error($(this).text());
-                    }
-                }
-                else if ($(this).attr('type') == 'Info') {
-                    if (callbacks && callbacks.info) {
-                        callbacks.info($(this).text());
-                    }
-                }
-            });
-
-            /* DASHBOARD UPDATE CASE */
-            var dashboards = parseDashboards($(execResults).find("Dashboards"));
-            if (dashboards !== null) {
-                expanz.Storage.setDashboards(dashboards);
-            }
-
-            $(execResults).find('Activity').each(function () {
-                activity.setAttr({
-                    handle: $(this).attr('activityHandle')
-                });
-                expanz.Storage.setActivityHandle($(this).attr('activityHandle'), activity.getAttr('name'), activity.getAttr('style'));
-            });
-
-            $(execResults).find('Field').each(function () {
-                var field = activity.get($(this).attr('id'));
-                if (field) {
-                    field.set({
-                        text: $(this).attr('text'),
-                        disabled: boolValue($(this).attr('disabled')),
-                        hidden: boolValue($(this).attr('hidden')),
-                        maxLength: $(this).attr('maxLength'),
-                        mask: $(this).attr('mask'),
-                        label: $(this).attr('label'),
-                        items: $(this).find("Item"),
-                        visualType: $(this).attr("visualType"),
-                        value: $(this).attr('value') == '$longData$' ? $(this).text() : $(this).attr('value')
-
-                    });
-
-                    if ($(this).attr('datatype')) {
-                        field.set({
-                            datatype: $(this).attr('datatype')
-                        }, {
-                            silent: true
-                        });
-                        if ($(this).attr('datatype').toLowerCase() === 'blob' && $(this).attr('url')) {
-                            field.set({
-                                value: $(this).attr('url')
-                            });
-                        }
-                    }
-                }
-            });
-
-            _.each($(execResults).find('Data'), function (data) {
-
-                var dataControlId = $(data).attr('id');
-                var dataControlModels = activity.getDataControl(dataControlId);
-
-                if (dataControlModels !== undefined) {
-
-                    for (var i = 0; i < dataControlModels.length; i++) {
-                        dataControlModel = dataControlModels[i];
-                        /* grid case */
-                        if (dataControlModel.getAttr('renderingType') == 'popupGrid') {
-                            /* don't display it on load, only happening with deltas */
-                        }
-                        else if (dataControlModel.getAttr('renderingType') == 'grid' || dataControlModel.getAttr('renderingType') == 'rotatingBar') {
-                            fillGridModel(dataControlModel, data);
-
-                            /* add a method handler for each action button */
-                            dataControlModel.actionSelected = function (selectedId, name, params) {
-                                expanz.net.MethodRequest(name, params, null, activity);
-                            };
-
-                            /* override a method handler for each menuaction button */
-                            dataControlModel.menuActionSelected = function (selectedId, name, params) {
-                                expanz.net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
-                            };
-
-                            /* override a method handler for each contextmenu button */
-                            dataControlModel.contextMenuSelected = function (selectedId, contextMenuType, contextObject, params) {
-                                expanz.net.CreateContextMenuRequest(this.getAttr('parent'), selectedId, contextMenuType, contextObject, callbacks);
-                            };
-
-                        }
-                            /* others cases (tree, combobox) */
-                        else {
-                            /* update the xml data in the model, view will get a event if bound */
-                            dataControlModel.setAttr({
-                                xml: $(data)
-                            });
-                        }
-                    }
-                }
-
-            }); // foreach 'Data'
-            //if (callbacks && callbacks.success) {
-            //if (activity.name !== undefined) {
-            //	callbacks.success('Activity (' + activity.name + ') has been loaded: ' + execResults);
-            //} else {
-            //window.expanz.logToConsole('Activity (' + activity.name + ') has been loaded: ' + execResults);
-            //}
-            //}
-
-        }
-        else {
-            if (callbacks && callbacks.error) {
-                callbacks.error('The response from the server was empty');
-            }
-            window.expanz.logToConsole('Server gave an empty response to a CreateActivity request: ' + xml);
-        }
-
-        activity.setAttr({
-            loading: false
-        });
-
-        return;
-    };
-}
-
 function parseResponse(activity, initiator, callbacks) {
     return function apply(xml) {
         /* Errors case -> server is most likely not running */
@@ -502,6 +352,10 @@ function parseActivityResponse(activityElement) {
         if (focusFieldId !== undefined) {
             activityModel.setFieldFocus(focusFieldId);
         }
+
+        activityModel.setAttr({
+            loading: false
+        });
     } else {
         // Houston, we have a problem. For now at least, just ignore.
         expanz.logToConsole("An activity with handle '" + activityHandle + "' is not found!");
@@ -610,7 +464,12 @@ function parseDataResponse(dataElement, activityModel, activityView) {
 
                     /* override a method handler for each menuaction button */
                     dataControlModel.menuActionSelected = function (selectedId, name, params) {
-                        expanz.net.CreateMenuActionRequest($dataElement.getAttr('parent'), selectedId, null, name, "1", true, callbacks);
+                        expanz.net.CreateMenuActionRequest($dataElement.getAttr('parent'), selectedId, null, name, "1", true);
+                    };
+
+                    /* override a method handler for each contextmenu button */
+                    dataControlModel.contextMenuSelected = function (selectedId, contextMenuType, contextObject, params) {
+                        expanz.net.CreateContextMenuRequest(this.getAttr('parent'), selectedId, contextMenuType, contextObject);
                     };
                 }
                 else {
