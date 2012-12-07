@@ -21,6 +21,7 @@ $(function () {
             this.model.bind("change:value", this.modelUpdate('value'), this);
             this.model.bind("change:text", this.modelUpdate('text'), this);
             this.model.bind("change:items", this.modelUpdate('value'), this);
+            this.model.bind("change:data", this.publishData, this);
             this.model.bind("change:disabled", this.onDisabledChanged, this);
             this.model.bind("change:hidden", this.onHiddenChanged, this);
             this.model.bind("change:errorMessage", this.displayError(), this);
@@ -32,12 +33,21 @@ $(function () {
 
         modelUpdate: function (attr) {
             var view = this;
+            
             return function () {
                 var elem = this.$el.find('[attribute=' + attr + ']');
+                
                 expanz.views.updateViewElement(view, elem, this.model.attributes, attr);
                 view.render();
+                
                 this.$el.trigger('update:field');
             };
+        },
+
+        publishData: function () {
+            this.$el.trigger("publishData", [
+				this.model.get("data"), this
+            ]);
         },
         
         onDisabledChanged: function () {
@@ -70,30 +80,34 @@ $(function () {
         displayError: function () {
             return function () {
                 var errorId = 'error' + this.model.get('id').replace(/\./g, "_");
+                
                 if (this.$el.attr('showError') !== 'false') {
                     var errorEl;
+                    
                     if (this.model.get('errorMessage') !== undefined) {
                         errorEl = this.$el.find('#' + errorId);
+                        
                         if (errorEl.length < 1) {
                             this.$el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="' + errorId + '"></p>');
                             errorEl = this.$el.find('#' + errorId);
                         }
+                        
                         errorEl.html(this.model.get("errorMessage"));
                         errorEl.show();
                         errorEl.css('display', 'inline');
+                        
                         this.$el.addClass("errorField");
-                        // window.expanz.logToConsole("showing error : " + this.model.get("errorMessage"));
                     }
                     else {
                         errorEl = this.$el.find('#' + errorId);
+                        
                         if (errorEl) {
                             errorEl.hide();
                         }
+                        
                         this.$el.removeClass("errorField");
-                        // window.expanz.logToConsole("hiding error message");
                     }
                 }
-
             };
         },
 
@@ -106,9 +120,10 @@ $(function () {
         },
 
         getValue: function () {
-            var elem = this.$el.find('[attribute=value]');
+            var elem = this.getInputElement();
 
             var value = null;
+            
             // handle checkbox field case
             if ($(elem).is(":checkbox")) {
                 var checkedValue = $(elem).attr("checkedValue") !== undefined ? $(elem).attr("checkedValue") : 1;
@@ -118,8 +133,8 @@ $(function () {
             else {
                 value = $(elem).val();
             }
+            
             return value;
-
         },
 
         viewUpdate: function (event) {

@@ -109,43 +109,36 @@ $(function() {
 		    var activityModel = activityView.collection;
 		    
 		    var fieldViewCollection = expanz.Factory.createFieldViews(activityView.$el.find('[bind=field]'));
-		    //var dataFieldViewCollection = expanz.Factory.createDataFieldViews(activityView.$el.find('[bind=datafield]'));
+		    var dataFieldViewCollection = expanz.Factory.createDataFieldViews(activityView.$el.find('[bind=datafield]'));
 		    var variantFieldViewCollection = expanz.Factory.createVariantFieldViews(activityView.$el.find('[bind=variantfield]'));
 		    var dashboardFieldViewCollection = expanz.Factory.createDashboardFieldViews(activityView.$el.find('[bind=dashboardfield]'));
 		    var dependantFieldViewCollection = expanz.Factory.createDependantFieldViews(activityView.$el.find('[bind=dependant]'));
-		    
-		    _.each(fieldViewCollection, function (fieldView) {
+
+		    var bindFieldToActivity = function(fieldView) {
 		        var fieldModel = fieldView.model;
-		        
-				fieldModel.set({
-					parent : activityModel
-				}, {
-					silent : true
-				});
-		        
-				activityModel.add(fieldModel);
 
-				/* add anonymous fields bound to method */
-				if (fieldModel.get('anonymousBoundMethod') !== null && fieldModel.get('anonymousBoundMethod') !== '') {
-				    var boundMethod = activityModel.get(fieldModel.get('anonymousBoundMethod'));
-				    
-					if (boundMethod) {
-						boundMethod.addAnonymousElement(fieldModel);
-					}
-				}
-			});
+		        fieldModel.set({
+		                parent: activityModel
+		            }, {
+		                silent: true
+		            });
 
-		    _.each(variantFieldViewCollection, function (variantFieldView) {
-		        var variantFieldModel = variantFieldView.model;
-		        
-				variantFieldModel.set({
-					parent : activityModel
-				}, {
-					silent : true
-				});
-			    
-				activityModel.add(variantFieldModel);
-			});
+		        activityModel.add(fieldModel);
+
+		        // Add anonymous fields bound to method
+		        if (fieldModel.get('anonymousBoundMethod') !== null && fieldModel.get('anonymousBoundMethod') !== '') {
+		            var boundMethod = activityModel.get(fieldModel.get('anonymousBoundMethod'));
+
+		            if (boundMethod) {
+		                boundMethod.addAnonymousElement(fieldModel);
+		            }
+		        }
+		    };
+		    
+		    _.each(fieldViewCollection, bindFieldToActivity);
+		    _.each(dataFieldViewCollection, bindFieldToActivity);
+		    _.each(variantFieldViewCollection, bindFieldToActivity);
+		    _.each(dependantFieldViewCollection, bindFieldToActivity);
 			
 		    _.each(dashboardFieldViewCollection, function (dashboardFieldView) {
 		        var dashboardFieldModel = dashboardFieldView.model;
@@ -156,19 +149,12 @@ $(function() {
 				});
 
 				expanz.Dashboards.add(dashboardFieldModel);
-			});
+		    });
 
-		    _.each(dependantFieldViewCollection, function (dependantFieldView) {
-		        var dependantFieldModel = dependantFieldView.model;
-
-				dependantFieldModel.set({
-					parent : activityModel
-				}, {
-					silent : true
-				});
-			    
-				activityModel.add(dependantFieldModel);
-			});
+		    // Data fields (such as dropdown lists) need to register themselves as data publications
+		    _.each(dataFieldViewCollection, function(dataFieldView) {
+		        activityModel.addDataControl(dataFieldView.dataModel);
+		    });
 		},
 
 		bindMethods: function (activityView) {
@@ -226,9 +212,10 @@ $(function() {
 		    _.each(DOMObjects, function (fieldEl) {
 		        var $fieldEl = $(fieldEl);
 		        
-				// create a model for each field
+				// Create a model and a view for each field, and associate the two together
 		        var model = new expanz.models.Field({
-					id : $fieldEl.attr('name'),
+		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('id') || $fieldEl.attr('name'),
+		            fieldId: $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id'),
 					anonymousBoundMethod : $fieldEl.attr('anonymousBoundMethod')
 				});
 			    
@@ -245,6 +232,48 @@ $(function() {
 		    
 			return fieldViews;
 		},
+
+		createDataFieldViews : function(DOMObjects) {
+
+		    var fieldViews = [];
+		    
+		    _.each(DOMObjects, function (fieldEl) {
+		        var $fieldEl = $(fieldEl);
+
+		        // Create a model and a view for each field, and associate the two together
+		        var fieldModel = new expanz.models.Field({
+		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('id') || $fieldEl.attr('name'),
+		            fieldId: $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id'),
+		            anonymousBoundMethod: $fieldEl.attr('anonymousBoundMethod')
+		        });
+		        
+		        var dataModel = new expanz.models.data.DataControl({
+		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('id') || $fieldEl.attr('name'),
+					dataId: $fieldEl.attr('dataId') || $fieldEl.attr('id') || $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('query') || $fieldEl.attr('populateMethod'),
+		            populateMethod : $fieldEl.attr('populateMethod'),
+		            type : $fieldEl.attr('type'),
+		            contextObject : $fieldEl.attr('contextObject'),
+		            autoPopulate : $fieldEl.attr('autoPopulate'),
+		            renderingType : $fieldEl.attr('renderingType'),
+		            selectionChangeAnonymousMethod : $fieldEl.attr('selectionChangeAnonymousMethod'),
+		            selectionChangeAnonymousContextObject : $fieldEl.attr('selectionChangeAnonymousContextObject'),
+					anonymousBoundMethod : $fieldEl.attr('anonymousBoundMethod')
+		        });
+		        
+				var view = new expanz.views.DataFieldView({
+					el : fieldEl,
+					id: fieldModel.get("id"),
+					className : $fieldEl.attr('class'),
+					model: fieldModel,
+					dataModel: dataModel,
+					textTransformFunction : $fieldEl.attr('textTransformFunction')
+				});
+
+				fieldViews.push(view);
+			});
+		    
+			return fieldViews;
+		},
 		
 		createVariantFieldViews : function(DOMObjects) {
 
@@ -253,9 +282,9 @@ $(function() {
 		    _.each(DOMObjects, function (fieldEl) {
 		        var $fieldEl = $(fieldEl);
 
-		        // Create a model and a view for each variant field
+		        // Create a model and a view for each variant field, and associate the two together
 		        var model = new expanz.models.Field({
-		            id: $fieldEl.attr('name')
+		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('id') || $fieldEl.attr('name')
 			    });
 		
 		        var view = new expanz.views.VariantFieldView({
@@ -279,7 +308,7 @@ $(function() {
 		    _.each(DOMObjects, function (fieldEl) {
 		        var $fieldEl = $(fieldEl);
 
-				// create a model for each field
+		        // Create a model and a view for each dashboard field, and associate the two together
 				var model = new expanz.models.DashboardField({
 					id : $fieldEl.attr('dashboardName') + "_" + $fieldEl.attr('name'),
 					name : $fieldEl.attr('name'),
@@ -307,7 +336,7 @@ $(function() {
 		    _.each(DOMObjects, function (fieldEl) {
 		        var $fieldEl = $(fieldEl);
 
-				// create a model for each field
+		        // Create a model and a view for each dependant field, and associate the two together
 				var model = new expanz.models.Bindable({
 					id : $fieldEl.attr('name')
 				});
@@ -332,7 +361,7 @@ $(function() {
 		    _.each(DOMObjects, function (methodEl) {
 		        var $methodEl = $(methodEl);
 
-				// create a model for each method
+		        // Create a model and a view for each method, and associate the two together
 				/* look for potential methodAttributes - format is name:value;name2:value2; */
 				var methodAttributes = [];
 				    

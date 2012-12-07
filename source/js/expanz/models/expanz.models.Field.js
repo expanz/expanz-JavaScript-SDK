@@ -19,14 +19,9 @@ $(function() {
 	    _type: 'Field',
 
 	    defaults: function () {
-
 	        return {
 	            error: false
 	        };
-	    },
-
-	    validate: function (attrs) {
-	        // window.expanz.logToConsole("validating field " + this.get('id'));
 	    },
 
 	    update: function (attrs) {
@@ -104,8 +99,8 @@ $(function() {
 	    },
 
 	    publishData: function (xml) {
-	        // Only variant panels will use this method. They consume data publications, but 
-	        // they behave more like fields than data publications (ie. they don't register as 
+	        // Dropdown lists and variant panels will use this method. They consume data publications,
+	        // but they behave more like fields than data publications (ie. they don't register as 
 	        // data publications with the activity).
 	        if (xml.attr !== undefined) {
 	            // Unset required, as the set function in FireFox and IE doesn't seem to recognise

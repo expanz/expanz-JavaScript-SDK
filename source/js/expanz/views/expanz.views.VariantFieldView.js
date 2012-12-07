@@ -21,7 +21,7 @@ $(function () {
 	                         "<div id='options' style='display: none' />"),
 
         initialize: function () {
-            //this.model.bind("change:label", this.modelUpdate('label'), this);
+            this.model.bind("change:label", this.modelUpdate('label'), this);
             this.model.bind("change:value", this.valueChanged(), this);
             this.model.bind("change:data", this.dataChanged(), this);
             this.model.bind("change:visualType", this.visualTypeChanged(), this);
@@ -31,7 +31,7 @@ $(function () {
             this.model.bind("change:loading", this.loading, this);
 
             this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
-            
+
             this.$el.html(this.template({ 'name': this.$el.attr('name') }));
 
             this.textInput = this.$el.find('[id=textinput]');
@@ -61,9 +61,9 @@ $(function () {
                 this.optionInput.html("");
 
                 var radioButtonItemTemplate = _.template("<div><label><input id='<%= id %>' name='<%= group %>' value='<%= rowId %>' attribute='value' type='radio' /> <%= label %></label></div>");
-                
+
                 var xml = this.model.get("data");
-                
+
                 _.each(xml.find('Row'), function (row) {
                     var fieldName = $(view.el).attr('name');
                     var rowId = $(row).attr('id');
@@ -149,10 +149,10 @@ $(function () {
 
             return control;
         },
-        
+
         updateActiveInputValue: function (value) {
             var visualType = this.model.get("visualType");
-            
+
             if (visualType == 'cb') {
                 this.booleanInput.prop("checked", value == 1);
             } else if (visualType == 'rb') {
