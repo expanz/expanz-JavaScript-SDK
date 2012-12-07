@@ -293,8 +293,14 @@ function parseActivityResponse(activityElement, initiator) {
     var activityView = null;
 
     if (initiator && initiator !== null && initiator.type === "CreateActivity") {
-        // This activity is the result of a create activity request
+        // This activity is the result of a create activity request, where the model doesn't have a handle yet
         activityView = window.expanz.findOpenActivityViewByModel(initiator.activityModel);
+        
+        initiator.activityModel.setAttr({
+            handle: $activityElement.attr('activityHandle')
+        });
+        
+        expanz.Storage.setActivityHandle($activityElement.attr('activityHandle'), initiator.activityModel.getAttr('name'), initiator.activityModel.getAttr('style'));
     } else {
         activityView = window.expanz.findOpenActivityViewByHandle(activityHandle);
     }
