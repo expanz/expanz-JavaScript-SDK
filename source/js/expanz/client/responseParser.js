@@ -254,7 +254,7 @@ function parseResponse(activity, initiator, callbacks) {
 
                     switch (currentElement.nodeName) {
                         case "Activity":
-                            parseActivityResponse(currentElement);
+                            parseActivityResponse(currentElement, initiator);
                             break;
                         case "ActivityRequest":
                             parseActivityRequestResponse(currentElement);
@@ -286,11 +286,18 @@ function parseResponse(activity, initiator, callbacks) {
     };
 }
 
-function parseActivityResponse(activityElement) {
+function parseActivityResponse(activityElement, initiator) {
     // Find the corresponding activity in the list of open activities
     var $activityElement = $(activityElement);
     var activityHandle = $activityElement.attr('activityHandle');
-    var activityView = window.expanz.findOpenActivityView(activityHandle);
+    var activityView = null;
+
+    if (initiator && initiator !== null && initiator.type === "CreateActivity") {
+        // This activity is the result of a create activity request
+        activityView = window.expanz.findOpenActivityViewByModel(initiator.activityModel);
+    } else {
+        activityView = window.expanz.findOpenActivityViewByHandle(activityHandle);
+    }
 
     if (activityView != null) {
         // Activity found, so parse the XML in the response for it, and apply it to the model
@@ -366,7 +373,7 @@ function parseFieldResponse(fieldElement, activityModel) {
     var $fieldElement = $(fieldElement);
     var id = $fieldElement.attr('id');
 
-    activityModel.forEachChildWithMatchingId(id, function(field) {
+    activityModel.forEachChildWithMatchingId(id, function (field) {
         field.publish($fieldElement);
     });
 }
@@ -481,14 +488,12 @@ function parseDataResponse(dataElement, activityModel, activityView) {
             }
         }
 
-        // Variant fields also can consume data publications, but are handled separately as
-        // they behave more like fields than data publications (ie. they don't register as 
-        // data publications with the activity).
-        var variantField = activityModel.get(id);
-
-        if (variantField && variantField !== undefined) {
-            variantField.publishData($dataElement, activityModel);
-        }
+        // Dropdown lists and variant fields also can consume data publications, but are handled 
+        // separately as they behave more like fields than data publications (ie. they don't register 
+        // as data publications with the activity).
+        activityModel.forEachChildWithMatchingId(id, function (field) {
+            field.publishData($dataElement);
+        });
     }
 }
 

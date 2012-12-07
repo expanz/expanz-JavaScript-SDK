@@ -150,10 +150,22 @@ $(function() {
 	// Helper Functions
 	//
 
-	window.expanz.findOpenActivityView = function(activityId) {
+	window.expanz.findOpenActivityViewByHandle = function(activityHandle) {
 	    if (window && window.openActivityViews) {
 	        for (var i = 0; i < window.openActivityViews.length; i++) {
-	            if (window.openActivityViews[i] !== undefined && window.openActivityViews[i].collection.getAttr("handle") == activityId) {
+	            if (window.openActivityViews[i] !== undefined && window.openActivityViews[i].collection.getAttr("handle") == activityHandle) {
+	                return window.openActivityViews[i];
+				}
+			}
+		}
+	    
+		return null;
+	};
+
+	window.expanz.findOpenActivityViewByModel = function(activityModel) {
+	    if (window && window.openActivityViews) {
+	        for (var i = 0; i < window.openActivityViews.length; i++) {
+	            if (window.openActivityViews[i] !== undefined && window.openActivityViews[i].collection === activityModel) {
 	                return window.openActivityViews[i];
 				}
 			}

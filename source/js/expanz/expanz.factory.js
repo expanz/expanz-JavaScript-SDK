@@ -109,6 +109,7 @@ $(function() {
 		    var activityModel = activityView.collection;
 		    
 		    var fieldViewCollection = expanz.Factory.createFieldViews(activityView.$el.find('[bind=field]'));
+		    //var dataFieldViewCollection = expanz.Factory.createDataFieldViews(activityView.$el.find('[bind=datafield]'));
 		    var variantFieldViewCollection = expanz.Factory.createVariantFieldViews(activityView.$el.find('[bind=variantfield]'));
 		    var dashboardFieldViewCollection = expanz.Factory.createDashboardFieldViews(activityView.$el.find('[bind=dashboardfield]'));
 		    var dependantFieldViewCollection = expanz.Factory.createDependantFieldViews(activityView.$el.find('[bind=dependant]'));
@@ -433,20 +434,6 @@ $(function() {
 								var type = $(action).attr('methodName') ? 'method' : $(action).attr('menuAction') ? 'menuAction' : 'contextMenu';
 
 								dataControlModel.addAction(type, $(action).attr('id'), $(action).attr('label'), $(action).attr('width'), actionName, params);
-										
-								/*var method;
-								method = new expanz.models.MenuAction({
-									id : $(action).attr('id'),
-									contextObject : actionName
-								});*/
-
-								/*var ctxMenuview = new expanz.views.ContextMenuView({
-									el : $(this),
-									id : $(this).attr('id'),
-									className : $(this).attr('class'),
-									model : dataControlModel
-								});
-								window.expanz.currentContextMenu = ctxMenuview.model;*/
 							});
 						}
 					}
