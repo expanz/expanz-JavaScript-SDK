@@ -47,17 +47,6 @@ $(function () {
             }
         }
         
-        if (elem !== null && elem.attr('renderingType') === 'time') {
-            // Time fields should render their value using the corresponding 12hr/24hr value provided by the model, the
-            // choice of which is specified as a configuration property
-            var timeFormat = $(view).attr('timeFormat') !== undefined ? $(view).attr('timeFormat') : window.config._timeFormat;
-
-            if (timeFormat === undefined)
-                timeFormat = 12;
-            
-            value = (timeFormat == 12 ? allAttrs["timeAMPM"] : allAttrs["time24"]);
-        }
-        
         if (allAttrs["null"] === true) {
             value = null;
         }

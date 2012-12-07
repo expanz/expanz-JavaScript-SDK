@@ -214,7 +214,7 @@ $(function() {
 		        
 				// Create a model and a view for each field, and associate the two together
 		        var model = new expanz.models.Field({
-		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('id') || $fieldEl.attr('name'),
+		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id'),
 		            fieldId: $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id'),
 					anonymousBoundMethod : $fieldEl.attr('anonymousBoundMethod')
 				});
@@ -242,13 +242,13 @@ $(function() {
 
 		        // Create a model and a view for each field, and associate the two together
 		        var fieldModel = new expanz.models.Field({
-		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('id') || $fieldEl.attr('name'),
+		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id'),
 		            fieldId: $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id'),
 		            anonymousBoundMethod: $fieldEl.attr('anonymousBoundMethod')
 		        });
 		        
 		        var dataModel = new expanz.models.data.DataControl({
-		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('id') || $fieldEl.attr('name'),
+		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id'),
 					dataId: $fieldEl.attr('dataId') || $fieldEl.attr('id') || $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('query') || $fieldEl.attr('populateMethod'),
 		            populateMethod : $fieldEl.attr('populateMethod'),
 		            type : $fieldEl.attr('type'),

@@ -21,6 +21,11 @@ $(function () {
             this.model.bind("change:value", this.modelUpdate('value'), this);
             this.model.bind("change:text", this.modelUpdate('text'), this);
             this.model.bind("change:items", this.modelUpdate('value'), this);
+            this.model.bind("change:date", this.modelUpdate('date'), this);
+            this.model.bind("change:time", this.modelUpdate('time'), this);
+            this.model.bind("change:DayOfWeek", this.modelUpdate('DayOfWeek'), this);
+            this.model.bind("change:time24", this.modelUpdate('time24'), this);
+            this.model.bind("change:timeAMPM", this.modelUpdate('timeAMPM'), this);
             this.model.bind("change:data", this.publishData, this);
             this.model.bind("change:disabled", this.onDisabledChanged, this);
             this.model.bind("change:hidden", this.onHiddenChanged, this);
