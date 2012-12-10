@@ -64,6 +64,16 @@ $.fn.KendoDropDownListAdapter = function() {
 		list.value(newValue);
 	};
 
+    var onErrorChanged = function(eventinfo, errorMessage) {
+        if (errorMessage !== undefined && errorMessage !== null && errorMessage !== "") {
+            list._focused.addClass("kendoErrorField");
+        } else {
+            list._focused.removeClass("kendoErrorField");
+        }
+        
+        eventinfo.preventBubble = true;
+    };
+
     var onDisabledChanged = function(eventinfo, isDisabled) {
         list.enable(!isDisabled);
     };
@@ -77,4 +87,5 @@ $.fn.KendoDropDownListAdapter = function() {
 	cb.bind("valueUpdated", onValueUpdated);
 	cb.bind("disabledChanged", onDisabledChanged);
 	cb.bind("visibilityChanged", onVisibilityChanged);
+	cb.bind("errorChanged", onErrorChanged);
 };

@@ -86,6 +86,7 @@ $(function () {
             return function () {
                 var errorId = 'error' + this.model.get('id').replace(/\./g, "_");
                 
+                // TODO: Also change the label font colour to red?
                 if (this.$el.attr('showError') !== 'false') {
                     var errorEl;
                     
@@ -93,13 +94,11 @@ $(function () {
                         errorEl = this.$el.find('#' + errorId);
                         
                         if (errorEl.length < 1) {
-                            this.$el.append('<p class="errorMessage" onclick="javascript:$(this).hide();" style="display:inline" id="' + errorId + '"></p>');
+                            this.$el.append('<p class="errorMessage" id="' + errorId + '"></p>');
                             errorEl = this.$el.find('#' + errorId);
                         }
                         
                         errorEl.html(this.model.get("errorMessage"));
-                        errorEl.show();
-                        errorEl.css('display', 'inline');
                         
                         this.$el.addClass("errorField");
                     }
@@ -107,12 +106,14 @@ $(function () {
                         errorEl = this.$el.find('#' + errorId);
                         
                         if (errorEl) {
-                            errorEl.hide();
+                            errorEl.remove();
                         }
                         
                         this.$el.removeClass("errorField");
                     }
                 }
+
+                this.getInputElement().trigger("errorChanged", this.model.get("errorMessage"));
             };
         },
 
