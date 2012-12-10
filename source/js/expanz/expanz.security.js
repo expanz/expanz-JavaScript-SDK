@@ -59,7 +59,7 @@ $(function() {
         content += '    <input class="loginInput" attribute="value" type="password" placeholder="Password"/>';
         content += '  </div>';
         content += '  <div name="login" id="login">';
-        content += '    <button id="signinButton" type="submit" attribute="submit"></button>';
+        content += '    <button id="signinButton" type="submit" attribute="submit">Login</button>';
         content += '  </div>';
         content += '  <div bind="messageControl" class="error">';
         content += '  </div>';
