@@ -528,7 +528,7 @@ function parseActivityLevelMessagesResponse(messagesElement, activityModel) {
 
             if (field && field !== undefined) {
                 field.set({
-                    errorMessage: messageModel.message,
+                    errorMessage: activityModel.messageCollection.transformMessage(messageModel.message),
                     error: true
                 });
             }

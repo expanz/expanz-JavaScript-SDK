@@ -60,37 +60,39 @@ $(function() {
             this._addMessageByText(messageText, 'success');
         },
 	    
-        _addMessageByText: function (messageText, messageType) {
+        // TODO: Move message transformation into an external js file, so it's not MessageCollection specific (also used by fields themselves)
+        transformMessage: function(messageText) {
             if (window.config._useBundle === true) {
                 // Pass the message to an implementation specific message converter, that may
                 // transform the message from the server to something more suitable for display
                 var data = null;
-                
+
                 if (typeof window.expanz.findMessageKey == 'function') {
                     data = window.expanz.findMessageKey(messageText);
                 } else {
                     expanz.logToConsole("window.expanz.findMessageKey not found in your implementation");
                 }
-                
+
                 if (data !== null) {
-                    this._addMessageByKey(data['key'], data['data'], messageType, data['popup']);
-                } else {
-                    if (messageText !== "") {
-                        this.add({
-                            type: messageType,
-                            message: messageText
-                        });
-                        
-                        if (window.config._showAllMessages === true && messageText !== "") {
-                            window.expanz.logToConsole(messageType + ': ' + messageText);
-                        }
-                    }
+                    messageText = jQuery.i18n.prop(data['key'], data['data']);
                 }
-            } else {
+            }
+
+            return messageText;
+        },
+	    
+        _addMessageByText: function (messageText, messageType) {
+            messageText = this.transformMessage(messageText);
+            
+            if (messageText !== "") {
                 this.add({
                     type: messageType,
                     message: messageText
                 });
+                        
+                if (window.config._showAllMessages === true) {
+                    window.expanz.logToConsole(messageType + ': ' + messageText);
+                }
             }
         },
 
