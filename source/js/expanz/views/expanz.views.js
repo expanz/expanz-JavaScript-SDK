@@ -25,7 +25,7 @@ $(function () {
 		window.expanz.views.redirect(expanz.security.getLoginPage());
 	};
 
-    window.expanz.views.updateViewElement = function(view, elem, allAttrs, attr) {
+    window.expanz.views.updateViewElement = function(view, elem, allAttrs, attr, model) {
         var datatype = allAttrs['datatype'];
 
         if (datatype && datatype.toLowerCase() === 'blob' && attr && attr === 'value') {
@@ -51,48 +51,52 @@ $(function () {
             value = null;
         }
 
-        /* multi choice field -> display as checkboxes */
-        if (allAttrs.items !== undefined && allAttrs.items.length > 0 && attr === 'value') {
-            var disabled = boolValue(elem.attr('editable')) ? "" : "disabled='disabled'";
-            _.each(allAttrs.items, function(item) {
-                var selected = boolValue($(item).attr('selected')) === true ? ' checked="checked" ' : '';
-                var text = $(item).attr('text');
-                var value = $(item).attr('value');
-                $(elem).append("<div><input " + disabled + selected + "' value='" + value + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
-            });
-        } else if ($(elem).is('input')) {
-            // special behaviour for checkbox input
-            if ($(elem).is(":checkbox") || $(elem).is(":radio")) {
-                $(elem).addClass('checkbox');
-                var checkedValue = $(elem).attr("checkedValue") ? $(elem).attr("checkedValue") : 1;
-                
-                if (value == checkedValue) {
-                    $(elem).prop("checked", true);
-                } else {
-                    $(elem).prop("checked", false);
-                }
-            } else {
-                $(elem).val(value);
-            }
-            
-            $(elem).trigger("valueUpdated", value);
+        if (value !== undefined) {
+            var event = jQuery.Event("valueUpdated");
+            $(elem).trigger(event, [value, model]); // Extensibility point for adapters
 
-            // if the field is disable apply the disabled attribute and style
-            if (allAttrs["disabled"] === true) {
-                $(elem).attr('disabled', true);
-                $(elem).addClass('readonlyInput');
-            } else {
-                $(elem).removeAttr('disabled');
-                $(elem).removeClass('readonlyInput');
+            if (event.result === undefined) { // Only if no adapter has handled setting the value itself, then we continue and set using default behaviour
+                /* multi choice field -> display as checkboxes */
+                if (allAttrs.items !== undefined && allAttrs.items.length > 0 && attr === 'value') {
+                    var disabled = boolValue(elem.attr('editable')) ? "" : "disabled='disabled'";
+                    _.each(allAttrs.items, function(item) {
+                        var selected = boolValue($(item).attr('selected')) === true ? ' checked="checked" ' : '';
+                        var text = $(item).attr('text');
+                        var value = $(item).attr('value');
+                        $(elem).append("<div><input " + disabled + selected + "' value='" + value + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
+                    });
+                } else if ($(elem).is('input')) {
+                    // special behaviour for checkbox input
+                    if ($(elem).is(":checkbox") || $(elem).is(":radio")) {
+                        $(elem).addClass('checkbox');
+                        var checkedValue = $(elem).attr("checkedValue") ? $(elem).attr("checkedValue") : 1;
+
+                        if (value == checkedValue) {
+                            $(elem).prop("checked", true);
+                        } else {
+                            $(elem).prop("checked", false);
+                        }
+                    } else {
+                        $(elem).val(value);
+                    }
+
+                    // if the field is disabled apply the disabled attribute and style
+                    if (allAttrs["disabled"] === true) {
+                        $(elem).attr('disabled', true);
+                        $(elem).addClass('readonlyInput');
+                    } else {
+                        $(elem).removeAttr('disabled');
+                        $(elem).removeClass('readonlyInput');
+                    }
+                } else if ($(elem).is('textarea')) {
+                    $(elem).val(value);
+                } else {
+                    /* if value is empty put an unbreakable space instead */
+                    $(elem).html(value || '&nbsp;');
+                }
             }
-        } else if ($(elem).is('textarea')) {
-            $(elem).val(value);
-        } else {
-            /* if value is empty put an unbreakable space instead */
-            $(elem).html(value || '&nbsp;');
         }
 
         return elem;
     };
-
 });

@@ -42,7 +42,7 @@ $(function () {
             return function () {
                 var elem = this.$el.find('[attribute=' + attr + ']');
                 
-                expanz.views.updateViewElement(view, elem, this.model.attributes, attr);
+                expanz.views.updateViewElement(view, elem, this.model.attributes, attr, this.model);
                 view.render();
                 
                 this.$el.trigger('update:field');

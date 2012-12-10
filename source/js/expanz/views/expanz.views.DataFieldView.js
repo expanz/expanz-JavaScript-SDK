@@ -40,7 +40,7 @@ $(function () {
             var value = this.model.get("value");
             
             elem.val(value);
-            elem.trigger("valueUpdated", value); // Extensibility point for adapters
+            elem.trigger("valueUpdated", [value, this.model]); // Extensibility point for adapters
         },
 
         dataChanged: function () {
