@@ -223,8 +223,7 @@ $(function() {
 					el : fieldEl,
 					id: model.get("id"),
 					className : $fieldEl.attr('class'),
-					model: model,
-					textTransformFunction : $fieldEl.attr('textTransformFunction')
+					model: model
 				});
 
 				fieldViews.push(view);
@@ -265,8 +264,7 @@ $(function() {
 					id: fieldModel.get("id"),
 					className : $fieldEl.attr('class'),
 					model: fieldModel,
-					dataModel: dataModel,
-					textTransformFunction : $fieldEl.attr('textTransformFunction')
+					dataModel: dataModel
 				});
 
 				fieldViews.push(view);
@@ -291,8 +289,7 @@ $(function() {
 		            el: fieldEl,
 		            id: model.get("id"),
 		            className: $fieldEl.attr('class'),
-		            model: model,
-		            textTransformFunction: $fieldEl.attr('textTransformFunction')
+		            model: model
 		        });
 
 		        fieldViews.push(view);
@@ -319,8 +316,7 @@ $(function() {
 				    el: fieldEl,
 				    id: model.get("id"),
 					className : $fieldEl.attr('class'),
-					model : model,
-					textTransformFunction : $fieldEl.attr('textTransformFunction')
+					model : model
 				});
 
 				fieldViews.push(view);
