@@ -16,20 +16,14 @@ $(function() {
 	window.expanz.models = window.expanz.models || {};
 	window.expanz.models.data = window.expanz.models.data || {};
 
-	window.expanz.models.data.Grid = expanz.Collection.extend({
+	window.expanz.models.data.Grid = Backbone.Model.extend({
 
-		model : expanz.models.data.Row,
-
-		// header : [],
-		//		
-		// actions : [],
-
-		initialize : function(attrs) {
-			expanz.Collection.prototype.initialize.call(this, attrs);
-			this.setAttr({
-				lockedColumns : false
-			});
-			this.add([
+	    initialize: function () {
+	        this.rows = new expanz.models.data.RowCollection();
+	        //this.columns = new expanz.Collection(); // TODO: Use this instead of proxy row
+	        this.hasActions = false;
+	        
+	        this.rows.add([
 				{
 					id : '_header'
 				}, {
@@ -39,97 +33,101 @@ $(function() {
 		},
 
 		clear : function() {
-			var that = this;
+		    var grid = this;
+		    
 			_.each(this.getAllRows(), function(row) {
-				that.remove(row);
+				grid.rows.remove(row);
 			});
+		    
 			this.removeColumns();
 		},
 
 		removeColumns : function() {
-			var that = this;
+		    var grid = this;
+		    
 			_.each(this.getAllColumns(), function(col) {
-				that.get('_header').remove(col);
+				grid.rows.get('_header').cells.remove(col);
 			});
 		},
 
 		getColumn : function(id) {
-			return this.get('_header').get(id);
+			return this.rows.get('_header').cells.get(id);
 		},
+	    
 		getAllColumns : function() {
-			return this.get('_header').reject(function(cell) {
+		    return this.rows.get('_header').cells.reject(function (cell) {
 				return cell.get('id') === '_header';
 			}, this);
 		},
+	    
 		getActions : function() {
-			return this.get('_actions').reject(function(cell) {
+		    return this.rows.get('_actions').cells.reject(function (cell) {
 				return cell.get('id') === '_actions';
 			}, this);
 		},
+	    
 		getAction : function(actionName) {
-			return this.get('_actions').reject(function(cell) {
+		    return this.rows.get('_actions').cells.reject(function (cell) {
 				return cell.get('id') === '_actions' || cell.get('actionName') != actionName;
 			}, this);
 		},
-		addAction : function(_type, _id, _label, _width, _name, _params) {
-			this.setAttr({
-				hasActions : true
-			});
+	    
+		addAction : function(type, id, label, width, name, params) {
+		    this.hasActions = true;
 
-			this.get('_actions').add({
-				id : _id,
-				type : _type,
-				label : _label,
-				width : _width,
-				actionName : _name,
-				actionParams : _params
+		    this.rows.get('_actions').cells.add({
+				id : id,
+				type : type,
+				label : label,
+				width : width,
+				actionName : name,
+				actionParams : params
 			});
 		},
-		addColumn : function(_id, _field, _label, _datatype, _width) {
-			this.get('_header').add({
-				id : _id,
-				field : _field,
-				label : _label,
-				datatype : _datatype,
-				width : _width
+	    
+		addColumn : function(id, field, label, datatype, width) {
+		    this.rows.get('_header').cells.add({
+				id : id,
+				field : field,
+				label : label,
+				datatype : datatype,
+				width : width
 			});
 		},
 
 		getAllRows : function() {
-			return this.reject(function(row) {
+			return this.rows.reject(function(row) {
 				// NOTE: 'this' has been set as expanz.models.DataGrid
-				return (row.getAttr('id') === '_header') || (row.getAttr('id') === '_actions') || (this.getAttr('id') === row.getAttr('id')) || (this.getAttr('activityId') === row.getAttr('id'));
+				return (row.id === '_header') || (row.id === '_actions') || (this.id === row.id) || (this.activityId === row.id);
 			}, this);
 		},
 
 		sortRows : function(columnName, ascending) {
-			this.comparator = function(rowA) {
+			this.rows.comparator = function(rowA) {
 				var sortValue = rowA.getCellsMapByField().sortedValues[columnName] || "";
 				return sortValue.toLowerCase();
 			};
-			this.sort();
+		    
+			this.rows.sort();
 
 			if (!ascending)
-				this.models.reverse();
-
+			    this.rows.models.reverse();
 		},
 
-		addRow : function(_id, _type) {
-
-			this.add({
-				id : _id,
-				type : _type,
-				gridId : this.getAttr('id')
+		addRow : function(id, type) {
+		    this.rows.add({
+				id : id,
+				type : type,
+				gridId : this.id
 			});
 		},
 
-		addCell : function(_rowId, _cellId, _value, _field, _sortValue) {
-
-			this.get(_rowId).add({
-				id : _cellId,
-				value : _value,
-				field : _field,
-				sortValue : _sortValue
+		addCell : function(rowId, cellId, value, field, sortValue) {
+		    this.rows.get(rowId).cells.add({
+				id : cellId,
+				value : value,
+				field : field,
+				sortValue : sortValue
 			});
 		},
 
@@ -154,9 +152,17 @@ $(function() {
 		},
 		
 		refresh : function() {
-			expanz.net.DataRefreshRequest(this.getAttr('id'), this.getAttr('parent'));
-		}
-
+			expanz.net.DataRefreshRequest(this.id, this.parent);
+		},
+	    
+        setAttr: function(attrs) {
+            // TEMPORARY, UNTIL DATACONTROL IS CONVERTED TO MODEL TOO!
+            this.set(attrs);
+        },
+	    
+        getAttr: function(id) {
+            // TEMPORARY, UNTIL DATACONTROL IS CONVERTED TO MODEL TOO!
+            return this.get(id);
+        }
 	});
-
 });

@@ -16,23 +16,23 @@ $(function() {
 	window.expanz.models = window.expanz.models || {};
 	window.expanz.models.data = window.expanz.models.data || {};
 
-	window.expanz.models.data.Row = expanz.Collection.extend({
+	window.expanz.models.data.Row = expanz.models.Bindable.extend({
 
-		model : expanz.models.data.Cell,
+	    defaults: function () {
+	        return {
+	            selected: false
+	        };
+	    },
 
-		initialize : function(attrs, options) {
-			expanz.Collection.prototype.initialize.call(this, attrs, options);
-			this.setAttr({
-				selected : false
-			});
-			this.setAttr(attrs);
+		initialize: function () {
+		    this.cells = new expanz.models.data.RowCollection();
 		},
 
 		getAllCells : function() {
 
 			// remove/reject cells without value attribute
 			// :this can happen b/c Backbone inserts a recursive/parent cell into the collection
-			var cells = this.reject(function(cell) {
+			var cells = this.cells.reject(function(cell) {
 				return cell.get('value') === undefined;
 			}, this);
 
@@ -43,12 +43,13 @@ $(function() {
 
 			// remove/reject cells without value attribute
 			// :this can happen b/c Backbone inserts a recursive/parent cell into the collection
-			var cells = this.reject(function(cell) {
+			var cells = this.cells.reject(function(cell) {
 				return cell.get('value') === undefined;
 			}, this);
 
 			var map = {};
 			var sortedMap = {};
+		    
 			_.each(cells, function(cell) {
 				var key = cell.get('field') || cell.get('label');
 				map[key] = cell.get('value');
@@ -56,8 +57,8 @@ $(function() {
 			});
 
 			/* add row id and type to the map */
-			map['rowId'] = this.getAttr('id');
-			map['rowType'] = this.getAttr('type');
+			map['rowId'] = this.id;
+			map['rowType'] = this.type;
 
 			/* using a data to put the data to avoid underscore 'variable is not defined' error */
 			return {
@@ -67,4 +68,7 @@ $(function() {
 		}
 	});
 
+	window.expanz.models.data.RowCollection = expanz.Collection.extend({
+	    model: expanz.models.data.Row
+	});
 });

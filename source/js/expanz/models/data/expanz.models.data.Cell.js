@@ -17,14 +17,14 @@ $(function() {
 	window.expanz.models.data = window.expanz.models.data || {};
     
 	window.expanz.models.data.Cell = expanz.models.Bindable.extend({
-
-		initialize : function(attrs, options) {
-			expanz.models.Bindable.prototype.initialize.call(this, attrs, options);
-			this.set({
-				selected : false
-			});
-		}
-
+        defaults: function() {
+            return {
+                selected: false
+            };
+        }
 	});
 
+	window.expanz.models.data.CellCollection = expanz.Collection.extend({
+	    model: expanz.models.data.Cell
+	});
 });

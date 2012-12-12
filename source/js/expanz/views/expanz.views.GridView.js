@@ -23,8 +23,6 @@ $(function () {
             this.bind("actionClicked", this.actionClicked, this);
             this.bind("menuActionClicked", this.menuActionClicked, this);
             this.bind("contextMenuClicked", this.contextMenuClicked, this);
-
-            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
         },
 
         rowClicked: function (row) {
@@ -68,7 +66,7 @@ $(function () {
 
                     pagingBar = hostEl.find("#pagingBar");
                     for (var i = 0; i < nbPages; i++) {
-                        var inputId = this.model.getAttr('id') + "BtnPage" + i;
+                        var inputId = this.model.id + "BtnPage" + i;
                         var disabled = "";
                         if (i == currentPage)
                             disabled = " disabled='disabled'";
@@ -95,9 +93,9 @@ $(function () {
             var hasItem = (lastItem > firstItem);
 
             var hostEl;
-            var hostId = this.model.getAttr('id') + "_host";
+            var hostId = this.model.id + "_host";
 
-            var templateName = this.options['templateName'] || this.model.getAttr('id') + "ItemTemplate";
+            var templateName = this.options['templateName'] || this.model.id + "ItemTemplate";
             var wrapperElement = this.options['isHTMLTable'] == "true" ? 'table' : 'div';
             var enableConfiguration = this.options['enableConfiguration'] ? boolValue(this.options['enableConfiguration']) : false;
             var noItemText = this.options['noItemText'] || '';
@@ -200,8 +198,8 @@ $(function () {
                     for (i = firstItem; i < lastItem; i++) {
                         var row = rows[i];
                         var result = compiled(row.getCellsMapByField());
-                        var itemId = this.model.getAttr('id') + "_" + row.getAttr('id');
-                        result = $(result).attr('id', itemId).attr('rowId', row.getAttr('id'));
+                        var itemId = this.model.id + "_" + row.id;
+                        result = $(result).attr('id', itemId).attr('rowId', row.id);
 
                         if (i === 0)
                             result = $(result).addClass('first');
@@ -217,7 +215,7 @@ $(function () {
 
                         /* add row id to prefix id for eventual user inputs */
                         $(result).find("[id*='userinput_']").each(function () {
-                            $(this).attr('id', row.getAttr('id') + "_" + $(this).attr('id'));
+                            $(this).attr('id', row.id + "_" + $(this).attr('id'));
                         });
 
                         gridItems.append(result);
@@ -275,7 +273,7 @@ $(function () {
                                     method = new expanz.models.ContextMenu({
                                         id: rowId,
                                         contextObject: action[0].get('actionName'),
-                                        parent: that.model.getAttr('parent')
+                                        parent: that.model.parent
                                     });
 
                                     var ctxMenuview = new expanz.views.ContextMenuView({
@@ -315,7 +313,7 @@ $(function () {
                     el.append(html);
                 });
 
-                if (this.model.getAttr('hasActions')) {
+                if (this.model.hasActions) {
                     el.append('<th>actions</th>');
                 }
 
@@ -326,11 +324,11 @@ $(function () {
                 for (i = firstItem; i < lastItem; i++) {
                     var row = rows[i];
                     var alternate = ((i - firstItem) % 2 == 1) ? 'class="gridRowAlternate"' : 'class="gridRow"';
-                    var html = '<tr id="' + row.getAttr('id') + '" type="' + row.getAttr('type') + '" ' + alternate + '>';
+                    var html = '<tr id="' + row.id + '" type="' + row.type + '" ' + alternate + '>';
 
                     var values = {};
                     _.each(row.getAllCells(), function (cell) {
-                        html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="row' + row.getAttr('id') + ' column' + cell.get('id') + '">';
+                        html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="row' + row.id + ' column' + cell.get('id') + '">';
                         if (model.getColumn(cell.get('id')) && model.getColumn(cell.get('id')).get('datatype') === 'BLOB') {
                             html += '<img width="' + model.getColumn(cell.get('id')).get('width') + '" src="' + cell.get('value') + '"/>';
                         }
@@ -341,10 +339,10 @@ $(function () {
                         html += '</td>';
                     }, row);
 
-                    if (this.model.getAttr('hasActions')) {
+                    if (this.model.hasActions) {
                         html += '<td>';
                         _.each(this.model.getActions(), function (cell) {
-                            var buttonId = model.getAttr('id') + "_" + row.getAttr('id') + "_" + cell.get('actionName');
+                            var buttonId = model.id + "_" + row.id + "_" + cell.get('actionName');
                             var actionParams = cell.get('actionParams');
 
                             var userInputs = "";
@@ -360,7 +358,7 @@ $(function () {
                                     if (bindValueFromCellId) {
                                         inputValue = " value='" + values[bindValueFromCellId] + "' ";
                                     }
-                                    userInputs += "<label for='" + row.getAttr('id') + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.getAttr('id') + "_userinput_" + name + "'/>";
+                                    userInputs += "<label for='" + row.id + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.id + "_userinput_" + name + "'/>";
                                 }
                             });
                             html += "<div style='display:inline' name='" + cell.get('actionName') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='" + cell.get('type') + "'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
@@ -424,12 +422,12 @@ $(function () {
 
             $(hostEl).attr('nbItems', rows.length);
 
-            if (this.model.getAttr('renderingType') == 'popupGrid') {
+            if (this.model.renderingType == 'popupGrid') {
                 var clientMessage = new expanz.models.ClientMessage({
                     id: hostId + 'PopUp',
                     title: '',
                     text: '',
-                    parent: this.model.getAttr('parent')
+                    parent: this.model.parent
                 });
 
                 var picklistWindow = new window.expanz.views.PopupView({
@@ -437,10 +435,10 @@ $(function () {
                     model: clientMessage
                 }, $('body'));
 
-                picklistWindow.el.append(hostEl);
+                picklistWindow.$el.append(hostEl);
                 picklistWindow.center();
             }
-            else if (this.model.getAttr('renderingType') == 'rotatingBar') {
+            else if (this.model.renderingType == 'rotatingBar') {
                 this.renderAsRotationBar(hostEl, 3, 3, 0);
             }
 
