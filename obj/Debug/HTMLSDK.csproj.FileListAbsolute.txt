@@ -1,5 +1,0 @@
-K:\Git\HTMLSDK\bin\HTMLSDK.dll
-K:\Git\HTMLSDK\bin\HTMLSDK.pdb
-K:\Git\HTMLSDK\obj\Debug\HTMLSDK.csprojResolveAssemblyReference.cache
-K:\Git\HTMLSDK\obj\Debug\HTMLSDK.dll
-K:\Git\HTMLSDK\obj\Debug\HTMLSDK.pdb
