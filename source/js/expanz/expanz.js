@@ -132,7 +132,7 @@ $(function() {
 				}, $('body'));
 
 				popup.bind('contentLoaded', function() {
-				    expanz.CreateActivity($(popup.el).find("[bind=activity]"), null, key, popup);
+				    expanz.CreateActivity(popup.$el.find("[bind=activity]"), null, key, popup);
 				});
 			}
 			/* case 'navigate' or default */

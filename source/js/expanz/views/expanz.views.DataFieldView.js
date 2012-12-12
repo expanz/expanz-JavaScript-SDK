@@ -31,8 +31,6 @@ $(function () {
             this.model.bind("setFocus", this.setFocus, this);
             
             this.dataModel.bind("update:xml", this.dataChanged, this);
-
-            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
         },
 
         valueChanged: function () {

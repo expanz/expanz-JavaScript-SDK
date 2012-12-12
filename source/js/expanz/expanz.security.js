@@ -70,7 +70,7 @@ $(function() {
         /* set focus on username field */
         $("#username input").focus();
 
-        createLogin(loginPopup.el.find('[bind=login]'));
+        createLogin(loginPopup.$el.find('[bind=login]'));
 
         return;
     };

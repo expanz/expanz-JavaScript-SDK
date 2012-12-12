@@ -55,12 +55,7 @@ $(function() {
 	                        attributeValue = boolValue(attributeValue);
 	                    }
 	                    
-	                    // TODO: When updating to backbone 0.9+, the following lines can be replaced with this one:
-	                    //model.set(item.name, attributeValue);
-	                    var property = {};
-	                    property[item.name] = attributeValue;
-	                    model.set(property);
-	                    model.attributes[item.name] = attributeValue;
+	                    model.set(item.name, attributeValue);
 	                }
 	            });
 	            
@@ -69,7 +64,9 @@ $(function() {
 	            // to bool, long data handling, etc)
 	            if ((this.get('value') && (this.get('value') != xml.attr('value'))) || !this.get('value')) {
 	                this.set({
-	                    items: xml.find("Item"),
+	                    // NOTE: The model doesn't currently populate the items property anymore, as it leads to an
+	                    // endless loop in underscore.js in Chrome. As not required for now, commenting out.
+	                    //items: xml.find("Item"),
 	                    value: xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value')
 	                });
 	            }

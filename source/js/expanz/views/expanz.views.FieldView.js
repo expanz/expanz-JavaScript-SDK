@@ -32,8 +32,6 @@ $(function () {
             this.model.bind("change:errorMessage", this.displayError(), this);
             this.model.bind("change:loading", this.loading, this);
             this.model.bind("setFocus", this.setFocus, this);
-
-            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
         },
 
         modelUpdate: function (attr) {

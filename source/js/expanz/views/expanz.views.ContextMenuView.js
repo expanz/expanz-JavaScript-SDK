@@ -17,8 +17,6 @@ $(function () {
     window.expanz.views.ContextMenuView = Backbone.View.extend({
         initialize: function () {
             this.collection.bind("menuLoaded", this.render, this);
-
-            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
         },
 
         render: function () {

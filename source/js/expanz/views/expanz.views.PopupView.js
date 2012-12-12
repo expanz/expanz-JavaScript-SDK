@@ -31,7 +31,7 @@ $(function () {
             /* find the parent popup -> it is the first parentPopup visible */
             if (window.expanz.currentPopup !== undefined) {
                 this.parentPopup = window.expanz.currentPopup;
-                while (!$(this.parentPopup.el).is(":visible")) {
+                while (!this.parentPopup.$el.is(":visible")) {
                     if (this.parentPopup.parentPopup === undefined) {
                         this.parentPopup = undefined;
                         break;
@@ -66,13 +66,13 @@ $(function () {
             }
 
             containerjQ.append("<div class='" + this.cssClass + "' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");
-            this.el = containerjQ.find('#' + this.id);
+            this.setElement(containerjQ.find('#' + this.id));
             this.createWindowObject();
 
             if (this.model.getAttr('url') !== undefined && this.model.getAttr('url').length > 0) {
                 var url = this.model.getAttr('url');
                 var that = this;
-                this.el.load(url, function () {
+                this.$el.load(url, function () {
                     that.center();
                     that.trigger('contentLoaded');
                 });

@@ -20,7 +20,7 @@ $(function () {
             this.model.bind("change:isLoggingIn", this.isLoggingInChanged(), this);
 
             // Look for a message control within the view
-            this.messageControl = $(this.el).find('[bind=messageControl]');
+            this.messageControl = this.$el.find('[bind=messageControl]');
             
             if (this.messageControl.length === 0) {
                 // Message control not found within the view - look in the page
@@ -46,8 +46,8 @@ $(function () {
         attemptLogin: function () {
             this.model.messageCollection.reset();
             
-            var usernameEl = this.el.find("#username input");
-            var passwordEl = this.el.find("#password input");
+            var usernameEl = this.$el.find("#username input");
+            var passwordEl = this.$el.find("#password input");
             
             if (usernameEl.length === 0 || passwordEl.length === 0) {
                 alert("Username or password field cannot be found on the page");
@@ -56,7 +56,7 @@ $(function () {
                 this.model.messageCollection.addErrorMessageByKey("loginOrPasswordEmpty");
             }
             else {
-                this.model.login(usernameEl.val(), passwordEl.val(), this.el.attr('type') == 'popup');
+                this.model.login(usernameEl.val(), passwordEl.val(), this.$el.attr('type') == 'popup');
             }
         },
 

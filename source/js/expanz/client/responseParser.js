@@ -418,7 +418,7 @@ function parseDataResponse(dataElement, activityModel, activityView) {
             model: clientMessage
         }, $('body'));
 
-        expanz.Factory.bindDataControls(activityView, picklistWindow.el.parent());
+        expanz.Factory.bindDataControls(activityView, picklistWindow.$el.parent());
 
         var gridModels = activityModel.getDataControl(elId);
 

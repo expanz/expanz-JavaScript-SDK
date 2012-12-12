@@ -60,15 +60,18 @@ $(function () {
 
             if (event.result === undefined) { // Only if no adapter has handled setting the value itself, then we continue and set using default behaviour
                 /* multi choice field -> display as checkboxes */
-                if (allAttrs.items !== undefined && allAttrs.items.length > 0 && attr === 'value') {
-                    var disabled = boolValue($elem.attr('editable')) ? "" : "disabled='disabled'";
-                    _.each(allAttrs.items, function(item) {
-                        var selected = boolValue($(item).attr('selected')) === true ? ' checked="checked" ' : '';
-                        var text = $(item).attr('text');
-                        var value = $(item).attr('value');
-                        $elem.append("<div><input " + disabled + selected + "' value='" + value + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
-                    });
-                } else if ($elem.is('input')) {
+                // NOTE: The model doesn't currently populate the items property anymore, as it leads to an
+                // endless loop in underscore.js in Chrome. As not required for now, commenting out.
+                //if (allAttrs.items !== undefined && allAttrs.items.length > 0 && attr === 'value') {
+                //    var disabled = boolValue($elem.attr('editable')) ? "" : "disabled='disabled'";
+                //    _.each(allAttrs.items, function(item) {
+                //        var selected = boolValue($(item).attr('selected')) === true ? ' checked="checked" ' : '';
+                //        var text = $(item).attr('text');
+                //        var value = $(item).attr('value');
+                //        $elem.append("<div><input " + disabled + selected + "' value='" + value + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
+                //    });
+                //} else
+                if ($elem.is('input')) {
                     // special behaviour for checkbox input
                     if ($elem.is(":checkbox") || $elem.is(":radio")) {
                         $elem.addClass('checkbox');

@@ -30,8 +30,8 @@ $(function () {
                model: message 
             });
 
-            var $messageControlElement = $(this.el);
-            var $messageItemElement = $(messageItemView.el);
+            var $messageControlElement = this.$el;
+            var $messageItemElement = messageItemView.$el;
             
             $messageControlElement.append(messageItemView.render().el);
             $messageItemElement.show();
@@ -69,7 +69,7 @@ $(function () {
         },
         
         collectionReset: function () {
-            $(this.el).html("");
+            this.$el.html("");
         }
     });
     
@@ -95,7 +95,7 @@ $(function () {
                     break;
             }
 
-            $(this.el).html(this.model.get("message"));
+            this.$el.html(this.model.get("message"));
             
             return this;
         }

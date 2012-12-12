@@ -22,8 +22,6 @@ $(function () {
                 this.key = attrs.key;
             }
 
-            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
-
             this.messageControl = null;
             
             this.fieldViewCollection = {};
@@ -51,17 +49,17 @@ $(function () {
 
         loading: function () {
             var loadingId = "Loading_" + this.id.replace(/\./g, "_");
-            var loadingEL = $(this.el).find("#" + loadingId);
+            var loadingEL = this.$el.find("#" + loadingId);
             if (loadingEL.length === 0) {
-                $(this.el).append('<div class="loading" id="' + loadingId + '"><span>Loading content, please wait.. <img src="assets/images/loading.gif" alt="loading.." /></span></div>');
-                loadingEL = $(this.el).find("#" + loadingId);
+                this.$el.append('<div class="loading" id="' + loadingId + '"><span>Loading content, please wait.. <img src="assets/images/loading.gif" alt="loading.." /></span></div>');
+                loadingEL = this.$el.find("#" + loadingId);
             }
 
             var isLoading = this.collection.getAttr('loading');
             if (isLoading) {
-                var off = this.el.offset();
+                var off = this.$el.offset();
                 /* set the loading element as a mask on top of the div to avoid user doing any action */
-                $(this.el).addClass('activityLoading');
+                this.$el.addClass('activityLoading');
                 loadingEL.css("position", "absolute"); /* parent need to be relative //todo enfore it ? */
                 loadingEL.css('width', '100%');
                 loadingEL.css('height', '100%');
@@ -77,7 +75,7 @@ $(function () {
                 loadingEL.show();
             }
             else {
-                $(this.el).removeClass('activityLoading');
+                this.$el.removeClass('activityLoading');
                 loadingEL.hide();
             }
 
@@ -102,7 +100,7 @@ $(function () {
                     if (initiatorType == 'method' && !deltaLoading.isLoading) {
                         /* can be either a element with methodName or a name */
                         var actionSelector = ".actionLoading[methodName='" + initiatorID + "'], [name='" + initiatorID + "'] .actionLoading, .actionLoading[autoUpdate='" + initiatorID + "']";
-                        var dataControlEl = this.el.find(actionSelector).first().closest("[bind='DataControl']");
+                        var dataControlEl = this.$el.find(actionSelector).first().closest("[bind='DataControl']");
                         if (dataControlEl && dataControlEl.length > 0) {
                             dataControlEl.find(actionSelector).removeAttr('disabled');
                             dataControlEl.find(actionSelector).removeClass('actionLoading');

@@ -19,8 +19,6 @@ $(function () {
             this.model.bind("change:label", this.labelChanged(), this);
             this.model.bind("change:loading", this.loading, this);
             this.model.bind("contextMenuLoaded", this.onContextMenuLoaded, this);
-
-            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
         },
 
         events: {

@@ -18,18 +18,18 @@ $(function () {
 
         initialize: function () {
             this.model.bind("change:value", this.toggle, this);
-            this.el.hide();
+            this.$el.hide();
         },
 
         toggle: function () {
-            var elem = this.el.find('[attribute=value]');
+            var elem = this.$el.find('[attribute=value]');
             expanz.views.updateViewElement(this, elem, this.model.get('value'));
 
             if (this.model.get('value').length > 0) {
-                this.el.show('slow');
+                this.$el.show('slow');
             }
             else {
-                this.el.hide('slow');
+                this.$el.hide('slow');
             }
         }
 

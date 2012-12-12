@@ -30,8 +30,6 @@ $(function () {
             this.model.bind("change:errorMessage", this.displayError(), this);
             this.model.bind("change:loading", this.loading, this);
 
-            this.$el = $(this.el); // Can be removed when upgrading to backbone 0.9+
-
             this.$el.html(this.template({ 'name': this.$el.attr('name') }));
 
             this.textInput = this.$el.find('[id=textinput]');
@@ -65,7 +63,7 @@ $(function () {
                 var xml = this.model.get("data");
 
                 _.each(xml.find('Row'), function (row) {
-                    var fieldName = $(view.el).attr('name');
+                    var fieldName = view.$el.attr('name');
                     var rowId = $(row).attr('id');
 
                     var cell = $(row).find('Cell');

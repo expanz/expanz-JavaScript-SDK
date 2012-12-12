@@ -17,7 +17,7 @@ $(function () {
     window.expanz.views.RadioButtonsView = expanz.views.DataControlView.extend({
         publishData: function () {
             /* clean elements */
-            this.el.html();
+            this.$el.html();
             var that = this;
             /* no external component needed just have to draw the checkboxes and handle the clicks */
 
@@ -27,10 +27,10 @@ $(function () {
                 _.each($(row).find('Cell'), function (cell) {
                     var text = $(cell).text();
                     var id = that.model.id.replace(/\./g, "_") + "_" + rowId;
-                    that.el.append("<div><input " + selected + " id='" + id + "' value='" + rowId + "' name='radio' type='radio'></input><span>" + text + "</span></div>");
+                    that.$el.append("<div><input " + selected + " id='" + id + "' value='" + rowId + "' name='radio' type='radio'></input><span>" + text + "</span></div>");
 
                     /* handle radio button click */
-                    $(that.el).find("#" + id).click(function () {
+                    that.$el.find("#" + id).click(function () {
                         /* send the delta to the server */
                         that.model.updateItemSelected($(this).val());
                     });

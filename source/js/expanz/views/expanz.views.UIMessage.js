@@ -22,18 +22,18 @@ $(function () {
 
         renderActions: function () {
             this.model.each(function (action) {
-                if (this.el.find("[attribute=submit]").length === 0) {
-                    this.el.append("<br/>");
+                if (this.$el.find("[attribute=submit]").length === 0) {
+                    this.$el.append("<br/>");
                 }
 
                 var divId = action.id;
 
                 if (action.id == 'close') {
                     divId += action.get('label').split(' ').join('');
-                    this.el.append('<div style="float:left"  bind="method" name="close" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
+                    this.$el.append('<div style="float:left"  bind="method" name="close" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
                 }
                 else if (action.id !== this.model.id) {
-                    this.el.append('<div style="float:left" bind="method" name="' + action.id + '" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
+                    this.$el.append('<div style="float:left" bind="method" name="' + action.id + '" id="' + divId + '">' + '<button attribute="submit">' + action.get('label') + '</button>' + '</div>');
                     var methodView = new expanz.views.MethodView({
                         el: $('div#' + action.id, this.el),
                         id: action.id,
@@ -43,7 +43,7 @@ $(function () {
 
                 /* if response data are present we have to send it during the click event as well */
                 if (action.get('response') !== undefined) {
-                    var button = this.el.find('#' + divId + ' button');
+                    var button = this.$el.find('#' + divId + ' button');
                     var that = this;
 
                     button.click(function () {
