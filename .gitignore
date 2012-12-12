@@ -31,3 +31,7 @@ obj/
 _ReSharper*/
 bin\*
 obj\*
+packages
+obj
+bin
+/obj
