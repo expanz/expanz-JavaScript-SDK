@@ -58,6 +58,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+    <Content Include="source\js\libs\jquery.cookies.2.2.0.js" />
+    <Content Include="source\js\libs\jquery.cookies.2.2.0.min.js" />
+    <Content Include="source\js\libs\jquery.i18n.properties-1.0.9.js" />
+    <Content Include="source\js\libs\jquery.i18n.properties-min-1.0.9.js" />
+    <Content Include="source\js\libs\modernizr-2.6.2.js" />
     <Content Include="source\js\libs\backbone.js" />
     <Content Include="source\js\libs\backbone.min.js" />
     <None Include="source\js\libs\jquery-1.8.3.intellisense.js" />

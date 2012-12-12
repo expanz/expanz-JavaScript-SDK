@@ -35,3 +35,4 @@ packages
 obj
 bin
 /obj
+/source/js/vendor
