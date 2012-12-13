@@ -28,14 +28,14 @@ $(function () {
             this.methodViewCollection = {};
             this.dataControlViewCollection = {};
             
-            this.collection.bind("error", this.updateError, this);
-            this.collection.bind("update:loading", this.loading, this);
-            this.collection.bind("update:deltaLoading", this.deltaLoading, this);
-            this.collection.bind("closingActivity", this.closeActivity, this);
+            this.model.bind("error", this.updateError, this);
+            this.model.bind("change:loading", this.loading, this);
+            this.model.bind("change:deltaLoading", this.deltaLoading, this);
+            this.model.bind("closingActivity", this.closeActivity, this);
         },
 
         updateError: function (model, error) {
-            this.collection.messageCollection.addErrorMessageByText(error);
+            this.model.messageCollection.addErrorMessageByText(error);
         },
 
         events: {
@@ -55,7 +55,7 @@ $(function () {
                 loadingEL = this.$el.find("#" + loadingId);
             }
 
-            var isLoading = this.collection.getAttr('loading');
+            var isLoading = this.model.get('loading');
             if (isLoading) {
                 var off = this.$el.offset();
                 /* set the loading element as a mask on top of the div to avoid user doing any action */
@@ -82,13 +82,13 @@ $(function () {
         },
 
         deltaLoading: function () {
-            var deltaLoading = this.collection.getAttr('deltaLoading');
+            var deltaLoading = this.model.get('deltaLoading');
 
             if (deltaLoading.initiator !== undefined && deltaLoading.initiator !== null) {
                 var initiatorID = deltaLoading.initiator.id;
                 var initiatorType = deltaLoading.initiator.type;
 
-                var initiator = this.collection.get(initiatorID);
+                var initiator = this.model.get(initiatorID);
                 if (initiator) {
                     // window.expanz.logToConsole("delta method loading " + deltaLoading.isLoading + " " + initiatorID);
                     initiator.set({

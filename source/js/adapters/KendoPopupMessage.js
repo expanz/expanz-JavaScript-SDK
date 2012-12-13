@@ -7,7 +7,7 @@ function useKendoPopups() {
 		var that = this;
 		this.$el.kendoWindow({
 			visible : true,
-			title : this.model.getAttr('title') ? this.model.getAttr('title') : "",
+			title : this.model.get('title') ? this.model.get('title') : "",
 			modal : true,
 			width : this.width,
 			close : function() {

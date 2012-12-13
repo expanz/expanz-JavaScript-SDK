@@ -48,7 +48,7 @@ $(function() {
 			    el: activityEl,
 				id : $activityEl.attr('name'),
 				key : $activityEl.attr('key'),
-				collection: activityModel
+				model: activityModel
 			});
 
 			expanz.Factory.bindMessageControl(activityView);
@@ -60,7 +60,7 @@ $(function() {
 		},
 
 		bindMessageControl: function (activityView) {
-		    var activityModel = activityView.collection;
+		    var activityModel = activityView.model;
 		    var messageControl = activityView.$el.find('[bind=messageControl]');
 		    var $messageControl = null;
 		    
@@ -106,7 +106,8 @@ $(function() {
 		},
 
 		bindFields: function (activityView) {
-		    var activityModel = activityView.collection;
+		    var activityModel = activityView.model;
+		    var fieldIdSuffixIndex = 0;
 		    
 		    var fieldViewCollection = expanz.Factory.createFieldViews(activityView.$el.find('[bind=field]'));
 		    var dataFieldViewCollection = expanz.Factory.createDataFieldViews(activityView.$el.find('[bind=datafield]'));
@@ -123,11 +124,11 @@ $(function() {
 		                silent: true
 		            });
 
-		        activityModel.add(fieldModel);
+		        activityModel.fields.add(fieldModel);
 
 		        // Add anonymous fields bound to method
 		        if (fieldModel.get('anonymousBoundMethod') !== null && fieldModel.get('anonymousBoundMethod') !== '') {
-		            var boundMethod = activityModel.get(fieldModel.get('anonymousBoundMethod'));
+		            var boundMethod = activityModel.methods.get(fieldModel.get('anonymousBoundMethod'));
 
 		            if (boundMethod) {
 		                boundMethod.addAnonymousElement(fieldModel);
@@ -153,12 +154,12 @@ $(function() {
 
 		    // Data fields (such as dropdown lists) need to register themselves as data publications
 		    _.each(dataFieldViewCollection, function(dataFieldView) {
-		        activityModel.addDataControl(dataFieldView.dataModel);
+		        activityModel.dataPublications.add(dataFieldView.dataModel);
 		    });
 		},
 
 		bindMethods: function (activityView) {
-		    var activityModel = activityView.collection;
+		    var activityModel = activityView.model;
 
 		    var methodViewCollection = expanz.Factory.createMethodViews(activityView.$el.find('[bind=method]'));
 		    
@@ -171,32 +172,42 @@ $(function() {
 		                silent: true
 		            });
 		        
-		        activityModel.add(methodModel);
+		        activityModel.methods.add(methodModel);
 		        activityView.addMethodView(methodView);
 		    });
 		},
 
 		bindDataControls: function (activityView, parentEl) {
-		    var activityModel = activityView.collection;
+		    var activityModel = activityView.model;
 
 		    if (parentEl === undefined) // Picklists will pass in a parent, but activities won't
 		        parentEl = activityView.el;
 
-		    var dataControlViewCollection = expanz.Factory.createDataControlViews(activityModel.getAttr('name'), activityModel.getAttr('style'), $(parentEl).find('[bind=DataControl]'));
+		    var dataControlViewCollection = expanz.Factory.createDataControlViews(activityModel.get('name'), activityModel.get('style'), $(parentEl).find('[bind=DataControl]'));
 
 		    _.each(dataControlViewCollection, function (dataControlView) {
 		        var dataControlModel = dataControlView.model;
 		        
-				dataControlModel.setAttr({
+				dataControlModel.set({
 					parent : activityModel,
-					activityId : activityModel.getAttr('name')
+					activityId : activityModel.get('name')
 				});
 			    
-				activityModel.addDataControl(dataControlModel);
+		        // Look for any data publication already registered with the same ID, and
+		        // remove it if so (backbone ignores the add if ID already exists). This is 
+		        // primarily required by picklists, which will repeatedly use the same ID.
+				var existingDataModel = activityModel.dataPublications.get(dataControlModel.id);
+		        
+				if (existingDataModel !== undefined) {
+				    activityModel.dataPublications.remove(existingDataModel);
+				}
+
+                // Now add new one
+				activityModel.dataPublications.add(dataControlModel);
 
 				/* add anonymous datacontrol field bound to method */
-				if (dataControlModel.getAttr('anonymousBoundMethod') !== null && dataControlModel.get('anonymousBoundMethod') !== '') {
-				    var boundMethod = activityModel.get(dataControlModel.getAttr('anonymousBoundMethod'));
+				if (dataControlModel.get('anonymousBoundMethod') !== null && dataControlModel.get('anonymousBoundMethod') !== '') {
+				    var boundMethod = activityModel.methods.get(dataControlModel.get('anonymousBoundMethod'));
 				    
 					if (boundMethod) {
 						boundMethod.addAnonymousElement(dataControlModel);
@@ -209,19 +220,29 @@ $(function() {
 
 		    var fieldViews = [];
 		    
-		    _.each(DOMObjects, function (fieldEl) {
+		    _.each(DOMObjects, function (fieldEl, index) {
 		        var $fieldEl = $(fieldEl);
+
+		        // There are a number of ways that the user can specify a field ID. The preferred means is using
+		        // the fieldId attribute, but if this doesn't exist then it looks for a name attribute, and
+		        // finally an id attribute. This will map to a field on the server.
+		        var fieldId = $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id');
 		        
+		        // We also need to generate a unique ID for the model. We'll use the field ID, but if a field
+		        // already exists using that ID (such as when a field is used twice on the page) then append
+		        // a number to the name to make it unique.
+		        var modelId = fieldId + "_" + index;
+
 				// Create a model and a view for each field, and associate the two together
 		        var model = new expanz.models.Field({
-		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id'),
-		            fieldId: $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id'),
+		            id: modelId,
+		            fieldId: fieldId,
 					anonymousBoundMethod : $fieldEl.attr('anonymousBoundMethod')
 				});
 			    
 				var view = new expanz.views.FieldView({
 					el : fieldEl,
-					id: model.get("id"),
+					id: modelId,
 					className : $fieldEl.attr('class'),
 					model: model
 				});
@@ -236,18 +257,28 @@ $(function() {
 
 		    var fieldViews = [];
 		    
-		    _.each(DOMObjects, function (fieldEl) {
+		    _.each(DOMObjects, function (fieldEl, index) {
 		        var $fieldEl = $(fieldEl);
+
+		        // There are a number of ways that the user can specify a field ID. The preferred means is using
+		        // the fieldId attribute, but if this doesn't exist then it looks for a name attribute, and
+		        // finally an id attribute. This will map to a field on the server.
+		        var fieldId = $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id');
+
+		        // We also need to generate a unique ID for the model. We'll use the field ID, but if a field
+		        // already exists using that ID (such as when a field is used twice on the page) then append
+		        // a number to the name to make it unique.
+		        var modelId = fieldId + "_" + index;
 
 		        // Create a model and a view for each field, and associate the two together
 		        var fieldModel = new expanz.models.Field({
-		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id'),
-		            fieldId: $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id'),
+		            id: modelId,
+		            fieldId: fieldId,
 		            anonymousBoundMethod: $fieldEl.attr('anonymousBoundMethod')
 		        });
 		        
 		        var dataModel = new expanz.models.data.DataControl({
-		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id'),
+		            id: modelId,
 					dataId: $fieldEl.attr('dataId') || $fieldEl.attr('id') || $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('query') || $fieldEl.attr('populateMethod'),
 		            populateMethod : $fieldEl.attr('populateMethod'),
 		            type : $fieldEl.attr('type'),
@@ -261,7 +292,7 @@ $(function() {
 		        
 				var view = new expanz.views.DataFieldView({
 					el : fieldEl,
-					id: fieldModel.get("id"),
+					id: modelId,
 					className : $fieldEl.attr('class'),
 					model: fieldModel,
 					dataModel: dataModel
@@ -277,17 +308,28 @@ $(function() {
 
 		    var fieldViews = [];
 		    
-		    _.each(DOMObjects, function (fieldEl) {
+		    _.each(DOMObjects, function (fieldEl, index) {
 		        var $fieldEl = $(fieldEl);
+
+		        // There are a number of ways that the user can specify a field ID. The preferred means is using
+		        // the fieldId attribute, but if this doesn't exist then it looks for a name attribute, and
+		        // finally an id attribute. This will map to a field on the server.
+		        var fieldId = $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id');
+
+		        // We also need to generate a unique ID for the model. We'll use the field ID, but if a field
+		        // already exists using that ID (such as when a field is used twice on the page) then append
+		        // a number to the name to make it unique.
+		        var modelId = fieldId + "_" + index;
 
 		        // Create a model and a view for each variant field, and associate the two together
 		        var model = new expanz.models.Field({
-		            id: $fieldEl.attr('fieldId') || $fieldEl.attr('id') || $fieldEl.attr('name')
+		            id: modelId,
+		            fieldId: fieldId,
 			    });
 		
 		        var view = new expanz.views.VariantFieldView({
 		            el: fieldEl,
-		            id: model.get("id"),
+		            id: modelId,
 		            className: $fieldEl.attr('class'),
 		            model: model
 		        });
@@ -302,7 +344,7 @@ $(function() {
 
 		    var fieldViews = [];
 		    
-		    _.each(DOMObjects, function (fieldEl) {
+		    _.each(DOMObjects, function (fieldEl, index) {
 		        var $fieldEl = $(fieldEl);
 
 		        // Create a model and a view for each dashboard field, and associate the two together
@@ -329,7 +371,7 @@ $(function() {
 
 		    var fieldViews = [];
 		    
-		    _.each(DOMObjects, function (fieldEl) {
+		    _.each(DOMObjects, function (fieldEl, index) {
 		        var $fieldEl = $(fieldEl);
 
 		        // Create a model and a view for each dependant field, and associate the two together
@@ -439,7 +481,7 @@ $(function() {
 						    
 					if (activityInfo) {
 						var gridviewInfo = _.find($(activityInfo).find('gridview'), function(gridviewXML) {
-							return $(gridviewXML).attr('id') === dataControlModel.getAttr('id');
+							return $(gridviewXML).attr('id') === dataControlModel.get('id');
 						});
 							    
 						if (gridviewInfo) {

@@ -14,56 +14,21 @@ $(function() {
 	window.expanz = window.expanz || {};
 	window.expanz.models = window.expanz.models || {};
 
-	window.expanz.models.Activity = expanz.Collection.extend({
-
-	    model: expanz.models.Bindable,
+	window.expanz.models.Activity = Backbone.Model.extend({
 
 	    isAnonymous: function () {
-	        return !this.getAttr('handle');
+	        return !this.get('handle');
 	    },
 	    
         defaults: {
         },
 
-	    initialize: function (attrs) {
-	        this.dataControls = {};
+	    initialize: function () {
+	        this.fields = new expanz.Collection();
+	        this.methods = new expanz.Collection();
+	        this.dataPublications = new expanz.Collection();
 	        this.messageCollection = new expanz.models.MessageCollection();
 	        this.loading = false;
-
-	        this.name = attrs["name"];
-	        this.style = attrs["style"];
-
-	        expanz.Collection.prototype.initialize.call(this, attrs);
-	    },
-
-	    getAll: function () {
-	        return this.reject(function (field) {
-	            // NOTE: 'this' has been set as expanz.models.Activity
-	            return (field.get('id') === 'error') || (field.getAttr && field.getAttr('name'));
-	        }, this);
-	    },
-
-	    addDataControl: function (dataControl) {
-	        var id = dataControl.id || dataControl.getAttr('dataId');
-
-	        if (this.dataControls[id] === undefined)
-	            this.dataControls[id] = [];
-	        
-	        this.dataControls[id].push(dataControl);
-	        
-	        return;
-	    },
-	    
-	    getDataControl: function (id) {
-	        return this.dataControls[id];
-	    },
-	    
-	    getDataControls: function () {
-	        return this.dataControls;
-	    },
-	    
-	    hasDataControl: function () {
-	        return this.dataControls != {};
 	    },
 
 	    load: function () {
@@ -74,50 +39,28 @@ $(function() {
 	        this.trigger("closingActivity");
 	        
 	        // Remove the cached activity handle
-	        window.expanz.Storage.clearActivityHandle(this.name, this.style);
+	        window.expanz.Storage.clearActivityHandle(this.get("name"), this.get("style"));
 
 	        // Remove the activity from the list of open activities
-	        window.expanz.OnActivityClosed(this.getAttr('handle'));
+	        window.expanz.OnActivityClosed(this.get('handle'));
 
 	        // Close the activity on the server
-	        expanz.net.CloseActivityRequest(this.getAttr('handle'));
+	        expanz.net.CloseActivityRequest(this.get('handle'));
 	        
 	        this.destroy();
 	    },
 	    
 	    setFieldFocus: function (focusFieldId) {
 	        // Find the field
-	        var focusField = this.getFirstChildWithMatchingId(focusFieldId);
+	        var focusField = this.fields.where({ fieldId: focusFieldId });
 	        
 	        // Now set focus to it
-	        if (focusField != null)
-	            focusField.setFocus();
+	        if (focusField.length !== 0)
+	            focusField[0].setFocus();
 	    },
-	    
-	    getChildrenWithMatchingId: function (childId) {
-            return this.filter(function(child) {
-                return (child !== undefined && child.id === childId);
-            });
-        },
-	    
-	    getFirstChildWithMatchingId: function (childId) {
-	        // NOTE: get() function returns *last* child with a matching ID
-	        var matches = this.getChildrenWithMatchingId(childId);
-
-	        if (matches.length !== 0)
-	            return matches[0];
-	        else
-	            return null;
-	    },
-	    
-        forEachChildWithMatchingId: function (childId, callback) {
-            this.getChildrenWithMatchingId(childId).forEach(function (child) {
-                callback(child);
-            });
-        },
 
 	    destroy: function () {
-	        expanz.Collection.prototype.destroy.call(this, this.callbacks);
+	        // TODO: Destory field, method, and data publication models
 	    }
 	});
 });

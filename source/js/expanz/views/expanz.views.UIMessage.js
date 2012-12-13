@@ -21,7 +21,7 @@ $(function () {
         cssClass: 'uiMessage popupView',
 
         renderActions: function () {
-            this.model.each(function (action) {
+            this.model.actions.forEach(function (action) {
                 if (this.$el.find("[attribute=submit]").length === 0) {
                     this.$el.append("<br/>");
                 }
@@ -47,7 +47,7 @@ $(function () {
                     var that = this;
 
                     button.click(function () {
-                        that.postCloseActions(that.model.getAttr('title'));
+                        that.postCloseActions(that.model.get('title'));
 
                         if (action.get('response').find("closeWindow")) {
                             if (that.parentPopup !== undefined) {

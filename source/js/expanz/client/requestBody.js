@@ -27,28 +27,22 @@ var requestBody = {
     },
 
     createActivity: function (activity) {
-        var handle = activity.getAttr('handle');
+        var handle = activity.get('handle');
         var center = '';
 
         var unmaskedFields = '';
         
         /* if optimisation is true, ask for fields we want to avoid getting everything */
-        if (activity.getAttr('optimisation') === true) {
-            var fields = activity.getAll();
-            
-            if (fields) {
-                _.each(fields, function (field) {
-                    if (field._type == 'Field') {
-                        unmaskedFields += '<Field id="' + field.get('id') + '" masked="0" />';
-                    }
-                });
-            }
+        if (activity.get('optimisation') === true) {
+            activity.fields.forEach(function (field) {
+                unmaskedFields += '<Field id="' + field.get('fieldId') + '" masked="0" />';
+            });
         }
 
         center = '';
         
         if (handle) {
-            if (activity.getAttr('optimisation') === true) {
+            if (activity.get('optimisation') === true) {
                 center += this.wrapPayloadInActivityRequest(unmaskedFields, activity);
             }
             
@@ -56,12 +50,12 @@ var requestBody = {
         }
         else {
             center += '<CreateActivity ';
-            center += 'name="' + activity.getAttr('name') + '"';
-            center += activity.getAttr('style') ? ' style="' + activity.getAttr('style') + '"' : '';
-            center += activity.getAttr('optimisation') ? ' suppressFields="1"' : '';
-            center += activity.getAttr('key') ? ' initialKey="' + activity.getAttr('key') + '">' : '>';
+            center += 'name="' + activity.get('name') + '"';
+            center += activity.get('style') ? ' style="' + activity.get('style') + '"' : '';
+            center += activity.get('optimisation') ? ' suppressFields="1"' : '';
+            center += activity.get('key') ? ' initialKey="' + activity.get('key') + '">' : '>';
 
-            if (activity.getAttr('optimisation') === true) {
+            if (activity.get('optimisation') === true) {
                 center += unmaskedFields;
             }
         }
@@ -192,43 +186,38 @@ var requestBody = {
     },
 
     getBlob: function (blobId, activity) { // TODO: Activity handle element? Investigate...
-        return '<activityHandle>' + activity.getAttr('handle') + '</activityHandle><blobId>' + blobId + '</blobId><isbyteArray>false</isbyteArray>';
+        return '<activityHandle>' + activity.get('handle') + '</activityHandle><blobId>' + blobId + '</blobId><isbyteArray>false</isbyteArray>';
     },
 
     getFile: function (filename, activity) { // TODO: Activity handle element? Investigate...
-        return '<activityHandle>' + activity.getAttr('handle') + '</activityHandle><fileName>' + filename + '</fileName><isbyteArray>false</isbyteArray>';
+        return '<activityHandle>' + activity.get('handle') + '</activityHandle><fileName>' + filename + '</fileName><isbyteArray>false</isbyteArray>';
     },
 
     dataRefresh: function (dataId, activity) { // TODO: Activity handle element? Investigate...
-        return '<activityHandle>' + activity.getAttr('handle') + '</activityHandle><DataPublication id="' + dataId + '" refresh="1" />';
+        return '<activityHandle>' + activity.get('handle') + '</activityHandle><DataPublication id="' + dataId + '" refresh="1" />';
     },
     
     wrapPayloadInActivityRequest: function (payload, activity) {
         if (activity.isAnonymous())
-            return '<Activity id="' + activity.getAttr('name') + '">' + payload + '</Activity>';
+            return '<Activity id="' + activity.get('name') + '">' + payload + '</Activity>';
         else
-            return '<Activity activityHandle="' + activity.getAttr('handle') + '">' + payload + '</Activity>';
+            return '<Activity activityHandle="' + activity.get('handle') + '">' + payload + '</Activity>';
     },
     
     getActivityDataPublicationRequests: function (activity) {
         var dataPublicationRequests = '';
         
         /* add datapublication for data controls */
-        if (activity.hasDataControl()) {
-            _.each(activity.getDataControls(), function (dataControl, dataControlId) {
-                /* dataControl is an array if many UI element are using the same data but they should all be for the same parameters, we take only the first one then */
-                dataControl = dataControl[0];
+        activity.dataPublications.each(function (dataControl) {
+            var populateMethod = dataControl.get('populateMethod') ? ' populateMethod="' + dataControl.get('populateMethod') + '"' : '';
+            var query = dataControl.get('query') ? ' query="' + dataControl.get('query') + '"' : '';
+            var autoPopulate = dataControl.get('autoPopulate') ? ' autoPopulate="' + dataControl.get('autoPopulate') + '"' : '';
+            var type = dataControl.get('type') ? ' type="' + dataControl.get('type') + '"' : '';
 
-                var populateMethod = dataControl.getAttr('populateMethod') ? ' populateMethod="' + dataControl.getAttr('populateMethod') + '"' : '';
-                var query = dataControl.getAttr('query') ? ' query="' + dataControl.getAttr('query') + '"' : '';
-                var autoPopulate = dataControl.getAttr('autoPopulate') ? ' autoPopulate="' + dataControl.getAttr('autoPopulate') + '"' : '';
-                var type = dataControl.getAttr('type') ? ' type="' + dataControl.getAttr('type') + '"' : '';
-
-                dataPublicationRequests += '<DataPublication id="' + dataControlId + '"' + query + populateMethod + autoPopulate + type;
-                dataPublicationRequests += dataControl.getAttr('contextObject') ? ' contextObject="' + dataControl.getAttr('contextObject') + '"' : '';
-                dataPublicationRequests += '/>';
-            });
-        }
+            dataPublicationRequests += '<DataPublication id="' + dataControl.get('dataId') + '"' + query + populateMethod + autoPopulate + type;
+            dataPublicationRequests += dataControl.get('contextObject') ? ' contextObject="' + dataControl.get('contextObject') + '"' : '';
+            dataPublicationRequests += '/>';
+        });
 
         return dataPublicationRequests;
     }

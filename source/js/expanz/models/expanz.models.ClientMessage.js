@@ -14,13 +14,10 @@ $(function() {
 	window.expanz = window.expanz || {};
 	window.expanz.models = window.expanz.models || {};
 
-	window.expanz.models.ClientMessage = expanz.Collection.extend({
+	window.expanz.models.ClientMessage = expanz.models.Bindable.extend({
 
-	    model: expanz.models.Bindable,
-
-	    initialize: function (attrs) {
-	        expanz.Collection.prototype.initialize.call(this, attrs);
+	    initialize: function () {
+	        this.actions = new expanz.Collection();
 	    }
-
 	});
 });

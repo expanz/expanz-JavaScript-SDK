@@ -21,7 +21,7 @@ $(function () {
             var that = this;
             /* no external component needed just have to draw the checkboxes and handle the clicks */
 
-            _.each(this.model.getAttr('xml').find('Row'), function (row) {
+            _.each(this.model.get('xml').find('Row'), function (row) {
                 var rowId = $(row).attr('id');
                 var selected = boolValue($(row).attr('selected')) === true ? ' checked="checked" ' : '';
                 _.each($(row).find('Cell'), function (cell) {

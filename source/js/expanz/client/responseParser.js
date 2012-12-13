@@ -1,7 +1,5 @@
 ﻿var parseCreateSessionResponse = function (callbacks) {
     return function apply(xml) {
-        // window.expanz.logToConsole("start parseCreateSessionResponse");
-
         if ($(xml).find('CreateSessionXResult').length > 0) {
             expanz.Storage.setSessionHandle($(xml).find('CreateSessionXResult').text());
         }
@@ -59,7 +57,6 @@ function parseUserDetails(xml) {
 }
 
 function parseProcessAreas(xmlElement) {
-    // window.expanz.logToConsole("start parseProcessAreas");
     var processAreas = [];
     $(xmlElement).children('processarea').each(function () {
         var processArea = new ProcessArea($(this).attr('id'), $(this).attr('title'));
@@ -117,9 +114,9 @@ function parseDashboards(xmlElement) {
 
 function parseExecAnonymousResponse(callbacks) {
     return function apply(xml) {
-        // window.expanz.logToConsole("start parseExecAnonymousResponse");
         var execResults = $(xml).find('ExecAnonymousXResult');
         var success = false;
+        
         if (execResults.length > 0) {
             var esaResult = $(execResults).find('ESA');
             success = boolValue(esaResult.attr('success'));
@@ -137,8 +134,6 @@ function parseExecAnonymousResponse(callbacks) {
             if (!success && $(xml).find('errors').length > 0) {
                 serverMessage += $(xml).find('errors').text();
             }
-
-            // window.expanz.logToConsole("Success:" + success);
 
             if (serverMessage !== undefined && serverMessage.length > 0) {
                 if (success) {
@@ -174,8 +169,6 @@ function parseExecAnonymousResponse(callbacks) {
 
 function parseGetSessionDataResponse(callbacks) {
     return function apply(xml) {
-        // window.expanz.logToConsole("start parseGetSessionDataResponse");
-
         var userDetails = parseUserDetails(xml);
         expanz.Storage.setUserDetails(userDetails);
 
@@ -243,7 +236,7 @@ function parseResponse(activity, initiator, callbacks) {
             // REMOVED as I don't know why it would do this
             /* remove other activities from the xml except for anonymous activity */
             //if (!activity.isAnonymous()) {
-            //    $(execResults).find("Activity[activityHandle!='" + activity.getAttr('handle') + "']").remove();
+            //    $(execResults).find("Activity[activityHandle!='" + activity.get('handle') + "']").remove();
             //}
 
             var esaNode = execResults.children("ESA");
@@ -277,7 +270,7 @@ function parseResponse(activity, initiator, callbacks) {
         }
 
         // TODO: Check if this should really be here, and what it actually does
-        activity.setAttr({
+        activity.set({
             'deltaLoading': {
                 isLoading: false,
                 initiator: initiator
@@ -296,18 +289,18 @@ function parseActivityResponse(activityElement, initiator) {
         // This activity is the result of a create activity request, where the model doesn't have a handle yet
         activityView = window.expanz.findOpenActivityViewByModel(initiator.activityModel);
         
-        initiator.activityModel.setAttr({
+        initiator.activityModel.set({
             handle: $activityElement.attr('activityHandle')
         });
         
-        expanz.Storage.setActivityHandle($activityElement.attr('activityHandle'), initiator.activityModel.getAttr('name'), initiator.activityModel.getAttr('style'));
+        expanz.Storage.setActivityHandle(initiator.activityModel.get('handle'), initiator.activityModel.get('name'), initiator.activityModel.get('style'));
     } else {
         activityView = window.expanz.findOpenActivityViewByHandle(activityHandle);
     }
 
     if (activityView != null) {
         // Activity found, so parse the XML in the response for it, and apply it to the model
-        var activityModel = activityView.collection;
+        var activityModel = activityView.model;
 
         // Clear any current errors being displayed
         activityModel.messageCollection.reset();
@@ -366,7 +359,7 @@ function parseActivityResponse(activityElement, initiator) {
             activityModel.setFieldFocus(focusFieldId);
         }
 
-        activityModel.setAttr({
+        activityModel.set({
             loading: false
         });
     } else {
@@ -379,7 +372,7 @@ function parseFieldResponse(fieldElement, activityModel) {
     var $fieldElement = $(fieldElement);
     var id = $fieldElement.attr('id');
 
-    activityModel.forEachChildWithMatchingId(id, function (field) {
+    activityModel.fields.where({ fieldId: id }).forEach(function (field) {
         field.publish($fieldElement);
     });
 }
@@ -387,7 +380,7 @@ function parseFieldResponse(fieldElement, activityModel) {
 function parseMethodResponse(methodElement, activityModel) {
     var $methodElement = $(methodElement);
     var id = $methodElement.attr('id');
-    var method = activityModel.get(id);
+    var method = activityModel.methods.get(id);
 
     if (method && method !== undefined) {
         method.publish($methodElement);
@@ -411,8 +404,6 @@ function parseDataResponse(dataElement, activityModel, activityView) {
             parent: activityModel
         });
 
-        var gridEl = $("#" + elId);
-
         var picklistWindow = new window.expanz.views.PicklistWindowView({
             id: clientMessage.id,
             model: clientMessage
@@ -420,84 +411,76 @@ function parseDataResponse(dataElement, activityModel, activityView) {
 
         expanz.Factory.bindDataControls(activityView, picklistWindow.$el.parent());
 
-        var gridModels = activityModel.getDataControl(elId);
+        var gridModel = activityModel.dataPublications.get(elId);
 
-        if (gridModels !== undefined) {
-            for (var i = 0; i < gridModels.length; i++) {
-                gridModel = gridModels[i];
-                fillGridModel(gridModel, $dataElement);
-                picklistWindow.center();
-                gridModel.updateRowSelected = function (selectedId, type) {
-                    // window.expanz.logToConsole("From parseDeltaResponse:updateRowSelected id:" + selectedId + ' ,type:' + type);
-
-                    var clientFunction = window["picklistUpdateRowSelected" + type];
-                    if (typeof (clientFunction) == "function") {
-                        clientFunction(selectedId);
-                    }
-                    else {
-                        var context = {
-                            id: selectedId,
-                            contextObject: contextObject,
-                            type: type
-                        };
-
-                        var methodAttributes = [
-                            {
-                                name: "contextObject",
-                                value: contextObject
-                            }
-                        ];
-
-                        expanz.net.MethodRequest('SetIdFromContext', methodAttributes, context, activityModel);
-
-                    }
-                    picklistWindow.close();
+        fillGridModel(gridModel, $dataElement);
+        picklistWindow.center();
+            
+        gridModel.updateRowSelected = function(selectedId, type) {
+            var clientFunction = window["picklistUpdateRowSelected" + type];
+                
+            if (typeof(clientFunction) == "function") {
+                clientFunction(selectedId);
+            } else {
+                var context = {
+                    id: selectedId,
+                    contextObject: contextObject,
+                    type: type
                 };
 
+                var methodAttributes = [
+                    {
+                        name: "contextObject",
+                        value: contextObject
+                    }
+                ];
+
+                expanz.net.MethodRequest('SetIdFromContext', methodAttributes, context, activityModel);
             }
-        }
-        else {
-            alert("Unexpected error while trying to display the picklist");
-        }
+                
+            picklistWindow.close();
+        };
     }
     else {
-        var dataControlModels = activityModel.getDataControl(id);
+        var dataControlModels = activityModel.dataPublications.getChildrenByAttribute("dataId", id);
 
-        if (dataControlModels !== undefined) {
-            for (var i = 0; i < dataControlModels.length; i++) {
-                dataControlModel = dataControlModels[i];
+        dataControlModels.forEach(function(dataControlModel) {
+            if (dataControlModel.get('renderingType') == 'grid' || dataControlModel.get('renderingType') == 'popupGrid' || dataControlModel.get('renderingType') == 'rotatingBar') {
+                fillGridModel(dataControlModel, $dataElement);
 
-                if (dataControlModel.getAttr('renderingType') == 'grid' || dataControlModel.getAttr('renderingType') == 'popupGrid' || dataControlModel.getAttr('renderingType') == 'rotatingBar') {
-                    fillGridModel(dataControlModel, $dataElement);
+                /* override the method handler for each action button */
+                dataControlModel.actionSelected = function(selectedId, name, params) {
+                    expanz.net.MethodRequest(name, params, null, activityModel);
+                };
 
-                    /* override the method handler for each action button */
-                    dataControlModel.actionSelected = function (selectedId, name, params) {
-                        expanz.net.MethodRequest(name, params, null, activityModel);
-                    };
+                /* override a method handler for each menuaction button */
+                dataControlModel.menuActionSelected = function(selectedId, name, params) {
+                    expanz.net.CreateMenuActionRequest($dataElement.get('parent'), selectedId, null, name, "1", true);
+                };
 
-                    /* override a method handler for each menuaction button */
-                    dataControlModel.menuActionSelected = function (selectedId, name, params) {
-                        expanz.net.CreateMenuActionRequest($dataElement.getAttr('parent'), selectedId, null, name, "1", true);
-                    };
-
-                    /* override a method handler for each contextmenu button */
-                    dataControlModel.contextMenuSelected = function (selectedId, contextMenuType, contextObject, params) {
-                        expanz.net.CreateContextMenuRequest(this.getAttr('parent'), selectedId, contextMenuType, contextObject);
-                    };
-                }
-                else {
-                    /* update the xml data in the model, view will get a event if bound */
-                    dataControlModel.setAttr({
-                        xml: $dataElement
-                    });
-                }
+                /* override a method handler for each contextmenu button */
+                dataControlModel.contextMenuSelected = function(selectedId, contextMenuType, contextObject, params) {
+                    expanz.net.CreateContextMenuRequest(this.get('parent'), selectedId, contextMenuType, contextObject);
+                };
+            } else {
+                // Unset required, as the set function in FireFox and IE doesn't seem to recognise
+                // that the data has changed, and thus doesn't actually change the value or raise
+                // the change event
+                dataControlModel.unset("xml", {
+                    silent: true
+                });
+                
+                /* update the xml data in the model, view will get a event if bound */
+                dataControlModel.set({
+                    xml: $dataElement
+                });
             }
-        }
+        });
 
-        // Dropdown lists and variant fields also can consume data publications, but are handled 
-        // separately as they behave more like fields than data publications (ie. they don't register 
+        // Variant fields also can consume data publications, but are handled separately 
+        // as they behave more like fields than data publications (ie. they don't register 
         // as data publications with the activity).
-        activityModel.forEachChildWithMatchingId(id, function (field) {
+        activityModel.fields.where({ fieldId: id }).forEach(function (field) {
             field.publishData($dataElement);
         });
     }
@@ -524,14 +507,12 @@ function parseActivityLevelMessagesResponse(messagesElement, activityModel) {
         var source = messageModel.source;
 
         if (source && source !== undefined) {
-            var field = activityModel.get(source);
-
-            if (field && field !== undefined) {
+            activityModel.fields.where({ fieldId: source }).forEach(function (field) {
                 field.set({
                     errorMessage: activityModel.messageCollection.transformMessage(messageModel.message),
                     error: true
                 });
-            }
+            });
         }
     });
 }
@@ -570,7 +551,7 @@ function parseUIMessageResponse(uiMessageElement, activityModel) {
             methodAttributes: methodAttributes
         });
 
-        clientMessage.add(actionModel);
+        clientMessage.actions.add(actionModel);
     });
 
     var uiMsg = new window.expanz.views.UIMessage({
@@ -676,7 +657,6 @@ function parseFilesResponse(filesElement, activity, initiator) {
 // TODO: Merge into core response handler
 function parseCloseActivityResponse(callbacks) {
     return function apply(xml) {
-        // window.expanz.logToConsole("start parseCloseActivityResponse");
         var execResults = $(xml).find('ExecXResult');
         if (xml && execResults) {
             var esaResult = $(execResults).find('ESA');
@@ -689,6 +669,7 @@ function parseCloseActivityResponse(callbacks) {
                 }
             }
         }
+        
         if (callbacks && callbacks.error) {
             callbacks.error(true);
         }
@@ -698,8 +679,8 @@ function parseCloseActivityResponse(callbacks) {
 
 function parseReleaseSessionResponse(callbacks) {
     return function apply(xml) {
-        // window.expanz.logToConsole("start parseReleaseSessionResponse");
         var result = $(xml).find("ReleaseSessionResult").text();
+        
         if (result === 'true') {
             if (callbacks && callbacks.success) {
                 callbacks.success(result);
@@ -707,9 +688,11 @@ function parseReleaseSessionResponse(callbacks) {
             }
 
         }
+        
         if (callbacks && callbacks.error) {
             callbacks.error(result);
         }
+        
         return;
     };
 }
@@ -733,7 +716,7 @@ function fillActivityData(processAreas, url, name, style, gridviewList) {
 function fillGridModel(gridModel, data) {
     gridModel.clear();
 
-    gridModel.setAttr({
+    gridModel.set({
         source: $(data).attr('source')
     });
 

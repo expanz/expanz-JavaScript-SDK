@@ -18,7 +18,7 @@ $(function () {
 
         initialize: function (attrs) {
             Backbone.View.prototype.initialize.call(attrs);
-            this.model.bind("update:xml", this.publishData, this); 
+            this.model.bind("change:xml", this.publishData, this); 
         },
 
         itemSelected: function (itemId, callbacks) {
@@ -27,9 +27,8 @@ $(function () {
 
         publishData: function () {
             this.$el.trigger("publishData", [
-				this.model.getAttr('xml'), this
+				this.model.get('xml'), this
             ]);
         }
-
     });
 });

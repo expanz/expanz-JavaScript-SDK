@@ -26,8 +26,8 @@ $(function() {
 	            $.each(this.get('anonymousFields'), function (index, value) {
 	                if (value instanceof expanz.models.data.DataControl) {
 	                    anonymousFields.push({
-	                        id: value.getAttr('dataId'),
-	                        value: value.getAttr('lastValues') || ""
+	                        id: value.get('dataId'),
+	                        value: value.get('lastValues') || ""
 	                    });
 	                }
 	                else {

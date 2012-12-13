@@ -219,7 +219,7 @@ $.fn.KendoTreeAdapter = function(options) {
 								name : "contextObject",
 								value : elem.contextObject
 							}
-						], null, view.model.getAttr('parent'));
+						], null, view.model.get('parent'));
 
 						$(treeView).trigger("TreeSelectionChanged", {
 							id : 'static',

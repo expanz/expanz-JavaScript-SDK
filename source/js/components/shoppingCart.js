@@ -244,7 +244,7 @@ $(function() {
 								$("#ItemSearch input").val(search);
 							}
 
-							expanz.net.AnonymousMethodsRequest(dataModelList, that.activity.collection);
+							expanz.net.AnonymousMethodsRequest(dataModelList, that.activity.model);
 
 							/* hide unwanted stuff when anonymous */
 							$("[loginNeeded='true']").hide();
@@ -262,7 +262,7 @@ $(function() {
 							/* initial load as a logged in user -> user has copied the url, reloaded the page */
 							var methodAttributes = [];
 							if (from == 'tree') {
-								expanz.net.DeltaRequest(that.categoryTreeName, catId, that.activity.collection);
+							    expanz.net.DeltaRequest(that.categoryTreeName, catId, that.activity.model);
 								that.lastCategory = catName;
 								that.lastCategoryParent = catParentName;
 							}
@@ -273,7 +273,7 @@ $(function() {
 										value : that.listItemsOnSpecialMethodContextObject
 									}
 								];
-								expanz.net.MethodRequest(that.listItemsOnSpecialMethodName, methodAttributes, null, that.activity.collection);
+								expanz.net.MethodRequest(that.listItemsOnSpecialMethodName, methodAttributes, null, that.activity.model);
 							}
 							else if (from == 'newItems') {
 								methodAttributes = [
@@ -282,7 +282,7 @@ $(function() {
 										value : that.listItemsNewMethodContextObject
 									}
 								];
-								expanz.net.MethodRequest(that.listItemsNewMethodName, methodAttributes, null, that.activity.collection);
+								expanz.net.MethodRequest(that.listItemsNewMethodName, methodAttributes, null, that.activity.model);
 							}
 							else if (from == 'endOfLine') {
 								methodAttributes = [
@@ -291,7 +291,7 @@ $(function() {
 										value : that.listItemsEndOfLineMethodContextObject
 									}
 								];
-								expanz.net.MethodRequest(that.listItemsEndOfLineMethodName, methodAttributes, null, that.activity.collection);
+								expanz.net.MethodRequest(that.listItemsEndOfLineMethodName, methodAttributes, null, that.activity.model);
 							}
 							else if (from == 'previously') {
 								methodAttributes = [
@@ -300,18 +300,18 @@ $(function() {
 										value : that.listPreviouslyOrderedContextObject
 									}
 								];
-								expanz.net.MethodRequest(that.listPreviouslyOrderedMethodName, methodAttributes, null, that.activity.collection);
+								expanz.net.MethodRequest(that.listPreviouslyOrderedMethodName, methodAttributes, null, that.activity.model);
 							}
 							else if (from == 'search') {
 								// TODO support search initial load for logged in user
 							}
 						}
 					};
-					if (this.activity.collection.getAttr('loading') === false) {
+					if (this.activity.model.get('loading') === false) {
 						initialCall();
 					}
 					else {
-						this.activity.collection.bind("update:loading", function() {
+					    this.activity.model.bind("change:loading", function () {
 							initialCall();
 						});
 					}
@@ -651,7 +651,7 @@ $(function() {
 					$("#displayAsGrid").removeClass("selectedDisplay");
 					productListAsTable.show();
 					productListAsGrid.hide();
-					expanz.net.GetSavePreferencesRequest(that.activity.collection, "DefaultShoppingCartView", 'displayAsList', true);
+					expanz.net.GetSavePreferencesRequest(that.activity.model, "DefaultShoppingCartView", 'displayAsList', true);
 				});
 
 				$("#displayAsGrid").click(function() {
@@ -659,7 +659,7 @@ $(function() {
 					$("#displayAsGrid").addClass("selectedDisplay");
 					productListAsTable.hide();
 					productListAsGrid.show();
-					expanz.net.GetSavePreferencesRequest(that.activity.collection, "DefaultShoppingCartView", 'displayAsGrid', true);
+					expanz.net.GetSavePreferencesRequest(that.activity.model, "DefaultShoppingCartView", 'displayAsGrid', true);
 				});
 
 			},
@@ -1006,7 +1006,7 @@ $(function() {
 			},
 
 			_executeAfterRenderMiniGoToCartBoxModule : function() {
-				var CartItemsCountField = this.activity.collection.get('CartItemsCount');
+			    var CartItemsCountField = this.activity.model.fields.getFirstChildByAttribute('fieldId', 'CartItemsCount');
 				if (CartItemsCountField) {
 					CartItemsCountField.collection.bind('change:value', function(el) {
 						if (el.get('value') === 0) {
@@ -1281,7 +1281,7 @@ $(function() {
 			isAnonymous : function() {
 				if (this.activity === null)
 					return null;
-				return this.activity.collection.getAttr('allowAnonymous') === true && this.activity.collection.isAnonymous();
+				return this.activity.model.get('allowAnonymous') === true && this.activity.model.isAnonymous();
 			}
 
 		});

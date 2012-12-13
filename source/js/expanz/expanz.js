@@ -68,7 +68,7 @@ $(function() {
 	// name : $(activityEl).attr('name'),
 	// key : $(activityEl).attr('key')
 	// });
-	// activity.collection.destroy();
+    // activity.model.destroy();
 	// activity.remove(); // remove from DOM
 	// }
 	// else {
@@ -153,7 +153,7 @@ $(function() {
 	window.expanz.findOpenActivityViewByHandle = function(activityHandle) {
 	    if (window && window.openActivityViews) {
 	        for (var i = 0; i < window.openActivityViews.length; i++) {
-	            if (window.openActivityViews[i] !== undefined && window.openActivityViews[i].collection.getAttr("handle") == activityHandle) {
+	            if (window.openActivityViews[i] !== undefined && window.openActivityViews[i].model.get("handle") == activityHandle) {
 	                return window.openActivityViews[i];
 				}
 			}
@@ -165,7 +165,7 @@ $(function() {
 	window.expanz.findOpenActivityViewByModel = function(activityModel) {
 	    if (window && window.openActivityViews) {
 	        for (var i = 0; i < window.openActivityViews.length; i++) {
-	            if (window.openActivityViews[i] !== undefined && window.openActivityViews[i].collection === activityModel) {
+	            if (window.openActivityViews[i] !== undefined && window.openActivityViews[i].model === activityModel) {
 	                return window.openActivityViews[i];
 				}
 			}
@@ -178,7 +178,7 @@ $(function() {
 	    // Remove the activity with the matching ID from the list of open activities
 	    if (window && window.openActivityViews) {
 	        for (var i = 0; i < window.openActivityViews.length; i++) {
-	            if (window.openActivityViews[i] !== undefined && window.openActivityViews[i].collection.getAttr("handle") == activityId) {
+	            if (window.openActivityViews[i] !== undefined && window.openActivityViews[i].model.get("handle") == activityId) {
 	                delete window.openActivityViews[i];
 	                return;
 				}
@@ -230,12 +230,12 @@ $(function() {
 		    var activityView = expanz.Factory.createActivityView(dom);
 
 			/* look for initial key in the query parameters */
-			var initialKey = paramInitialKey || getQueryParameterByName(activityView.collection.getAttr('name') + (activityView.collection.getAttr('style') || '') + 'initialKey');
-			activityView.collection.setAttr({
+		    var initialKey = paramInitialKey || getQueryParameterByName(activityView.model.get('name') + (activityView.model.get('style') || '') + 'initialKey');
+			activityView.model.set({
 				'key' : initialKey
 			});
 
-			activityView.collection.load(callbacks);
+			activityView.model.load(callbacks);
 			activities.push(activityView);
 		});
 

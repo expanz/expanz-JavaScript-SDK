@@ -153,16 +153,6 @@ $(function() {
 		
 		refresh : function() {
 			expanz.net.DataRefreshRequest(this.id, this.parent);
-		},
-	    
-        setAttr: function(attrs) {
-            // TEMPORARY, UNTIL DATACONTROL IS CONVERTED TO MODEL TOO!
-            this.set(attrs);
-        },
-	    
-        getAttr: function(id) {
-            // TEMPORARY, UNTIL DATACONTROL IS CONVERTED TO MODEL TOO!
-            return this.get(id);
-        }
+		}
 	});
 });

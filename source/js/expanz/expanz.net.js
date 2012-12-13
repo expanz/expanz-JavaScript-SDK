@@ -75,7 +75,7 @@ $(function() {
 			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (activity.getAttr('allowAnonymous') === false) {
+			if (activity.get('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 					expanz.views.requestLogin();
 					return;
@@ -87,10 +87,10 @@ $(function() {
 			    var initiator = null;
 			    
 				/* check if an activity has already been created, if so specify it instead of creating a new one */
-				var activityHandle = expanz.Storage.getActivityHandle(activity.getAttr('name'), activity.getAttr('style'));
+				var activityHandle = expanz.Storage.getActivityHandle(activity.get('name'), activity.get('style'));
 
 				if (activityHandle !== undefined && activityHandle !== null) {
-				    activity.setAttr({
+				    activity.set({
 				        'handle': activityHandle
 				    });
 				} else {
@@ -103,7 +103,7 @@ $(function() {
 			        };
 				}
 
-				activity.setAttr({
+				activity.set({
 					loading : true
 				});
 
@@ -116,7 +116,7 @@ $(function() {
 
 		GetSavePreferencesRequest : function(activity, key, value, updateClientStorage, callbacks) {
 
-			if (activity.getAttr('allowAnonymous') === false) {
+			if (activity.get('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 					expanz.views.requestLogin();
 					return;
@@ -137,7 +137,7 @@ $(function() {
 			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (activity.getAttr('allowAnonymous') === false) {
+			if (activity.get('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 					expanz.views.requestLogin();
 					return;
@@ -149,7 +149,7 @@ $(function() {
 				id : id
 			};
 
-			activity.setAttr({
+			activity.set({
 				'deltaLoading' : {
 					isLoading : true,
 					initiator : initiator
@@ -163,7 +163,7 @@ $(function() {
 			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
-			if (activity.getAttr('allowAnonymous') === false) {
+			if (activity.get('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 					expanz.views.requestLogin();
 					return;
@@ -175,7 +175,7 @@ $(function() {
 				id : name
 			};
 
-			activity.setAttr({
+			activity.set({
 				'deltaLoading' : {
 					isLoading : true,
 					initiator : initiator
@@ -202,7 +202,7 @@ $(function() {
 				id : "anonymous"
 			};
 
-			activity.setAttr({
+			activity.set({
 				'deltaLoading' : {
 					isLoading : true,
 					initiator : initiator
@@ -237,7 +237,7 @@ $(function() {
 				id : dataId
 			};
 
-			activity.setAttr({
+			activity.set({
 				'deltaLoading' : {
 					isLoading : true,
 					initiator : initiator
@@ -263,7 +263,7 @@ $(function() {
 			}
 
 			/* even if the file is not opened yet, we consider the delta loading is finished */
-			activity.setAttr({
+			activity.set({
 				'deltaLoading' : {
 					isLoading : false,
 					initiator : initiator
@@ -281,7 +281,7 @@ $(function() {
 			}
 
 			/* even if the file is not opened yet, we consider the delta loading is finished */
-			activity.setAttr({
+			activity.set({
 				'deltaLoading' : {
 					isLoading : false,
 					initiator : initiator
@@ -306,7 +306,7 @@ $(function() {
 				id : contextId
 			};
 
-			activity.setAttr({
+			activity.set({
 				'deltaLoading' : {
 					isLoading : true,
 					initiator : initiator
@@ -331,7 +331,7 @@ $(function() {
 				id : contextId
 			};
 
-			activity.setAttr({
+			activity.set({
 				'deltaLoading' : {
 					isLoading : true,
 					initiator : initiator

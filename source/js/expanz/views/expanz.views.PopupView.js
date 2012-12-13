@@ -61,16 +61,16 @@ $(function () {
             }
 
             var content = '';
-            if (this.model.getAttr('text') !== undefined && this.model.getAttr('text').length > 0) {
-                content = this.model.getAttr('text');
+            if (this.model.get('text') !== undefined && this.model.get('text').length > 0) {
+                content = this.model.get('text');
             }
 
             containerjQ.append("<div class='" + this.cssClass + "' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");
             this.setElement(containerjQ.find('#' + this.id));
             this.createWindowObject();
 
-            if (this.model.getAttr('url') !== undefined && this.model.getAttr('url').length > 0) {
-                var url = this.model.getAttr('url');
+            if (this.model.get('url') !== undefined && this.model.get('url').length > 0) {
+                var url = this.model.get('url');
                 var that = this;
                 this.$el.load(url, function () {
                     that.center();
@@ -88,7 +88,7 @@ $(function () {
             this.el.dialog({
                 modal: true,
                 width: this.width,
-                title: this.model.getAttr('title')
+                title: this.model.get('title')
             });
         },
         
@@ -115,7 +115,7 @@ $(function () {
             }
             
             if (this.postCloseActions)
-                this.postCloseActions(this.model.getAttr('title'));
+                this.postCloseActions(this.model.get('title'));
         },
 
         /* may be redifined depending on the plug-in used */

@@ -16,15 +16,15 @@ $(function() {
 	window.expanz.models = window.expanz.models || {};
 	window.expanz.models.data = window.expanz.models.data || {};
 
-	window.expanz.models.data.DataControl = expanz.Collection.extend({
+	window.expanz.models.data.DataControl = Backbone.Model.extend({
 
-		initialize : function(attrs) {
-			expanz.Collection.prototype.initialize.call(this, attrs);
+	    initialize: function () {
+	        this.rows = new expanz.models.data.RowCollection();
 		},
 
 		update : function(attrs) {
 
-			expanz.net.DeltaRequest(this.getAttr('dataId'), attrs.value, this.getAttr('parent'));
+			expanz.net.DeltaRequest(this.get('dataId'), attrs.value, this.get('parent'));
 			return;
 		},
 
@@ -32,26 +32,26 @@ $(function() {
 			// window.expanz.logToConsole("DataControl:updateItemSelected id:" + selectedId);
 
 			/* anonymous activity case */
-			if (this.getAttr('parent').isAnonymous()) {
+			if (this.get('parent').isAnonymous()) {
 				/* if we are in anonymous mode and the data control is a tree we need to call a method on selection change instead of a delta */
-				if (this.getAttr('renderingType') == 'tree') {
+				if (this.get('renderingType') == 'tree') {
 					var anonymousFields = [
 						{
-							id : this.getAttr('dataId'),
+							id : this.get('dataId'),
 							value : selectedId
 						}
 					];
 
-					expanz.net.MethodRequest(this.getAttr('selectionChangeAnonymousMethod'), [
+					expanz.net.MethodRequest(this.get('selectionChangeAnonymousMethod'), [
 						{
 							name : "contextObject",
-							value : this.getAttr('selectionChangeAnonymousContextObject')
+							value : this.get('selectionChangeAnonymousContextObject')
 						}
-					], null, this.getAttr('parent'), anonymousFields,callbacks);
+					], null, this.get('parent'), anonymousFields,callbacks);
 				}
 				/* if we are in anonymous mode and the data control is a checkboxes control we need to store the value to send it later */
 				else {
-					var lastValues = this.getAttr('lastValues');
+					var lastValues = this.get('lastValues');
 					if (!lastValues) {
 						lastValues = "";
 					}
@@ -68,7 +68,7 @@ $(function() {
 						lastValues += selectedId;
 					}
 
-					this.setAttr({
+					this.set({
 						lastValues : lastValues
 					});
 				}
@@ -76,15 +76,14 @@ $(function() {
 			/* logged in case */
 			else {
 				/* exception for documents we have to send a MenuAction request */
-				if (this.getAttr('id') == 'documents') {
-					expanz.net.CreateMenuActionRequest(this.getAttr('parent'), selectedId, "File", null, "1", callbacks);
+				if (this.get('id') == 'documents') {
+					expanz.net.CreateMenuActionRequest(this.get('parent'), selectedId, "File", null, "1", callbacks);
 				}
 				/* normal case we send a delta request */
 				else {
-					expanz.net.DeltaRequest(this.getAttr('fieldName'), selectedId, this.getAttr('parent'), callbacks);
+					expanz.net.DeltaRequest(this.get('fieldName'), selectedId, this.get('parent'), callbacks);
 				}
 			}
 		}
 	});
-
 });

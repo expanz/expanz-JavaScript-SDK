@@ -54,10 +54,13 @@ $(function() {
 
 		getActivityHandle : function(activityName, activityStyle) {
 			var activityHandle = this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle);
-			if (activityHandle == 'undefined')
+
+			if (activityHandle === undefined || activityHandle === null)
 				return undefined;
+
 			if (activityHandle)
 				activityHandle = activityHandle.replace('_', '.');
+
 			return activityHandle;
 		},
 

@@ -127,7 +127,7 @@ $.fn.KendoPanelBarAdapter = function(options) {
 								name : "contextObject",
 								value : elem.contextObject
 							}
-						], null, view.model.getAttr('parent'));
+						], null, view.model.get('parent'));
 					}
 				});
 
