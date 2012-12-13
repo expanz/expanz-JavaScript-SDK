@@ -9,14 +9,22 @@
         var onValueUpdatedFromServer = function(event, newValue, model) {
             // Time fields should render their value using the corresponding 12hr/24hr value provided by the model, the
             // choice of which is specified as a configuration property
-            var timeFormat = $inputElement.attr('timeFormat') !== undefined ? $inputElement.attr('timeFormat') : window.config._timeFormat;
+            var value = null;
 
-            if (timeFormat === undefined)
-                timeFormat = 12;
+            if (newValue !== null) {
+                var timeFormat = $inputElement.attr('timeFormat') !== undefined ? $inputElement.attr('timeFormat') : window.config._timeFormat;
 
-            var value = (timeFormat == 12 ? model.attributes["timeAMPM"] : model.attributes["time24"]);
+                if (timeFormat === undefined)
+                    timeFormat = 12;
 
-            $inputElement.val(value);
+                value = (timeFormat == 12 ? model.attributes["timeAMPM"] : model.attributes["time24"]);
+            }
+
+            if ($inputElement.is('input')) {
+                $inputElement.val(value);
+            } else {
+                $inputElement.text(value || ""); // Support for non-input elements, like labels
+            }
 
             return value;
         };
