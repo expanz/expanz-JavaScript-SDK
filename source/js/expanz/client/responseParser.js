@@ -734,7 +734,7 @@ function fillGridModel(gridModel, data) {
     _.each($(data).find('Row'), function (row) {
 
         var rowId = $(row).attr('id');
-        gridModel.addRow(rowId, $(row).attr('type') || $(row).attr('Type'));
+        gridModel.addRow(rowId, $(row).attr('type') || $(row).attr('Type'), $(row).attr('displayStyle'));
 
         // add cells to this row
         _.each($(row).find('Cell'), function (cell) {

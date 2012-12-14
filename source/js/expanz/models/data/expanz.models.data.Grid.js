@@ -114,10 +114,11 @@ $(function() {
 			    this.rows.models.reverse();
 		},
 
-		addRow : function(id, type) {
+		addRow : function(id, type, displayStyle) {
 		    this.rows.add({
 				id : id,
-				type : type,
+				type: type,
+				displayStyle: displayStyle,
 				gridId : this.id
 			});
 		},
