@@ -38,7 +38,12 @@ $(function () {
             var view = this;
             
             return function () {
-                var elem = this.$el.find('[attribute=' + attr + ']');
+                var elem = null;
+
+                if (this.$el.attr("attribute") === "value")
+                    elem = this.$el;
+                else
+                    elem = this.$el.find('[attribute=' + attr + ']');
                 
                 expanz.views.updateViewElement(view, elem, this.model.attributes, attr, this.model);
                 view.render();
@@ -119,8 +124,11 @@ $(function () {
             "change [attribute=value]": "viewUpdate"
         },
         
-        getInputElement: function() {
-            return this.$el.find('[attribute=value]');
+        getInputElement: function () {
+            if (this.$el.attr("attribute") === "value")
+                return this.$el;
+            else
+                return this.$el.find('[attribute=value]');
         },
 
         getValue: function () {
