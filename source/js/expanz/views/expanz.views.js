@@ -56,7 +56,9 @@ $(function () {
 
         if (value !== undefined) {
             var event = jQuery.Event("valueUpdated");
-            $elem.trigger(event, [value, model]); // Extensibility point for adapters
+            
+            if (attr === "value")
+                $elem.trigger(event, [value, model]); // Extensibility point for adapters
 
             if (event.result === undefined) { // Only if no adapter has handled setting the value itself, then we continue and set using default behaviour
                 /* multi choice field -> display as checkboxes */
