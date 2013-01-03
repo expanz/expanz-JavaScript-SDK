@@ -62,7 +62,7 @@ $(function() {
 	            // Now do special attribute processing. Reasons for processing these attributes separately include
 	            // needing to be processed in a specific order, or needing their values transformed (e.g. converted 
 	            // to bool, long data handling, etc)
-	            if ((this.get('value') && (this.get('value') != xml.attr('value'))) || !this.get('value')) {
+	            if (xml[0].hasAttribute("value")) {
 	                this.set({
 	                    // NOTE: The model doesn't currently populate the items property anymore, as it leads to an
 	                    // endless loop in underscore.js in Chrome. As not required for now, commenting out.
@@ -71,7 +71,7 @@ $(function() {
 	                });
 	            }
 
-	            if (xml.attr('visualType')) {
+	            if (xml[0].hasAttribute('visualType')) {
 	                this.set({
 	                    visualType: xml.attr('visualType')
 	                });
