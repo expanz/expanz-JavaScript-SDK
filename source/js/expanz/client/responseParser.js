@@ -472,7 +472,7 @@ function parseDataResponse(dataElement, activityModel, activityView) {
                 
                 /* update the xml data in the model, view will get a event if bound */
                 dataControlModel.set({
-                    xml: $dataElement
+                    xml: $dataElement[0] 
                 });
             }
         });
