@@ -372,7 +372,7 @@ function parseFieldResponse(fieldElement, activityModel) {
     var $fieldElement = $(fieldElement);
     var id = $fieldElement.attr('id');
 
-    activityModel.fields.where({ fieldId: id }).forEach(function (field) {
+    _.each(activityModel.fields.where({ fieldId: id }), function (field) {
         field.publish($fieldElement);
     });
 }
@@ -444,7 +444,7 @@ function parseDataResponse(dataElement, activityModel, activityView) {
     else {
         var dataControlModels = activityModel.dataPublications.getChildrenByAttribute("dataId", id);
 
-        dataControlModels.forEach(function(dataControlModel) {
+        _.each(dataControlModels, function(dataControlModel) {
             if (dataControlModel.get('renderingType') == 'grid' || dataControlModel.get('renderingType') == 'popupGrid' || dataControlModel.get('renderingType') == 'rotatingBar') {
                 fillGridModel(dataControlModel, $dataElement);
 
@@ -480,7 +480,7 @@ function parseDataResponse(dataElement, activityModel, activityView) {
         // Variant fields also can consume data publications, but are handled separately 
         // as they behave more like fields than data publications (ie. they don't register 
         // as data publications with the activity).
-        activityModel.fields.where({ fieldId: id }).forEach(function (field) {
+        _.each(activityModel.fields.where({ fieldId: id }), function (field) {
             field.publishData($dataElement);
         });
     }
@@ -507,7 +507,7 @@ function parseActivityLevelMessagesResponse(messagesElement, activityModel) {
         var source = messageModel.source;
 
         if (source && source !== undefined) {
-            activityModel.fields.where({ fieldId: source }).forEach(function (field) {
+            _.each(activityModel.fields.where({ fieldId: source }), function (field) {
                 field.set({
                     errorMessage: activityModel.messageCollection.transformMessage(messageModel.message),
                     error: true
