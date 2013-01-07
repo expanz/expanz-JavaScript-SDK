@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bundle minify="true" runOnBuild="true">
+  <!--The order of the <file> elements determines the order of them when bundled.-->
+  <file>/source/js/adapters/KendoAdapter.js</file>
+  <file>/source/js/adapters/KendoComboBoxAdapter.js</file>
+  <file>/source/js/adapters/KendoDatePickerAdapter.js</file>
+  <file>/source/js/adapters/KendoDropDownListAdapter.js</file>
+  <file>/source/js/adapters/KendoMobileListAdapter.js</file>
+  <file>/source/js/adapters/KendoPanelBarAdapter.js</file>
+  <file>/source/js/adapters/KendoPopupMessage.js</file>
+  <file>/source/js/adapters/KendoTabStripAdapter.js</file>
+  <file>/source/js/adapters/KendoTimePickerAdapter.js</file>
+  <file>/source/js/adapters/KendoTreeAdapter.js</file>
+</bundle>

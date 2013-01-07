@@ -58,6 +58,24 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+    <Content Include="build\expanz-sdk.js">
+      <DependentUpon>expanz-sdk.js.bundle</DependentUpon>
+    </Content>
+    <Content Include="build\expanz-sdk.min.js">
+      <DependentUpon>expanz-sdk.js.bundle</DependentUpon>
+    </Content>
+    <Content Include="build\KendoUIAdapters.js">
+      <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
+    </Content>
+    <Content Include="build\KendoUIAdapters.min.js">
+      <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
+    </Content>
+    <Content Include="build\expanz-components.js">
+      <DependentUpon>expanz-components.js.bundle</DependentUpon>
+    </Content>
+    <Content Include="build\expanz-components.min.js">
+      <DependentUpon>expanz-components.js.bundle</DependentUpon>
+    </Content>
     <Content Include="source\js\libs\jquery.cookies.2.2.0.js" />
     <Content Include="source\js\libs\jquery.cookies.2.2.0.min.js" />
     <Content Include="source\js\libs\jquery.i18n.properties-1.0.9.js" />
@@ -65,12 +83,23 @@
     <Content Include="source\js\libs\modernizr-2.6.2.js" />
     <Content Include="source\js\libs\backbone.js" />
     <Content Include="source\js\libs\backbone.min.js" />
+    <None Include="build\expanz-sdk.js.bundle" />
+    <Content Include="build\expanz-sdk.min.js.map">
+      <DependentUpon>expanz-sdk.js.bundle</DependentUpon>
+    </Content>
+    <None Include="build\expanz-kendoui-adapters.js.bundle" />
+    <Content Include="build\KendoUIAdapters.min.js.map">
+      <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
+    </Content>
+    <None Include="build\expanz-components.js.bundle" />
+    <Content Include="build\expanz-components.min.js.map">
+      <DependentUpon>expanz-components.js.bundle</DependentUpon>
+    </Content>
     <None Include="source\js\libs\jquery-1.8.3.intellisense.js" />
     <Content Include="source\js\libs\jquery-1.8.3.js" />
     <Content Include="source\js\libs\jquery-1.8.3.min.js" />
     <Content Include="source\js\libs\underscore.js" />
     <Content Include="source\js\libs\underscore.min.js" />
-    <Content Include="source\js\adapters\.gitignore" />
     <Content Include="source\js\adapters\KendoTimePickerAdapter.js" />
     <Content Include="source\js\adapters\KendoDatePickerAdapter.js" />
     <Content Include="source\js\adapters\KendoAdapter.js" />
@@ -81,9 +110,6 @@
     <Content Include="source\js\adapters\KendoPopupMessage.js" />
     <Content Include="source\js\adapters\KendoTabStripAdapter.js" />
     <Content Include="source\js\adapters\KendoTreeAdapter.js" />
-    <Content Include="source\js\adapters\min\.gitignore" />
-    <Content Include="source\js\adapters\min\expanz.kendo.adapters.all.min.js" />
-    <Content Include="source\js\adapters\min\expanz.kendo.adapters.all.ycomp.js" />
     <Content Include="source\js\adapters\TimeInputAdapter.js" />
     <Content Include="source\js\components\core.js" />
     <Content Include="source\js\components\shoppingCart.js" />
@@ -147,8 +173,6 @@
   <ItemGroup>
     <Content Include="expanz_jscompressor.rb" />
     <Content Include="README" />
-    <Content Include="build\buildcss.gradle" />
-    <Content Include="build\buildjs.gradle" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

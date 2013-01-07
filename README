@@ -1,3 +1,35 @@
 User Documentation
 
 http://expanz.com/docs/client-technologies/javascript-sdk/
+
+
+Building the SDK
+----------------
+
+The expanz SDK comes with 3 supported ways of bundling and minification:
+
+1. ASP.NET 4.5 has bundling and minification for release builds built in.  Simply reference each .js file in your site master
+   in the order specified in the .bundle files under the build folder, and follow the instructions in Scott Guthrie's blog
+   post here: http://weblogs.asp.net/scottgu/archive/2011/11/27/new-bundling-and-minification-support-asp-net-4-5-series.aspx
+
+2. If you have the Web Essentials 2012 extension for Visual Studio 2012 installed (http://visualstudiogallery.msdn.microsoft.com/07d54d12-7133-4e15-becb-6f451ea3bea6)
+   then the bundled and minified files in the build folder will automatically update when the source files are changed, or
+   if the project is built. The configuration for the bundling/minification can be found in the .bundle files in the build
+   folder.
+
+3. Use YUI Compressor for .NET
+
+
+http://ajaxmin.codeplex.com/???
+
+TODO: Create a NuGet package
+
+
+Outputs
+-------
+
+- expanz-sdk.min.js - the core expanz JavaScript SDK
+
+- expanz-kendoui-adapters.min.js - allows the expanz SDK to support Kendo UI controls
+
+- expanz-components.min.js - provides a way to create components, and includes a shopping cart component

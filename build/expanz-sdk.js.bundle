@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bundle minify="true" runOnBuild="true">
+  <!--The order of the <file> elements determines the order of them when bundled.-->
+  <file>/source/js/expanz/expanz.collection.js</file>
+  <file>/source/js/expanz/expanz.component.js</file>
+  <file>/source/js/expanz/expanz.factory.js</file>
+  <file>/source/js/expanz/expanz.html.js</file>
+  <file>/source/js/expanz/expanz.util.js</file>
+
+  <file>/source/js/expanz/models/expanz.models.Bindable.js</file>
+  <file>/source/js/expanz/models/expanz.models.Field.js</file>
+  <file>/source/js/expanz/models/expanz.models.DashboardField.js</file>
+  <file>/source/js/expanz/models/expanz.models.Method.js</file>
+  <file>/source/js/expanz/models/expanz.models.MenuAction.js</file>
+  <file>/source/js/expanz/models/expanz.models.ContextMenu.js</file>
+  <file>/source/js/expanz/models/expanz.models.Login.js</file>
+  <file>/source/js/expanz/models/expanz.models.Dashboards.js</file>
+  <file>/source/js/expanz/models/expanz.models.Message.js</file>
+  <file>/source/js/expanz/models/expanz.models.MessageCollection.js</file>
+  <file>/source/js/expanz/models/expanz.models.Activity.js</file>
+  <file>/source/js/expanz/models/expanz.models.ClientMessage.js</file>
+  
+  <file>/source/js/expanz/models/data/expanz.models.data.DataControl.js</file>
+  <file>/source/js/expanz/models/data/expanz.models.data.Cell.js</file>
+  <file>/source/js/expanz/models/data/expanz.models.data.Row.js</file>
+  <file>/source/js/expanz/models/data/expanz.models.data.Grid.js</file>  
+  
+  <file>/source/js/expanz/expanz.net.js</file>
+  <file>/source/js/expanz/client/requestBuilder.js</file>
+  <file>/source/js/expanz/client/requestBody.js</file>
+  <file>/source/js/expanz/client/responseParser.js</file>
+  <file>/source/js/expanz/client/ActivityInfo.js</file>
+  <file>/source/js/expanz/client/ProcessArea.js</file>
+  <file>/source/js/expanz/client/GridViewInfo.js</file>
+  
+  <file>/source/js/expanz/expanz.storage.js</file>
+  <file>/source/js/expanz/menu/AppSiteMenu.js</file>
+  <file>/source/js/expanz/menu/ProcessAreaMenu.js</file>
+  <file>/source/js/expanz/menu/ActivityMenu.js</file>
+    
+  <file>/source/js/expanz/views/expanz.views.js</file>
+  <file>/source/js/expanz/views/expanz.views.FieldView.js</file>
+  <file>/source/js/expanz/views/expanz.views.DataFieldView.js</file>
+  <file>/source/js/expanz/views/expanz.views.VariantFieldView.js</file>
+  <file>/source/js/expanz/views/expanz.views.DependantFieldView.js</file>
+  <file>/source/js/expanz/views/expanz.views.MethodView.js</file>
+  <file>/source/js/expanz/views/expanz.views.MessagesView.js</file>
+  <file>/source/js/expanz/views/expanz.views.ContextMenuView.js</file>
+  <file>/source/js/expanz/views/expanz.views.GridView.js</file>
+  <file>/source/js/expanz/views/expanz.views.LoginView.js</file>
+  <file>/source/js/expanz/views/expanz.views.ActivityView.js</file>
+  <file>/source/js/expanz/views/expanz.views.DataControlView.js</file>
+  <file>/source/js/expanz/views/expanz.views.CheckboxesView.js</file>
+  <file>/source/js/expanz/views/expanz.views.RadioButtonsView.js</file>
+  <file>/source/js/expanz/views/expanz.views.PopupView.js</file>
+  <file>/source/js/expanz/views/expanz.views.PicklistWindowView.js</file>
+  <file>/source/js/expanz/views/expanz.views.UIMessage.js</file>  
+  <file>/source/js/expanz/views/expanz.views.ManuallyClosedPopup.js</file>
+  
+  <file>/source/js/expanz/expanz.security.js</file>
+  <file>/source/js/expanz/expanz.js</file>
+  
+  <file>/source/js/adapters/TimeInputAdapter.js</file>
+</bundle>
