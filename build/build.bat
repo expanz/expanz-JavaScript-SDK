@@ -1,1 +1,0 @@
-gradle -b buildjs.gradle all
