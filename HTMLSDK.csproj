@@ -38,25 +38,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Web.DynamicData" />
-    <Reference Include="System.Web.Entity" />
-    <Reference Include="System.Web.ApplicationServices" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Web.Services" />
-    <Reference Include="System.EnterpriseServices" />
-  </ItemGroup>
-  <ItemGroup>
+    <Content Include="build\expanz-kendoui-adapters.js">
+      <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
+    </Content>
+    <Content Include="build\expanz-kendoui-adapters.min.js">
+      <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
+    </Content>
     <Content Include="packages.config" />
     <Content Include="build\expanz-sdk.js">
       <DependentUpon>expanz-sdk.js.bundle</DependentUpon>
@@ -83,6 +70,9 @@
     <Content Include="source\js\libs\modernizr-2.6.2.js" />
     <Content Include="source\js\libs\backbone.js" />
     <Content Include="source\js\libs\backbone.min.js" />
+    <Content Include="build\expanz-kendoui-adapters.min.js.map">
+      <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
+    </Content>
     <None Include="build\expanz-sdk.js.bundle" />
     <Content Include="build\expanz-sdk.min.js.map">
       <DependentUpon>expanz-sdk.js.bundle</DependentUpon>
@@ -165,22 +155,13 @@
     <Content Include="source\js\expanz\expanz.util.js" />
     <Content Include="source\js\expanz\views\expanz.views.js" />
     <Content Include="source\js\expanz\views\expanz.views.VariantFieldView.js" />
-    <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="expanz_jscompressor.rb" />
     <Content Include="README" />
-    <None Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
-    <None Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
