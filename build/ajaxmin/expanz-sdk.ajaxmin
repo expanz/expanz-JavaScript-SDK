@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root> 
+  <output path="build\expanz-sdk.min.js">
+    <arguments>-clobber</arguments>
+    <symbolMap name="v3" path="build\expanz-sdk.min.js.map" />
+    
+    <input path="source/js/expanz/expanz.collection.js" />
+    <input path="source/js/expanz/expanz.component.js" />
+    <input path="source/js/expanz/expanz.factory.js" />
+    <input path="source/js/expanz/expanz.html.js" />
+    <input path="source/js/expanz/expanz.util.js" />
+
+    <input path="source/js/expanz/models/expanz.models.Bindable.js" />
+    <input path="source/js/expanz/models/expanz.models.Field.js" />
+    <input path="source/js/expanz/models/expanz.models.DashboardField.js" />
+    <input path="source/js/expanz/models/expanz.models.Method.js" />
+    <input path="source/js/expanz/models/expanz.models.MenuAction.js" />
+    <input path="source/js/expanz/models/expanz.models.ContextMenu.js" />
+    <input path="source/js/expanz/models/expanz.models.Login.js" />
+    <input path="source/js/expanz/models/expanz.models.Dashboards.js" />
+    <input path="source/js/expanz/models/expanz.models.Message.js" />
+    <input path="source/js/expanz/models/expanz.models.MessageCollection.js" />
+    <input path="source/js/expanz/models/expanz.models.Activity.js" />
+    <input path="source/js/expanz/models/expanz.models.ClientMessage.js" />
+
+    <input path="source/js/expanz/models/data/expanz.models.data.DataControl.js" />
+    <input path="source/js/expanz/models/data/expanz.models.data.Cell.js" />
+    <input path="source/js/expanz/models/data/expanz.models.data.Row.js" />
+    <input path="source/js/expanz/models/data/expanz.models.data.Grid.js" />
+
+    <input path="source/js/expanz/expanz.net.js" />
+    <input path="source/js/expanz/client/requestBuilder.js" />
+    <input path="source/js/expanz/client/requestBody.js" />
+    <input path="source/js/expanz/client/responseParser.js" />
+    <input path="source/js/expanz/client/ActivityInfo.js" />
+    <input path="source/js/expanz/client/ProcessArea.js" />
+    <input path="source/js/expanz/client/GridViewInfo.js" />
+
+    <input path="source/js/expanz/expanz.storage.js" />
+    <input path="source/js/expanz/menu/AppSiteMenu.js" />
+    <input path="source/js/expanz/menu/ProcessAreaMenu.js" />
+    <input path="source/js/expanz/menu/ActivityMenu.js" />
+
+    <input path="source/js/expanz/views/expanz.views.js" />
+    <input path="source/js/expanz/views/expanz.views.FieldView.js" />
+    <input path="source/js/expanz/views/expanz.views.DataFieldView.js" />
+    <input path="source/js/expanz/views/expanz.views.VariantFieldView.js" />
+    <input path="source/js/expanz/views/expanz.views.DependantFieldView.js" />
+    <input path="source/js/expanz/views/expanz.views.MethodView.js" />
+    <input path="source/js/expanz/views/expanz.views.MessagesView.js" />
+    <input path="source/js/expanz/views/expanz.views.ContextMenuView.js" />
+    <input path="source/js/expanz/views/expanz.views.GridView.js" />
+    <input path="source/js/expanz/views/expanz.views.LoginView.js" />
+    <input path="source/js/expanz/views/expanz.views.ActivityView.js" />
+    <input path="source/js/expanz/views/expanz.views.DataControlView.js" />
+    <input path="source/js/expanz/views/expanz.views.CheckboxesView.js" />
+    <input path="source/js/expanz/views/expanz.views.RadioButtonsView.js" />
+    <input path="source/js/expanz/views/expanz.views.PopupView.js" />
+    <input path="source/js/expanz/views/expanz.views.PicklistWindowView.js" />
+    <input path="source/js/expanz/views/expanz.views.UIMessage.js" />
+    <input path="source/js/expanz/views/expanz.views.ManuallyClosedPopup.js" />
+
+    <input path="source/js/expanz/expanz.security.js" />
+    <input path="source/js/expanz/expanz.js" />
+
+    <input path="source/js/adapters/TimeInputAdapter.js" />
+  </output>
+
+
+  <output path="build\expanz-components.min.js">
+    <arguments>-clobber</arguments>
+    <symbolMap name="v3" path="build\expanz-components.min.js.map" />
+
+    <input path="source/js/components/core.js" />
+    <input path="source/js/components/shoppingCart.js" />
+  </output>
+  
+  
+  <output path="build\expanz-kendoui-adapters.min.js">
+    <arguments>-clobber</arguments>
+    <symbolMap name="v3" path="build\expanz-kendoui-adapters.min.js.map" />
+
+    <input path="source/js/adapters/KendoAdapter.js" />
+    <input path="source/js/adapters/KendoComboBoxAdapter.js" />
+    <input path="source/js/adapters/KendoDatePickerAdapter.js" />
+    <input path="source/js/adapters/KendoDropDownListAdapter.js" />
+    <input path="source/js/adapters/KendoMobileListAdapter.js" />
+    <input path="source/js/adapters/KendoPanelBarAdapter.js" />
+    <input path="source/js/adapters/KendoPopupMessage.js" />
+    <input path="source/js/adapters/KendoTabStripAdapter.js" />
+    <input path="source/js/adapters/KendoTimePickerAdapter.js" />
+    <input path="source/js/adapters/KendoTreeAdapter.js" />
+  </output>
+</root>

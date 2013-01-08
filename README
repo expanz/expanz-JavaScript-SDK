@@ -1,4 +1,5 @@
 User Documentation
+------------------
 
 http://expanz.com/docs/client-technologies/javascript-sdk/
 
@@ -9,20 +10,36 @@ Building the SDK
 The expanz SDK comes with 3 supported ways of bundling and minification:
 
 1. ASP.NET 4.5 has bundling and minification for release builds built in.  Simply reference each .js file in the site master
-   of your target project in the order specified in the .bundle files under the build folder  (perhaps using linked files), 
+   of your target project in the order specified in the .bundle files under the build folder (perhaps using linked files), 
    and follow the instructions in Scott Guthrie's blog post here: http://weblogs.asp.net/scottgu/archive/2011/11/27/new-bundling-and-minification-support-asp-net-4-5-series.aspx
 
 2. If you have the Web Essentials 2012 extension for Visual Studio 2012 installed (http://visualstudiogallery.msdn.microsoft.com/07d54d12-7133-4e15-becb-6f451ea3bea6)
    then the bundled and minified files in the build folder will automatically update when the source files are changed, or
    if the project is built. The configuration for the bundling/minification can be found in the .bundle files in the build
-   folder.
+   folder. The output will also be written to the build folder.
 
-3. Use YUI Compressor for .NET
+3. Support for the Microsoft Ajax Minifier (http://ajaxmin.codeplex.com) is also built in, enabling the SDK to be built on
+   a build server. This outputs to the build folder, but note that it *does not* create the bundled but not minified file
+   like Web Essentials 2012 creates.
 
 
-http://ajaxmin.codeplex.com/???
+Deploying the SDK
+-----------------
 
-TODO: Create a NuGet package
+You'll also note that there are two NuGet package manifests under the build folder:
+ 
+ - expanz-javascript-sdk.1.0.0.nupkg - This package allows the bundled and minified SDK (with all three outputs listed shortly)
+   to be consumed easily in a target project.
+
+ - expanz-javascript-sdk-source.1.0.0.nupkg - This package provides the full SDK source code, along with the bundled and minified 
+   files (with all three outputs listed shortly) to be consumed easily in a target project.
+
+You can use one of these packages to import the SDK and its dependencies into your target project in Visual Studio. You will 
+need to configure your Visual Studio to use this path as a package source (go to Options, Package Manager > Package Sources)
+and it will configure the required files under a Scripts folder in your project.
+
+
+Another means to consume the SDK it to directly link to the .js files in your target project as linked files.
 
 
 Outputs
@@ -33,3 +50,19 @@ Outputs
 - expanz-kendoui-adapters.min.js - allows the expanz SDK to support Kendo UI controls
 
 - expanz-components.min.js - provides a way to create components, and includes a shopping cart component
+
+
+Using the SDK
+-------------
+
+- In order for IIS to serve up files with the .properties extension (used for message text conversion/
+  transformation), you need to add the .properties extension to your root web.config file as a mime
+  type mapping, like so:
+
+<configuration>
+  <system.webServer>
+    <staticContent>
+      <mimeMap fileExtension=".properties" mimeType="text/plain" />
+    </staticContent>
+  </system.webServer>
+</configuration>
