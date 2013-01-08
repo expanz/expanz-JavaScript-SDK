@@ -38,6 +38,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="build\ajaxmin\AjaxMin.dll" />
+    <Content Include="build\ajaxmin\AjaxMinTask.dll" />
     <Content Include="build\expanz-kendoui-adapters.js">
       <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
     </Content>
@@ -73,6 +75,14 @@
     <Content Include="build\expanz-kendoui-adapters.min.js.map">
       <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
     </Content>
+    <Content Include="build\expanz-javascript-sdk-source.1.0.0.nupkg" />
+    <Content Include="build\expanz-javascript-sdk.1.0.0.nupkg" />
+    <Content Include="build\ajaxmin\AjaxMinTask.targets">
+      <SubType>Designer</SubType>
+    </Content>
+    <None Include="build\ajaxmin\expanz-sdk.ajaxmin">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="build\expanz-sdk.js.bundle" />
     <Content Include="build\expanz-sdk.min.js.map">
       <DependentUpon>expanz-sdk.js.bundle</DependentUpon>
@@ -169,6 +179,7 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <Import Project="$(MSBuildProjectDirectory)\build\ajaxmin\AjaxMinTask.targets" />
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
