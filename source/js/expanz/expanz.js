@@ -107,6 +107,8 @@ $(function() {
 			if (activityMetadata.url === null) {
 				window.expanz.logToConsole("Url of activity not found");
 			}
+		    
+			var urlSeparator = activityMetadata.url.indexOf('?') !== -1 ? "&" : "?";
 
 			/* case 'popup' */
 			if (activityMetadata.onRequest == 'popup') {
@@ -121,7 +123,7 @@ $(function() {
 			    
 			    var clientMessage = new expanz.models.ClientMessage({
 					id : 'ActivityRequest',
-					url : activityMetadata.url + "&random=" + new Date().getTime(),
+					url: activityMetadata.url + urlSeparator + "random=" + new Date().getTime(),
 					//parent : parentActivity,
 					title : unescape(title || activityMetadata.title || '')
 				});
@@ -137,7 +139,7 @@ $(function() {
 			}
 			/* case 'navigate' or default */
 			else {
-				window.location = activityMetadata.url + "&random=" + new Date().getTime() + "&" + id + style + "initialKey=" + key;
+			    window.location = activityMetadata.url + urlSeparator + "random=" + new Date().getTime() + "&" + id + style + "initialKey=" + key;
 			}
 		};
 
