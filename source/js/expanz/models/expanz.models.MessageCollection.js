@@ -32,7 +32,7 @@ $(function() {
             if (window.config._useBundle !== false) {
                 jQuery.i18n.properties({
                     name: 'Messages',
-                    path: 'assets/bundle/',
+                    path: config._messageBundlePath,
                     mode: 'map',
                     language: ' ', /* set to en to load Messages-en.properties as well, set to '' to load as well Messages-en-XX.properties - add to config.js if different for some customers */
                     cache: true,
