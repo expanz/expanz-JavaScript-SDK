@@ -1301,7 +1301,7 @@ $(function() {
 
 	window.expanz.html.anonymousPersonActivity = "ERP.Person";
 
-	window.expanz.html.submitLostPasswordForm = function(loginCode, emailAddress) {
+	window.expanz.html.submitLostPasswordForm = function(loginCode, emailAddress, callbacks) {
 	    var xml = '<Activity id="' + window.expanz.html.anonymousPersonActivity + '">';
 	    
 		if (loginCode) {
@@ -1316,7 +1316,7 @@ $(function() {
 		xml += '</Method>';
 		xml += '</Activity>';
 	    
-		window.expanz.net.CreateAnonymousRequest(xml);
+		window.expanz.net.CreateAnonymousRequest(xml, callbacks);
 	};
 
 	window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent = function(hostEl, initValue, min, max) {
