@@ -111,7 +111,6 @@
     <Content Include="source\js\adapters\KendoTabStripAdapter.js" />
     <Content Include="source\js\adapters\KendoTreeAdapter.js" />
     <Content Include="source\js\adapters\TimeInputAdapter.js" />
-    <Content Include="source\js\components\core.js" />
     <Content Include="source\js\components\shoppingCart.js" />
     <Content Include="source\js\expanz\client\ActivityInfo.js" />
     <Content Include="source\js\expanz\client\GridViewInfo.js" />
