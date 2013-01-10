@@ -539,7 +539,7 @@ $(function() {
 					else if (this.lastListAction == 'tree') {
 						/* check if browser support HTML5 pushstate, if not use hash instead */
 						if (supports_history_api()) {
-							var newUrl = config._urlAbsoluteSiteName + this.shopUrlRewritePattern;
+							var newUrl = config.urlAbsoluteSiteName + this.shopUrlRewritePattern;
 							if (this.lastCategoryParent !== undefined && this.lastCategoryParent !== '') {
 								newUrl += escapeBadCharForURL(this.lastCategoryParent) + "/";
 							}
@@ -693,7 +693,7 @@ $(function() {
 						<div class="product"> \
 							<% if ( isImageValid(data.ThumbImage_FileContents) ){ %>  \
 								<div class="productIcon left productThumbnail"> \
-									<a title="<%= data.Name %>" href="' + window.config._URLblobs + '<%= data.Image_FileContents %>' + '" class="productImage"><img class="thumbnail" src="' + window.config._URLblobs + '<%= data.ThumbImage_FileContents %>' + '"/></a> \
+									<a title="<%= data.Name %>" href="' + window.config.urlBlobs + '<%= data.Image_FileContents %>' + '" class="productImage"><img class="thumbnail" src="' + window.config.urlBlobs + '<%= data.ThumbImage_FileContents %>' + '"/></a> \
 								</div> \
 							<% } %>  \
 							<% if ( !isImageValid(data.ThumbImage_FileContents) ){ %>  \
@@ -758,7 +758,7 @@ $(function() {
 					<tr class="item listDisplay"> \
 					<td class="cell"> \
 					<% if ( isImageValid(data.ThumbImage_FileContents) ){ %> \
-					<img class="thumbnailList" src="<%= window.config._URLblobs  + data.ThumbImage_FileContents %>"/> \
+					<img class="thumbnailList" src="<%= window.config.urlBlobs  + data.ThumbImage_FileContents %>"/> \
 					<% } %> \
 					<% if ( !isImageValid(data.ThumbImage_FileContents) ){ %> \
 						<img class="noThumbnailList" src="assets/images/no_image_available.png"/> \

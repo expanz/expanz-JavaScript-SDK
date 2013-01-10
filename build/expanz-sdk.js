@@ -1332,8 +1332,8 @@ function getPageUrl(page) {
 	var url = '';
 	if (page === undefined)
 		url = getSiteUrl();
-	else if (window.config._formmappingFormat && window.config._formmappingFormat.indexOf('[p]') != -1)
-		url = window.config._formmappingFormat.replace('[p]', page);
+	else if (window.config.formmappingFormat && window.config.formmappingFormat.indexOf('[p]') != -1)
+		url = window.config.formmappingFormat.replace('[p]', page);
 	else
 		url = page;
 	return url;
@@ -1341,8 +1341,8 @@ function getPageUrl(page) {
 
 function getSiteUrl() {
 	var url = '';
-	if (window.config._homepage)
-		url = '/' + getPageUrl(window.config._homepage);
+	if (window.config.homePage)
+		url = '/' + getPageUrl(window.config.homePage);
 	else
 		url = '/';
 		
@@ -1926,10 +1926,10 @@ $(function() {
 
         loadMessageResources: function () {
             /* load resource bundle */
-            if (window.config._useBundle !== false) {
+            if (window.config.useBundle !== false) {
                 jQuery.i18n.properties({
                     name: 'Messages',
-                    path: config._messageBundlePath,
+                    path: config.messageBundlePath,
                     mode: 'map',
                     language: ' ', /* set to en to load Messages-en.properties as well, set to '' to load as well Messages-en-XX.properties - add to config.js if different for some customers */
                     cache: true,
@@ -1959,7 +1959,7 @@ $(function() {
 	    
         // TODO: Move message transformation into an external js file, so it's not MessageCollection specific (also used by fields themselves)
         transformMessage: function(messageText) {
-            if (window.config._useBundle === true) {
+            if (window.config.useBundle === true) {
                 // Pass the message to an implementation specific message converter, that may
                 // transform the message from the server to something more suitable for display
                 var data = null;
@@ -1987,7 +1987,7 @@ $(function() {
                     message: messageText
                 });
                         
-                if (window.config._showAllMessages === true) {
+                if (window.config.showAllMessages === true) {
                     window.expanz.logToConsole(messageType + ': ' + messageText);
                 }
             }
@@ -2026,7 +2026,7 @@ $(function() {
 
                 this.add(messageModel);
             } else {
-                if (window.config._showAllMessages === true) {
+                if (window.config.showAllMessages === true) {
                     window.expanz.logToConsole(messageType + ': ' + messageKey + messageData);
                 }
             }
@@ -2515,8 +2515,8 @@ $(function() {
 		// Request Objects -> to be passed to SendRequest
 		CreateSessionRequest : function(username, password, callbacks) {
 			expanz.Storage.clearSession(); /* clear previous existing sessions */
-			var appsite = config._AppSite;
-			var authenticationMode = config._AuthenticationMode;
+			var appsite = config.appSite;
+			var authenticationMode = config.authenticationMode;
 			SendRequest(requestBuilder.CreateSession(username, password, appsite, authenticationMode), parseCreateSessionResponse(callbacks));
 		},
 
@@ -2869,11 +2869,11 @@ $(function() {
 		    headers: { "cache-control": "no-cache" } // http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
 		});
 	    
-		if (config._URLproxy !== undefined && config._URLproxy.length > 0) {
+		if (config.urlProxy !== undefined && config.urlProxy.length > 0) {
 			$.ajax({
 				type : 'POST',
 
-				url: config._URLproxy,
+				url: config.urlProxy,
 
 				data: {
 					url : getUrlRestService(request.url),
@@ -2959,7 +2959,7 @@ $(function() {
 		}
 
 		var form = '';
-		form += "<form method='post' id='formFile' target='_blank' action='" + config._URLproxy + "'>";
+		form += "<form method='post' id='formFile' target='_blank' action='" + config.urlProxy + "'>";
 		form += "<input type='hidden' name='url' value='" + getUrlRestService(request.url) + "'>";
 
 		form += "<input type='hidden' name='data' value='" + request.data + "'>";
@@ -2973,10 +2973,10 @@ $(function() {
 	function getUrlRestService(path) {
 	    var sep = "";
 	    
-		if (!config._URLprefix.endsWith("/"))
+		if (!config.urlPrefix.endsWith("/"))
 		    sep = "/";
 	    
-		return config._URLprefix + sep + path;
+		return config.urlPrefix + sep + path;
 	}
 });
 
@@ -2996,7 +2996,7 @@ $(function() {
 //
 // Request Objects (used when passed to SendRequest( ... )
 //
-var XMLNamespace = window.config._XMLNamespace || XMLNamespace; // TODO: throw an error here, saying that window.config._XMLNamespace is required
+var XMLNamespace = window.config.xmlNamespace || XMLNamespace; // TODO: throw an error here, saying that window.config.xmlNamespace is required
 
 var requestBuilder = {
 
@@ -3129,7 +3129,7 @@ var requestBuilder = {
 
     buildRequest: function(requestType, xmlns, sessionHandle, includeSite) {
         return function insertBody(body) {
-            var site = includeSite ? '<site>' + config._AppSite + '</site>' : '';
+            var site = includeSite ? '<site>' + config.appSite + '</site>' : '';
             var namespace = xmlns ? ' xmlns="' + xmlns + '" ' : '';
             var head = '<' + requestType + namespace + '>' + site + '<xml><ESA>';
             var tail = '</ESA>' + '</xml>';
@@ -3254,7 +3254,7 @@ var requestBody = {
 
         /* add company code if anonymous */
         if (activity.isAnonymous()) {
-            body += " company='" + config._anonymousCompanyCode + "' ";
+            body += " company='" + config.anonymousCompanyCode + "' ";
         }
 
         body += '>';
@@ -3278,7 +3278,7 @@ var requestBody = {
         $.each(methods, function (index, value) {
             body += '<Method name="' + value.name + '"';
             body += " contextObject='" + value.contextObject + "' ";
-            body += " company='" + config._anonymousCompanyCode + "' ";
+            body += " company='" + config.anonymousCompanyCode + "' ";
             body += '>';
             
             if (value.additionalElement) {
@@ -4200,10 +4200,7 @@ $(function() {
 		},
 
 		_getStorageGlobalName : function() {
-			var siteCountry = config._siteCountry === undefined ? '' : '_' + config._siteCountry;
-			var siteEnvironment = config._siteEnvironment === undefined ? '' : '_' + config._siteEnvironment;
-		
-			return "_expanz_" + config._AppSite + siteCountry + siteEnvironment + "_";
+			return "_expanz_" + config.appSite + config.implementationId + "_";
 		},
 
 		getSessionHandle : function() {
@@ -4485,8 +4482,8 @@ $(function() {
 
                 var url = window.location.href;
                 var currentPage = url.substring(url.lastIndexOf('/') + 1);
-                if (window.config._homepage && currentPage.length == 0) {
-                    currentPage = getPageUrl(window.config._homepage);
+                if (window.config.homePage && currentPage.length == 0) {
+                    currentPage = getPageUrl(window.config.homePage);
                 }
 
                 // load process areas into DOM menu
@@ -4497,16 +4494,16 @@ $(function() {
                 var backLabel = el.attr('backLabel') || 'Back';
 
                 // add back button if defined
-                if (window.config._backButton === true) {
+                if (window.config.backButton === true) {
                     el.find("#menuUL").before('<a href="javascript:void(0);" onclick="history.go(-1);return true;" class="backbutton">' + backLabel + '</a>');
                 }
 
                 // add home page if defined
-                if (window.config._homepage) {
+                if (window.config.homePage) {
                     var homeClass = "";
 
                     url = getPageUrl($(this).attr('form'));
-                    var urlHome = getPageUrl(window.config._homepage);
+                    var urlHome = getPageUrl(window.config.homePage);
                     if (urlHome == currentPage) {
                         homeClass = "selected selectedNew ";
                     }
@@ -4675,7 +4672,7 @@ $(function () {
 
         if (datatype && datatype.toLowerCase() === 'blob' && attr && attr === 'value') {
             var width = allAttrs['width'];
-            var imgElem = '<img src="' + window.config._URLblobs + allAttrs['value'] + '"';
+            var imgElem = '<img src="' + window.config.urlBlobs + allAttrs['value'] + '"';
             imgElem += width ? ' width="' + width + '"' : 'width="100%"';
             imgElem += '/>';
             $elem.html(imgElem);
@@ -6779,7 +6776,7 @@ $(function() {
     window.expanz.security = window.expanz.security || {};
 
     window.expanz.security.getLoginPage = function () {
-        //var loginUrl = getPageUrl(window.config._loginpage);
+        //var loginUrl = getPageUrl(window.config.loginPage);
         /* if login url is null try to guess it by removing the filename */
         //if (loginUrl === undefined) {
         //	loginUrl = document.location.href.substring(0, document.location.href.lastIndexOf("/"));
@@ -6788,7 +6785,7 @@ $(function() {
         //		loginUrl = "/";
         //}
         // window.expanz.logToConsole("getLoginURL : " + loginUrl);
-        return window.config._loginpage ? window.config._loginpage : 'login';
+        return window.config.loginPage ? window.config.loginPage : 'login';
     };
 
     window.expanz.security.createLogin = function (DOMObject, callbacks) {
@@ -6881,11 +6878,11 @@ $(function() {
 	};
 
 	window.expanz.getMaintenancePage = function() {
-		return window.config._maintenancePage ? window.config._maintenancePage : 'maintenance';
+		return window.config.maintenancePage ? window.config.maintenancePage : 'maintenance';
 	};
 
 	window.expanz.isOnMaintenance = function() {
-		var maintenance = window.config._onMaintenance;
+		var maintenance = window.config.onMaintenance;
 		if (maintenance === true) {
 			return true;
 		}
@@ -7244,7 +7241,7 @@ $(function() {
             var value = null;
 
             if (newValue !== null) {
-                var timeFormat = $inputElement.attr('timeFormat') !== undefined ? $inputElement.attr('timeFormat') : window.config._timeFormat;
+                var timeFormat = $inputElement.attr('timeFormat') !== undefined ? $inputElement.attr('timeFormat') : window.config.timeFormat;
 
                 if (timeFormat === undefined)
                     timeFormat = 12;

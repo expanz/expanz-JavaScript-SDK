@@ -29,10 +29,10 @@ $(function() {
 
         loadMessageResources: function () {
             /* load resource bundle */
-            if (window.config._useBundle !== false) {
+            if (window.config.useBundle !== false) {
                 jQuery.i18n.properties({
                     name: 'Messages',
-                    path: config._messageBundlePath,
+                    path: config.messageBundlePath,
                     mode: 'map',
                     language: ' ', /* set to en to load Messages-en.properties as well, set to '' to load as well Messages-en-XX.properties - add to config.js if different for some customers */
                     cache: true,
@@ -62,7 +62,7 @@ $(function() {
 	    
         // TODO: Move message transformation into an external js file, so it's not MessageCollection specific (also used by fields themselves)
         transformMessage: function(messageText) {
-            if (window.config._useBundle === true) {
+            if (window.config.useBundle === true) {
                 // Pass the message to an implementation specific message converter, that may
                 // transform the message from the server to something more suitable for display
                 var data = null;
@@ -90,7 +90,7 @@ $(function() {
                     message: messageText
                 });
                         
-                if (window.config._showAllMessages === true) {
+                if (window.config.showAllMessages === true) {
                     window.expanz.logToConsole(messageType + ': ' + messageText);
                 }
             }
@@ -129,7 +129,7 @@ $(function() {
 
                 this.add(messageModel);
             } else {
-                if (window.config._showAllMessages === true) {
+                if (window.config.showAllMessages === true) {
                     window.expanz.logToConsole(messageType + ': ' + messageKey + messageData);
                 }
             }

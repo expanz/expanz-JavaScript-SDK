@@ -99,7 +99,7 @@ var requestBody = {
 
         /* add company code if anonymous */
         if (activity.isAnonymous()) {
-            body += " company='" + config._anonymousCompanyCode + "' ";
+            body += " company='" + config.anonymousCompanyCode + "' ";
         }
 
         body += '>';
@@ -123,7 +123,7 @@ var requestBody = {
         $.each(methods, function (index, value) {
             body += '<Method name="' + value.name + '"';
             body += " contextObject='" + value.contextObject + "' ";
-            body += " company='" + config._anonymousCompanyCode + "' ";
+            body += " company='" + config.anonymousCompanyCode + "' ";
             body += '>';
             
             if (value.additionalElement) {

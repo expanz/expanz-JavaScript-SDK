@@ -1,7 +1,7 @@
 $.fn.KendoTimePickerAdapter = function() {
 
     /* instantiate Kendo Control */
-    var timeFormat = this.attr('timeFormat') !== undefined ? this.attr('timeFormat') : window.config._timeFormat;
+    var timeFormat = this.attr('timeFormat') !== undefined ? this.attr('timeFormat') : window.config.timeFormat;
     
     if (timeFormat === undefined)
         timeFormat = 12;

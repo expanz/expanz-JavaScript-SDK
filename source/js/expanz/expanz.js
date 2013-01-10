@@ -28,11 +28,11 @@ $(function() {
 	};
 
 	window.expanz.getMaintenancePage = function() {
-		return window.config._maintenancePage ? window.config._maintenancePage : 'maintenance';
+		return window.config.maintenancePage ? window.config.maintenancePage : 'maintenance';
 	};
 
 	window.expanz.isOnMaintenance = function() {
-		var maintenance = window.config._onMaintenance;
+		var maintenance = window.config.onMaintenance;
 		if (maintenance === true) {
 			return true;
 		}

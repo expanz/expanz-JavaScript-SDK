@@ -12,7 +12,7 @@
             var value = null;
 
             if (newValue !== null) {
-                var timeFormat = $inputElement.attr('timeFormat') !== undefined ? $inputElement.attr('timeFormat') : window.config._timeFormat;
+                var timeFormat = $inputElement.attr('timeFormat') !== undefined ? $inputElement.attr('timeFormat') : window.config.timeFormat;
 
                 if (timeFormat === undefined)
                     timeFormat = 12;

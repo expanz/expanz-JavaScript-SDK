@@ -49,7 +49,7 @@ Outputs
 
 - expanz-kendoui-adapters.min.js - allows the expanz SDK to support Kendo UI controls
 
-- expanz-components.min.js - provides a way to create components, and includes a shopping cart component
+- expanz-components.min.js - includes a prebuilt shopping cart component
 
 
 Using the SDK
@@ -66,3 +66,27 @@ Using the SDK
     </staticContent>
   </system.webServer>
 </configuration>
+
+
+- To configure some of the functionality of the SDK, you're target project will need to define a config object, with the
+  following options (and example values):
+
+window.config = {
+	appSite: 'MySite',
+	authenticationMode: 'Alternate',
+	backButton: true,
+	formmappingFormat: '[p]',
+	homePage: 'Home',
+	implementationId: '',
+	loginPage: 'Login',
+	maintenancePage: 'Maintenance',
+	messageBundlePath: 'assets/',
+	onMaintenance: false,
+	showAllMessages: true,
+	timeFormat: 12,
+	urlBlobs: 'http://crp.expanz.com/downloads/TMX/blobs/TMX/',
+	urlPrefix: 'https://localhost/ESAService/ESAService.svc/restishssl/',
+	urlProxy: '/Proxy.aspx',
+	useBundle: true,
+	xmlNamespace: 'http://www.expanz.com/ESAService'
+};

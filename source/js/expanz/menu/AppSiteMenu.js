@@ -26,8 +26,8 @@
 
                 var url = window.location.href;
                 var currentPage = url.substring(url.lastIndexOf('/') + 1);
-                if (window.config._homepage && currentPage.length == 0) {
-                    currentPage = getPageUrl(window.config._homepage);
+                if (window.config.homePage && currentPage.length == 0) {
+                    currentPage = getPageUrl(window.config.homePage);
                 }
 
                 // load process areas into DOM menu
@@ -38,16 +38,16 @@
                 var backLabel = el.attr('backLabel') || 'Back';
 
                 // add back button if defined
-                if (window.config._backButton === true) {
+                if (window.config.backButton === true) {
                     el.find("#menuUL").before('<a href="javascript:void(0);" onclick="history.go(-1);return true;" class="backbutton">' + backLabel + '</a>');
                 }
 
                 // add home page if defined
-                if (window.config._homepage) {
+                if (window.config.homePage) {
                     var homeClass = "";
 
                     url = getPageUrl($(this).attr('form'));
-                    var urlHome = getPageUrl(window.config._homepage);
+                    var urlHome = getPageUrl(window.config.homePage);
                     if (urlHome == currentPage) {
                         homeClass = "selected selectedNew ";
                     }

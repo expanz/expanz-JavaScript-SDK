@@ -414,8 +414,8 @@ function getPageUrl(page) {
 	var url = '';
 	if (page === undefined)
 		url = getSiteUrl();
-	else if (window.config._formmappingFormat && window.config._formmappingFormat.indexOf('[p]') != -1)
-		url = window.config._formmappingFormat.replace('[p]', page);
+	else if (window.config.formmappingFormat && window.config.formmappingFormat.indexOf('[p]') != -1)
+		url = window.config.formmappingFormat.replace('[p]', page);
 	else
 		url = page;
 	return url;
@@ -423,8 +423,8 @@ function getPageUrl(page) {
 
 function getSiteUrl() {
 	var url = '';
-	if (window.config._homepage)
-		url = '/' + getPageUrl(window.config._homepage);
+	if (window.config.homePage)
+		url = '/' + getPageUrl(window.config.homePage);
 	else
 		url = '/';
 		

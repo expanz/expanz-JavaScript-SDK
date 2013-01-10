@@ -31,7 +31,7 @@ $(function () {
 
         if (datatype && datatype.toLowerCase() === 'blob' && attr && attr === 'value') {
             var width = allAttrs['width'];
-            var imgElem = '<img src="' + window.config._URLblobs + allAttrs['value'] + '"';
+            var imgElem = '<img src="' + window.config.urlBlobs + allAttrs['value'] + '"';
             imgElem += width ? ' width="' + width + '"' : 'width="100%"';
             imgElem += '/>';
             $elem.html(imgElem);

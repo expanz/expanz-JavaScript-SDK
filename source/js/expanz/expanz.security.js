@@ -15,7 +15,7 @@ $(function() {
     window.expanz.security = window.expanz.security || {};
 
     window.expanz.security.getLoginPage = function () {
-        //var loginUrl = getPageUrl(window.config._loginpage);
+        //var loginUrl = getPageUrl(window.config.loginPage);
         /* if login url is null try to guess it by removing the filename */
         //if (loginUrl === undefined) {
         //	loginUrl = document.location.href.substring(0, document.location.href.lastIndexOf("/"));
@@ -24,7 +24,7 @@ $(function() {
         //		loginUrl = "/";
         //}
         // window.expanz.logToConsole("getLoginURL : " + loginUrl);
-        return window.config._loginpage ? window.config._loginpage : 'login';
+        return window.config.loginPage ? window.config.loginPage : 'login';
     };
 
     window.expanz.security.createLogin = function (DOMObject, callbacks) {

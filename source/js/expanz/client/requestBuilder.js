@@ -13,7 +13,7 @@
 //
 // Request Objects (used when passed to SendRequest( ... )
 //
-var XMLNamespace = window.config._XMLNamespace || XMLNamespace; // TODO: throw an error here, saying that window.config._XMLNamespace is required
+var XMLNamespace = window.config.xmlNamespace || XMLNamespace; // TODO: throw an error here, saying that window.config.xmlNamespace is required
 
 var requestBuilder = {
 
@@ -146,7 +146,7 @@ var requestBuilder = {
 
     buildRequest: function(requestType, xmlns, sessionHandle, includeSite) {
         return function insertBody(body) {
-            var site = includeSite ? '<site>' + config._AppSite + '</site>' : '';
+            var site = includeSite ? '<site>' + config.appSite + '</site>' : '';
             var namespace = xmlns ? ' xmlns="' + xmlns + '" ' : '';
             var head = '<' + requestType + namespace + '>' + site + '<xml><ESA>';
             var tail = '</ESA>' + '</xml>';

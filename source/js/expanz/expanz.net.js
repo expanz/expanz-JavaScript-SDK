@@ -25,8 +25,8 @@ $(function() {
 		// Request Objects -> to be passed to SendRequest
 		CreateSessionRequest : function(username, password, callbacks) {
 			expanz.Storage.clearSession(); /* clear previous existing sessions */
-			var appsite = config._AppSite;
-			var authenticationMode = config._AuthenticationMode;
+			var appsite = config.appSite;
+			var authenticationMode = config.authenticationMode;
 			SendRequest(requestBuilder.CreateSession(username, password, appsite, authenticationMode), parseCreateSessionResponse(callbacks));
 		},
 
@@ -379,11 +379,11 @@ $(function() {
 		    headers: { "cache-control": "no-cache" } // http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
 		});
 	    
-		if (config._URLproxy !== undefined && config._URLproxy.length > 0) {
+		if (config.urlProxy !== undefined && config.urlProxy.length > 0) {
 			$.ajax({
 				type : 'POST',
 
-				url: config._URLproxy,
+				url: config.urlProxy,
 
 				data: {
 					url : getUrlRestService(request.url),
@@ -469,7 +469,7 @@ $(function() {
 		}
 
 		var form = '';
-		form += "<form method='post' id='formFile' target='_blank' action='" + config._URLproxy + "'>";
+		form += "<form method='post' id='formFile' target='_blank' action='" + config.urlProxy + "'>";
 		form += "<input type='hidden' name='url' value='" + getUrlRestService(request.url) + "'>";
 
 		form += "<input type='hidden' name='data' value='" + request.data + "'>";
@@ -483,9 +483,9 @@ $(function() {
 	function getUrlRestService(path) {
 	    var sep = "";
 	    
-		if (!config._URLprefix.endsWith("/"))
+		if (!config.urlPrefix.endsWith("/"))
 		    sep = "/";
 	    
-		return config._URLprefix + sep + path;
+		return config.urlPrefix + sep + path;
 	}
 });
