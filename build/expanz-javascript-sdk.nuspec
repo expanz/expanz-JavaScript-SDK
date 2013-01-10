@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>expanz-javascript-sdk</id>
+        <version>1.0.0</version>
+        <title>JavaScript SDK for the expanzPLATFORM</title>
+        <authors>expanz</authors>
+        <owners />
+        <projectUrl>http://www.expanz.com</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>The core JavaScript SDK for the expanzPLATFORM.</description>
+        <copyright>© 2013 expanz</copyright>
+        <language>en-US</language>
+        <dependencies>
+            <dependency id="jQuery" version="1.8.3" />
+            <dependency id="Modernizr" version="2.6.2" />
+            <dependency id="Backbone.js" version="0.9.9" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="expanz-components.min.js" target="content\Scripts\expanz-components.min.js" />
+        <file src="expanz-kendoui-adapters.min.js" target="content\Scripts\expanz-kendoui-adapters.min.js" />
+        <file src="expanz-sdk.min.js" target="content\Scripts\expanz-sdk.min.js" />
+        <file src="..\source\js\lib\jquery.cookies.2.2.0.min.js" target="content\Scripts\jquery.cookies.2.2.0.min.js" />
+        <file src="..\source\js\lib\jquery.i18n.properties-min-1.0.9.js" target="content\Scripts\jquery.i18n.properties-min-1.0.9.js" />
+    </files>
+</package>

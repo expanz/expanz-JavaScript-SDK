@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>expanz-javascript-sdk-source</id>
+        <version>1.0.0</version>
+        <title>JavaScript SDK for the expanzPLATFORM (Source Code)</title>
+        <authors>expanz</authors>
+        <owners />
+        <projectUrl>http://www.expanz.com</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>The core JavaScript SDK for the expanzPLATFORM, including the full source code.</description>
+        <copyright>© 2013 expanz</copyright>
+        <language>en-US</language>
+        <dependencies>
+            <dependency id="jQuery" version="1.8.3" />
+            <dependency id="Modernizr" version="2.6.2" />
+            <dependency id="Backbone.js" version="0.9.9" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\source\js\adapters\KendoAdapter.js" target="content\Scripts\expanz\adapters\KendoAdapter.js" />
+        <file src="..\source\js\adapters\KendoComboBoxAdapter.js" target="content\Scripts\expanz\adapters\KendoComboBoxAdapter.js" />
+        <file src="..\source\js\adapters\KendoDatePickerAdapter.js" target="content\Scripts\expanz\adapters\KendoDatePickerAdapter.js" />
+        <file src="..\source\js\adapters\KendoDropDownListAdapter.js" target="content\Scripts\expanz\adapters\KendoDropDownListAdapter.js" />
+        <file src="..\source\js\adapters\KendoMobileListAdapter.js" target="content\Scripts\expanz\adapters\KendoMobileListAdapter.js" />
+        <file src="..\source\js\adapters\KendoPanelBarAdapter.js" target="content\Scripts\expanz\adapters\KendoPanelBarAdapter.js" />
+        <file src="..\source\js\adapters\KendoPopupMessage.js" target="content\Scripts\expanz\adapters\KendoPopupMessage.js" />
+        <file src="..\source\js\adapters\KendoTabStripAdapter.js" target="content\Scripts\expanz\adapters\KendoTabStripAdapter.js" />
+        <file src="..\source\js\adapters\KendoTimePickerAdapter.js" target="content\Scripts\expanz\adapters\KendoTimePickerAdapter.js" />
+        <file src="..\source\js\adapters\KendoTreeAdapter.js" target="content\Scripts\expanz\adapters\KendoTreeAdapter.js" />
+        <file src="..\source\js\adapters\TimeInputAdapter.js" target="content\Scripts\expanz\adapters\TimeInputAdapter.js" />
+        <file src="..\source\js\expanz\client\ActivityInfo.js" target="content\Scripts\expanz\client\ActivityInfo.js" />
+        <file src="..\source\js\expanz\client\GridViewInfo.js" target="content\Scripts\expanz\client\GridViewInfo.js" />
+        <file src="..\source\js\expanz\client\ProcessArea.js" target="content\Scripts\expanz\client\ProcessArea.js" />
+        <file src="..\source\js\expanz\client\requestBody.js" target="content\Scripts\expanz\client\requestBody.js" />
+        <file src="..\source\js\expanz\client\requestBuilder.js" target="content\Scripts\expanz\client\requestBuilder.js" />
+        <file src="..\source\js\expanz\client\responseParser.js" target="content\Scripts\expanz\client\responseParser.js" />
+        <file src="..\source\js\components\shoppingCart.js" target="content\Scripts\expanz\components\shoppingCart.js" />
+        <file src="..\source\js\expanz\menu\ActivityMenu.js" target="content\Scripts\expanz\menu\ActivityMenu.js" />
+        <file src="..\source\js\expanz\menu\AppSiteMenu.js" target="content\Scripts\expanz\menu\AppSiteMenu.js" />
+        <file src="..\source\js\expanz\menu\ProcessAreaMenu.js" target="content\Scripts\expanz\menu\ProcessAreaMenu.js" />
+        <file src="..\source\js\expanz\models\data\expanz.models.data.Cell.js" target="content\Scripts\expanz\models\data\expanz.models.data.Cell.js" />
+        <file src="..\source\js\expanz\models\data\expanz.models.data.DataControl.js" target="content\Scripts\expanz\models\data\expanz.models.data.DataControl.js" />
+        <file src="..\source\js\expanz\models\data\expanz.models.data.Grid.js" target="content\Scripts\expanz\models\data\expanz.models.data.Grid.js" />
+        <file src="..\source\js\expanz\models\data\expanz.models.data.Row.js" target="content\Scripts\expanz\models\data\expanz.models.data.Row.js" />
+        <file src="..\source\js\expanz\models\expanz.models.Activity.js" target="content\Scripts\expanz\models\expanz.models.Activity.js" />
+        <file src="..\source\js\expanz\models\expanz.models.Bindable.js" target="content\Scripts\expanz\models\expanz.models.Bindable.js" />
+        <file src="..\source\js\expanz\models\expanz.models.ClientMessage.js" target="content\Scripts\expanz\models\expanz.models.ClientMessage.js" />
+        <file src="..\source\js\expanz\models\expanz.models.ContextMenu.js" target="content\Scripts\expanz\models\expanz.models.ContextMenu.js" />
+        <file src="..\source\js\expanz\models\expanz.models.DashboardField.js" target="content\Scripts\expanz\models\expanz.models.DashboardField.js" />
+        <file src="..\source\js\expanz\models\expanz.models.Dashboards.js" target="content\Scripts\expanz\models\expanz.models.Dashboards.js" />
+        <file src="..\source\js\expanz\models\expanz.models.Field.js" target="content\Scripts\expanz\models\expanz.models.Field.js" />
+        <file src="..\source\js\expanz\models\expanz.models.Login.js" target="content\Scripts\expanz\models\expanz.models.Login.js" />
+        <file src="..\source\js\expanz\models\expanz.models.MenuAction.js" target="content\Scripts\expanz\models\expanz.models.MenuAction.js" />
+        <file src="..\source\js\expanz\models\expanz.models.Message.js" target="content\Scripts\expanz\models\expanz.models.Message.js" />
+        <file src="..\source\js\expanz\models\expanz.models.MessageCollection.js" target="content\Scripts\expanz\models\expanz.models.MessageCollection.js" />
+        <file src="..\source\js\expanz\models\expanz.models.Method.js" target="content\Scripts\expanz\models\expanz.models.Method.js" />
+        <file src="..\source\js\expanz\views\expanz.views.ActivityView.js" target="content\Scripts\expanz\views\expanz.views.ActivityView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.CheckboxesView.js" target="content\Scripts\expanz\views\expanz.views.CheckboxesView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.ContextMenuView.js" target="content\Scripts\expanz\views\expanz.views.ContextMenuView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.DataControlView.js" target="content\Scripts\expanz\views\expanz.views.DataControlView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.DataFieldView.js" target="content\Scripts\expanz\views\expanz.views.DataFieldView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.DependantFieldView.js" target="content\Scripts\expanz\views\expanz.views.DependantFieldView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.FieldView.js" target="content\Scripts\expanz\views\expanz.views.FieldView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.GridView.js" target="content\Scripts\expanz\views\expanz.views.GridView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.js" target="content\Scripts\expanz\views\expanz.views.js" />
+        <file src="..\source\js\expanz\views\expanz.views.LoginView.js" target="content\Scripts\expanz\views\expanz.views.LoginView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.ManuallyClosedPopup.js" target="content\Scripts\expanz\views\expanz.views.ManuallyClosedPopup.js" />
+        <file src="..\source\js\expanz\views\expanz.views.MessagesView.js" target="content\Scripts\expanz\views\expanz.views.MessagesView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.MethodView.js" target="content\Scripts\expanz\views\expanz.views.MethodView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.PicklistWindowView.js" target="content\Scripts\expanz\views\expanz.views.PicklistWindowView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.PopupView.js" target="content\Scripts\expanz\views\expanz.views.PopupView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.RadioButtonsView.js" target="content\Scripts\expanz\views\expanz.views.RadioButtonsView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.UIMessage.js" target="content\Scripts\expanz\views\expanz.views.UIMessage.js" />
+        <file src="..\source\js\expanz\views\expanz.views.VariantFieldView.js" target="content\Scripts\expanz\views\expanz.views.VariantFieldView.js" />
+        <file src="..\source\js\expanz\expanz.collection.js" target="content\Scripts\expanz\expanz.collection.js" />
+        <file src="..\source\js\expanz\expanz.component.js" target="content\Scripts\expanz\expanz.component.js" />
+        <file src="..\source\js\expanz\expanz.factory.js" target="content\Scripts\expanz\expanz.factory.js" />
+        <file src="..\source\js\expanz\expanz.html.js" target="content\Scripts\expanz\expanz.html.js" />
+        <file src="..\source\js\expanz\expanz.js" target="content\Scripts\expanz\expanz.js" />
+        <file src="..\source\js\expanz\expanz.net.js" target="content\Scripts\expanz\expanz.net.js" />
+        <file src="..\source\js\expanz\expanz.security.js" target="content\Scripts\expanz\expanz.security.js" />
+        <file src="..\source\js\expanz\expanz.storage.js" target="content\Scripts\expanz\expanz.storage.js" />
+        <file src="..\source\js\expanz\expanz.util.js" target="content\Scripts\expanz\expanz.util.js" />
+
+        <file src="expanz-components.min.js" target="content\Scripts\expanz-components.min.js" />
+        <file src="expanz-kendoui-adapters.min.js" target="content\Scripts\expanz-kendoui-adapters.min.js" />
+        <file src="expanz-sdk.min.js" target="content\Scripts\expanz-sdk.min.js" />
+        <file src="..\source\js\lib\jquery.cookies.2.2.0.min.js" target="content\Scripts\jquery.cookies.2.2.0.min.js" />
+        <file src="..\source\js\lib\jquery.i18n.properties-min-1.0.9.js" target="content\Scripts\jquery.i18n.properties-min-1.0.9.js" />
+    </files>
+</package>
