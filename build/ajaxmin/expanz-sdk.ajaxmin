@@ -71,7 +71,6 @@
     <arguments>-clobber</arguments>
     <symbolMap name="v3" path="build\expanz-components.min.js.map" />
 
-    <input path="source/js/components/core.js" />
     <input path="source/js/components/shoppingCart.js" />
   </output>
   
