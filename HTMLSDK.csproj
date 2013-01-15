@@ -38,26 +38,20 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="build\ajaxmin\AjaxMin.dll" />
-    <Content Include="build\ajaxmin\AjaxMinTask.dll" />
+    <None Include="build\ajaxmin\AjaxMin.dll" />
+    <None Include="build\ajaxmin\AjaxMinTask.dll" />
     <Content Include="build\expanz-kendoui-adapters.js">
       <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
     </Content>
     <Content Include="build\expanz-kendoui-adapters.min.js">
       <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
     </Content>
-    <Content Include="packages.config" />
+    <None Include="packages.config" />
     <Content Include="build\expanz-sdk.js">
       <DependentUpon>expanz-sdk.js.bundle</DependentUpon>
     </Content>
     <Content Include="build\expanz-sdk.min.js">
       <DependentUpon>expanz-sdk.js.bundle</DependentUpon>
-    </Content>
-    <Content Include="build\KendoUIAdapters.js">
-      <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
-    </Content>
-    <Content Include="build\KendoUIAdapters.min.js">
-      <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
     </Content>
     <Content Include="build\expanz-components.js">
       <DependentUpon>expanz-components.js.bundle</DependentUpon>
@@ -68,14 +62,15 @@
     <Content Include="build\expanz-kendoui-adapters.min.js.map">
       <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
     </Content>
-    <Content Include="build\ajaxmin\AjaxMinTask.targets">
+    <None Include="build\ajaxmin\AjaxMinTask.targets">
       <SubType>Designer</SubType>
-    </Content>
+    </None>
     <Content Include="source\js\lib\backbone.js" />
     <Content Include="source\js\lib\backbone.min.js" />
     <Content Include="source\js\lib\jquery-1.7.1.js" />
-    <Content Include="build\expanz-javascript-sdk-source.nuspec" />
-    <Content Include="build\expanz-javascript-sdk.nuspec" />
+    <None Include="build\expanz-javascript-sdk-source.nuspec" />
+    <None Include="build\expanz-javascript-sdk.nuspec" />
+    <None Include="Properties\PublishProfiles\Test AU.pubxml" />
     <None Include="source\js\lib\jquery-1.8.3.intellisense.js" />
     <Content Include="source\js\lib\jquery-1.8.3.js" />
     <Content Include="source\js\lib\jquery-1.8.3.min.js" />
@@ -95,9 +90,6 @@
       <DependentUpon>expanz-sdk.js.bundle</DependentUpon>
     </Content>
     <None Include="build\expanz-kendoui-adapters.js.bundle" />
-    <Content Include="build\KendoUIAdapters.min.js.map">
-      <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
-    </Content>
     <None Include="build\expanz-components.js.bundle" />
     <Content Include="build\expanz-components.min.js.map">
       <DependentUpon>expanz-components.js.bundle</DependentUpon>
@@ -168,11 +160,9 @@
     <Content Include="source\js\expanz\views\expanz.views.VariantFieldView.js" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="README" />
+    <None Include="README" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

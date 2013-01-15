@@ -91,11 +91,11 @@ window.config = {
 	maintenancePage: 'Maintenance',
 	messageBundlePath: 'assets/',
 	onMaintenance: false,
-	showAllMessages: true,
+	showAllMessages: false,
 	timeFormat: 12,
-	urlBlobs: 'http://crp.expanz.com/downloads/TMX/blobs/TMX/',
-	urlPrefix: 'https://localhost/ESAService/ESAService.svc/restishssl/',
-	urlProxy: '/Proxy.aspx',
+	urlBlobs: 'http://xxx.com/downloads/blobs/',
+	urlPrefix: '',
+	urlProxy: '/ESAProxy.ashx',
 	useBundle: true,
 	xmlNamespace: 'http://www.expanz.com/ESAService'
 };
