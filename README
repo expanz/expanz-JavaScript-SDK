@@ -99,3 +99,6 @@ window.config = {
 	useBundle: true,
 	xmlNamespace: 'http://www.expanz.com/ESAService'
 };
+
+- You'll also need an HTTP Handler to act as a proxy between the client and the ESA web service.
+  Instructions to come.
