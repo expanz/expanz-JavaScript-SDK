@@ -194,8 +194,11 @@
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>if $(ConfigurationName) == Debug (
+$(ProjectDir)build\nuget.exe pack $(ProjectDir)build\expanz-javascript-sdk.nuspec -OutputDirectory $(ProjectDir)build\
+$(ProjectDir)build\nuget.exe pack $(ProjectDir)build\expanz-javascript-sdk-source.nuspec -OutputDirectory $(ProjectDir)build\
+)
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
