@@ -41,22 +41,22 @@
   <ItemGroup>
     <None Include="build\ajaxmin\AjaxMin.dll" />
     <None Include="build\ajaxmin\AjaxMinTask.dll" />
-    <Content Include="build\expanz-kendoui-adapters.js">
+    <None Include="build\expanz-kendoui-adapters.js">
       <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
-    </Content>
+    </None>
     <Content Include="build\expanz-kendoui-adapters.min.js">
       <DependentUpon>expanz-kendoui-adapters.js.bundle</DependentUpon>
     </Content>
     <None Include="packages.config" />
-    <Content Include="build\expanz-sdk.js">
+    <None Include="build\expanz-sdk.js">
       <DependentUpon>expanz-sdk.js.bundle</DependentUpon>
-    </Content>
+    </None>
     <Content Include="build\expanz-sdk.min.js">
       <DependentUpon>expanz-sdk.js.bundle</DependentUpon>
     </Content>
-    <Content Include="build\expanz-components.js">
+    <None Include="build\expanz-components.js">
       <DependentUpon>expanz-components.js.bundle</DependentUpon>
-    </Content>
+    </None>
     <Content Include="build\expanz-components.min.js">
       <DependentUpon>expanz-components.js.bundle</DependentUpon>
     </Content>
