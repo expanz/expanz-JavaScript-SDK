@@ -3,7 +3,7 @@
     <UsingTask TaskName="AjaxMinManifestTask" AssemblyFile="AjaxMinTask.dll" />
 
     <!-- target to build all ajaxmin manifest files in the project -->
-    <Target Name="BuildAjaxMinManifests" AfterTargets="Build">
+    <Target Name="BuildAjaxMinManifests" AfterTargets="Compile">
         <Message Text="Processing AjaxMin Manifests" Importance="high" />
         <CreateItem Include="@(None)" Condition="'%(Extension)'=='.ajaxmin'">
             <Output TaskParameter="Include" ItemName="AjaxMinManifests"/>
