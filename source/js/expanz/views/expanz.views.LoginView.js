@@ -40,7 +40,7 @@ $(function () {
         },
 
         events: {
-            "click [type*='submit']": "attemptLogin"
+            "click [type='submit']": "attemptLogin"
         },
 
         attemptLogin: function () {
