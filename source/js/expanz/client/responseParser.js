@@ -613,8 +613,28 @@ function parseApplicationMessagesResponse(messagesElement) {
             window.expanz.security.showLoginPopup();
         } else {
             // Add any other messages to a list to be displayed to the user in a message box
-            message += "\n\n";
-            message += $messageElement.text();
+            if (window.config.useBundle === true) {
+                // Pass the message to an implementation specific message converter, that may
+                // transform the message from the server to something more suitable for display
+                var data = null;
+
+                if (typeof window.expanz.findMessageKey == 'function') {
+                    data = window.expanz.findMessageKey($messageElement.text());
+                } else {
+                    expanz.logToConsole("window.expanz.findMessageKey not found in your implementation");
+                }
+
+                if (data !== null) {
+                    var tempMessage = jQuery.i18n.prop(data['key'], data['data']);
+                    
+                    if (tempMessage.length !== 0) {
+                        message += "\n\n" + tempMessage;
+                    }
+                }
+            } else {
+                message += "\n\n";
+                message += $messageElement.text();
+            }
         }
     });
 
