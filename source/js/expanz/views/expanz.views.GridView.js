@@ -17,7 +17,7 @@ $(function () {
     window.expanz.views.GridView = Backbone.View.extend({
 
         initialize: function () {
-            this.model.bind("update:grid", this.render, this);
+            this.model.bind("update:grid", this.publishData, this);
             this.bind("rowClicked", this.rowClicked, this);
             this.bind("rowDoubleClicked", this.rowDoubleClicked, this);
             this.bind("actionClicked", this.actionClicked, this);
@@ -48,6 +48,14 @@ $(function () {
 
         contextMenuClicked: function (id, contextMenuType, contextObject, params) {
             this.model.contextMenuSelected(id, contextMenuType, contextObject, params);
+        },
+
+        publishData: function () {
+            this.$el.trigger("publishData", [
+				this.model, this
+            ]);
+
+            this.render();
         },
 
         render: function () {
