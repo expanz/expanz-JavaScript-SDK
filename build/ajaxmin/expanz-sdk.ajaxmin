@@ -64,6 +64,7 @@
     <input path="source/js/expanz/expanz.js" />
 
     <input path="source/js/adapters/TimeInputAdapter.js" />
+    <input path="source/js/adapters/BreadcrumbAdapter.js" />
   </output>
 
 

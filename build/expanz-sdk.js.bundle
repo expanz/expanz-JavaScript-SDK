@@ -61,4 +61,5 @@
   <file>/source/js/expanz/expanz.js</file>
   
   <file>/source/js/adapters/TimeInputAdapter.js</file>
+  <file>/source/js/adapters/BreadcrumbAdapter.js</file>
 </bundle>
