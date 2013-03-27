@@ -77,7 +77,7 @@ $(function() {
 			else {
 				/* exception for documents we have to send a MenuAction request */
 				if (this.get('id') == 'documents') {
-					expanz.net.CreateMenuActionRequest(this.get('parent'), selectedId, "File", null, "1", callbacks);
+					expanz.net.CreateMenuActionRequest(this.get('parent'), selectedId, null, "File", null, "1", callbacks);
 				}
 				/* normal case we send a delta request */
 				else {

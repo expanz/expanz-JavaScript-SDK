@@ -23,6 +23,7 @@ $(function () {
             this.bind("actionClicked", this.actionClicked, this);
             this.bind("menuActionClicked", this.menuActionClicked, this);
             this.bind("contextMenuClicked", this.contextMenuClicked, this);
+            this.bind("drillDown", this.drillDown, this);
         },
 
         rowClicked: function (row) {
@@ -48,6 +49,10 @@ $(function () {
 
         contextMenuClicked: function (id, contextMenuType, contextObject, params) {
             this.model.contextMenuSelected(id, contextMenuType, contextObject, params);
+        },
+
+        drillDown: function (row) {
+            this.model.drillDown(row.attr('id'), row.attr('type'), null);
         },
 
         publishData: function () {
@@ -305,93 +310,15 @@ $(function () {
         
         renderGridUsingDefaultLayout: function (hostId, rows, firstItemIndex, lastItemIndex) {
             // set table scaffold
-            var hostEl = this.$el.find('table#' + hostId);
+            var $hostEl = this.$el.find('table#' + hostId);
             
-            if (hostEl.length < 1) {
+            if ($hostEl.length < 1) {
                 this.$el.append('<table class="grid" id="' + hostId + '"></table>');
-                hostEl = this.$el.find('table#' + hostId);
-            }
-            
-            $(hostEl).html('<thead><tr class="item"></tr></thead><tbody></tbody>');
-
-            // render column header
-            var el = $(hostEl).find('thead tr');
-            
-            _.each(this.model.getAllColumns(), function (cell) {
-                var html = '<th ';
-                // html += cell.get('width') ? ' width="' + cell.get('width') + '"' : '';
-                html += '>' + cell.get('label') + '</th>';
-                el.append(html);
-            });
-
-            if (this.model.hasActions) {
-                el.append('<th>actions</th>');
+                $hostEl = this.$el.find('table#' + hostId);
             }
 
-            // render rows
-            var model = this.model;
-            el = $(hostEl).find('tbody');
-            var i;
-            
-            for (i = firstItemIndex; i < lastItemIndex; i++) {
-                var row = rows[i];
-                var className = ((i - firstItemIndex) % 2 == 1) ? 'gridRowAlternate' : 'gridRow';
-
-                if (row.get("displayStyle") === "separator")
-                    className = "gridRowGroup";
-
-                var html = '<tr id="' + row.id + '" type="' + row.get("type") + '" class="' + className + '">';
-
-                var values = {};
-                
-                _.each(row.getAllCells(), function (cell) {
-                    html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="row' + row.id + ' column' + cell.get('id') + '">';
-                    
-                    if (model.getColumn(cell.get('id')) && model.getColumn(cell.get('id')).get('datatype') === 'BLOB') {
-                        html += '<img width="' + model.getColumn(cell.get('id')).get('width') + '" src="' + cell.get('value') + '"/>';
-                    }
-                    else if (cell.get('value')) {
-                        html += '<span>' + cell.get('value') + '</span>';
-                        values[cell.get('id')] = cell.get('value');
-                    }
-                    
-                    html += '</td>';
-                }, row);
-
-                if (this.model.hasActions) {
-                    html += '<td>';
-                    
-                    _.each(this.model.getActions(), function (cell) {
-                        var buttonId = model.id + "_" + row.id + "_" + cell.get('actionName');
-                        var actionParams = cell.get('actionParams');
-
-                        var userInputs = "";
-                        
-                        _.each(actionParams, function (actionParams) {
-                            var name = actionParams.name;
-                            var value = actionParams.value;
-                            var label = actionParams.label;
-
-                            if (value == '@userInput.textinput' || value == '@userInput.numericinput') {
-                                var format = (value == '@userInput.numericinput') ? 'numeric' : 'text';
-                                var bindValueFromCellId = actionParams.bindValueFromCellId;
-                                var inputValue = '';
-                                if (bindValueFromCellId) {
-                                    inputValue = " value='" + values[bindValueFromCellId] + "' ";
-                                }
-                                userInputs += "<label for='" + row.id + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.id + "_userinput_" + name + "'/>";
-                            }
-                        });
-                        
-                        html += "<div style='display:inline' name='" + cell.get('actionName') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='" + cell.get('type') + "'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
-                    });
-                    
-                    html += '</td>';
-                }
-                
-                html += '</tr>';
-                el.append(html);
-            }
+            this.renderHeaderUsingDefaultTemplate($hostEl);
+            this.renderRowsUsingDefaultTemplate($hostEl, rows, firstItemIndex, lastItemIndex);
 
             /* handle row click event */
             var onRowClick = function (event) {
@@ -418,6 +345,14 @@ $(function () {
 
             $('table#' + hostId + ' tr [bind=method] > button').click(this, onActionClick);
 
+            /* handle drilldown hyperlink click event */
+            var onDrillDownClick = function (event) {
+                var row = $(this).closest("tr");
+                event.data.trigger("drillDown", row);
+            };
+            
+            $('table#' + hostId + ' tr a').click(this, onDrillDownClick);
+
             /* handle menuAction click event */
             var onMenuActionClick = function (event) {
                 var rowId = $(this).closest("tr").attr('id');
@@ -440,7 +375,107 @@ $(function () {
 
             $('table#' + hostId + ' tr [bind=contextMenu] > button').click(this, onContextMenuClick);
 
-            return hostEl;
+            return $hostEl;
+        },
+        
+        renderHeaderUsingDefaultTemplate: function($hostEl) {
+            $hostEl.html('<thead><tr class="item"></tr></thead>');
+
+            // render column header
+            var el = $hostEl.find('thead tr');
+            
+            _.each(this.model.getAllColumns(), function (cell) {
+                var html = '<th ';
+                // html += cell.get('width') ? ' width="' + cell.get('width') + '"' : '';
+                html += '>' + cell.get('label') + '</th>';
+                el.append(html);
+            });
+
+            if (this.model.hasActions) {
+                el.append('<th>actions</th>');
+            }
+        },
+        
+        renderRowsUsingDefaultTemplate: function ($hostEl, rows, firstItemIndex, lastItemIndex) {
+            // render rows
+            $hostEl.append('<tbody></tbody>');
+
+            el = $hostEl.find('tbody');
+            var i;
+
+            for (i = firstItemIndex; i < lastItemIndex; i++) {
+                var row = rows[i];
+                var className = ((i - firstItemIndex) % 2 == 1) ? 'gridRowAlternate' : 'gridRow';
+
+                if (row.get("displayStyle"))
+                    className = "grid-" + row.get("displayStyle");
+
+                var html = '<tr id="' + row.id + '" type="' + row.get("type") + '" class="' + className + '">';
+                html += this.renderRowCellsUsingDefaultTemplate(row);
+                html += '</tr>';
+                el.append(html);
+            }
+        },
+
+        renderRowCellsUsingDefaultTemplate: function (row) {
+            var html;
+            var values = {};
+            var model = this.model;
+            var isDrillDownRow = this.$el.attr('candrilldown') == "true" && (row.get("type") !== "Totals" && row.get("type") !== "BlankLine"); // Only show drilldown link if configured to do so, and only on non-totals and non-blank rows
+            var drillDownLinkCreated = !isDrillDownRow;
+            
+            _.each(row.getAllCells(), function (cell) {
+                html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="row' + row.id + ' column' + cell.get('id') + '">';
+
+                if (model.getColumn(cell.get('id')) && model.getColumn(cell.get('id')).get('datatype') === 'BLOB') {
+                    html += '<img width="' + model.getColumn(cell.get('id')).get('width') + '" src="' + cell.get('value') + '"/>';
+                }
+                else if (cell.get('value')) {
+                    if (!drillDownLinkCreated) {
+                        html += '<a href="#' + row.get('id') + '">' + cell.get('value') + '</a>';
+                        drillDownLinkCreated = true;
+                    } else {
+                        html += '<span>' + cell.get('value') + '</span>';
+                    }
+                    
+                    values[cell.get('id')] = cell.get('value');
+                }
+
+                html += '</td>';
+            }, row);
+            
+            if (this.model.hasActions) {
+                html += '<td>';
+
+                _.each(this.model.getActions(), function (cell) {
+                    var buttonId = model.id + "_" + row.id + "_" + cell.get('actionName');
+                    var actionParams = cell.get('actionParams');
+
+                    var userInputs = "";
+
+                    _.each(actionParams, function (actionParams) {
+                        var name = actionParams.name;
+                        var value = actionParams.value;
+                        var label = actionParams.label;
+
+                        if (value == '@userInput.textinput' || value == '@userInput.numericinput') {
+                            var format = (value == '@userInput.numericinput') ? 'numeric' : 'text';
+                            var bindValueFromCellId = actionParams.bindValueFromCellId;
+                            var inputValue = '';
+                            if (bindValueFromCellId) {
+                                inputValue = " value='" + values[bindValueFromCellId] + "' ";
+                            }
+                            userInputs += "<label for='" + row.id + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.id + "_userinput_" + name + "'/>";
+                        }
+                    });
+
+                    html += "<div style='display:inline' name='" + cell.get('actionName') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='" + cell.get('type') + "'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
+                });
+
+                html += '</td>';
+            }
+            
+            return html;
         },
 
         renderPagingBar: function (currentPage, itemsPerPage, hostEl, currentSortField, currentSortAsc) {

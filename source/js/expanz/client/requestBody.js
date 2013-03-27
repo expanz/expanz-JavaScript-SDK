@@ -136,12 +136,14 @@ var requestBody = {
         return this.wrapPayloadInActivityRequest(body, activity);
     },
 
-    createMenuAction: function (activity, contextId, contextType, menuAction, defaultAction, setIdFromContext) {
+    createMenuAction: function (activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext) {
         var mnuActionStr = '';
-        var contextObjectStr = contextType ? ' contextObject="' + contextType + '"' : '';
+        var contextObjectStr = contextObject ? ' contextObject="' + contextObject + '"' : '';
+        var contextTypeStr = contextType ? contextType : "";
 
         if (contextId) {
             mnuActionStr += '<Context id="' + contextId + '"' + contextObjectStr;
+            mnuActionStr += contextTypeStr ? " Type='" + contextTypeStr + "' " : "";
             mnuActionStr += setIdFromContext ? " setIdFromContext='1' " : "";
             mnuActionStr += '/>';
         }

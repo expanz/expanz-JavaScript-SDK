@@ -292,7 +292,7 @@ $(function() {
 		},
 
 		/* call when selecting something from the tree view (file) or menu action */
-		CreateMenuActionRequest : function(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, callbacks) {
+		CreateMenuActionRequest: function (activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext, callbacks) {
 			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
@@ -313,7 +313,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+			SendRequest(requestBuilder.CreateMenuAction(activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
 		},
 
 		/* call when selecting something from the tree view (file) or menu action */

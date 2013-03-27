@@ -24,7 +24,7 @@ $(function() {
 
 	    menuItemSelected: function (action) {
 
-	        expanz.net.CreateMenuActionRequest(this.get('parentActivity'), null, null, action);
+	        expanz.net.CreateMenuActionRequest(this.get('parentActivity'), null, null, null, action);
 	        return;
 
 	    }

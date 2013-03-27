@@ -123,9 +123,9 @@ var requestBuilder = {
         };
     },
 
-    CreateMenuAction: function (activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, sessionHandle) {
+    CreateMenuAction: function (activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext, sessionHandle) {
         return {
-            data: this.buildRequest('ExecX', XMLNamespace, sessionHandle)(requestBody.createMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext)),
+            data: this.buildRequest('ExecX', XMLNamespace, sessionHandle)(requestBody.createMenuAction(activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext)),
             url: 'ExecX'
         };
     },

@@ -455,7 +455,7 @@ function parseDataResponse(dataElement, activityModel, activityView) {
 
                 /* override a method handler for each menuaction button */
                 dataControlModel.menuActionSelected = function(selectedId, name, params) {
-                    expanz.net.CreateMenuActionRequest($dataElement.get('parent'), selectedId, null, name, "1", true);
+                    expanz.net.CreateMenuActionRequest($dataElement.get('parent'), selectedId, null, null, name, "1", true);
                 };
 
                 /* override a method handler for each contextmenu button */

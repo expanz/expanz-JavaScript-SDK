@@ -151,9 +151,13 @@ $(function() {
 		contextMenuSelected : function(selectedId, contextMenuType, contextObject, params) {
 			window.expanz.logToConsole("GridModel:contextMenuSelected type:" + contextMenuType + " ,id:" + selectedId + ' ,contextObject:' + contextObject + ' , contextMenuParams:' + JSON.stringify(params));
 		},
+
+		drillDown: function (selectedId, type, contextObject) {
+		    expanz.net.CreateMenuActionRequest(this.get("parent"), selectedId, type, contextObject, null, "1", false);
+		},
 		
 		refresh : function() {
-			expanz.net.DataRefreshRequest(this.id, this.parent);
+		    expanz.net.DataRefreshRequest(this.id, this.get("parent"));
 		}
 	});
 });
