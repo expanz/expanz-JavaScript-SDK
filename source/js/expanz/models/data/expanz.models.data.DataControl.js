@@ -84,6 +84,10 @@ $(function() {
 					expanz.net.DeltaRequest(this.get('fieldName'), selectedId, this.get('parent'), callbacks);
 				}
 			}
+		},
+
+		drillDown: function (selectedId, type, contextObject) {
+		    expanz.net.CreateMenuActionRequest(this.get("parent"), selectedId, type, contextObject, null, "1", false);
 		}
 	});
 });
