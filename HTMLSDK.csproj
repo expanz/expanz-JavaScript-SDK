@@ -66,6 +66,7 @@
     <None Include="build\ajaxmin\AjaxMinTask.targets">
       <SubType>Designer</SubType>
     </None>
+    <Content Include="source\js\adapters\BreadcrumbAdapter.js" />
     <Content Include="source\js\lib\backbone.js" />
     <Content Include="source\js\lib\backbone.min.js" />
     <None Include="build\expanz-javascript-sdk-source.nuspec" />

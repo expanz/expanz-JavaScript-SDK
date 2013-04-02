@@ -180,6 +180,7 @@ window.config = {
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/expanz.security.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/expanz.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/adapters/TimeInputAdapter.js"></script>
+    <script type="text/javascript" src="~/Scripts/expanz-sdk/adapters/BreadcrumbAdapter.js"></script>
     }
     else
     {
