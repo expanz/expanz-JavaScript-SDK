@@ -332,10 +332,10 @@ $(function() {
 		    if (parentEl === undefined) // Picklists will pass in a parent, but activities won't
 		        parentEl = activityView.el;
 
-		    var dataControlViewCollection = expanz.Factory.createDataControlViews(activityModel.get('name'), activityModel.get('style'), $(parentEl).find('[bind=DataControl]'));
+		    var dataPublicationViewCollection = expanz.Factory.createDataPublicationViews($(parentEl).find('[bind=DataControl]'));
 
-		    _.each(dataControlViewCollection, function (dataControlView) {
-		        var dataControlModel = dataControlView.model;
+		    _.each(dataPublicationViewCollection, function (dataPublicationView) {
+		        var dataControlModel = dataPublicationView.model;
 		        
 				dataControlModel.set({
 					parent : activityModel,
@@ -426,23 +426,23 @@ $(function() {
 		            anonymousBoundMethod: $fieldEl.attr('anonymousBoundMethod')
 		        });
 		        
-		        var dataModel = new expanz.models.data.DataControl({
+		        var dataModel = new expanz.models.DataPublication({
 		            id: modelId,
-					dataId: $fieldEl.attr('dataId') || $fieldEl.attr('id') || $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('query') || $fieldEl.attr('populateMethod'),
-		            populateMethod : $fieldEl.attr('populateMethod'),
-		            type : $fieldEl.attr('type'),
-		            contextObject : $fieldEl.attr('contextObject'),
-		            autoPopulate : $fieldEl.attr('autoPopulate'),
-		            renderingType : $fieldEl.attr('renderingType'),
-		            selectionChangeAnonymousMethod : $fieldEl.attr('selectionChangeAnonymousMethod'),
-		            selectionChangeAnonymousContextObject : $fieldEl.attr('selectionChangeAnonymousContextObject'),
-					anonymousBoundMethod : $fieldEl.attr('anonymousBoundMethod')
+		            dataId: $fieldEl.attr('dataId') || $fieldEl.attr('id') || $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('query') || $fieldEl.attr('populateMethod'),
+		            query: $fieldEl.attr('query'),
+		            populateMethod: $fieldEl.attr('populateMethod'),
+		            contextObject: $fieldEl.attr('contextObject'),
+		            autoPopulate: $fieldEl.attr('autoPopulate'),
+		            selectionChangeAnonymousMethod: $fieldEl.attr('selectionChangeAnonymousMethod'),
+		            selectionChangeAnonymousContextObject: $fieldEl.attr('selectionChangeAnonymousContextObject'),
+		            anonymousBoundMethod: $fieldEl.attr('anonymousBoundMethod')
 		        });
 		        
 				var view = new expanz.views.DataFieldView({
 					el : fieldEl,
 					id: modelId,
 					className : $fieldEl.attr('class'),
+					renderingType : $fieldEl.attr('renderingType'),
 					model: fieldModel,
 					dataModel: dataModel
 				});
@@ -581,6 +581,53 @@ $(function() {
 			});
 		    
 			return methodViews;
+		},
+	    
+		createDataPublicationViews: function(domObjects) {
+		    var dataPublicationViews = [];
+
+		    _.each(domObjects, function (dataPubicationEl, index) {
+		        var $dataPubicationEl = $(dataPubicationEl);
+
+		        // There are a number of ways that the user can specify a data ID. The preferred means is using
+		        // the dataId attribute, but if this doesn't exist then it looks for various other attributes.
+		        var dataId = $dataPubicationEl.attr('dataId') || $dataPubicationEl.attr('id') || $dataPubicationEl.attr('name') || $dataPubicationEl.attr('query') || $dataPubicationEl.attr('populateMethod');
+
+		        // We also need to generate a unique ID for the model. We'll use the data ID, but if a model
+		        // already exists using that ID (such as when a data publication is used twice on the page)
+		        // then append a number to the name to make it unique.
+		        var modelId = dataId + "_" + index;
+
+		        var dataModel = new expanz.models.DataPublication({
+		            id: modelId,
+		            dataId: dataId,
+		            query: $dataPubicationEl.attr('query'),
+		            populateMethod: $dataPubicationEl.attr('populateMethod'),
+		            contextObject: $dataPubicationEl.attr('contextObject'),
+		            autoPopulate: $dataPubicationEl.attr('autoPopulate'),
+		            selectionChangeAnonymousMethod: $dataPubicationEl.attr('selectionChangeAnonymousMethod'),
+		            selectionChangeAnonymousContextObject: $dataPubicationEl.attr('selectionChangeAnonymousContextObject'),
+		            anonymousBoundMethod: $dataPubicationEl.attr('anonymousBoundMethod')
+		        });
+		        
+		        var view = new expanz.views.DataPublicationView({
+		            el: dataPubicationEl,
+		            id: modelId,
+		            className: $dataPubicationEl.attr('class'),
+		            renderingType: $dataPubicationEl.attr('renderingType'),
+		            canDrillDown: $dataPubicationEl.attr('candrilldown') == "true",
+		            model: dataModel
+		            //itemsPerPage: $dataControlEl.attr('itemsPerPage'),
+		            //templateName: $dataControlEl.attr('templateName'),
+		            //isHTMLTable: $dataControlEl.attr('isHTMLTable'),
+		            //enableConfiguration: $dataControlEl.attr('enableConfiguration'),
+		            //noItemText: $dataControlEl.attr('noItemText')
+		        });
+
+		        dataPublicationViews.push(view);
+		    });
+
+		    return dataPublicationViews;
 		},
 
 		createDataControlViews : function(activityName, activityStyle, DOMObjects) {
@@ -1683,7 +1730,7 @@ $(function() {
 
 	    menuItemSelected: function (action) {
 
-	        expanz.net.CreateMenuActionRequest(this.get('parentActivity'), null, null, action);
+	        expanz.net.CreateMenuActionRequest(this.get('parentActivity'), null, null, null, action);
 	        return;
 
 	    }
@@ -2207,13 +2254,17 @@ $(function() {
 			else {
 				/* exception for documents we have to send a MenuAction request */
 				if (this.get('id') == 'documents') {
-					expanz.net.CreateMenuActionRequest(this.get('parent'), selectedId, "File", null, "1", callbacks);
+					expanz.net.CreateMenuActionRequest(this.get('parent'), selectedId, null, "File", null, "1", callbacks);
 				}
 				/* normal case we send a delta request */
 				else {
 					expanz.net.DeltaRequest(this.get('fieldName'), selectedId, this.get('parent'), callbacks);
 				}
 			}
+		},
+
+		drillDown: function (selectedId, type, contextObject) {
+		    expanz.net.CreateMenuActionRequest(this.get("parent"), selectedId, type, contextObject, null, "1", false);
 		}
 	});
 });
@@ -2278,45 +2329,33 @@ $(function() {
 	    },
 
 		initialize: function () {
-		    this.cells = new expanz.models.data.RowCollection();
+		    this.cells = new expanz.models.data.CellCollection();
+		    this.dataPublication = null; // Will be set in populateDataPublicationModel in responseParser
 		},
 
-		getAllCells : function() {
-
-			// remove/reject cells without value attribute
-			// :this can happen b/c Backbone inserts a recursive/parent cell into the collection
-			var cells = this.cells.reject(function(cell) {
-				return cell.get('value') === undefined;
-			}, this);
-
-			return cells;
+		addCell: function (cellId, value, column, sortValue) {
+		    this.cells.add({
+		        id: cellId,
+		        value: value,
+		        column: column,
+		        sortValue: sortValue
+		    });
 		},
 
-		getCellsMapByField : function() {
-
-			// remove/reject cells without value attribute
-			// :this can happen b/c Backbone inserts a recursive/parent cell into the collection
-			var cells = this.cells.reject(function(cell) {
-				return cell.get('value') === undefined;
-			}, this);
-
-			var map = {};
-			var sortedMap = {};
+		getCellValues : function() {
+			var values = {};
+			var sortValues = {};
 		    
-			_.each(cells, function(cell) {
-				var key = cell.get('field') || cell.get('label');
-				map[key] = cell.get('value');
-				sortedMap[key] = cell.get('sortValue') || cell.get('value');
+			this.cells.each(function(cell) {
+			    var key = cell.get('field') || cell.get('id');
+			    
+			    values[key] = cell.get('value');
+				sortValues[key] = cell.get('sortValue') || cell.get('value');
 			});
 
-			/* add row id and type to the map */
-			map['rowId'] = this.id;
-			map['rowType'] = this.type;
-
-			/* using a data to put the data to avoid underscore 'variable is not defined' error */
 			return {
-				data : map,
-				sortedValues : sortedMap
+			    values: values,
+				sortValues: sortValues
 			};
 		}
 	});
@@ -2480,9 +2519,13 @@ $(function() {
 		contextMenuSelected : function(selectedId, contextMenuType, contextObject, params) {
 			window.expanz.logToConsole("GridModel:contextMenuSelected type:" + contextMenuType + " ,id:" + selectedId + ' ,contextObject:' + contextObject + ' , contextMenuParams:' + JSON.stringify(params));
 		},
+
+		drillDown: function (selectedId, type, contextObject) {
+		    expanz.net.CreateMenuActionRequest(this.get("parent"), selectedId, type, contextObject, null, "1", false);
+		},
 		
 		refresh : function() {
-			expanz.net.DataRefreshRequest(this.id, this.parent);
+		    expanz.net.DataRefreshRequest(this.id, this.get("parent"));
 		}
 	});
 });
@@ -2782,7 +2825,7 @@ $(function() {
 		},
 
 		/* call when selecting something from the tree view (file) or menu action */
-		CreateMenuActionRequest : function(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, callbacks) {
+		CreateMenuActionRequest: function (activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext, callbacks) {
 			if (callbacks === undefined)
 				callbacks = activity.callbacks;
 
@@ -2803,7 +2846,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.CreateMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+			SendRequest(requestBuilder.CreateMenuAction(activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
 		},
 
 		/* call when selecting something from the tree view (file) or menu action */
@@ -3106,9 +3149,9 @@ var requestBuilder = {
         };
     },
 
-    CreateMenuAction: function (activity, contextId, contextType, menuAction, defaultAction, setIdFromContext, sessionHandle) {
+    CreateMenuAction: function (activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext, sessionHandle) {
         return {
-            data: this.buildRequest('ExecX', XMLNamespace, sessionHandle)(requestBody.createMenuAction(activity, contextId, contextType, menuAction, defaultAction, setIdFromContext)),
+            data: this.buildRequest('ExecX', XMLNamespace, sessionHandle)(requestBody.createMenuAction(activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext)),
             url: 'ExecX'
         };
     },
@@ -3291,12 +3334,14 @@ var requestBody = {
         return this.wrapPayloadInActivityRequest(body, activity);
     },
 
-    createMenuAction: function (activity, contextId, contextType, menuAction, defaultAction, setIdFromContext) {
+    createMenuAction: function (activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext) {
         var mnuActionStr = '';
-        var contextObjectStr = contextType ? ' contextObject="' + contextType + '"' : '';
+        var contextObjectStr = contextObject ? ' contextObject="' + contextObject + '"' : '';
+        var contextTypeStr = contextType ? contextType : "";
 
         if (contextId) {
             mnuActionStr += '<Context id="' + contextId + '"' + contextObjectStr;
+            mnuActionStr += contextTypeStr ? " Type='" + contextTypeStr + "' " : "";
             mnuActionStr += setIdFromContext ? " setIdFromContext='1' " : "";
             mnuActionStr += '/>';
         }
@@ -3771,10 +3816,9 @@ function parseDataResponse(dataElement, activityModel, activityView) {
     var $dataElement = $(dataElement);
     var id = $dataElement.attr('id');
     var pickfield = $dataElement.attr('pickField');
-    var contextObject = $dataElement.attr('contextObject');
 
     if (id == 'picklist') {
-        // window.expanz.logToConsole("picklist received");
+        // Server has sent back a picklist, so pop up a window to display it
         var elId = id + pickfield.replace(/ /g, "_");
 
         var clientMessage = new expanz.models.ClientMessage({
@@ -3791,70 +3835,14 @@ function parseDataResponse(dataElement, activityModel, activityView) {
 
         expanz.Factory.bindDataControls(activityView, picklistWindow.$el.parent());
 
-        var gridModel = activityModel.dataPublications.get(elId);
-
-        fillGridModel(gridModel, $dataElement);
-        picklistWindow.center();
-            
-        gridModel.updateRowSelected = function(selectedId, type) {
-            var clientFunction = window["picklistUpdateRowSelected" + type];
-                
-            if (typeof(clientFunction) == "function") {
-                clientFunction(selectedId);
-            } else {
-                var context = {
-                    id: selectedId,
-                    contextObject: contextObject,
-                    type: type
-                };
-
-                var methodAttributes = [
-                    {
-                        name: "contextObject",
-                        value: contextObject
-                    }
-                ];
-
-                expanz.net.MethodRequest('SetIdFromContext', methodAttributes, context, activityModel);
-            }
-                
-            picklistWindow.close();
-        };
+        var dataPublicationModel = activityModel.dataPublications.get(elId + "_0");
+        populateDataPublicationModel(dataPublicationModel, $dataElement);
     }
     else {
         var dataControlModels = activityModel.dataPublications.getChildrenByAttribute("dataId", id);
 
         _.each(dataControlModels, function(dataControlModel) {
-            if (dataControlModel.get('renderingType') == 'grid' || dataControlModel.get('renderingType') == 'popupGrid' || dataControlModel.get('renderingType') == 'rotatingBar') {
-                fillGridModel(dataControlModel, $dataElement);
-
-                /* override the method handler for each action button */
-                dataControlModel.actionSelected = function(selectedId, name, params) {
-                    expanz.net.MethodRequest(name, params, null, activityModel);
-                };
-
-                /* override a method handler for each menuaction button */
-                dataControlModel.menuActionSelected = function(selectedId, name, params) {
-                    expanz.net.CreateMenuActionRequest($dataElement.get('parent'), selectedId, null, name, "1", true);
-                };
-
-                /* override a method handler for each contextmenu button */
-                dataControlModel.contextMenuSelected = function(selectedId, contextMenuType, contextObject, params) {
-                    expanz.net.CreateContextMenuRequest(this.get('parent'), selectedId, contextMenuType, contextObject);
-                };
-            } else {
-                // Unset required, as the set function in FireFox and IE doesn't seem to recognise
-                // that the data has changed, and thus doesn't actually change the value or raise
-                // the change event
-                dataControlModel.unset("xml", {
-                    silent: true
-                });
-                
-                /* update the xml data in the model, view will get a event if bound */
-                dataControlModel.set({
-                    xml: $dataElement[0] 
-                });
-            }
+            populateDataPublicationModel(dataControlModel, $dataElement);
         });
 
         // Variant fields also can consume data publications, but are handled separately 
@@ -3993,8 +3981,28 @@ function parseApplicationMessagesResponse(messagesElement) {
             window.expanz.security.showLoginPopup();
         } else {
             // Add any other messages to a list to be displayed to the user in a message box
-            message += "\n\n";
-            message += $messageElement.text();
+            if (window.config.useBundle === true) {
+                // Pass the message to an implementation specific message converter, that may
+                // transform the message from the server to something more suitable for display
+                var data = null;
+
+                if (typeof window.expanz.findMessageKey == 'function') {
+                    data = window.expanz.findMessageKey($messageElement.text());
+                } else {
+                    expanz.logToConsole("window.expanz.findMessageKey not found in your implementation");
+                }
+
+                if (data !== null) {
+                    var tempMessage = jQuery.i18n.prop(data['key'], data['data']);
+                    
+                    if (tempMessage.length !== 0) {
+                        message += "\n\n" + tempMessage;
+                    }
+                }
+            } else {
+                message += "\n\n";
+                message += $messageElement.text();
+            }
         }
     });
 
@@ -4038,8 +4046,10 @@ function parseFilesResponse(filesElement, activity, initiator) {
 function parseCloseActivityResponse(callbacks) {
     return function apply(xml) {
         var execResults = $(xml).find('ExecXResult');
+        
         if (xml && execResults) {
             var esaResult = $(execResults).find('ESA');
+            
             if (esaResult) {
                 if ($(esaResult).attr('success') === 1) {
                     if (callbacks && callbacks.success) {
@@ -4053,7 +4063,6 @@ function parseCloseActivityResponse(callbacks) {
         if (callbacks && callbacks.error) {
             callbacks.error(true);
         }
-        return;
     };
 }
 
@@ -4066,7 +4075,6 @@ function parseReleaseSessionResponse(callbacks) {
                 callbacks.success(result);
                 return;
             }
-
         }
         
         if (callbacks && callbacks.error) {
@@ -4090,41 +4098,43 @@ function fillActivityData(processAreas, url, name, style, gridviewList) {
         fillActivityData(processArea.pa, url, name, style, gridviewList);
 
     });
-
 }
 
-function fillGridModel(gridModel, data) {
-    gridModel.clear();
+function populateDataPublicationModel(dataPublicationModel, data) {
+    var $data = $(data);
+    
+    dataPublicationModel.rows.reset();
 
-    gridModel.set({
-        source: $(data).attr('source')
+    dataPublicationModel.contextObject = $data.attr('contextObject');
+    dataPublicationModel.isEditable = $(data).attr('hasEditableColumns') === "1";
+    
+    if ($data.attr('clearColumnDefinitions') !== "0") {
+        dataPublicationModel.columns.reset();
+    }
+
+    // Add columns to the grid Model
+    _.each($data.find('Column'), function (column) {
+        var $column = $(column);
+        dataPublicationModel.addColumn($column.attr('id'), $column.attr('field'), $column.attr('label'), $column.attr('datatype'), $column.attr('width'), $column.attr('editable') === "1", $column.attr('matrixKey'));
     });
 
-    var columnMap = Object();
-
-    // add columns to the grid Model
-    _.each($(data).find('Column'), function (column) {
-        var field = $(column).attr('field') ? $(column).attr('field') : $(column).attr('id');
-        field = field.replace(/\./g, "_");
-        columnMap[$(column).attr('id')] = field;
-        gridModel.addColumn($(column).attr('id'), $(column).attr('field'), $(column).attr('label'), $(column).attr('datatype'), $(column).attr('width'));
-    });
-
-    // add rows to the grid Model
-    _.each($(data).find('Row'), function (row) {
-
+    // Add rows to the grid Model
+    _.each($data.find('Row'), function (row) {
+        var $row = $(row);
         var rowId = $(row).attr('id');
-        gridModel.addRow(rowId, $(row).attr('type') || $(row).attr('Type'), $(row).attr('displayStyle'));
+        
+        var rowModel = dataPublicationModel.addRow(rowId, $row.attr('type') || $row.attr('Type'), $row.attr('displayStyle'));
 
-        // add cells to this row
-        _.each($(row).find('Cell'), function (cell) {
-            // nextline is quick fix for htmlunit
-            cell = serializeXML(cell);
-            gridModel.addCell(rowId, $(cell).attr('id'), $(cell).text(), columnMap[$(cell).attr('id')], $(cell).attr('sortValue'));
+        // Add cells to this row
+        _.each($row.find('Cell'), function (cell) {
+            cell = serializeXML(cell); // quick fix for htmlunit
+            var $cell = $(cell);
+            
+            rowModel.addCell($cell.attr('id'), $cell.text(), dataPublicationModel.columns.get($cell.attr('id')), $cell.attr('sortValue'));
         });
     });
 
-    gridModel.trigger("update:grid");
+    dataPublicationModel.trigger("datapublication:publishData");
 }
 ///#source 1 1 /source/js/expanz/client/ActivityInfo.js
 function ActivityInfo(name, title, url, style, image) {
@@ -4964,7 +4974,7 @@ $(function () {
             this.model.bind("change:loading", this.loading, this);
             this.model.bind("setFocus", this.setFocus, this);
             
-            this.dataModel.bind("change:xml", this.dataChanged, this);
+            this.dataModel.bind("datapublication:publishData", this.dataChanged, this);
         },
 
         valueChanged: function () {
@@ -4977,7 +4987,7 @@ $(function () {
 
         dataChanged: function () {
             this.getInputElement().trigger("publishData", [
-				this.dataModel.get('xml'), this
+				this.dataModel, this
             ]);
             
             // A value might have been added to the field (such as a dropdown list) that can now be selected 
@@ -5544,12 +5554,13 @@ $(function () {
     window.expanz.views.GridView = Backbone.View.extend({
 
         initialize: function () {
-            this.model.bind("update:grid", this.render, this);
+            this.model.bind("update:grid", this.publishData, this);
             this.bind("rowClicked", this.rowClicked, this);
             this.bind("rowDoubleClicked", this.rowDoubleClicked, this);
             this.bind("actionClicked", this.actionClicked, this);
             this.bind("menuActionClicked", this.menuActionClicked, this);
             this.bind("contextMenuClicked", this.contextMenuClicked, this);
+            this.bind("drillDown", this.drillDown, this);
         },
 
         rowClicked: function (row) {
@@ -5575,6 +5586,18 @@ $(function () {
 
         contextMenuClicked: function (id, contextMenuType, contextObject, params) {
             this.model.contextMenuSelected(id, contextMenuType, contextObject, params);
+        },
+
+        drillDown: function (row) {
+            this.model.drillDown(row.attr('id'), row.attr('type'), null);
+        },
+
+        publishData: function () {
+            this.$el.trigger("publishData", [
+				this.model, this
+            ]);
+
+            this.render();
         },
 
         render: function () {
@@ -5824,93 +5847,15 @@ $(function () {
         
         renderGridUsingDefaultLayout: function (hostId, rows, firstItemIndex, lastItemIndex) {
             // set table scaffold
-            var hostEl = this.$el.find('table#' + hostId);
+            var $hostEl = this.$el.find('table#' + hostId);
             
-            if (hostEl.length < 1) {
+            if ($hostEl.length < 1) {
                 this.$el.append('<table class="grid" id="' + hostId + '"></table>');
-                hostEl = this.$el.find('table#' + hostId);
-            }
-            
-            $(hostEl).html('<thead><tr class="item"></tr></thead><tbody></tbody>');
-
-            // render column header
-            var el = $(hostEl).find('thead tr');
-            
-            _.each(this.model.getAllColumns(), function (cell) {
-                var html = '<th ';
-                // html += cell.get('width') ? ' width="' + cell.get('width') + '"' : '';
-                html += '>' + cell.get('label') + '</th>';
-                el.append(html);
-            });
-
-            if (this.model.hasActions) {
-                el.append('<th>actions</th>');
+                $hostEl = this.$el.find('table#' + hostId);
             }
 
-            // render rows
-            var model = this.model;
-            el = $(hostEl).find('tbody');
-            var i;
-            
-            for (i = firstItemIndex; i < lastItemIndex; i++) {
-                var row = rows[i];
-                var className = ((i - firstItemIndex) % 2 == 1) ? 'gridRowAlternate' : 'gridRow';
-
-                if (row.get("displayStyle") === "separator")
-                    className = "gridRowGroup";
-
-                var html = '<tr id="' + row.id + '" type="' + row.get("type") + '" class="' + className + '">';
-
-                var values = {};
-                
-                _.each(row.getAllCells(), function (cell) {
-                    html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="row' + row.id + ' column' + cell.get('id') + '">';
-                    
-                    if (model.getColumn(cell.get('id')) && model.getColumn(cell.get('id')).get('datatype') === 'BLOB') {
-                        html += '<img width="' + model.getColumn(cell.get('id')).get('width') + '" src="' + cell.get('value') + '"/>';
-                    }
-                    else if (cell.get('value')) {
-                        html += '<span>' + cell.get('value') + '</span>';
-                        values[cell.get('id')] = cell.get('value');
-                    }
-                    
-                    html += '</td>';
-                }, row);
-
-                if (this.model.hasActions) {
-                    html += '<td>';
-                    
-                    _.each(this.model.getActions(), function (cell) {
-                        var buttonId = model.id + "_" + row.id + "_" + cell.get('actionName');
-                        var actionParams = cell.get('actionParams');
-
-                        var userInputs = "";
-                        
-                        _.each(actionParams, function (actionParams) {
-                            var name = actionParams.name;
-                            var value = actionParams.value;
-                            var label = actionParams.label;
-
-                            if (value == '@userInput.textinput' || value == '@userInput.numericinput') {
-                                var format = (value == '@userInput.numericinput') ? 'numeric' : 'text';
-                                var bindValueFromCellId = actionParams.bindValueFromCellId;
-                                var inputValue = '';
-                                if (bindValueFromCellId) {
-                                    inputValue = " value='" + values[bindValueFromCellId] + "' ";
-                                }
-                                userInputs += "<label for='" + row.id + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.id + "_userinput_" + name + "'/>";
-                            }
-                        });
-                        
-                        html += "<div style='display:inline' name='" + cell.get('actionName') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='" + cell.get('type') + "'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
-                    });
-                    
-                    html += '</td>';
-                }
-                
-                html += '</tr>';
-                el.append(html);
-            }
+            this.renderHeaderUsingDefaultTemplate($hostEl);
+            this.renderRowsUsingDefaultTemplate($hostEl, rows, firstItemIndex, lastItemIndex);
 
             /* handle row click event */
             var onRowClick = function (event) {
@@ -5937,6 +5882,14 @@ $(function () {
 
             $('table#' + hostId + ' tr [bind=method] > button').click(this, onActionClick);
 
+            /* handle drilldown hyperlink click event */
+            var onDrillDownClick = function (event) {
+                var row = $(this).closest("tr");
+                event.data.trigger("drillDown", row);
+            };
+            
+            $('table#' + hostId + ' tr a').click(this, onDrillDownClick);
+
             /* handle menuAction click event */
             var onMenuActionClick = function (event) {
                 var rowId = $(this).closest("tr").attr('id');
@@ -5959,7 +5912,107 @@ $(function () {
 
             $('table#' + hostId + ' tr [bind=contextMenu] > button').click(this, onContextMenuClick);
 
-            return hostEl;
+            return $hostEl;
+        },
+        
+        renderHeaderUsingDefaultTemplate: function($hostEl) {
+            $hostEl.html('<thead><tr class="item"></tr></thead>');
+
+            // render column header
+            var el = $hostEl.find('thead tr');
+            
+            this.model.columns.each(function (cell) {
+                var html = '<th ';
+                // html += cell.get('width') ? ' width="' + cell.get('width') + '"' : '';
+                html += '>' + cell.get('label') + '</th>';
+                el.append(html);
+            });
+
+            if (this.model.hasActions) {
+                el.append('<th>actions</th>');
+            }
+        },
+        
+        renderRowsUsingDefaultTemplate: function ($hostEl, rows, firstItemIndex, lastItemIndex) {
+            // render rows
+            $hostEl.append('<tbody></tbody>');
+
+            el = $hostEl.find('tbody');
+            var i;
+
+            for (i = firstItemIndex; i < lastItemIndex; i++) {
+                var row = rows[i];
+                var className = ((i - firstItemIndex) % 2 == 1) ? 'gridRowAlternate' : 'gridRow';
+
+                if (row.get("displayStyle"))
+                    className = "grid-" + row.get("displayStyle");
+
+                var html = '<tr id="' + row.id + '" type="' + row.get("type") + '" class="' + className + '">';
+                html += this.renderRowCellsUsingDefaultTemplate(row);
+                html += '</tr>';
+                el.append(html);
+            }
+        },
+
+        renderRowCellsUsingDefaultTemplate: function (row) {
+            var html;
+            var values = {};
+            var model = this.model;
+            var isDrillDownRow = this.$el.attr('candrilldown') == "true" && (row.get("type") !== "Totals" && row.get("type") !== "BlankLine"); // Only show drilldown link if configured to do so, and only on non-totals and non-blank rows
+            var drillDownLinkCreated = !isDrillDownRow;
+            
+            _.each(row.getAllCells(), function (cell) {
+                html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="row' + row.id + ' column' + cell.get('id') + '">';
+
+                if (model.getColumn(cell.get('id')) && model.getColumn(cell.get('id')).get('datatype') === 'BLOB') {
+                    html += '<img width="' + model.getColumn(cell.get('id')).get('width') + '" src="' + cell.get('value') + '"/>';
+                }
+                else if (cell.get('value')) {
+                    if (!drillDownLinkCreated) {
+                        html += '<a href="#' + row.get('id') + '">' + cell.get('value') + '</a>';
+                        drillDownLinkCreated = true;
+                    } else {
+                        html += '<span>' + cell.get('value') + '</span>';
+                    }
+                    
+                    values[cell.get('id')] = cell.get('value');
+                }
+
+                html += '</td>';
+            }, row);
+            
+            if (this.model.hasActions) {
+                html += '<td>';
+
+                _.each(this.model.getActions(), function (cell) {
+                    var buttonId = model.id + "_" + row.id + "_" + cell.get('actionName');
+                    var actionParams = cell.get('actionParams');
+
+                    var userInputs = "";
+
+                    _.each(actionParams, function (actionParams) {
+                        var name = actionParams.name;
+                        var value = actionParams.value;
+                        var label = actionParams.label;
+
+                        if (value == '@userInput.textinput' || value == '@userInput.numericinput') {
+                            var format = (value == '@userInput.numericinput') ? 'numeric' : 'text';
+                            var bindValueFromCellId = actionParams.bindValueFromCellId;
+                            var inputValue = '';
+                            if (bindValueFromCellId) {
+                                inputValue = " value='" + values[bindValueFromCellId] + "' ";
+                            }
+                            userInputs += "<label for='" + row.id + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.id + "_userinput_" + name + "'/>";
+                        }
+                    });
+
+                    html += "<div style='display:inline' name='" + cell.get('actionName') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='" + cell.get('type') + "'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
+                });
+
+                html += '</td>';
+            }
+            
+            return html;
         },
 
         renderPagingBar: function (currentPage, itemsPerPage, hostEl, currentSortField, currentSortAsc) {
@@ -6182,7 +6235,7 @@ $(function () {
         },
 
         events: {
-            "click [type*='submit']": "attemptLogin"
+            "click [type='submit']": "attemptLogin"
         },
 
         attemptLogin: function () {
@@ -6522,9 +6575,9 @@ $(function () {
 
         divAttributes: '',
 
-        initialize: function (attrs, containerjQ) {
+        initialize: function (attrs, $container) {
             Backbone.View.prototype.initialize.call(attrs);
-            this.create(containerjQ);
+            this.create($container);
             this.renderActions();
             this.delegateEvents(this.events);
 
@@ -6553,9 +6606,9 @@ $(function () {
 
         },
 
-        create: function (containerjQ) {
+        create: function ($container) {
             // window.expanz.logToConsole("render popupWindow");
-            var popupWindow = containerjQ.find('#' + this.id);
+            var popupWindow = $container.find('#' + this.id);
             if (popupWindow.length > 0) {
                 popupWindow.remove();
             }
@@ -6565,8 +6618,8 @@ $(function () {
                 content = this.model.get('text');
             }
 
-            containerjQ.append("<div class='" + this.cssClass + "' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");
-            this.setElement(containerjQ.find('#' + this.id));
+            $container.append("<div class='" + this.cssClass + "' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");
+            this.setElement($container.find('#' + this.id));
             this.createWindowObject();
 
             if (this.model.get('url') !== undefined && this.model.get('url').length > 0) {
@@ -6580,7 +6633,6 @@ $(function () {
             else {
                 this.center();
             }
-
         },
 
         /* must be redefined depending on the plug-in used */
@@ -6650,7 +6702,36 @@ $(function () {
 
     window.expanz.views.PicklistWindowView = window.expanz.views.PopupView.extend({
         divAttributes: " bind='DataControl' renderingType='grid' ",
-        cssClass: 'pickListPopup popupView'
+        
+        cssClass: 'pickListPopup popupView',
+        
+        initialize: function(attrs, $container) {
+            window.expanz.views.PopupView.prototype.initialize.call(this, attrs, $container);
+            
+            // Centre the window once the pick list has rendered, and its size has been determined
+            this.$el.on("datapublication:rendered", $.proxy(function(event, dataPublicationView) {
+                this.center();
+
+                var picklistWindowView = this;
+                
+                // Redefine the data publication view's onRowClicked event handler function
+                dataPublicationView.onRowClicked = function (row) {
+                    picklistWindowView.onItemSelected(dataPublicationView.model, row.attr("id"), row.attr("type"));
+                    picklistWindowView.close();
+                };
+            }, this));
+        },
+        
+        onItemSelected: function (dataPublicationModel, selectedId, type) {
+            // An item from the pick list has been selected, so send the context to the server
+            var clientFunction = window["picklistUpdateRowSelected" + type];
+
+            if (typeof(clientFunction) == "function") {
+                clientFunction(selectedId);
+            } else {
+                dataPublicationModel.sendContextToServer(selectedId, type);
+            }
+        }
     });
 });
 
@@ -7260,5 +7341,39 @@ $(function() {
 
         // Register event handlers
         $inputElement.bind("valueUpdated", onValueUpdatedFromServer);
+    };
+});
+///#source 1 1 /source/js/adapters/BreadcrumbAdapter.js
+$(function () {
+    $("body").find("[renderingType=breadcrumb]").each(function () {
+        var breadcrumbAdapter = new BreadcrumbAdapter(this);
+    });
+
+    function BreadcrumbAdapter(inputElement) {
+        var $inputElement = $(inputElement);
+
+        var onRender = function (event, dataPublicationModel, view, args) {
+            view.$el.html("");
+            
+            dataPublicationModel.rows.each(function (row, index) {
+                if (index > 0)
+                    view.$el.append("&nbsp;&gt;&nbsp;");
+
+                view.$el.append("<a href='#" + row.get("id") + "' id='" + row.get("id") + "' type='" + row.get("type") + "'>" + row.cells.first().get("value") + "</a>");
+            });
+            
+            /* handle drilldown hyperlink click event */
+            var onDrillDownClick = function (event) {
+                var $anchor = $(this);
+                view.model.drillDown($anchor.attr('id'), $anchor.attr('type'), null);
+            };
+
+            view.$el.find("a").click(this, onDrillDownClick);
+
+            args.handled = true; // Indicates that the rendering of the data publication has been handled
+        };
+
+        // Register event handlers
+        $inputElement.bind("dataPublication:rendering", onRender);
     };
 });

@@ -19,10 +19,8 @@ $.fn.KendoDropDownListAdapter = function() {
 	if ($this.attr('emptyItemValue') !== undefined)
 	    emptyItemValue = $this.attr('emptyItemValue');
 
-	/**
-	 * define publishData which is called when list of data is ready, xml data is passed as argument after the event
-	 */
-	var publishData = function(event, xml) {
+	/* publishData is called when data is ready to be assigned to the control, in the form of a expanz.models.DataPublication model */
+	var publishData = function(event, dataPublicationModel) {
 		var data = [];
 
 		if (emptyItemLabel !== null) {
@@ -32,15 +30,16 @@ $.fn.KendoDropDownListAdapter = function() {
 			});
 		}
 
-		_.each($(xml).find('Row'), function(row) {
-			var rowId = $(row).attr('id');
-			_.each($(row).find('Cell'), function(cell) {
-				data.push({
-					text : $(cell).text(),
-					value : rowId === 0 ? $(cell).text() : rowId
-				});
-			});
-		});
+	    dataPublicationModel.rows.each(function(row) {
+	        var rowId = row.get("id");
+
+	        row.cells.each(function(cell) {
+	            data.push({
+	                text: cell.get("value"),
+	                value: rowId === 0 ? cell.get("value") : rowId
+	            });
+	        });
+	    });
 
 		var ds = new kendo.data.DataSource({
 			data : data
@@ -49,11 +48,11 @@ $.fn.KendoDropDownListAdapter = function() {
 		list.dataSource = ds;
 		ds.read();
 		list.refresh();
+	    
 		/* set initial value if existing */
 		if (cb.val() !== undefined) {
 			list.value(cb.val());
 		}
-
 	};
 
 	/* when the field gets a new value from the server, update the combobox element */
@@ -82,7 +81,7 @@ $.fn.KendoDropDownListAdapter = function() {
         // TODO
     };
 
-	/* bind listenners */
+	/* bind event handlers */
 	cb.bind("publishData", publishData);
 	cb.bind("valueUpdated", onValueUpdated);
 	cb.bind("disabledChanged", onDisabledChanged);

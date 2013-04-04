@@ -30,7 +30,7 @@ $(function () {
             this.model.bind("change:loading", this.loading, this);
             this.model.bind("setFocus", this.setFocus, this);
             
-            this.dataModel.bind("change:xml", this.dataChanged, this);
+            this.dataModel.bind("datapublication:publishData", this.dataChanged, this);
         },
 
         valueChanged: function () {
@@ -43,7 +43,7 @@ $(function () {
 
         dataChanged: function () {
             this.getInputElement().trigger("publishData", [
-				this.dataModel.get('xml'), this
+				this.dataModel, this
             ]);
             
             // A value might have been added to the field (such as a dropdown list) that can now be selected 

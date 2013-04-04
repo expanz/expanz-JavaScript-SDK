@@ -391,10 +391,9 @@ function parseDataResponse(dataElement, activityModel, activityView) {
     var $dataElement = $(dataElement);
     var id = $dataElement.attr('id');
     var pickfield = $dataElement.attr('pickField');
-    var contextObject = $dataElement.attr('contextObject');
 
     if (id == 'picklist') {
-        // window.expanz.logToConsole("picklist received");
+        // Server has sent back a picklist, so pop up a window to display it
         var elId = id + pickfield.replace(/ /g, "_");
 
         var clientMessage = new expanz.models.ClientMessage({
@@ -411,70 +410,14 @@ function parseDataResponse(dataElement, activityModel, activityView) {
 
         expanz.Factory.bindDataControls(activityView, picklistWindow.$el.parent());
 
-        var gridModel = activityModel.dataPublications.get(elId);
-
-        fillGridModel(gridModel, $dataElement);
-        picklistWindow.center();
-            
-        gridModel.updateRowSelected = function(selectedId, type) {
-            var clientFunction = window["picklistUpdateRowSelected" + type];
-                
-            if (typeof(clientFunction) == "function") {
-                clientFunction(selectedId);
-            } else {
-                var context = {
-                    id: selectedId,
-                    contextObject: contextObject,
-                    type: type
-                };
-
-                var methodAttributes = [
-                    {
-                        name: "contextObject",
-                        value: contextObject
-                    }
-                ];
-
-                expanz.net.MethodRequest('SetIdFromContext', methodAttributes, context, activityModel);
-            }
-                
-            picklistWindow.close();
-        };
+        var dataPublicationModel = activityModel.dataPublications.get(elId + "_0");
+        populateDataPublicationModel(dataPublicationModel, $dataElement);
     }
     else {
         var dataControlModels = activityModel.dataPublications.getChildrenByAttribute("dataId", id);
 
         _.each(dataControlModels, function(dataControlModel) {
-            if (dataControlModel.get('renderingType') == 'grid' || dataControlModel.get('renderingType') == 'popupGrid' || dataControlModel.get('renderingType') == 'rotatingBar') {
-                fillGridModel(dataControlModel, $dataElement);
-
-                /* override the method handler for each action button */
-                dataControlModel.actionSelected = function(selectedId, name, params) {
-                    expanz.net.MethodRequest(name, params, null, activityModel);
-                };
-
-                /* override a method handler for each menuaction button */
-                dataControlModel.menuActionSelected = function(selectedId, name, params) {
-                    expanz.net.CreateMenuActionRequest($dataElement.get('parent'), selectedId, null, null, name, "1", true);
-                };
-
-                /* override a method handler for each contextmenu button */
-                dataControlModel.contextMenuSelected = function(selectedId, contextMenuType, contextObject, params) {
-                    expanz.net.CreateContextMenuRequest(this.get('parent'), selectedId, contextMenuType, contextObject);
-                };
-            } else {
-                // Unset required, as the set function in FireFox and IE doesn't seem to recognise
-                // that the data has changed, and thus doesn't actually change the value or raise
-                // the change event
-                dataControlModel.unset("xml", {
-                    silent: true
-                });
-                
-                /* update the xml data in the model, view will get a event if bound */
-                dataControlModel.set({
-                    xml: $dataElement[0] 
-                });
-            }
+            populateDataPublicationModel(dataControlModel, $dataElement);
         });
 
         // Variant fields also can consume data publications, but are handled separately 
@@ -678,8 +621,10 @@ function parseFilesResponse(filesElement, activity, initiator) {
 function parseCloseActivityResponse(callbacks) {
     return function apply(xml) {
         var execResults = $(xml).find('ExecXResult');
+        
         if (xml && execResults) {
             var esaResult = $(execResults).find('ESA');
+            
             if (esaResult) {
                 if ($(esaResult).attr('success') === 1) {
                     if (callbacks && callbacks.success) {
@@ -693,7 +638,6 @@ function parseCloseActivityResponse(callbacks) {
         if (callbacks && callbacks.error) {
             callbacks.error(true);
         }
-        return;
     };
 }
 
@@ -706,7 +650,6 @@ function parseReleaseSessionResponse(callbacks) {
                 callbacks.success(result);
                 return;
             }
-
         }
         
         if (callbacks && callbacks.error) {
@@ -730,39 +673,41 @@ function fillActivityData(processAreas, url, name, style, gridviewList) {
         fillActivityData(processArea.pa, url, name, style, gridviewList);
 
     });
-
 }
 
-function fillGridModel(gridModel, data) {
-    gridModel.clear();
+function populateDataPublicationModel(dataPublicationModel, data) {
+    var $data = $(data);
+    
+    dataPublicationModel.rows.reset();
 
-    gridModel.set({
-        source: $(data).attr('source')
+    dataPublicationModel.contextObject = $data.attr('contextObject');
+    dataPublicationModel.isEditable = $(data).attr('hasEditableColumns') === "1";
+    
+    if ($data.attr('clearColumnDefinitions') !== "0") {
+        dataPublicationModel.columns.reset();
+    }
+
+    // Add columns to the grid Model
+    _.each($data.find('Column'), function (column) {
+        var $column = $(column);
+        dataPublicationModel.addColumn($column.attr('id'), $column.attr('field'), $column.attr('label'), $column.attr('datatype'), $column.attr('width'), $column.attr('editable') === "1", $column.attr('matrixKey'));
     });
 
-    var columnMap = Object();
-
-    // add columns to the grid Model
-    _.each($(data).find('Column'), function (column) {
-        var field = $(column).attr('field') ? $(column).attr('field') : $(column).attr('id');
-        field = field.replace(/\./g, "_");
-        columnMap[$(column).attr('id')] = field;
-        gridModel.addColumn($(column).attr('id'), $(column).attr('field'), $(column).attr('label'), $(column).attr('datatype'), $(column).attr('width'));
-    });
-
-    // add rows to the grid Model
-    _.each($(data).find('Row'), function (row) {
-
+    // Add rows to the grid Model
+    _.each($data.find('Row'), function (row) {
+        var $row = $(row);
         var rowId = $(row).attr('id');
-        gridModel.addRow(rowId, $(row).attr('type') || $(row).attr('Type'), $(row).attr('displayStyle'));
+        
+        var rowModel = dataPublicationModel.addRow(rowId, $row.attr('type') || $row.attr('Type'), $row.attr('displayStyle'));
 
-        // add cells to this row
-        _.each($(row).find('Cell'), function (cell) {
-            // nextline is quick fix for htmlunit
-            cell = serializeXML(cell);
-            gridModel.addCell(rowId, $(cell).attr('id'), $(cell).text(), columnMap[$(cell).attr('id')], $(cell).attr('sortValue'));
+        // Add cells to this row
+        _.each($row.find('Cell'), function (cell) {
+            cell = serializeXML(cell); // quick fix for htmlunit
+            var $cell = $(cell);
+            
+            rowModel.addCell($cell.attr('id'), $cell.text(), dataPublicationModel.columns.get($cell.attr('id')), $cell.attr('sortValue'));
         });
     });
 
-    gridModel.trigger("update:grid");
+    dataPublicationModel.trigger("datapublication:publishData");
 }

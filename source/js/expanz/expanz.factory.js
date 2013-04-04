@@ -183,10 +183,10 @@ $(function() {
 		    if (parentEl === undefined) // Picklists will pass in a parent, but activities won't
 		        parentEl = activityView.el;
 
-		    var dataControlViewCollection = expanz.Factory.createDataControlViews(activityModel.get('name'), activityModel.get('style'), $(parentEl).find('[bind=DataControl]'));
+		    var dataPublicationViewCollection = expanz.Factory.createDataPublicationViews($(parentEl).find('[bind=DataControl]'));
 
-		    _.each(dataControlViewCollection, function (dataControlView) {
-		        var dataControlModel = dataControlView.model;
+		    _.each(dataPublicationViewCollection, function (dataPublicationView) {
+		        var dataControlModel = dataPublicationView.model;
 		        
 				dataControlModel.set({
 					parent : activityModel,
@@ -277,23 +277,23 @@ $(function() {
 		            anonymousBoundMethod: $fieldEl.attr('anonymousBoundMethod')
 		        });
 		        
-		        var dataModel = new expanz.models.data.DataControl({
+		        var dataModel = new expanz.models.DataPublication({
 		            id: modelId,
-					dataId: $fieldEl.attr('dataId') || $fieldEl.attr('id') || $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('query') || $fieldEl.attr('populateMethod'),
-		            populateMethod : $fieldEl.attr('populateMethod'),
-		            type : $fieldEl.attr('type'),
-		            contextObject : $fieldEl.attr('contextObject'),
-		            autoPopulate : $fieldEl.attr('autoPopulate'),
-		            renderingType : $fieldEl.attr('renderingType'),
-		            selectionChangeAnonymousMethod : $fieldEl.attr('selectionChangeAnonymousMethod'),
-		            selectionChangeAnonymousContextObject : $fieldEl.attr('selectionChangeAnonymousContextObject'),
-					anonymousBoundMethod : $fieldEl.attr('anonymousBoundMethod')
+		            dataId: $fieldEl.attr('dataId') || $fieldEl.attr('id') || $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('query') || $fieldEl.attr('populateMethod'),
+		            query: $fieldEl.attr('query'),
+		            populateMethod: $fieldEl.attr('populateMethod'),
+		            contextObject: $fieldEl.attr('contextObject'),
+		            autoPopulate: $fieldEl.attr('autoPopulate'),
+		            selectionChangeAnonymousMethod: $fieldEl.attr('selectionChangeAnonymousMethod'),
+		            selectionChangeAnonymousContextObject: $fieldEl.attr('selectionChangeAnonymousContextObject'),
+		            anonymousBoundMethod: $fieldEl.attr('anonymousBoundMethod')
 		        });
 		        
 				var view = new expanz.views.DataFieldView({
 					el : fieldEl,
 					id: modelId,
 					className : $fieldEl.attr('class'),
+					renderingType : $fieldEl.attr('renderingType'),
 					model: fieldModel,
 					dataModel: dataModel
 				});
@@ -432,6 +432,53 @@ $(function() {
 			});
 		    
 			return methodViews;
+		},
+	    
+		createDataPublicationViews: function(domObjects) {
+		    var dataPublicationViews = [];
+
+		    _.each(domObjects, function (dataPubicationEl, index) {
+		        var $dataPubicationEl = $(dataPubicationEl);
+
+		        // There are a number of ways that the user can specify a data ID. The preferred means is using
+		        // the dataId attribute, but if this doesn't exist then it looks for various other attributes.
+		        var dataId = $dataPubicationEl.attr('dataId') || $dataPubicationEl.attr('id') || $dataPubicationEl.attr('name') || $dataPubicationEl.attr('query') || $dataPubicationEl.attr('populateMethod');
+
+		        // We also need to generate a unique ID for the model. We'll use the data ID, but if a model
+		        // already exists using that ID (such as when a data publication is used twice on the page)
+		        // then append a number to the name to make it unique.
+		        var modelId = dataId + "_" + index;
+
+		        var dataModel = new expanz.models.DataPublication({
+		            id: modelId,
+		            dataId: dataId,
+		            query: $dataPubicationEl.attr('query'),
+		            populateMethod: $dataPubicationEl.attr('populateMethod'),
+		            contextObject: $dataPubicationEl.attr('contextObject'),
+		            autoPopulate: $dataPubicationEl.attr('autoPopulate'),
+		            selectionChangeAnonymousMethod: $dataPubicationEl.attr('selectionChangeAnonymousMethod'),
+		            selectionChangeAnonymousContextObject: $dataPubicationEl.attr('selectionChangeAnonymousContextObject'),
+		            anonymousBoundMethod: $dataPubicationEl.attr('anonymousBoundMethod')
+		        });
+		        
+		        var view = new expanz.views.DataPublicationView({
+		            el: dataPubicationEl,
+		            id: modelId,
+		            className: $dataPubicationEl.attr('class'),
+		            renderingType: $dataPubicationEl.attr('renderingType'),
+		            canDrillDown: $dataPubicationEl.attr('candrilldown') == "true",
+		            model: dataModel
+		            //itemsPerPage: $dataControlEl.attr('itemsPerPage'),
+		            //templateName: $dataControlEl.attr('templateName'),
+		            //isHTMLTable: $dataControlEl.attr('isHTMLTable'),
+		            //enableConfiguration: $dataControlEl.attr('enableConfiguration'),
+		            //noItemText: $dataControlEl.attr('noItemText')
+		        });
+
+		        dataPublicationViews.push(view);
+		    });
+
+		    return dataPublicationViews;
 		},
 
 		createDataControlViews : function(activityName, activityStyle, DOMObjects) {

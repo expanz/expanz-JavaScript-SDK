@@ -67,6 +67,8 @@
       <SubType>Designer</SubType>
     </None>
     <Content Include="source\js\adapters\BreadcrumbAdapter.js" />
+    <Content Include="source\js\expanz\models\expanz.models.DataPublication.js" />
+    <Content Include="source\js\expanz\views\expanz.views.DataPublicationView.js" />
     <Content Include="source\js\lib\backbone.js" />
     <Content Include="source\js\lib\backbone.min.js" />
     <None Include="build\expanz-javascript-sdk-source.nuspec" />
@@ -118,8 +120,6 @@
     <Content Include="source\js\expanz\menu\ProcessAreaMenu.js" />
     <Content Include="source\js\expanz\models\expanz.models.Message.js" />
     <Content Include="source\js\expanz\models\expanz.models.MessageCollection.js" />
-    <Content Include="source\js\expanz\models\data\expanz.models.data.DataControl.js" />
-    <Content Include="source\js\expanz\models\data\expanz.models.data.Grid.js" />
     <Content Include="source\js\expanz\models\data\expanz.models.data.Row.js" />
     <Content Include="source\js\expanz\models\data\expanz.models.data.Cell.js" />
     <Content Include="source\js\expanz\models\expanz.models.Activity.js" />
@@ -140,10 +140,8 @@
     <Content Include="source\js\expanz\views\expanz.views.PopupView.js" />
     <Content Include="source\js\expanz\views\expanz.views.RadioButtonsView.js" />
     <Content Include="source\js\expanz\views\expanz.views.CheckboxesView.js" />
-    <Content Include="source\js\expanz\views\expanz.views.DataControlView.js" />
     <Content Include="source\js\expanz\views\expanz.views.ActivityView.js" />
     <Content Include="source\js\expanz\views\expanz.views.LoginView.js" />
-    <Content Include="source\js\expanz\views\expanz.views.GridView.js" />
     <Content Include="source\js\expanz\views\expanz.views.ContextMenuView.js" />
     <Content Include="source\js\expanz\views\expanz.views.MethodView.js" />
     <Content Include="source\js\expanz\views\expanz.views.DependantFieldView.js" />

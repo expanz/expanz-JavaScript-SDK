@@ -6,16 +6,14 @@
     function BreadcrumbAdapter(inputElement) {
         var $inputElement = $(inputElement);
 
-        var onPublishData = function (event, newValue, view) {
-            $inputElement.html("<span></span>");
+        var onRender = function (event, dataPublicationModel, view, args) {
+            view.$el.html("");
             
-            $(newValue).find("Rows").find("Row").each(function (index, row) {
-                var $row = $(row);
-
+            dataPublicationModel.rows.each(function (row, index) {
                 if (index > 0)
-                    $inputElement.append("&nbsp;&gt;&nbsp;");
+                    view.$el.append("&nbsp;&gt;&nbsp;");
 
-                $inputElement.append("<a href='#" + $row.attr("id") + "' id='" + $row.attr("id") + "' type='" + $row.attr("Type") + "'>" + $row.find("Cell").text() + "</a>");
+                view.$el.append("<a href='#" + row.get("id") + "' id='" + row.get("id") + "' type='" + row.get("type") + "'>" + row.cells.first().get("value") + "</a>");
             });
             
             /* handle drilldown hyperlink click event */
@@ -24,10 +22,12 @@
                 view.model.drillDown($anchor.attr('id'), $anchor.attr('type'), null);
             };
 
-            $inputElement.find("a").click(this, onDrillDownClick);
+            view.$el.find("a").click(this, onDrillDownClick);
+
+            args.handled = true; // Indicates that the rendering of the data publication has been handled
         };
 
         // Register event handlers
-        $inputElement.bind("publishData", onPublishData);
+        $inputElement.bind("dataPublication:rendering", onRender);
     };
 });

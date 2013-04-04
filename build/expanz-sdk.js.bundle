@@ -19,11 +19,10 @@
   <file>/source/js/expanz/models/expanz.models.MessageCollection.js</file>
   <file>/source/js/expanz/models/expanz.models.Activity.js</file>
   <file>/source/js/expanz/models/expanz.models.ClientMessage.js</file>
+  <file>/source/js/expanz/models/expanz.models.DataPublication.js</file>
   
-  <file>/source/js/expanz/models/data/expanz.models.data.DataControl.js</file>
   <file>/source/js/expanz/models/data/expanz.models.data.Cell.js</file>
   <file>/source/js/expanz/models/data/expanz.models.data.Row.js</file>
-  <file>/source/js/expanz/models/data/expanz.models.data.Grid.js</file>  
   
   <file>/source/js/expanz/expanz.net.js</file>
   <file>/source/js/expanz/client/requestBuilder.js</file>
@@ -41,15 +40,14 @@
   <file>/source/js/expanz/views/expanz.views.js</file>
   <file>/source/js/expanz/views/expanz.views.FieldView.js</file>
   <file>/source/js/expanz/views/expanz.views.DataFieldView.js</file>
+  <file>/source/js/expanz/views/expanz.views.DataPublicationView.js</file>
   <file>/source/js/expanz/views/expanz.views.VariantFieldView.js</file>
   <file>/source/js/expanz/views/expanz.views.DependantFieldView.js</file>
   <file>/source/js/expanz/views/expanz.views.MethodView.js</file>
   <file>/source/js/expanz/views/expanz.views.MessagesView.js</file>
   <file>/source/js/expanz/views/expanz.views.ContextMenuView.js</file>
-  <file>/source/js/expanz/views/expanz.views.GridView.js</file>
   <file>/source/js/expanz/views/expanz.views.LoginView.js</file>
   <file>/source/js/expanz/views/expanz.views.ActivityView.js</file>
-  <file>/source/js/expanz/views/expanz.views.DataControlView.js</file>
   <file>/source/js/expanz/views/expanz.views.CheckboxesView.js</file>
   <file>/source/js/expanz/views/expanz.views.RadioButtonsView.js</file>
   <file>/source/js/expanz/views/expanz.views.PopupView.js</file>

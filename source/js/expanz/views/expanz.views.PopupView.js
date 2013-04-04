@@ -22,9 +22,9 @@ $(function () {
 
         divAttributes: '',
 
-        initialize: function (attrs, containerjQ) {
+        initialize: function (attrs, $container) {
             Backbone.View.prototype.initialize.call(attrs);
-            this.create(containerjQ);
+            this.create($container);
             this.renderActions();
             this.delegateEvents(this.events);
 
@@ -53,9 +53,9 @@ $(function () {
 
         },
 
-        create: function (containerjQ) {
+        create: function ($container) {
             // window.expanz.logToConsole("render popupWindow");
-            var popupWindow = containerjQ.find('#' + this.id);
+            var popupWindow = $container.find('#' + this.id);
             if (popupWindow.length > 0) {
                 popupWindow.remove();
             }
@@ -65,8 +65,8 @@ $(function () {
                 content = this.model.get('text');
             }
 
-            containerjQ.append("<div class='" + this.cssClass + "' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");
-            this.setElement(containerjQ.find('#' + this.id));
+            $container.append("<div class='" + this.cssClass + "' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");
+            this.setElement($container.find('#' + this.id));
             this.createWindowObject();
 
             if (this.model.get('url') !== undefined && this.model.get('url').length > 0) {
@@ -80,7 +80,6 @@ $(function () {
             else {
                 this.center();
             }
-
         },
 
         /* must be redefined depending on the plug-in used */

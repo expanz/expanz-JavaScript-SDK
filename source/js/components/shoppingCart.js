@@ -494,7 +494,7 @@ $(function() {
 			_executeAfterRenderListItemsModule : function(el) {
 				window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent($(el).find("#"+this.productListName), 1);
 				var that = this;
-				$(el).find("#"+this.productListName).bind("table:rendered", function() {
+				$(el).find("#"+this.productListName).bind("datapublication:rendered", function() {
 					if (that.lastListAction == 'search') {
 						$("#searchString").html($("#ItemSearch input").val());
 						$("#searchResultTitle").show();
@@ -982,7 +982,7 @@ $(function() {
 			},
 
 			_executeAfterRenderCartCheckoutButtonModule : function() {
-				$("#lvMiniCart").bind("table:rendered", function() {
+			    $("#lvMiniCart").bind("datapublication:rendered", function () {
 
 					/* hiding the checkout part if no items */
 					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === "0") {
@@ -1196,7 +1196,7 @@ $(function() {
 			_executeAfterRenderCheckoutItemsListModule : function() {
 				window.expanz.html.renderNumericTextBoxesOnTableRenderedEvent($("#lvMiniCart"));
 				var that = this;
-				$("#lvMiniCart").bind("table:rendered", function() {
+				$("#lvMiniCart").bind("datapublication:rendered", function () {
 					/* hiding the checkout part if no items and not order submitted message displayed */
 					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === "0" && ($('.k-window-title:contains("Order Submitted")').length === 0) && $('.k-window-title:contains("Order Saved")').length === 0) {
 						expanz.views.redirect(that.shoppingCartPage);
@@ -1324,7 +1324,7 @@ $(function() {
 			min = 1;
 		if (max === undefined)
 			max = 99;
-		$(hostEl).bind("table:rendered", function() {
+		$(hostEl).bind("datapublication:rendered", function () {
 			$(hostEl).find("[id*='_userinput_'][format='numeric']").each(function() {
 				var kntb = null;
 

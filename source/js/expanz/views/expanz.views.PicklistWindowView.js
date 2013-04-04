@@ -16,6 +16,35 @@ $(function () {
 
     window.expanz.views.PicklistWindowView = window.expanz.views.PopupView.extend({
         divAttributes: " bind='DataControl' renderingType='grid' ",
-        cssClass: 'pickListPopup popupView'
+        
+        cssClass: 'pickListPopup popupView',
+        
+        initialize: function(attrs, $container) {
+            window.expanz.views.PopupView.prototype.initialize.call(this, attrs, $container);
+            
+            // Centre the window once the pick list has rendered, and its size has been determined
+            this.$el.on("datapublication:rendered", $.proxy(function(event, dataPublicationView) {
+                this.center();
+
+                var picklistWindowView = this;
+                
+                // Redefine the data publication view's onRowClicked event handler function
+                dataPublicationView.onRowClicked = function (row) {
+                    picklistWindowView.onItemSelected(dataPublicationView.model, row.attr("id"), row.attr("type"));
+                    picklistWindowView.close();
+                };
+            }, this));
+        },
+        
+        onItemSelected: function (dataPublicationModel, selectedId, type) {
+            // An item from the pick list has been selected, so send the context to the server
+            var clientFunction = window["picklistUpdateRowSelected" + type];
+
+            if (typeof(clientFunction) == "function") {
+                clientFunction(selectedId);
+            } else {
+                dataPublicationModel.sendContextToServer(selectedId, type);
+            }
+        }
     });
 });

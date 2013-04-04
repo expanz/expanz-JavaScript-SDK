@@ -25,45 +25,33 @@ $(function() {
 	    },
 
 		initialize: function () {
-		    this.cells = new expanz.models.data.RowCollection();
+		    this.cells = new expanz.models.data.CellCollection();
+		    this.dataPublication = null; // Will be set in populateDataPublicationModel in responseParser
 		},
 
-		getAllCells : function() {
-
-			// remove/reject cells without value attribute
-			// :this can happen b/c Backbone inserts a recursive/parent cell into the collection
-			var cells = this.cells.reject(function(cell) {
-				return cell.get('value') === undefined;
-			}, this);
-
-			return cells;
+		addCell: function (cellId, value, column, sortValue) {
+		    this.cells.add({
+		        id: cellId,
+		        value: value,
+		        column: column,
+		        sortValue: sortValue
+		    });
 		},
 
-		getCellsMapByField : function() {
-
-			// remove/reject cells without value attribute
-			// :this can happen b/c Backbone inserts a recursive/parent cell into the collection
-			var cells = this.cells.reject(function(cell) {
-				return cell.get('value') === undefined;
-			}, this);
-
-			var map = {};
-			var sortedMap = {};
+		getCellValues : function() {
+			var values = {};
+			var sortValues = {};
 		    
-			_.each(cells, function(cell) {
-				var key = cell.get('field') || cell.get('label');
-				map[key] = cell.get('value');
-				sortedMap[key] = cell.get('sortValue') || cell.get('value');
+			this.cells.each(function(cell) {
+			    var key = cell.get('field') || cell.get('id');
+			    
+			    values[key] = cell.get('value');
+				sortValues[key] = cell.get('sortValue') || cell.get('value');
 			});
 
-			/* add row id and type to the map */
-			map['rowId'] = this.id;
-			map['rowType'] = this.type;
-
-			/* using a data to put the data to avoid underscore 'variable is not defined' error */
 			return {
-				data : map,
-				sortedValues : sortedMap
+			    values: values,
+				sortValues: sortValues
 			};
 		}
 	});

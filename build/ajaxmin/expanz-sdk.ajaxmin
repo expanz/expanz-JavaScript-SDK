@@ -22,11 +22,10 @@
     <input path="source/js/expanz/models/expanz.models.MessageCollection.js" />
     <input path="source/js/expanz/models/expanz.models.Activity.js" />
     <input path="source/js/expanz/models/expanz.models.ClientMessage.js" />
+    <input path="source/js/expanz/models/expanz.models.DataPublication.js" />
 
-    <input path="source/js/expanz/models/data/expanz.models.data.DataControl.js" />
     <input path="source/js/expanz/models/data/expanz.models.data.Cell.js" />
     <input path="source/js/expanz/models/data/expanz.models.data.Row.js" />
-    <input path="source/js/expanz/models/data/expanz.models.data.Grid.js" />
 
     <input path="source/js/expanz/expanz.net.js" />
     <input path="source/js/expanz/client/requestBuilder.js" />
@@ -44,15 +43,14 @@
     <input path="source/js/expanz/views/expanz.views.js" />
     <input path="source/js/expanz/views/expanz.views.FieldView.js" />
     <input path="source/js/expanz/views/expanz.views.DataFieldView.js" />
+    <input path="source/js/expanz/views/expanz.views.DataPublicationView.js" />
     <input path="source/js/expanz/views/expanz.views.VariantFieldView.js" />
     <input path="source/js/expanz/views/expanz.views.DependantFieldView.js" />
     <input path="source/js/expanz/views/expanz.views.MethodView.js" />
     <input path="source/js/expanz/views/expanz.views.MessagesView.js" />
     <input path="source/js/expanz/views/expanz.views.ContextMenuView.js" />
-    <input path="source/js/expanz/views/expanz.views.GridView.js" />
     <input path="source/js/expanz/views/expanz.views.LoginView.js" />
     <input path="source/js/expanz/views/expanz.views.ActivityView.js" />
-    <input path="source/js/expanz/views/expanz.views.DataControlView.js" />
     <input path="source/js/expanz/views/expanz.views.CheckboxesView.js" />
     <input path="source/js/expanz/views/expanz.views.RadioButtonsView.js" />
     <input path="source/js/expanz/views/expanz.views.PopupView.js" />
