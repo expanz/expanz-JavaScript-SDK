@@ -255,7 +255,7 @@ $(function () {
 
     window.expanz.views.TableRowView = Backbone.View.extend({
 
-        defaultRowTemplate: _.template('<tr id="<%= row.id %>" class="<%= className %>" type="<%= row.get("type") %>">' +
+        defaultRowTemplate: _.template('<tr class="<%= className %>">' +
                                        '<%= rowView.renderRowCells(row) %>' +
                                        '</tr>'),
 
@@ -273,9 +273,16 @@ $(function () {
                 if (this.model.get("displayStyle"))
                     className = "grid-" + this.model.get("displayStyle");
 
-                var itemTemplate = this.getItemTemplate();
-                this.setElement(itemTemplate({ row: this.model, data: this.model.getCellValues().data, className: className, rowView: this }));
+                var cellValues = this.model.getCellValues();
 
+                var itemTemplate = this.getItemTemplate();
+                this.setElement(itemTemplate({ row: this.model, data: cellValues.data, sortValues: cellValues.sortValues, className: className, rowView: this }));
+
+                // Set attributes on the element that will be used to identify it
+                this.$el.attr("id", this.model.id);
+                this.$el.attr("type", this.model.get("type"));
+
+                this.onRowRendered();
                 this.options.dataPublicationView.raiseExtensibilityPointEvent("rowRendered");
             }
             
@@ -352,38 +359,176 @@ $(function () {
         renderActions: function () {
             var html = "";
             
-            if (this.model.hasActions) {
-                html = '<td>';
+            //if (this.model.hasActions) {
+            //    html = '<td>';
 
-                _.each(this.model.getActions(), function (cell) {
-                    var buttonId = model.id + "_" + row.id + "_" + cell.get('actionName');
-                    var actionParams = cell.get('actionParams');
+            //    _.each(this.model.getActions(), function (cell) {
+            //        var buttonId = model.id + "_" + row.id + "_" + cell.get('actionName');
+            //        var actionParams = cell.get('actionParams');
 
-                    var userInputs = "";
+            //        var userInputs = "";
 
-                    _.each(actionParams, function (actionParams) {
-                        var name = actionParams.name;
-                        var value = actionParams.value;
-                        var label = actionParams.label;
+            //        _.each(actionParams, function (actionParams) {
+            //            var name = actionParams.name;
+            //            var value = actionParams.value;
+            //            var label = actionParams.label;
 
-                        if (value == '@userInput.textinput' || value == '@userInput.numericinput') {
-                            var format = (value == '@userInput.numericinput') ? 'numeric' : 'text';
-                            var bindValueFromCellId = actionParams.bindValueFromCellId;
-                            var inputValue = '';
-                            if (bindValueFromCellId) {
-                                inputValue = " value='" + values[bindValueFromCellId] + "' ";
-                            }
-                            userInputs += "<label for='" + row.id + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.id + "_userinput_" + name + "'/>";
-                        }
-                    });
+            //            if (value == '@userInput.textinput' || value == '@userInput.numericinput') {
+            //                var format = (value == '@userInput.numericinput') ? 'numeric' : 'text';
+            //                var bindValueFromCellId = actionParams.bindValueFromCellId;
+            //                var inputValue = '';
+            //                if (bindValueFromCellId) {
+            //                    inputValue = " value='" + values[bindValueFromCellId] + "' ";
+            //                }
+            //                userInputs += "<label for='" + row.id + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.id + "_userinput_" + name + "'/>";
+            //            }
+            //        });
 
-                    html += "<div style='display:inline' name='" + cell.get('actionName') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='" + cell.get('type') + "'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
-                });
+            //        html += "<div style='display:inline' name='" + cell.get('actionName') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='" + cell.get('type') + "'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
+            //    });
 
-                html += '</td>';
-            }
+            //    html += '</td>';
+            //}
 
             return html;
+        },
+
+        onRowRendered: function () {
+            var rowView = this;
+            var dataPublicationView = rowView.options.dataPublicationView;
+
+            /* Search for elements with a methodName attribute, and bind them to an action */
+            rowView.$el.find("[methodName]").each(function (index, element) {
+                var action = dataPublicationView.model.actions[$(element).attr('methodName')];
+                
+                if (action) {
+                    $(element).click(function () {
+                        var $element = $(this);
+                        var rowId = $element.closest("tr").attr('id');
+                        rowView._handleActionClick.call(rowView, $element, rowId, action, $element.closest("tr"));
+                    });
+                }
+            });
+
+            /* trigger a method call if a user field include a change attribute */
+            //rowView.$el.find("#" + itemId + "  [autoUpdate] ").change(function (elem) {
+            //    var action = that.model.getAction($(this).attr('autoUpdate'));
+            //    if (action && action.length > 0) {
+            //        var rowId = $(this).closest("[rowId]").attr('rowId');
+            //        var actionParams = action[0].get('actionParams').clone();
+            //        that._handleActionClick($(this), rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+            //    }
+            //    else {
+            //        window.expanz.logToConsole("autUpdate action not defined in formapping: " + $(this).attr('autoUpdate'));
+            //    }
+            //});
+
+            ///* binding menuAction from template */
+            //rowView.$el.find("#" + itemId + " [menuAction] ").each(function (index, element) {
+            //    var action = that.model.getAction($(element).attr('menuAction'));
+            //    if (action && action.length > 0) {
+            //        $(element).click(function () {
+            //            var rowId = $(this).closest("[rowId]").attr('rowId');
+            //            var actionParams = action[0].get('actionParams').clone();
+
+            //            that._handleMenuActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+
+            //        });
+            //    }
+            //});
+
+            ///* binding contextMenu from template */
+            //rowView.$el.find("#" + itemId + " [contextMenu] ").each(function (index, element) {
+            //    var action = that.model.getAction($(element).attr('contextMenu'));
+            //    if (action && action.length > 0) {
+            //        $(element).click(function () {
+            //            var rowId = $(this).closest("[rowId]").attr('rowId');
+            //            var actionParams = action[0].get('actionParams').clone();
+
+            //            var method;
+            //            method = new expanz.models.ContextMenu({
+            //                id: rowId,
+            //                contextObject: action[0].get('actionName'),
+            //                parent: that.model.parent
+            //            });
+
+            //            var ctxMenuview = new expanz.views.ContextMenuView({
+            //                el: $(this),
+            //                id: $(this).attr('id'),
+            //                className: $(this).attr('class'),
+            //                collection: method
+            //            });
+
+            //            window.expanz.currentContextMenu = ctxMenuview.collection;
+
+            //            that._handleContextMenuClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+            //        });
+            //    }
+            //});
+        },
+
+        _handleActionClick: function (actionEl, rowId, action, divEl) {
+            var inputValid = true;
+
+            var newActionParams = action.actionParams.clone();
+            
+            // Replace variables (starting with @) with actual values
+            _.each(newActionParams, function (actionParam) {
+                var name = actionParam.name;
+                
+                if (actionParam.value == '@userInput.textinput' || actionParam.value == '@userInput.numericinput') {
+                    var valueInput = divEl.find("#" + rowId + "_userinput_" + name);
+                    
+                    if (valueInput.length > 0 && valueInput.val().length > 0) {
+                        actionParam.value = valueInput.val();
+                    }
+                    else {
+                        inputValid = false;
+                    }
+                }
+                else if (actionParam.value == '@contextId') {
+                    actionParam.value = rowId;
+                }
+            });
+
+            if (inputValid) {
+                this.options.dataPublicationView.trigger("actionClicked", rowId, action.actionName, newActionParams, actionEl);
+                
+                actionEl.attr('disabled', 'disabled');
+                actionEl.addClass('actionLoading');
+                
+                // TODO: Move into Row model
+                expanz.net.MethodRequest(action.actionName, newActionParams, null, this.options.dataPublicationView.model.get("parent"));
+            }
+        },
+
+        _handleMenuActionClick: function (rowId, menuAction, actionParams, divEl) {
+            /* handle user input */
+            _.each(actionParams, function (actionParam) {
+                var name = actionParam.name;
+                if (actionParam.value == '@contextId') {
+                    actionParam.value = rowId;
+                }
+            });
+
+            this.trigger("menuActionClicked", rowId, menuAction, actionParams);
+        },
+
+        _handleContextMenuClick: function (rowId, contextMenuType, actionParams, divEl) {
+            /* handle user input */
+            var contextObject = '';
+            _.each(actionParams, function (actionParam) {
+                var name = actionParam.name;
+                if (actionParam.value == '@contextId') {
+                    actionParam.value = rowId;
+                }
+                if (actionParam.name == 'contextObject') {
+                    contextObject = actionParam.value;
+                }
+            });
+            contextObject = contextObject || contextMenuType;
+
+            this.trigger("contextMenuClicked", rowId, contextMenuType, contextObject, actionParams);
         }
     });
 });

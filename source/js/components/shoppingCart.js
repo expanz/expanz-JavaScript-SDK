@@ -737,13 +737,13 @@ $(function() {
 			renderDefaultListItemTemplateHeader : function() {
 				var html = ' \
 					<script type="text/template" id="productListItemTemplateListHeader">\
-					<thead><tr class="item listDisplay" style="height:25px;font-size:16px;text-align:center"> \
+					<tr class="item listDisplay" style="height:25px;font-size:16px;text-align:center"> \
 					<th class="cell" style="width:65px;">&nbsp;</th> \
 					<th class="cell">Name</th> \
 					<th class="cell" style="width:60px;">Price</th> \
 					<th class="cell">Note</th> \
 					<th class="cell" style="">Actions</th> \
-					</tr></thead>\
+					</tr>\
 					</script>';
 				return html;
 			},
@@ -1254,12 +1254,12 @@ $(function() {
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 12;
 
 				html += '<script type="text/template" id="orderHistoryItemTemplateHeader">';
-				html += '<thead><tr class="item"><th sortField="SearchCode" style="width:100px">Search code</th><th style="width:200px" sortField="Name" >Name</th><th style="width:100px" sortField="Status" >Status</th><th  style="width:200px" sortField="CreationDate" defaultSortDirection="desc">Creation Date</th><th style="width:120px" sortField="Total">Amount</th><th>Actions</th></tr></thead>';
+				html += '<tr class="item"><th sortField="SearchCode" style="width:100px">Search code</th><th style="width:200px" sortField="Name" >Name</th><th style="width:100px" sortField="Status" >Status</th><th  style="width:200px" sortField="CreationDate" defaultSortDirection="desc">Creation Date</th><th style="width:120px" sortField="Total">Amount</th><th>Actions</th></tr>';
 				html += '</script>';
 
 				html += '<script type="text/template" id="orderHistoryItemTemplate">';
 				html += '<tr class="item"><td><%=data.SearchCode%></td><td><%=data.Client_Name%></td><td><%=data.Status%></td><td><%=data.CreationDate%></td><td><%=data.Total%></td>';
-				html += '<td class="actions"><% if(sortedValues.Status >= 20){ %><button methodName="showInvoice">Show Invoice</button><% } %></td></tr>';
+				html += '<td class="actions"><% if(sortValues.Status >= 20){ %><button methodName="showInvoice">Show Invoice</button><% } %></td></tr>';
 				html += '</script>';
 
 				html += '<div id="orderHistoryDivList" class="orderHistory" isHTMLTable="true" populateMethod="' + this.orderHistoryPopMethod + '" itemsPerPage="' + itemsPerPage + '" dataId="' + this.orderHistoryListName + '" bind="DataControl" renderingType="grid" contextObject="' + this.orderHistoryContextObject + '"></div>';

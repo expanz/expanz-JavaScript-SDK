@@ -20,10 +20,13 @@ $(function () {
         initialize: function () {
             this.rows = new expanz.models.data.RowCollection();
             this.columns = new expanz.Collection();
-
+            this.actions = {};
+            
             this.rows.dataPublication = this;
             this.columns.dataPublication = this;
 
+            this.bind("change:parent", this.onParentChanged, this);
+            
             this.hasActions = false;
             this.isEditable = false;
         },
@@ -116,6 +119,54 @@ $(function () {
 
         refresh: function () {
             expanz.net.DataRefreshRequest(this.id, this.get("parent"));
+        },
+        
+        onParentChanged: function () {
+           this.parseActions();
+        },
+        
+        parseActions: function() {
+            // Various actions associated with this data publication can be defined in the form mapping file.
+            // Actions are TODO
+            // Search the form mapping file for these actions, and gather their details.
+            this.actions = {};
+
+            var model = this;
+            var formMapping = expanz.Storage.getFormMapping();
+            var activityModel = this.get("parent");
+
+            var activityInfo = $(formMapping).find("activity[name='" + activityModel.get("name") + "'][style='" + activityModel.get("style") + "']");
+
+            if (activityInfo.length !== 0) {
+                var gridviewInfo = activityInfo.find("gridview[id='" + this.get("dataId") + "']");
+
+                if (gridviewInfo.length !== 0) {
+                    // add actions
+                    _.each($(gridviewInfo).find('action'), function (action) {
+                        var params = [];
+                        
+                        _.each($(action).find('param'), function (param) {
+                            params.push({
+                                name: $(param).attr('name'),
+                                value: $(param).attr('value'),
+                                label: $(param).attr('label'),
+                                bindValueFromCellId: $(param).attr('bindValueFromCellId')
+                            });
+                        });
+
+                        var actionName = $(action).attr('methodName') || $(action).attr('menuAction') || $(action).attr('contextMenu');
+                        
+                        model.actions[actionName] = {
+                            id: $(action).attr('id'),
+                            type: $(action).attr('methodName') ? 'method' : $(action).attr('menuAction') ? 'menuAction' : 'contextMenu',
+                            label: $(action).attr('label'),
+                            width: $(action).attr('width'),
+                            actionName: actionName,
+                            actionParams: params
+                        };
+                    });
+                }
+            }
         }
     });
 });
