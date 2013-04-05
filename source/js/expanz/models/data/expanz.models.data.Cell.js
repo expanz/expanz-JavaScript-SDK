@@ -21,6 +21,11 @@ $(function() {
             return {
                 selected: false
             };
+        },
+
+        initialize: function(params) {
+            this.row = params.row;
+            this.column = params.column;
         }
 	});
 

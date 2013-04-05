@@ -33,24 +33,25 @@ $(function() {
 		    this.cells.add({
 		        id: cellId,
 		        value: value,
+		        row: this,
 		        column: column,
 		        sortValue: sortValue
 		    });
 		},
 
 		getCellValues : function() {
-			var values = {};
+		    var values = {};
 			var sortValues = {};
 		    
 			this.cells.each(function(cell) {
-			    var key = cell.get('field') || cell.get('id');
+			    var key = cell.get("column").get("safeFieldName") || cell.get("id");
 			    
 			    values[key] = cell.get('value');
 				sortValues[key] = cell.get('sortValue') || cell.get('value');
 			});
 
 			return {
-			    values: values,
+			    data: values,
 				sortValues: sortValues
 			};
 		}

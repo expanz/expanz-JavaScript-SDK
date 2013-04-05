@@ -212,6 +212,15 @@ $(function() {
 			SendRequest(requestBuilder.AnonymousMethods(methods, activity), parseResponse(activity, initiator, callbacks), null, true);
 
 		},
+		
+		SetContextAndDeltaRequest: function (contextInfo, deltaInfo, activity, callbacks) {
+		    if (callbacks === undefined)
+		        callbacks = activity.callbacks;
+
+		    var initiator = {};
+		    
+		    SendRequest(requestBuilder.SetContextAndDelta(contextInfo, deltaInfo, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+	    },
 
 		CloseActivityRequest : function(activityHandle, callbacks) {
 

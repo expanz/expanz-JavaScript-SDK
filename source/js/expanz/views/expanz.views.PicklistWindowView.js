@@ -29,8 +29,8 @@ $(function () {
                 var picklistWindowView = this;
                 
                 // Redefine the data publication view's onRowClicked event handler function
-                dataPublicationView.onRowClicked = function (row) {
-                    picklistWindowView.onItemSelected(dataPublicationView.model, row.attr("id"), row.attr("type"));
+                dataPublicationView.onRowClicked = function ($row) {
+                    picklistWindowView.onItemSelected(dataPublicationView.model, $row.attr("id"), $row.attr("type"));
                     picklistWindowView.close();
                 };
             }, this));

@@ -73,20 +73,41 @@ $(function () {
         },
         
         sendContextToServer: function (selectedId, type) {
+            var contextInfo = this._getContextInfoObject(selectedId, type);
+
+            var methodAttributes = [];
+
+            if (this.contextObject) {
+                methodAttributes.push(
+                    {
+                        name: "contextObject",
+                        value: this.contextObject
+                    });
+            }
+
+            expanz.net.MethodRequest('SetIdFromContext', methodAttributes, contextInfo, this.get("parent"));
+        },
+        
+        sendCellUpdateToServer: function (cellModel, newValue) {
+            var contextInfo = this._getContextInfoObject(cellModel.row.id, cellModel.row.get("type"));
+            
+            var deltaInfo = {
+                id: cellModel.column.get("field"),
+                value: newValue,
+                matrixKey: cellModel.column.get("matrixKey")
+            };
+
+            expanz.net.SetContextAndDeltaRequest(contextInfo, deltaInfo, this.get("parent"));
+        },
+        
+        _getContextInfoObject: function (selectedId, type) {
             var context = {
                 id: selectedId,
                 contextObject: this.contextObject,
                 type: type
             };
 
-            var methodAttributes = [
-                {
-                    name: "contextObject",
-                    value: this.contextObject
-                }
-            ];
-
-            expanz.net.MethodRequest('SetIdFromContext', methodAttributes, context, this.get("parent"));
+            return context;
         },
 
         drillDown: function (selectedId, type, contextObject) {

@@ -88,6 +88,17 @@ var requestBuilder = {
         };
     },
 
+    SetContextAndDelta: function (contextInfo, deltaInfo, activity, sessionHandle) {
+        var setContextRequestBody = requestBody.createSetContextElement(contextInfo.id, contextInfo.contextObject, contextInfo.type);
+        var deltaRequestBody = requestBody.createDeltaElement(deltaInfo.id, deltaInfo.value, deltaInfo.matrixKey);
+        var fullRequestBody = requestBody.wrapPayloadInActivityRequest(setContextRequestBody + deltaRequestBody, activity);
+        
+        return {
+            data: this.buildRequest('ExecX', XMLNamespace, sessionHandle)(fullRequestBody),
+            url: 'ExecX'
+        };
+    },
+
     CloseActivity: function (activityHandle, sessionHandle) {
         return {
             data: this.buildRequest('ExecX', XMLNamespace, sessionHandle)(requestBody.closeActivity(activityHandle)),

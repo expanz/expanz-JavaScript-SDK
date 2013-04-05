@@ -467,9 +467,9 @@ $(function() {
 		            className: $dataPubicationEl.attr('class'),
 		            renderingType: $dataPubicationEl.attr('renderingType'),
 		            canDrillDown: $dataPubicationEl.attr('candrilldown') == "true",
+		            templateName: $dataPubicationEl.attr('templateName'),
 		            model: dataModel
 		            //itemsPerPage: $dataControlEl.attr('itemsPerPage'),
-		            //templateName: $dataControlEl.attr('templateName'),
 		            //isHTMLTable: $dataControlEl.attr('isHTMLTable'),
 		            //enableConfiguration: $dataControlEl.attr('enableConfiguration'),
 		            //noItemText: $dataControlEl.attr('noItemText')
@@ -479,126 +479,6 @@ $(function() {
 		    });
 
 		    return dataPublicationViews;
-		},
-
-		createDataControlViews : function(activityName, activityStyle, DOMObjects) {
-
-		    var dataControlViewCollection = [];
-		    
-			_.each(DOMObjects, function(dataControlEl) {
-			    var $dataControlEl = $(dataControlEl);
-		        
-			    var dataControlModel;
-			    var dataControlView;
-			    
-				/* case rendering as a grid */
-				if ($dataControlEl.attr('renderingType') == 'grid' || $dataControlEl.attr('renderingType') == 'popupGrid' || $dataControlEl.attr('renderingType') == 'rotatingBar') {
-					dataControlModel = new expanz.models.data.Grid({
-						id : $dataControlEl.attr('id'),
-						dataId: $dataControlEl.attr('dataId') || $dataControlEl.attr('id') || $dataControlEl.attr('name') || $dataControlEl.attr('query') || $dataControlEl.attr('populateMethod'),
-						query: $dataControlEl.attr('query'),
-						fieldName: $dataControlEl.attr('fieldName') || $dataControlEl.attr('dataId'),
-						populateMethod : $dataControlEl.attr('populateMethod'),
-						autoPopulate : $dataControlEl.attr('autoPopulate'),
-						contextObject : $dataControlEl.attr('contextObject'),
-						renderingType : $dataControlEl.attr('renderingType'),
-						selectionChangeAnonymousMethod : $dataControlEl.attr('selectionChangeAnonymousMethod'),
-						selectionChangeAnonymousContextObject : $dataControlEl.attr('selectionChangeAnonymousContextObject'),
-						anonymousBoundMethod : $dataControlEl.attr('anonymousBoundMethod')
-					});
-
-					dataControlView = new expanz.views.GridView({
-					    el: dataControlEl,
-					    id: dataControlModel.get("id"),
-						className : $dataControlEl.attr('class'),
-						itemsPerPage : $dataControlEl.attr('itemsPerPage'),
-						templateName : $dataControlEl.attr('templateName'),
-						isHTMLTable : $dataControlEl.attr('isHTMLTable'),
-						enableConfiguration : $dataControlEl.attr('enableConfiguration'),
-						noItemText : $dataControlEl.attr('noItemText'),
-						model : dataControlModel
-					});
-
-				    // load pre-defined gridview information from formmapping.xml
-					var formMapping = expanz.Storage.getFormMapping();
-				    
-					var activityInfo = _.find($(formMapping).find('activity'), function (activityXML) {
-						return $(activityXML).attr('name') === activityName && $(activityXML).attr('style') === activityStyle;
-					});
-						    
-					if (activityInfo) {
-						var gridviewInfo = _.find($(activityInfo).find('gridview'), function(gridviewXML) {
-							return $(gridviewXML).attr('id') === dataControlModel.get('id');
-						});
-							    
-						if (gridviewInfo) {
-							// add actions
-							_.each($(gridviewInfo).find('action'), function(action) {
-								var params = [];
-								_.each($(action).find('param'), function(param) {
-									params.push({
-										name : $(param).attr('name'),
-										value : $(param).attr('value'),
-										label : $(param).attr('label'),
-										bindValueFromCellId : $(param).attr('bindValueFromCellId')
-									});
-								});
-									    
-								var actionName = $(action).attr('methodName') || $(action).attr('menuAction') || $(action).attr('contextMenu');
-								var type = $(action).attr('methodName') ? 'method' : $(action).attr('menuAction') ? 'menuAction' : 'contextMenu';
-
-								dataControlModel.addAction(type, $(action).attr('id'), $(action).attr('label'), $(action).attr('width'), actionName, params);
-							});
-						}
-					}
-				}
-				/* renderingType is not grid: 'tree' or 'combobox' or checkboxes or empty */
-				/* the attribute fieldName might be defined in case, the datacontrol updates a field value if not specified taking the name */
-				else {
-					dataControlModel = new expanz.models.data.DataControl({
-						id: $dataControlEl.attr('id'),
-						dataId: $dataControlEl.attr('id') || $dataControlEl.attr('name') || $dataControlEl.attr('query') || $dataControlEl.attr('populateMethod'),
-						fieldName: $dataControlEl.attr('fieldName') || $dataControlEl.attr('dataId'),
-						populateMethod : $dataControlEl.attr('populateMethod'),
-						type : $dataControlEl.attr('type'),
-						contextObject : $dataControlEl.attr('contextObject'),
-						autoPopulate : $dataControlEl.attr('autoPopulate'),
-						renderingType : $dataControlEl.attr('renderingType'),
-						selectionChangeAnonymousMethod : $dataControlEl.attr('selectionChangeAnonymousMethod'),
-						selectionChangeAnonymousContextObject : $dataControlEl.attr('selectionChangeAnonymousContextObject'),
-						anonymousBoundMethod : $dataControlEl.attr('anonymousBoundMethod')
-					});
-
-					if ($dataControlEl.attr('renderingType') == 'checkboxes') {
-					    dataControlView = new expanz.views.CheckboxesView({
-					        el: dataControlEl,
-					        id: dataControlModel.get("id"),
-							className : $dataControlEl.attr('class'),
-							model : dataControlModel
-						});
-					}
-					else if ($dataControlEl.attr('renderingType') == 'radiobuttons') {
-					    dataControlView = new expanz.views.RadioButtonsView({
-					        el: dataControlEl,
-					        id: dataControlModel.get("id"),
-							className : $dataControlEl.attr('class'),
-							model : dataControlModel
-						});
-					}
-					else {
-						dataControlView = new expanz.views.DataControlView({
-						    el: dataControlEl,
-						    id: dataControlModel.get("id"),
-							className : $dataControlEl.attr('class'),
-							model : dataControlModel
-						});
-					}
-				}
-
-				dataControlViewCollection.push(dataControlView);
-			});
-		    
-			return dataControlViewCollection;
 		}
 	};
 });

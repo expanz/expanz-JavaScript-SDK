@@ -73,7 +73,33 @@ var requestBody = {
     },
 
     delta: function (id, value, activity) {
-        return this.wrapPayloadInActivityRequest('<Delta id="' + id + '" value="' + value + '"/>', activity);
+        return this.wrapPayloadInActivityRequest(this.createDeltaElement(id, value), activity);
+    },
+
+    createDeltaElement: function (id, value, matrixKey) {
+        var delta = '<Delta id="' + id + '" value="' + value + '"';
+
+        if (matrixKey)
+            delta += ' matrixKey="' + matrixKey + '"';
+
+        delta += ' />';
+
+        return delta;
+    },
+
+    createSetContextElement: function (id, contextObject, type) {
+        var body = "";
+
+        if (id) {
+            body += '<Context';
+
+            if (contextObject)
+                body += ' contextObject="' + contextObject + '"';
+
+            body += ' id="' + id + '" type="' + type + '" />';
+        }
+
+        return body;
     },
 
     createMethod: function (name, methodAttributes, context, activity, anonymousFields) {
@@ -83,9 +109,8 @@ var requestBody = {
             body += this.getActivityDataPublicationRequests(activity);
         }
 
-        if (context !== null && context.id) {
-            body += '<Context contextObject="' + context.contextObject + '" id="' + context.id + '" type="' + context.type + '" />';
-        }
+        if (context)
+            body += createSetContextElement(context.id, context.contextObject, context.type);
 
         body += '<Method name="' + name + '"';
         
