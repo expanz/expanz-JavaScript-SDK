@@ -63,7 +63,7 @@ $(function () {
 
         sortRowsByFieldName: function (fieldName, inAscendingOrder) {
             this.rows.comparator = function (compareRow) {
-                return compareRow.getCellValues().sortedValues[fieldName] || "";
+                return compareRow.getCellValues().sortValues[fieldName] || "";
             };
 
             this.rows.sort();

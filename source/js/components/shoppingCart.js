@@ -985,7 +985,7 @@ $(function() {
 			    $("#lvMiniCart").bind("datapublication:rendered", function () {
 
 					/* hiding the checkout part if no items */
-					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === "0") {
+			        if ($("#lvMiniCart > [data-itemcount]").attr("data-itemcount") === "0") {
 						$("#cartCheckout").hide();
 						$("#cartTotals").hide();
 						$("#cartEmptyButton").hide();
@@ -1000,8 +1000,8 @@ $(function() {
 
 			renderMiniGoToCartBoxModule : function(el) {
 				var html = "";
-				html += '<div><div id="miniCartBox" style="display:none" class="miniCartBox" onclick="if($(\'#nbItems\').text() != 0) window.location=\'' + getPageUrl(this.shoppingCartCheckoutPage) + '\'" >';
-				html += '<span class="miniCartBoxImage">CART</span><span class="miniCartBoxTotal" bind="field" name="Total2"><span attribute="value">$0</span></span> <div bind="field" name="CartItemsCount" class="cartItemCount"><span  id="nbItems" attribute="value">0</span></div></div></div>';
+				html += '<div><div id="miniCartBox" style="display:none" class="miniCartBox" onclick="if($(\'#data-itemcount\').text() != 0) window.location=\'' + getPageUrl(this.shoppingCartCheckoutPage) + '\'" >';
+				html += '<span class="miniCartBoxImage">CART</span><span class="miniCartBoxTotal" bind="field" name="Total2"><span attribute="value">$0</span></span> <div bind="field" name="CartItemsCount" class="cartItemCount"><span id="nbItems" attribute="value">0</span></div></div></div>';
 				return html;
 			},
 
@@ -1198,7 +1198,7 @@ $(function() {
 				var that = this;
 				$("#lvMiniCart").bind("datapublication:rendered", function () {
 					/* hiding the checkout part if no items and not order submitted message displayed */
-					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === "0" && ($('.k-window-title:contains("Order Submitted")').length === 0) && $('.k-window-title:contains("Order Saved")').length === 0) {
+				    if ($("#lvMiniCart > [data-itemcount]").attr("data-itemcount") === "0" && ($('.k-window-title:contains("Order Submitted")').length === 0) && $('.k-window-title:contains("Order Saved")').length === 0) {
 						expanz.views.redirect(that.shoppingCartPage);
 					}
 					else {
@@ -1254,7 +1254,7 @@ $(function() {
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 12;
 
 				html += '<script type="text/template" id="orderHistoryItemTemplateHeader">';
-				html += '<thead><tr class="item"><th sortField="SearchCode" style="width:100px">Search code</th><th style="width:200px" sortField="Name" >Name</th><th style="width:100px" sortField="Status" >Status</th><th  style="width:200px" sortField="CreationDate" defaultSorted="desc">Creation Date</th><th style="width:120px" sortField="Total">Amount</th><th>Actions</th></tr></thead>';
+				html += '<thead><tr class="item"><th sortField="SearchCode" style="width:100px">Search code</th><th style="width:200px" sortField="Name" >Name</th><th style="width:100px" sortField="Status" >Status</th><th  style="width:200px" sortField="CreationDate" defaultSortDirection="desc">Creation Date</th><th style="width:120px" sortField="Total">Amount</th><th>Actions</th></tr></thead>';
 				html += '</script>';
 
 				html += '<script type="text/template" id="orderHistoryItemTemplate">';

@@ -33,14 +33,9 @@ $(function () {
         render: function () {
             // Notify listeners (such as adapters) that we are about to render
             // the data publication, and give them a chance to take over.
-            // Acts as an extensibility point for adapters.
-            var args = { handled: false };
-            
-            this.$el.trigger("dataPublication:rendering", [
-				this.model, this, args
-            ]);
+            var hasBeenRenderedExternally = this.raiseExtensibilityPointEvent("rendering");
 
-            if (args.handled === true)
+            if (hasBeenRenderedExternally === true)
                 return this; // Rendering already performed by adapter, so return early
 
             var hostId = this.id + "_host";
@@ -59,9 +54,9 @@ $(function () {
 
             this.configureEventHandlers($hostEl);
 
-            $hostEl.attr('nbItems', this.model.rows.length);
+            $hostEl.attr('data-itemcount', this.model.rows.length);
 
-            $hostEl.trigger("datapublication:rendered", [ this ]);
+            this.raiseExtensibilityPointEvent("rendered");
 
             return this;
         },
@@ -108,16 +103,12 @@ $(function () {
 
         onRowClicked: function ($row) {
             // Does nothing by default. Function can be redefined or the event raised can be handled by external code as required.
-            this.$el.trigger("dataPublication:rowClicked", [
-				this.model, $row, this
-            ]);
+            this.raiseExtensibilityPointEvent("rowClicked");
         },
 
         onRowDoubleClicked: function ($row) {
             // Does nothing by default. Function can be redefined or the event raised can be handled by external code as required.
-            this.$el.trigger("dataPublication:rowDoubleClicked", [
-				this.model, $row, this
-            ]);
+            this.raiseExtensibilityPointEvent("rowDoubleClicked");
         },
 
         onDrillDown: function ($row) {
@@ -139,6 +130,22 @@ $(function () {
 
         itemTemplateName: function () {
             return this.options['templateName'] || this.model.get("dataId") + "ItemTemplate";
+        },
+        
+        raiseExtensibilityPointEvent: function(eventName, args) {
+            // Notify listeners (such as adapters) that we are about to do
+            // or have done something, and give them a chance to take over.
+            // Acts as an extensibility point for adapters.
+            if (!args)
+                args = {};
+
+            args.handled = false;
+
+            this.$el.trigger("dataPublication:" + eventName, [
+				this.model, this, args
+            ]);
+
+            return args.handled;
         }
     });
     
@@ -154,8 +161,16 @@ $(function () {
         tagName: "thead",
 
         render: function () {
-            var headerTemplate = this.getHeaderTemplate();
-            this.$el.html(headerTemplate({ columns: this.model.columns }));
+            var hasBeenRenderedExternally = this.options.dataPublicationView.raiseExtensibilityPointEvent("renderingHeader");
+
+            if (!hasBeenRenderedExternally) {
+                var headerTemplate = this.getHeaderTemplate();
+                this.$el.html(headerTemplate({ columns: this.model.columns }));
+
+                this.onHeaderRendered();
+                this.options.dataPublicationView.raiseExtensibilityPointEvent("headerRendered");
+            }
+            
             return this;
         },
 
@@ -171,6 +186,51 @@ $(function () {
                 headerTemplate = _.template(userDefinedTemplate.html());
 
             return headerTemplate;
+        },
+        
+        onHeaderRendered: function () {
+            var headerView = this;
+            var dataPublicationView = headerView.options.dataPublicationView;
+
+            // Search the header for all the fields marked as being sortable,
+            // and transform them to be as such.
+            this.$el.find("[sortField]").each(function () {
+                var $headerCell = $(this);
+                var fieldName = $headerCell.attr('sortField');
+                var defaultSortDirection = $headerCell.attr('defaultSortDirection') || "asc";
+
+                // Set classes on the field for styling purposes
+                $headerCell.addClass("sortable");
+                
+                if (fieldName == dataPublicationView.sortField) {
+                    if (defaultSortDirection == "asc") {
+                        $headerCell.removeClass("sortedDesc");
+                        $headerCell.addClass("sortedAsc");
+                    }
+                    else {
+                        $headerCell.removeClass("sortedAsc");
+                        $headerCell.addClass("sortedDesc");
+                    }
+                }
+
+                // Handle the user clicking on the colun header to sort the data publication
+                $(this).click(function () {
+                    // The user has clicked on a column header. Sort the data
+                    // publication by the corresponding field and re-render the list
+                    var sortDirection = $headerCell.attr('defaultSortDirection') || "asc";
+                    
+                    if (fieldName == dataPublicationView.sortField) {
+                        // Reverse the sort direction of this column
+                        sortDirection = dataPublicationView.sortDirection === "desc" ? "asc" : "desc";
+                    }
+
+                    dataPublicationView.sortField = fieldName;
+                    dataPublicationView.sortDirection = sortDirection.toLowerCase();
+                    
+                    dataPublicationView.model.sortRowsByFieldName(fieldName, (dataPublicationView.sortDirection === "asc"));
+                    dataPublicationView.render();
+                });
+            });
         }
     });
     
@@ -204,16 +264,20 @@ $(function () {
                                         '</td>'),
 
         render: function () {
-            // TODO: Notify element, which may override the rendering of the row
-            
-            var className = (this.options.rowIndex % 2 == 1) ? 'gridRowAlternate' : 'gridRow';
+            var hasBeenRenderedExternally = this.options.dataPublicationView.raiseExtensibilityPointEvent("renderingRow");
 
-            // If a displayStyle attribute is passed from the server, use it, prefixed with grid- as the class name
-            if (this.model.get("displayStyle"))
-                className = "grid-" + this.model.get("displayStyle");
+            if (!hasBeenRenderedExternally) {
+                var className = (this.options.rowIndex % 2 == 1) ? 'gridRowAlternate' : 'gridRow';
 
-            var itemTemplate = this.getItemTemplate();
-            this.setElement(itemTemplate({ row: this.model, data: this.model.getCellValues().data, className: className, rowView: this }));
+                // If a displayStyle attribute is passed from the server, use it, prefixed with grid- as the class name
+                if (this.model.get("displayStyle"))
+                    className = "grid-" + this.model.get("displayStyle");
+
+                var itemTemplate = this.getItemTemplate();
+                this.setElement(itemTemplate({ row: this.model, data: this.model.getCellValues().data, className: className, rowView: this }));
+
+                this.options.dataPublicationView.raiseExtensibilityPointEvent("rowRendered");
+            }
             
             return this;
         },

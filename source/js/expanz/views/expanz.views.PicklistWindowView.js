@@ -23,14 +23,14 @@ $(function () {
             window.expanz.views.PopupView.prototype.initialize.call(this, attrs, $container);
             
             // Centre the window once the pick list has rendered, and its size has been determined
-            this.$el.on("datapublication:rendered", $.proxy(function(event, dataPublicationView) {
+            this.$el.on("datapublication:rendered", $.proxy(function(event, dataPublicationModel, dataPublicationView) {
                 this.center();
 
                 var picklistWindowView = this;
                 
                 // Redefine the data publication view's onRowClicked event handler function
                 dataPublicationView.onRowClicked = function ($row) {
-                    picklistWindowView.onItemSelected(dataPublicationView.model, $row.attr("id"), $row.attr("type"));
+                    picklistWindowView.onItemSelected(dataPublicationModel, $row.attr("id"), $row.attr("type"));
                     picklistWindowView.close();
                 };
             }, this));
