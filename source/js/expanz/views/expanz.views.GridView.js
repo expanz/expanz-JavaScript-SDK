@@ -408,7 +408,7 @@ $(function () {
                 var className = ((i - firstItemIndex) % 2 == 1) ? 'gridRowAlternate' : 'gridRow';
 
                 if (row.get("displayStyle"))
-                    className = "grid-" + row.get("displayStyle");
+                    className += " grid-" + row.get("displayStyle");
 
                 var html = '<tr id="' + row.id + '" type="' + row.get("type") + '" class="' + className + '">';
                 html += this.renderRowCellsUsingDefaultTemplate(row);
@@ -425,7 +425,10 @@ $(function () {
             var drillDownLinkCreated = !isDrillDownRow;
             
             _.each(row.getAllCells(), function (cell) {
-                html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="row' + row.id + ' column' + cell.get('id') + '">';
+				var className = 'row' + row.id + ' column' + cell.get('id');
+                if (cell.get("displayStyle"))
+                    className += " grid-" + cell.get("displayStyle");
+                html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="' + className '">';
 
                 if (model.getColumn(cell.get('id')) && model.getColumn(cell.get('id')).get('datatype') === 'BLOB') {
                     html += '<img width="' + model.getColumn(cell.get('id')).get('width') + '" src="' + cell.get('value') + '"/>';
