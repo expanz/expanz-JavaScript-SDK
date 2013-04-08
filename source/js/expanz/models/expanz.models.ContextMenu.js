@@ -21,7 +21,14 @@ $(function () {
         initialize: function (attrs) {
             this.loading = false;
 
-            this.id = attrs["id"];
+            this.contextId = attrs["contextId"];
+            this.activity = attrs["activity"];
+            this.type = attrs["type"];
+            this.contextObject = attrs["contextObject"];
+        },
+        
+        requestContextMenu: function () {
+            expanz.net.CreateContextMenuRequest(this.activity, this.contextId, this.type, this.contextObject);
         },
 
         loadMenu: function (menuData, activityModel) {

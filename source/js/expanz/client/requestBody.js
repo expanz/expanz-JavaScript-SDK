@@ -114,7 +114,7 @@ var requestBody = {
 
         body += '<Method name="' + name + '"';
         
-        if (methodAttributes !== undefined && methodAttributes.length > 0) {
+        if (methodAttributes !== undefined) {
             _.each(methodAttributes, function (attribute) {
                 if (attribute.value !== undefined) {
                     body += " " + attribute.name + "='" + attribute.value + "' ";

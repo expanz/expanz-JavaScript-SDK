@@ -129,7 +129,7 @@ $(function () {
             //    html = '<td>';
 
             //    _.each(this.model.getActions(), function (cell) {
-            //        var buttonId = model.id + "_" + row.id + "_" + cell.get('actionName');
+            //        var buttonId = model.id + "_" + row.id + "_" + cell.get('name');
             //        var actionParams = cell.get('actionParams');
 
             //        var userInputs = "";
@@ -150,7 +150,7 @@ $(function () {
             //            }
             //        });
 
-            //        html += "<div style='display:inline' name='" + cell.get('actionName') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='" + cell.get('type') + "'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
+            //        html += "<div style='display:inline' name='" + cell.get('name') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='" + cell.get('type') + "'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
             //    });
 
             //    html += '</td>';
@@ -180,7 +180,7 @@ $(function () {
             //    if (action && action.length > 0) {
             //        var rowId = $(this).closest("[rowId]").attr('rowId');
             //        var actionParams = action[0].get('actionParams').clone();
-            //        that._handleActionClick($(this), rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+            //        that._handleActionClick($(this), rowId, action[0].get('name'), actionParams, $(this).closest("[rowId]"));
             //    }
             //    else {
             //        window.expanz.logToConsole("autUpdate action not defined in formapping: " + $(this).attr('autoUpdate'));
@@ -195,53 +195,85 @@ $(function () {
             //            var rowId = $(this).closest("[rowId]").attr('rowId');
             //            var actionParams = action[0].get('actionParams').clone();
 
-            //            that._handleMenuActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
+            //            that._handleMenuActionClick(rowId, action[0].get('name'), actionParams, $(this).closest("[rowId]"));
 
             //        });
             //    }
             //});
 
             /* Search for elements with a contextMenu attribute, and bind them to an action */
-            //rowView.$el.find("[contextMenu] ").each(function (index, element) {
-            //    var action = dataPublicationView.model.actions[$(element).attr('contextMenu')];
+            rowView.$el.find("[contextMenu] ").each(function (index, element) {
+                var action = dataPublicationView.model.actions[$(element).attr('contextMenu')];
                 
-            //    if (action) {
-            //        $(element).click(function () {
-            //            var $element = $(this);
-            //            var rowId = $element.closest("tr").attr('id');
-            //            rowView._handleActionClick.call(rowView, $element, rowId, action, $element.closest("tr"));
-                        
-            //            var rowId = $(this).closest("[rowId]").attr('rowId');
-            //            var actionParams = action[0].get('actionParams').clone();
-
-            //            var method = new expanz.models.ContextMenu({
-            //                id: rowId,
-            //                contextObject: action[0].get('actionName'),
-            //                parent: dataPublicationView.model.parent
-            //            });
-
-            //            var ctxMenuview = new expanz.views.ContextMenuView({
-            //                el: $(this),
-            //                id: $(this).attr('id'),
-            //                className: $(this).attr('class'),
-            //                collection: method
-            //            });
-
-            //            window.expanz.currentContextMenu = ctxMenuview.collection;
-
-            //            rowView._handleContextMenuClick.call(rowView, action[0].get('actionName'), actionParams, $(this).closest("tr"));
-            //        });
-            //    }
-            //});
+                if (action) {
+                    $(element).click(function () {
+                        rowView._handleContextMenuClick.call(rowView, $(this), action);
+                    });
+                }
+            });
         },
 
         _handleActionClick: function (actionEl, action) {
-            var rowView = this;
+            var replaceVariablesResult = this._replaceActionParamsVariables(action.params, this);
+
+            if (replaceVariablesResult.inputValid) {
+                var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("actionClicked", this, action.name, replaceVariablesResult.actionParams, actionEl);
+
+                if (!handledExternally) {
+                    actionEl.attr('disabled', 'disabled');
+                    actionEl.addClass('actionLoading');
+
+                    // TODO: Move into Row model
+                    expanz.net.MethodRequest(action.name, replaceVariablesResult.actionParams, null, this.dataPublicationView.model.get("parent"));
+                }
+            }
+        },
+
+        //_handleMenuActionClick: function (rowId, menuAction, actionParams, divEl) {
+        //    /* handle user input */
+        //    _.each(actionParams, function (actionParam) {
+        //        var name = actionParam.name;
+
+        //        if (actionParam.value == '@contextId') {
+        //            actionParam.value = rowId;
+        //        }
+        //    });
+
+        //    this.trigger("menuActionClicked", rowId, menuAction, actionParams);
+        //},
+
+        _handleContextMenuClick: function ($actionEl, action) {
+            var replaceVariablesResult = this._replaceActionParamsVariables(action.params, this);
+            
+            var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("contextMenuClicked", this, action.name, replaceVariablesResult.actionParams, $actionEl);
+
+            if (!handledExternally) {
+                // Create a context menu, and assign it to the clicked element
+                var contextMenuModel = new expanz.models.ContextMenu({
+                    contextId: this.model.id,
+                    type: action.name,
+                    contextObject: replaceVariablesResult.actionParams.contextObject ? replaceVariablesResult.actionParams.contextObject.value : null,
+                    activity: this.dataPublicationView.model.get("parent")
+                });
+
+                var contextMenuView = new expanz.views.ContextMenuView({
+                    el: $actionEl,
+                    id: $actionEl.attr("id"),
+                    className: $actionEl.attr("class"),
+                    collection: contextMenuModel
+                });
+
+                window.expanz.currentContextMenu = contextMenuView.collection;
+                
+                contextMenuModel.requestContextMenu();
+            }
+        },
+        
+        _replaceActionParamsVariables: function (actionParams, rowView) {
+            // Replaces variables (starting with @) with actual values in an action params array
             var inputValid = true;
+            var newActionParams = jQuery.extend(true, {}, actionParams); // Clone the params object so that we don't alter the original
 
-            var newActionParams = action.actionParams.clone();
-
-            // Replace variables (starting with @) with actual values
             _.each(newActionParams, function (actionParam) {
                 var name = actionParam.name;
 
@@ -250,8 +282,7 @@ $(function () {
 
                     if (valueInput.length > 0 && valueInput.val().length > 0) {
                         actionParam.value = valueInput.val();
-                    }
-                    else {
+                    } else {
                         inputValid = false;
                     }
                 }
@@ -260,50 +291,10 @@ $(function () {
                 }
             });
 
-            if (inputValid) {
-                var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("actionClicked", action.actionName, newActionParams, actionEl);
-
-                if (!handledExternally) {
-                    actionEl.attr('disabled', 'disabled');
-                    actionEl.addClass('actionLoading');
-
-                    // TODO: Move into Row model
-                    expanz.net.MethodRequest(action.actionName, newActionParams, null, this.dataPublicationView.model.get("parent"));
-                }
-            }
-        },
-
-        _handleMenuActionClick: function (rowId, menuAction, actionParams, divEl) {
-            /* handle user input */
-            _.each(actionParams, function (actionParam) {
-                var name = actionParam.name;
-
-                if (actionParam.value == '@contextId') {
-                    actionParam.value = rowId;
-                }
-            });
-
-            this.trigger("menuActionClicked", rowId, menuAction, actionParams);
-        },
-
-        _handleContextMenuClick: function (rowId, contextMenuType, actionParams, divEl) {
-            /* handle user input */
-            var contextObject = '';
-
-            _.each(actionParams, function (actionParam) {
-                var name = actionParam.name;
-
-                if (actionParam.value == '@contextId') {
-                    actionParam.value = rowId;
-                }
-                if (actionParam.name == 'contextObject') {
-                    contextObject = actionParam.value;
-                }
-            });
-
-            contextObject = contextObject || contextMenuType;
-
-            this.trigger("contextMenuClicked", rowId, contextMenuType, contextObject, actionParams);
+            return {
+                inputValid: inputValid,
+                actionParams: newActionParams
+            };
         }
     });
 });

@@ -29,7 +29,7 @@ $(function () {
             var contextMenuId;
 
             if (this.contextMenuEl === undefined) {
-                contextMenuId = this.collection.id.replace(/\./g, "_") + "_contextMenu";
+                contextMenuId = this.collection.contextId.replace(/\./g, "_") + "_contextMenu";
                 this.$el.append("<div class='contextMenu' id='" + contextMenuId + "' />");
                 this.contextMenuEl = this.$el.find("#" + contextMenuId);
             }

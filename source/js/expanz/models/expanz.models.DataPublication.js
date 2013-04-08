@@ -143,26 +143,30 @@ $(function () {
                 if (gridviewInfo.length !== 0) {
                     // add actions
                     _.each($(gridviewInfo).find('action'), function (action) {
-                        var params = [];
+                        var $action = $(action);
+                        var params = {};
                         
-                        _.each($(action).find('param'), function (param) {
-                            params.push({
-                                name: $(param).attr('name'),
-                                value: $(param).attr('value'),
-                                label: $(param).attr('label'),
-                                bindValueFromCellId: $(param).attr('bindValueFromCellId')
-                            });
+                        _.each($action.find('param'), function (param) {
+                            var $param = $(param);
+                            var paramName = $param.attr('name');
+                            
+                            params[paramName] = {
+                                name: paramName,
+                                value: $param.attr('value'),
+                                label: $param.attr('label'),
+                                bindValueFromCellId: $param.attr('bindValueFromCellId')
+                            };
                         });
 
-                        var actionName = $(action).attr('methodName') || $(action).attr('menuAction') || $(action).attr('contextMenu');
+                        var actionName = $action.attr('methodName') || $action.attr('menuAction') || $action.attr('contextMenu');
                         
                         model.actions[actionName] = {
-                            id: $(action).attr('id'),
-                            type: $(action).attr('methodName') ? 'method' : $(action).attr('menuAction') ? 'menuAction' : 'contextMenu',
-                            label: $(action).attr('label'),
-                            width: $(action).attr('width'),
-                            actionName: actionName,
-                            actionParams: params
+                            id: $action.attr('id'),
+                            type: $action.attr('methodName') ? 'method' : $action.attr('menuAction') ? 'menuAction' : 'contextMenu',
+                            label: $action.attr('label'),
+                            width: $action.attr('width'),
+                            name: actionName,
+                            params: params
                         };
                     });
                 }
