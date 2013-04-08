@@ -30,6 +30,14 @@ $(function () {
             this.hasActions = false;
             this.isEditable = false;
         },
+        
+        dataPublished: function($rawXml) {
+            // Data has been published to this model, so notify the associated view by raising an event.
+            // Note that not all data publications follow the "standard" column/row/cell format, so the
+            // raw XML is being passed through and stored, which adapters can parse differently if required.
+            this.$rawXml = $rawXml;
+            this.trigger("datapublication:dataPublished");
+        },
 
         addColumn: function (id, field, label, datatype, width, isEditable, matrixKey) {
             // Create a "safe" field name, replacing periods with underscores

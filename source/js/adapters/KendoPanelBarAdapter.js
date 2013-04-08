@@ -1,12 +1,12 @@
 $.fn.KendoPanelBarAdapter = function(options) {
-
 	var panelView = $(this);
-
 	var parentSelectable = true;
 	var labelAttribute = 'title';
 	var idAttribute = 'id';
 	var expandedOnLoad = true;
 	var staticElements = {};
+	var cachedDataPublicationModel = null;
+    var fieldName = panelView.attr("fieldname");
 
 	/* function called after the delta has been sent and the response has been handle by the client */
 	/* format is selectionCallback = { success : function(){ <doing some actions> } } */
@@ -16,8 +16,10 @@ $.fn.KendoPanelBarAdapter = function(options) {
 
 	var onSelection = function(view, id, isChild) {
 		if (!parentSelectable && !isChild)
-			return;
-		view.itemSelected(id, selectionCallback);
+		    return;
+	    
+		expanz.net.DeltaRequest(fieldName, id, cachedDataPublicationModel.get('parent'), selectionCallback);
+		//view.itemSelected(id, selectionCallback);
 	};
 
 	/* handle options */
@@ -43,28 +45,32 @@ $.fn.KendoPanelBarAdapter = function(options) {
 	/**
 	 * define publishData which is called when list of data is ready
 	 */
-	var publishData = function(event, xml, view) {
-		window.expanz.logToConsole("KendoPanelBarAdapter publishData");
-		var xmlData = xml;
+	var publishData = function(event, dataPublicationModel, dataPublicationView, args) {
+	    cachedDataPublicationModel = dataPublicationModel;
+		var $xmlData = dataPublicationModel.$rawXml;
+		var $rootNode = $xmlData;
 		var data = [];
 
 		var childTag = '';
 
 		/* if xml contains rows tag, this is where starts the real data for the panel bar */
-		if ($(xml).find("Rows").length > 0) {
-			xml = $(xml).find("Rows");
+		if ($rootNode.find("Rows").length > 0) {
+		    $rootNode = $rootNode.find("Rows");
 		}
 
-		_.each($(xml).children(), function(parentXml) {
-			var parentId = $(parentXml).attr(idAttribute);
+		_.each($rootNode.children(), function(parentXml) {
+		    var parentId = $(parentXml).attr(idAttribute);
+		    
 			var parentObj = {};
 			parentObj.text = $(parentXml).attr(labelAttribute);
 			parentObj.expanded = expandedOnLoad;
 			parentObj.allAttributes = $(parentXml).getAttributes();
 
 			var items = [];
+		    
 			_.each($(parentXml).children(), function(childXml) {
-				childTag = childXml.tagName;
+			    childTag = childXml.tagName;
+			    
 				items.push({
 					text : $(childXml).attr(labelAttribute),
 					value : $(childXml).attr(idAttribute),
@@ -77,8 +83,8 @@ $.fn.KendoPanelBarAdapter = function(options) {
 				items.sort(getObjectSortAscendingFunction('text'));
 				parentObj.items = items;
 			}
+		    
 			data.push(parentObj);
-
 		});
 
 		/* sort data */
@@ -90,8 +96,7 @@ $.fn.KendoPanelBarAdapter = function(options) {
 				data.push({
 					text : $(elem).attr('label')
 				});
-			}
-			else {
+			} else {
 				data.unshift({
 					text : $(elem).attr('label')
 				});
@@ -105,6 +110,7 @@ $.fn.KendoPanelBarAdapter = function(options) {
 		/* add css class for level 1 / level 2 */
 		/* add css class level 1 */
 		panelView.children("li").addClass("level1");
+	    
 		/* add css class level 2 */
 		panelView.children("li").find("ul").children("li").addClass("level2");
 
@@ -117,47 +123,48 @@ $.fn.KendoPanelBarAdapter = function(options) {
 
 			/* check if it is a static element */
 			var isStatic = false;
+		    
 			if (staticElements.length > 0) {
 				_.each(staticElements, function(elem) {
 					if (selectedText === elem.label) {
-						isStatic = true;
+					    isStatic = true;
+					    
 						/* call the method associated */
 						expanz.net.MethodRequest(elem.method, [
 							{
 								name : "contextObject",
 								value : elem.contextObject
 							}
-						], null, view.model.get('parent'));
+						], null, dataPublicationView.model.get('parent'));
 					}
 				});
-
 			}
 
 			if (!isStatic) {
-
-				var elem;
-				$(xmlData).find("[" + labelAttribute + "]").each(function() {
+			    var elem;
+			    
+				$xmlData.find("[" + labelAttribute + "]").each(function() {
 					if (selectedText === $(this).attr(labelAttribute)) {
 						elem = $(this);
 					}
 				});
 
 				if (onSelection) {
-					onSelection(view, elem.attr('id'), elem.is(childTag));
+				    onSelection(dataPublicationView, elem.attr('id'), elem.is(childTag));
 				}
 			}
 		});
 
 		/* calling runAfterPublish if defined */
 		if (runAfterPublish) {
-			runAfterPublish(xmlData);
+			runAfterPublish($xmlData);
 		}
 		
 		$(this).trigger('dataPublished');
 
+	    args.handled = true;
 	};
 
-	/* bind listenner */
-	$(this).bind("publishData", publishData);
-
+	/* bind listener */
+	$(this).bind("datapublication:publishData", publishData);
 };

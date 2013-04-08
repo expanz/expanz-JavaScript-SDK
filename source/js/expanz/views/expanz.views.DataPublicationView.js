@@ -19,15 +19,14 @@ $(function () {
         template: _.template('<table class="grid" id="<%= hostId %>"></table>'),
 
         initialize: function () {
-            this.model.bind("datapublication:publishData", this.publishData, this);
+            this.model.bind("datapublication:dataPublished", this.onDataPublished, this);
         },
 
-        publishData: function () {
-            this.$el.trigger("publishData", [
-				this.model, this
-            ]);
-
-            this.render();
+        onDataPublished: function () {
+            var handledExternally = this.raiseExtensibilityPointEvent("publishData");
+            
+            if (!handledExternally)
+                this.render();
         },
 
         render: function () {
@@ -140,11 +139,11 @@ $(function () {
                 args = {};
 
             args.handled = false;
-
-            this.$el.trigger("dataPublication:" + eventName, [
+            
+            this.$el.trigger("datapublication:" + eventName, [
 				this.model, this, args
             ]);
-
+            
             return args.handled;
         }
     });

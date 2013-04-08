@@ -709,5 +709,5 @@ function populateDataPublicationModel(dataPublicationModel, data) {
         });
     });
 
-    dataPublicationModel.trigger("datapublication:publishData");
+    dataPublicationModel.dataPublished($data);
 }
