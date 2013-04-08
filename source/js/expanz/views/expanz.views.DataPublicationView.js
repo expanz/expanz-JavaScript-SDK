@@ -197,17 +197,15 @@ $(function () {
             this.$el.find("[sortField]").each(function () {
                 var $headerCell = $(this);
                 var fieldName = $headerCell.attr('sortField');
-                var defaultSortDirection = $headerCell.attr('defaultSortDirection') || "asc";
-
+                
                 // Set classes on the field for styling purposes
                 $headerCell.addClass("sortable");
                 
                 if (fieldName == dataPublicationView.sortField) {
-                    if (defaultSortDirection == "asc") {
+                    if (dataPublicationView.sortDirection == "asc") {
                         $headerCell.removeClass("sortedDesc");
                         $headerCell.addClass("sortedAsc");
-                    }
-                    else {
+                    } else {
                         $headerCell.removeClass("sortedAsc");
                         $headerCell.addClass("sortedDesc");
                     }
