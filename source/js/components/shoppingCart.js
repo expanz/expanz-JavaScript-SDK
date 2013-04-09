@@ -667,7 +667,7 @@ $(function() {
 			renderStandardOrdersListModule : function(el) {
 				var html = "";
 				html += '<script type="text/template" id="listStandardOrdersItemTemplate">';
-				html += '<div class="item"><div class="loadStandardOrderName"><a methodName="loadStandardOrderWithPrompt" href="javascript:void(0)"><%=data.Name%></a></div>';
+				html += '<div class="item <%= className %>"><div class="loadStandardOrderName"><a methodName="loadStandardOrderWithPrompt" href="javascript:void(0)"><%=data.Name%></a></div>';
 				html += '<button methodName="deleteStandardOrderWithPrompt" class="deleteStandardOrder" href="javascript:void(0)"></button>';
 				html += '<div class="clear"></div></div>';
 				html += '</script>';
@@ -687,8 +687,11 @@ $(function() {
 			renderDefaultListItemGridTemplate : function() {
 				var html = '';
 				html += '\
-					<script type="text/template" id="productListItemTemplateGrid"> \
-					<div class="productNDetail"> \
+					<script type="text/template" id="productListItemTemplateGridHeader"> \
+					</script>\
+					\
+				    <script type="text/template" id="productListItemTemplateGrid"> \
+					<div class="productNDetail <%= className %>"> \
 						<div class="product"> \
 							<% if ( isImageValid(data.ThumbImage_FileContents) ){ %>  \
 								<div class="productIcon left productThumbnail"> \
@@ -719,7 +722,7 @@ $(function() {
 									<p class="noStock">No stock</p> \
 							<% } else { %>\
 								<div class="productCount left"> \
-									<input class="gridUserInput" type="text" format="numeric"  id="userinput_quantity"></input>\
+									<input class="gridUserInput" type="text" format="numeric"  id="<%= row.id %>_userinput_quantity"></input>\
 								</div> \
 								<div class="left addProductMain"> \
 									<a class="addProduct" methodName="saveItemFromCart"></a> \
@@ -1000,7 +1003,7 @@ $(function() {
 
 			renderMiniGoToCartBoxModule : function(el) {
 				var html = "";
-				html += '<div><div id="miniCartBox" style="display:none" class="miniCartBox" onclick="if($(\'#data-itemcount\').text() != 0) window.location=\'' + getPageUrl(this.shoppingCartCheckoutPage) + '\'" >';
+				html += '<div><div id="miniCartBox" style="display:none" class="miniCartBox" onclick="if($(\'#nbItems\').text() != 0) window.location=\'' + getPageUrl(this.shoppingCartCheckoutPage) + '\'" >';
 				html += '<span class="miniCartBoxImage">CART</span><span class="miniCartBoxTotal" bind="field" name="Total2"><span attribute="value">$0</span></span> <div bind="field" name="CartItemsCount" class="cartItemCount"><span id="nbItems" attribute="value">0</span></div></div></div>';
 				return html;
 			},

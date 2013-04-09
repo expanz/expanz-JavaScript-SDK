@@ -30,7 +30,7 @@ $(function () {
             this.model.bind("change:loading", this.loading, this);
             this.model.bind("setFocus", this.setFocus, this);
             
-            this.dataModel.bind("datapublication:publishData", this.dataChanged, this);
+            this.dataModel.bind("datapublication:dataPublished", this.dataChanged, this);
         },
 
         valueChanged: function () {
