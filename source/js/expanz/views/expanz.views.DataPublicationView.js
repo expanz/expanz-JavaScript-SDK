@@ -47,7 +47,21 @@ $(function () {
             
             this.configureEventHandlers(this.$el);
 
+            // Logic dealing with the number of items in the list. Store the item
+            // count as an attribute on the element, and if there are no items then
+            // apply a class to the element, and show a message (if supplied).
             this.$el.attr('data-itemcount', this.model.rows.length);
+            
+            if (this.model.rows.length === 0) {
+                this.$el.addClass("empty");
+
+                var noItemsText = this.$el.attr("noItemsText");
+                
+                if (noItemsText)
+                    this.$el.append('<div id="noItemsText" class="emptyListText">' + noItemsText + '</div>');
+            } else {
+                this.$el.removeClass("empty");
+            }
 
             this.raiseExtensibilityPointEvent("rendered");
 

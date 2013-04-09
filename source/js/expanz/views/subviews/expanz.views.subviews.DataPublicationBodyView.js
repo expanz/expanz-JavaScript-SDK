@@ -33,7 +33,7 @@ $(function () {
 
             this.model.rows.each(function (row, rowIndex) {
                 // Render row
-                var rowView = new expanz.views.subviews.TableRowView({ model: row, rowIndex: rowIndex, dataPublicationView: view.dataPublicationView });
+                var rowView = new expanz.views.subviews.DataPublicationRowView({ model: row, rowIndex: rowIndex, dataPublicationView: view.dataPublicationView });
                 view.$el.append(rowView.render().el);
             });
 
