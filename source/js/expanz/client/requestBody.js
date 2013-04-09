@@ -110,7 +110,7 @@ var requestBody = {
         }
 
         if (context)
-            body += createSetContextElement(context.id, context.contextObject, context.type);
+            body += this.createSetContextElement(context.id, context.contextObject, context.type);
 
         body += '<Method name="' + name + '"';
         

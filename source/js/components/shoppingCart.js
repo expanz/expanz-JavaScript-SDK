@@ -487,7 +487,7 @@ $(function() {
 					html += this.renderDefaultListItemGridTemplate();
 				}
 				html += "<div id='searchResultTitle' class='searchResultTitle' style='display:none'>Showing Results for \"<span id='searchString'></span>\"</div>";
-				html += '<div id="' + this.productListName + '" enableConfiguration="' + enableConfiguration + '" noItemText="No item matches your selection" isHTMLTable="' + displayAsTable + '" templateName="' + templateName + '"  itemsPerPage="' + itemsPerPage + '" dataId="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
+				html += '<div id="' + this.productListName + '" enableConfiguration="' + enableConfiguration + '" noItemText="No item matches your selection" templateName="' + templateName + '"  itemsPerPage="' + itemsPerPage + '" dataId="' + this.productListName + '" bind="DataControl" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 				return html;
 			},
 
@@ -675,7 +675,7 @@ $(function() {
 				html += '<div class="header">My standard orders';
 				html += '</div>';
 				html += '</script>';
-				html += '<div id="listStandardOrders" class="standardOrders" itemsPerPage="10" dataId="listStandardOrders" bind="DataControl" renderingType="grid" populateMethod="' + this.myStandardOrdersPopMethod + '" contextObject="' + this.myStandardOrdersContextObject + '"></div>';
+				html += '<div id="listStandardOrders" class="standardOrders" itemsPerPage="10" dataId="listStandardOrders" bind="DataControl" populateMethod="' + this.myStandardOrdersPopMethod + '" contextObject="' + this.myStandardOrdersContextObject + '"></div>';
 				return html;
 			},
 
@@ -740,13 +740,15 @@ $(function() {
 			renderDefaultListItemTemplateHeader : function() {
 				var html = ' \
 					<script type="text/template" id="productListItemTemplateListHeader">\
-					<tr class="item listDisplay" style="height:25px;font-size:16px;text-align:center"> \
+					<thead>\
+			        <tr class="item listDisplay" style="height:25px;font-size:16px;text-align:center"> \
 					<th class="cell" style="width:65px;">&nbsp;</th> \
 					<th class="cell">Name</th> \
 					<th class="cell" style="width:60px;">Price</th> \
 					<th class="cell">Note</th> \
 					<th class="cell" style="">Actions</th> \
 					</tr>\
+			        <thead>\
 					</script>';
 				return html;
 			},
@@ -1257,7 +1259,7 @@ $(function() {
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 12;
 
 				html += '<script type="text/template" id="orderHistoryItemTemplateHeader">';
-				html += '<tr class="item"><th sortField="SearchCode" style="width:100px">Search code</th><th style="width:200px" sortField="Name" >Name</th><th style="width:100px" sortField="Status" >Status</th><th  style="width:200px" sortField="CreationDate" defaultSortDirection="desc">Creation Date</th><th style="width:120px" sortField="Total">Amount</th><th>Actions</th></tr>';
+				html += '<thead><tr class="item"><th sortField="SearchCode" style="width:100px">Search code</th><th style="width:200px" sortField="Name" >Name</th><th style="width:100px" sortField="Status" >Status</th><th  style="width:200px" sortField="CreationDate" defaultSortDirection="desc">Creation Date</th><th style="width:120px" sortField="Total">Amount</th><th>Actions</th></tr></thead>';
 				html += '</script>';
 
 				html += '<script type="text/template" id="orderHistoryItemTemplate">';
@@ -1265,7 +1267,7 @@ $(function() {
 				html += '<td class="actions"><% if(sortValues.Status >= 20){ %><button methodName="showInvoice">Show Invoice</button><% } %></td></tr>';
 				html += '</script>';
 
-				html += '<div id="orderHistoryDivList" class="orderHistory" isHTMLTable="true" populateMethod="' + this.orderHistoryPopMethod + '" itemsPerPage="' + itemsPerPage + '" dataId="' + this.orderHistoryListName + '" bind="DataControl" renderingType="grid" contextObject="' + this.orderHistoryContextObject + '"></div>';
+				html += '<table id="orderHistoryDivList" class="orderHistory" populateMethod="' + this.orderHistoryPopMethod + '" itemsPerPage="' + itemsPerPage + '" dataId="' + this.orderHistoryListName + '" bind="DataControl" contextObject="' + this.orderHistoryContextObject + '"></table>';
 				return html;
 			},
 

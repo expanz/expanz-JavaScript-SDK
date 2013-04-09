@@ -468,11 +468,10 @@ $(function() {
 		            renderingType: $dataPubicationEl.attr('renderingType'),
 		            canDrillDown: $dataPubicationEl.attr('candrilldown') == "true",
 		            templateName: $dataPubicationEl.attr('templateName'),
-		            model: dataModel
-		            //itemsPerPage: $dataControlEl.attr('itemsPerPage'),
-		            //isHTMLTable: $dataControlEl.attr('isHTMLTable'),
-		            //enableConfiguration: $dataControlEl.attr('enableConfiguration'),
-		            //noItemText: $dataControlEl.attr('noItemText')
+		            model: dataModel,
+		            itemsPerPage: $dataPubicationEl.attr('itemsPerPage'),
+		            //enableConfiguration: $dataPubicationEl.attr('enableConfiguration'),
+		            noItemText: $dataPubicationEl.attr('noItemText')
 		        });
 
 		        dataPublicationViews.push(view);

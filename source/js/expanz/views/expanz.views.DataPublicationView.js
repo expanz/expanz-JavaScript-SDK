@@ -16,8 +16,6 @@ $(function () {
 
     window.expanz.views.DataPublicationView = Backbone.View.extend({
         
-        template: _.template('<table class="grid" id="<%= hostId %>"></table>'),
-
         initialize: function () {
             this.model.bind("datapublication:dataPublished", this.onDataPublished, this);
         },
@@ -37,23 +35,19 @@ $(function () {
             if (hasBeenRenderedExternally === true)
                 return this; // Rendering already performed by adapter, so return early
 
-            var hostId = this.id + "_host";
-
-            // Create table scaffold
-            this.$el.html(this.template({ hostId: hostId }));
-            var $hostEl = this.$el.find('#' + hostId);
-
+            this.$el.html(""); // Clear the contents of the host element
+            
             // Render header
             var headerView = new expanz.views.subviews.TableHeaderView({ model: this.model, dataPublicationView: this });
-            $hostEl.append(headerView.render().el);
+            this.$el.append(headerView.render().el);
 
             // Render body
             var bodyView = new expanz.views.subviews.TableBodyView({ model: this.model, dataPublicationView: this });
-            $hostEl.append(bodyView.render().el);
+            this.$el.append(bodyView.render().el);
+            
+            this.configureEventHandlers(this.$el);
 
-            this.configureEventHandlers($hostEl);
-
-            $hostEl.attr('data-itemcount', this.model.rows.length);
+            this.$el.attr('data-itemcount', this.model.rows.length);
 
             this.raiseExtensibilityPointEvent("rendered");
 

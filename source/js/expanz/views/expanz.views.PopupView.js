@@ -63,6 +63,8 @@ $(function () {
             var content = '';
             if (this.model.get('text') !== undefined && this.model.get('text').length > 0) {
                 content = this.model.get('text');
+            } else if (this.contentTemplate) {
+                content = this.contentTemplate({ id: this.id });
             }
 
             $container.append("<div class='" + this.cssClass + "' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");

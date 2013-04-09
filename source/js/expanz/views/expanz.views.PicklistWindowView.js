@@ -15,7 +15,7 @@ $(function () {
     window.expanz.views = window.expanz.views || {};
 
     window.expanz.views.PicklistWindowView = window.expanz.views.PopupView.extend({
-        divAttributes: " bind='DataControl' renderingType='grid' ",
+        contentTemplate: _.template("<table id='<%= id %>_host' bind='DataControl' class='grid'></table>"),
         
         cssClass: 'pickListPopup popupView',
         

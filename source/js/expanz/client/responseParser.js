@@ -410,7 +410,7 @@ function parseDataResponse(dataElement, activityModel, activityView) {
 
         expanz.Factory.bindDataControls(activityView, picklistWindow.$el.parent());
 
-        var dataPublicationModel = activityModel.dataPublications.get(elId + "_0");
+        var dataPublicationModel = activityModel.dataPublications.get(elId + "_host_0");
         populateDataPublicationModel(dataPublicationModel, $dataElement);
     }
     else {

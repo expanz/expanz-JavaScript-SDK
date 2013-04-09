@@ -28,6 +28,6 @@
         };
 
         // Register event handlers
-        $inputElement.bind("dataPublication:rendering", onRender);
+        $inputElement.bind("datapublication:rendering", onRender);
     };
 });

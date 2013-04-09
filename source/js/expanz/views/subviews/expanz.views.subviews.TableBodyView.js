@@ -21,6 +21,11 @@ $(function () {
 
         initialize: function (params) {
             this.dataPublicationView = params.dataPublicationView;
+
+            // If the host element is not a table, create items in a div instead of the default tbody.
+            if (this.dataPublicationView.$el.prop("tagName") !== "TABLE") {
+                this.setElement($('<div></div>'));
+            }
         },
 
         render: function () {

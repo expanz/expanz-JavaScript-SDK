@@ -17,13 +17,13 @@ $(function () {
 
     window.expanz.views.subviews.TableHeaderView = Backbone.View.extend({
 
-        defaultTemplate: _.template('<tr class="tableheader">' +
-                                    '<% columns.each(function(col){ %>' +
-                                       '<th width="<%= col.get("width") %>"><%= col.get("label") %></th>' +
-                                    '<% }); %>' +
-                                    '</tr>'),
-
-        tagName: "thead",
+        defaultTemplate: _.template('<thead>' +
+                                        '<tr class="tableheader">' +
+                                        '<% columns.each(function(col){ %>' +
+                                           '<th width="<%= col.get("width") %>"><%= col.get("label") %></th>' +
+                                        '<% }); %>' +
+                                        '</tr>' +
+                                    '</thead>'),
 
         initialize: function (params) {
             this.dataPublicationView = params.dataPublicationView;
@@ -34,7 +34,7 @@ $(function () {
 
             if (!hasBeenRenderedExternally) {
                 var headerTemplate = this.getHeaderTemplate();
-                this.$el.html(headerTemplate({ columns: this.model.columns }));
+                this.setElement(headerTemplate({ columns: this.model.columns }));
 
                 this.onHeaderRendered();
                 this.dataPublicationView.raiseExtensibilityPointEvent("headerRendered");
