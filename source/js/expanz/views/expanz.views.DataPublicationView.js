@@ -16,8 +16,11 @@ $(function () {
 
     window.expanz.views.DataPublicationView = Backbone.View.extend({
         
-        initialize: function () {
+        initialize: function (params) {
             this.model.bind("datapublication:dataPublished", this.onDataPublished, this);
+
+            this.currentPage = 1;
+            this.itemsPerPage = params.itemsPerPage != undefined ? parseInt(params.itemsPerPage) : 9999;
         },
 
         onDataPublished: function () {
@@ -44,6 +47,15 @@ $(function () {
             // Render body
             var bodyView = new expanz.views.subviews.DataPublicationBodyView({ model: this.model, dataPublicationView: this });
             this.$el.append(bodyView.render().el);
+            
+            // Render paging bar - needs to append paging bar to parent element, or use the
+            // existing one if found
+            var existingPagingBarElement = this.$el.parent().find("#pagingBar");
+            var pagingBarView = new expanz.views.subviews.DataPublicationPagingBarView({ model: this.model, dataPublicationView: this, el: existingPagingBarElement[0] });
+            var renderedPagingBarElement = pagingBarView.render().el;
+            
+            if (existingPagingBarElement.length === 0)
+                this.$el.parent().append(renderedPagingBarElement);
             
             this.configureEventHandlers(this.$el);
 

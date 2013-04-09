@@ -465,7 +465,6 @@ $(function() {
 		            el: dataPubicationEl,
 		            id: modelId,
 		            className: $dataPubicationEl.attr('class'),
-		            renderingType: $dataPubicationEl.attr('renderingType'),
 		            canDrillDown: $dataPubicationEl.attr('candrilldown') == "true",
 		            templateName: $dataPubicationEl.attr('templateName'),
 		            model: dataModel,

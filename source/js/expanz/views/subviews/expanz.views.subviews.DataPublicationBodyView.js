@@ -23,7 +23,7 @@ $(function () {
             this.dataPublicationView = params.dataPublicationView;
 
             // If the host element is not a table, create items in a div instead of the default tbody.
-            if (this.dataPublicationView.$el.prop("tagName") !== "TABLE") {
+            if (!this.dataPublicationView.$el.is("table")) {
                 this.setElement($('<div></div>'));
             }
         },
@@ -31,11 +31,18 @@ $(function () {
         render: function () {
             var view = this;
 
-            this.model.rows.each(function (row, rowIndex) {
+            // Calculate which items should be displayed, based upon the items per page and current page number
+            var firstItemIndex = (this.dataPublicationView.currentPage - 1) * this.dataPublicationView.itemsPerPage;
+            var lastItemIndex = Math.min(firstItemIndex + this.dataPublicationView.itemsPerPage, this.model.rows.length);
+            
+            // Enumerate the rows for the current page, and render them
+            for (var rowIndex = firstItemIndex; rowIndex < lastItemIndex; rowIndex++) {
+                var row = this.model.rows.at(rowIndex);
+                
                 // Render row
                 var rowView = new expanz.views.subviews.DataPublicationRowView({ model: row, rowIndex: rowIndex, dataPublicationView: view.dataPublicationView });
                 view.$el.append(rowView.render().el);
-            });
+            }
 
             return this;
         }
