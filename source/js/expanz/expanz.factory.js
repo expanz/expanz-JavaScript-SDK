@@ -471,7 +471,7 @@ $(function() {
 		            model: dataModel,
 		            itemsPerPage: $dataPubicationEl.attr('itemsPerPage'),
 		            //enableConfiguration: $dataPubicationEl.attr('enableConfiguration'),
-		            noItemText: $dataPubicationEl.attr('noItemText')
+		            noItemsText: $dataPubicationEl.attr('noItemsText')
 		        });
 
 		        dataPublicationViews.push(view);

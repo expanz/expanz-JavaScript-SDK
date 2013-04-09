@@ -487,7 +487,7 @@ $(function() {
 					html += this.renderDefaultListItemGridTemplate();
 				}
 				html += "<div id='searchResultTitle' class='searchResultTitle' style='display:none'>Showing Results for \"<span id='searchString'></span>\"</div>";
-				html += '<div id="' + this.productListName + '" enableConfiguration="' + enableConfiguration + '" noItemText="No item matches your selection" templateName="' + templateName + '"  itemsPerPage="' + itemsPerPage + '" dataId="' + this.productListName + '" bind="DataControl" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
+				html += '<div id="' + this.productListName + '" enableConfiguration="' + enableConfiguration + '" noItemsText="No item matches your selection" templateName="' + templateName + '"  itemsPerPage="' + itemsPerPage + '" dataId="' + this.productListName + '" bind="DataControl" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 				return html;
 			},
 
@@ -505,19 +505,19 @@ $(function() {
 					}
 
 					if (that.lastListAction == 'specials') {
-						$(el).find("#"+this.productListName).find("#noItemText").hide();
-						$(el).find("#"+this.productListName).find("#noItemText").after("<div id='onSpecial' class='emptyListText'>No Specials at this time - Check back later</div>");
+						$(el).find("#"+this.productListName).find("#noItemsText").hide();
+						$(el).find("#"+this.productListName).find("#noItemsText").after("<div id='onSpecial' class='emptyListText'>No Specials at this time - Check back later</div>");
 					}
 					else if (that.lastListAction == 'newItems') {
-						$(el).find("#"+this.productListName).find("#noItemText").hide();
-						$(el).find("#"+this.productListName).find("#noItemText").after("<div id='newItems' class='emptyListText'>No new items at this time - Check back later</div>");
+						$(el).find("#"+this.productListName).find("#noItemsText").hide();
+						$(el).find("#"+this.productListName).find("#noItemsText").after("<div id='newItems' class='emptyListText'>No new items at this time - Check back later</div>");
 					}
 					else if (that.lastListAction == 'endOfLine') {
-						$(el).find("#"+this.productListName).find("#noItemText").hide();
-						$(el).find("#"+this.productListName).find("#noItemText").after("<div id='endOfLine' class='emptyListText'>No end of line items at this time - Check back later</div>");
+						$(el).find("#"+this.productListName).find("#noItemsText").hide();
+						$(el).find("#"+this.productListName).find("#noItemsText").after("<div id='endOfLine' class='emptyListText'>No end of line items at this time - Check back later</div>");
 					}
 					else {
-						$(el).find("#"+this.productListName).find("#noItemText").show();
+						$(el).find("#"+this.productListName).find("#noItemsText").show();
 						$(el).find("#"+this.productListName).find("#onSpecial").remove();
 					}
 
@@ -953,7 +953,7 @@ $(function() {
 				html += '<button methodName="deleteItemFromCart">X</button>';
 				html += window.expanz.html.endDiv();
 				html += '</script>';
-				html += "<div bind='DataControl' noItemText='Empty' renderingType='grid' id='lvMiniCart' dataId='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
+				html += "<div bind='DataControl' noItemsText='Empty' renderingType='grid' id='lvMiniCart' dataId='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
 				return html
 			},
 
