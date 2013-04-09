@@ -59,13 +59,12 @@ $.fn.KendoPanelBarAdapter = function(options) {
 		}
 
 		_.each($rootNode.children(), function(parentXml) {
-		    var parentId = $(parentXml).attr(idAttribute);
-		    
-			var parentObj = {};
-			parentObj.text = $(parentXml).attr(labelAttribute);
-			parentObj.expanded = expandedOnLoad;
-			parentObj.allAttributes = $(parentXml).getAttributes();
-
+		    var parentObj = {
+		        text: $(parentXml).attr(labelAttribute),
+		        expanded: expandedOnLoad,
+		        allAttributes: $(parentXml).getAttributes()
+		    }
+	    
 			var items = [];
 		    
 			_.each($(parentXml).children(), function(childXml) {
