@@ -38,11 +38,11 @@ $(function () {
             this.$el.html(""); // Clear the contents of the host element
             
             // Render header
-            var headerView = new expanz.views.subviews.TableHeaderView({ model: this.model, dataPublicationView: this });
+            var headerView = new expanz.views.subviews.DataPublicationHeaderView({ model: this.model, dataPublicationView: this });
             this.$el.append(headerView.render().el);
 
             // Render body
-            var bodyView = new expanz.views.subviews.TableBodyView({ model: this.model, dataPublicationView: this });
+            var bodyView = new expanz.views.subviews.DataPublicationBodyView({ model: this.model, dataPublicationView: this });
             this.$el.append(bodyView.render().el);
             
             this.configureEventHandlers(this.$el);

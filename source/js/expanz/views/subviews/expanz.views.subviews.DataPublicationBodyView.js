@@ -15,7 +15,7 @@ $(function () {
     window.expanz.views = window.expanz.views || {};
     window.expanz.views.subviews = window.expanz.views.subviews || {};
 
-    window.expanz.views.subviews.TableBodyView = Backbone.View.extend({
+    window.expanz.views.subviews.DataPublicationBodyView = Backbone.View.extend({
 
         tagName: "tbody",
 

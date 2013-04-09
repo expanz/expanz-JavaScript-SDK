@@ -15,7 +15,7 @@ $(function () {
     window.expanz.views = window.expanz.views || {};
     window.expanz.views.subviews = window.expanz.views.subviews || {};
 
-    window.expanz.views.subviews.TableRowView = Backbone.View.extend({
+    window.expanz.views.subviews.DataPublicationRowView = Backbone.View.extend({
 
         defaultRowTemplate: _.template('<tr class="<%= className %>">' +
                                        '<%= rowView.renderRowCells(row) %>' +

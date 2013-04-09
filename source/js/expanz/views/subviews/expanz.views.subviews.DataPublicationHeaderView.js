@@ -15,7 +15,7 @@ $(function () {
     window.expanz.views = window.expanz.views || {};
     window.expanz.views.subviews = window.expanz.views.subviews || {};
 
-    window.expanz.views.subviews.TableHeaderView = Backbone.View.extend({
+    window.expanz.views.subviews.DataPublicationHeaderView = Backbone.View.extend({
 
         defaultTemplate: _.template('<thead>' +
                                         '<tr class="tableheader">' +
