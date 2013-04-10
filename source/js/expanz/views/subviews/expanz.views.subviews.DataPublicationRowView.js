@@ -18,11 +18,11 @@ $(function () {
     window.expanz.views.subviews.DataPublicationRowView = Backbone.View.extend({
 
         defaultRowTemplate: _.template('<tr class="<%= className %>">' +
-                                       '<%= rowView.renderRowCells(row) %>' +
+                                       '<%= rowView.renderRowCells(rowModel) %>' +
                                        '</tr>'),
 
-        defaultCellTemplate: _.template('<td id="<%= cell.get("id") %>">' +
-                                        '<%= rowView.renderCellContents(cell, row, cellIndex, isDrillDownRow) %>' +
+        defaultCellTemplate: _.template('<td data-columnid="<%= cellModel.get("id") %>">' +
+                                        '<%= rowView.renderCellContents(cellModel, rowModel, cellIndex, isDrillDownRow) %>' +
                                         '</td>'),
 
         initialize: function (params) {
@@ -42,11 +42,11 @@ $(function () {
                 var cellValues = this.model.getCellValues();
 
                 var itemTemplate = this.getItemTemplate();
-                this.setElement(itemTemplate({ row: this.model, data: cellValues.data, sortValues: cellValues.sortValues, className: className, rowView: this }));
+                this.setElement(itemTemplate({ rowModel: this.model, data: cellValues.data, sortValues: cellValues.sortValues, className: className, rowView: this }));
 
                 // Set attributes on the element that will be used to identify it
-                this.$el.attr("id", this.model.id);
-                this.$el.attr("type", this.model.get("type"));
+                this.$el.attr("data-rowid", this.model.id);
+                this.$el.attr("data-rowtype", this.model.get("type"));
 
                 this.onRowRendered();
                 this.dataPublicationView.raiseExtensibilityPointEvent("rowRendered");
@@ -69,49 +69,47 @@ $(function () {
             return itemTemplate;
         },
 
-        renderRowCells: function (row) {
+        renderRowCells: function (rowModel) {
             var html = "";
             var view = this;
-            var isDrillDownRow = this.dataPublicationView.options.canDrillDown && (row.get("type") !== "Totals" && row.get("type") !== "BlankLine"); // Only show drilldown link if configured to do so, and only on non-totals and non-blank rows
+            var isDrillDownRow = this.dataPublicationView.options.canDrillDown && (rowModel.get("type") !== "Totals" && rowModel.get("type") !== "BlankLine"); // Only show drilldown link if configured to do so, and only on non-totals and non-blank rows
 
-            row.cells.each(function (cell, cellIndex) {
-                html += view.defaultCellTemplate({ cell: cell, row: row, rowView: view, cellIndex: cellIndex, isDrillDownRow: isDrillDownRow });
+            rowModel.cells.each(function (cellModel, cellIndex) {
+                html += view.defaultCellTemplate({ cellModel: cellModel, rowModel: rowModel, rowView: view, cellIndex: cellIndex, isDrillDownRow: isDrillDownRow });
             });
-
-            html += this.renderActions();
 
             return html;
         },
 
-        renderCellContents: function (cell, row, cellIndex, isDrillDownRow) {
+        renderCellContents: function (cellModel, rowModel, cellIndex, isDrillDownRow) {
             var html = "";
 
-            if (cell.column && cell.column.get('datatype') === 'BLOB') {
-                html += '<img width="' + cell.column.get('width') + '" src="' + cell.get('value') + '"/>';
-            } else if (cell.column.get("isEditable")) {
-                html += this.renderCellInputControl(cell);
-            } else if (cell.get('value')) {
+            if (cellModel.column && cellModel.column.get('datatype') === 'BLOB') {
+                html += '<img width="' + cellModel.column.get('width') + '" src="' + cellModel.get('value') + '"/>';
+            } else if (cellModel.column.get("isEditable")) {
+                html += this.renderCellInputControl(cellModel);
+            } else if (cellModel.get('value')) {
                 if (cellIndex === 0 && isDrillDownRow) {
-                    html += '<a href="#' + row.get('id') + '">' + cell.get('value') + '</a>'; // Create a drilldown link
+                    html += '<a href="#' + rowModel.get('id') + '">' + cellModel.get('value') + '</a>'; // Create a drilldown link
                 } else {
-                    html += '<span>' + cell.get('value') + '</span>';
+                    html += '<span>' + cellModel.get('value') + '</span>';
                 }
             }
 
             return html;
         },
 
-        renderCellInputControl: function (cell) {
+        renderCellInputControl: function (cellModel) {
             // Render the correct type of input control, depending on the cell column's data type
             var html = "";
-            var dataType = cell.column.get("datatype");
+            var dataType = cellModel.column.get("datatype");
 
             if (dataType === "string" || dataType === "number") {
-                html = "<input type='text' value='" + cell.get('value') + "' class='dpinput-" + dataType + "' style='width: 100%;'>";
+                html = "<input type='text' value='" + cellModel.get('value') + "' class='dpinput-" + dataType + "' style='width: 100%;'>";
             } else if (dataType === "boolean") {
                 html = "<input type='checkbox' class='dpinput-boolean'";
 
-                if (cell.get('value') === "1")
+                if (cellModel.get('value') === "1")
                     html += " checked";
 
                 html += ">";
@@ -122,8 +120,9 @@ $(function () {
             return html;
         },
 
-        renderActions: function () {
-            var html = "";
+        // TODO: Re-instate, and call from default row template?
+        //renderActions: function () {
+        //    var html = "";
 
             //if (this.model.hasActions) {
             //    html = '<td>';
@@ -156,10 +155,15 @@ $(function () {
             //    html += '</td>';
             //}
 
-            return html;
-        },
+        //    return html;
+        //},
 
         onRowRendered: function () {
+            this.bindActions();
+            this.configureEventHandlers();
+        },
+        
+        bindActions: function() {
             var rowView = this;
             var dataPublicationView = rowView.dataPublicationView;
 
@@ -174,43 +178,63 @@ $(function () {
                 }
             });
 
-            /* trigger a method call if a user field include a change attribute */
-            //rowView.$el.find("#" + itemId + "  [autoUpdate] ").change(function (elem) {
-            //    var action = that.model.getAction($(this).attr('autoUpdate'));
-            //    if (action && action.length > 0) {
-            //        var rowId = $(this).closest("[rowId]").attr('rowId');
-            //        var actionParams = action[0].get('actionParams').clone();
-            //        that._handleActionClick($(this), rowId, action[0].get('name'), actionParams, $(this).closest("[rowId]"));
-            //    }
-            //    else {
-            //        window.expanz.logToConsole("autUpdate action not defined in formapping: " + $(this).attr('autoUpdate'));
-            //    }
-            //});
-
-            ///* binding menuAction from template */
-            //rowView.$el.find("#" + itemId + " [menuAction] ").each(function (index, element) {
-            //    var action = that.model.getAction($(element).attr('menuAction'));
-            //    if (action && action.length > 0) {
-            //        $(element).click(function () {
-            //            var rowId = $(this).closest("[rowId]").attr('rowId');
-            //            var actionParams = action[0].get('actionParams').clone();
-
-            //            that._handleMenuActionClick(rowId, action[0].get('name'), actionParams, $(this).closest("[rowId]"));
-
-            //        });
-            //    }
-            //});
-
             /* Search for elements with a contextMenu attribute, and bind them to an action */
             rowView.$el.find("[contextMenu] ").each(function (index, element) {
                 var action = dataPublicationView.model.actions[$(element).attr('contextMenu')];
-                
+
                 if (action) {
                     $(element).click(function () {
                         rowView._handleContextMenuClick.call(rowView, $(this), action);
                     });
                 }
             });
+        },
+
+        configureEventHandlers: function () {
+            var view = this;
+
+            this.$el.click(this, function () {
+                view.dataPublicationView.onRowClicked.call(view.dataPublicationView, view);
+            });
+
+            this.$el.dblclick(this, function () {
+                view.dataPublicationView.onRowDoubleClicked.call(view.dataPublicationView, view);
+            });
+            
+            this.$el.find("a").click(this, function () {
+                view.dataPublicationView.onDrillDown.call(view.dataPublicationView, view);
+            });
+
+            if (this.dataPublicationView.model.isEditable) {
+                this.$el.find("input").click(this, function () {
+                    // Select all the text in the input box when it is clicked
+                    this.select();
+                });
+                
+                this.$el.find("input").change(this, function () {
+                    // Input value has changed, so pass new value to the server
+                    var $input = $(this);
+                    var $cell = $input.closest("td");
+
+                    view.dataPublicationView.onCellValueChanged.call(view.dataPublicationView, $input, view, $cell);
+                });
+                
+                this.$el.find("input").keypress(function (event) {
+                    // Raise event when enter is pressed in an input
+                    var keycode = (event.keyCode ? event.keyCode : event.which);
+                    
+                    if (keycode == '13') {
+                        view.trigger("input:enterPressed", view, this);
+                    }
+                });
+            }
+        },
+        
+        focusCellInput: function(columnId) {
+            var input = this.$el.find("[data-columnid='" + columnId + "']").find("input");
+
+            if (input.length > 0)
+                input.focus();
         },
 
         _handleActionClick: function (actionEl, action) {
@@ -223,24 +247,11 @@ $(function () {
                     actionEl.attr('disabled', 'disabled');
                     actionEl.addClass('actionLoading');
 
-                    // TODO: Move into Row model
+                    // TODO: Move into model
                     expanz.net.MethodRequest(action.name, replaceVariablesResult.actionParams, null, this.dataPublicationView.model.get("parent"));
                 }
             }
         },
-
-        //_handleMenuActionClick: function (rowId, menuAction, actionParams, divEl) {
-        //    /* handle user input */
-        //    _.each(actionParams, function (actionParam) {
-        //        var name = actionParam.name;
-
-        //        if (actionParam.value == '@contextId') {
-        //            actionParam.value = rowId;
-        //        }
-        //    });
-
-        //    this.trigger("menuActionClicked", rowId, menuAction, actionParams);
-        //},
 
         _handleContextMenuClick: function ($actionEl, action) {
             var replaceVariablesResult = this._replaceActionParamsVariables(action.params, this);
@@ -258,7 +269,7 @@ $(function () {
 
                 var contextMenuView = new expanz.views.ContextMenuView({
                     el: $actionEl,
-                    id: $actionEl.attr("id"),
+                    id: $actionEl.attr("id"), // TODO: Fix
                     className: $actionEl.attr("class"),
                     collection: contextMenuModel
                 });

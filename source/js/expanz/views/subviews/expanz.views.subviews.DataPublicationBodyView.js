@@ -31,6 +31,8 @@ $(function () {
         render: function () {
             var view = this;
 
+            this.rowViewCollection = [];
+            
             // Calculate which items should be displayed, based upon the items per page and current page number
             var firstItemIndex = (this.dataPublicationView.currentPage - 1) * this.dataPublicationView.itemsPerPage;
             var lastItemIndex = Math.min(firstItemIndex + this.dataPublicationView.itemsPerPage, this.model.rows.length);
@@ -42,9 +44,25 @@ $(function () {
                 // Render row
                 var rowView = new expanz.views.subviews.DataPublicationRowView({ model: row, rowIndex: rowIndex, dataPublicationView: view.dataPublicationView });
                 view.$el.append(rowView.render().el);
+                
+                rowView.bind("input:enterPressed", this.onInputEnterPressed, this);
+                this.rowViewCollection.push(rowView);
             }
 
             return this;
+        },
+        
+        onInputEnterPressed: function(rowView, input) {
+            // Enter pressed on an input in a row. Move the focus to the same cell in the next row.
+            var $cell = $(input).closest("td");
+            var columnId = $cell.attr("data-columnid");
+
+            var rowViewIndex = this.rowViewCollection.indexOf(rowView);
+
+            if (rowViewIndex < this.rowViewCollection.length - 1) {
+                var newFocusedRowView = this.rowViewCollection[rowViewIndex + 1];
+                newFocusedRowView.focusCellInput(columnId);
+            }
         }
     });
 });

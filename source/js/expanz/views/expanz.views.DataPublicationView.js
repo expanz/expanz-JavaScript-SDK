@@ -56,8 +56,6 @@ $(function () {
             
             if (existingPagingBarElement.length === 0)
                 this.$el.parent().append(renderedPagingBarElement);
-            
-            this.configureEventHandlers(this.$el);
 
             // Logic dealing with the number of items in the list. Store the item
             // count as an attribute on the element, and if there are no items then
@@ -79,66 +77,29 @@ $(function () {
 
             return this;
         },
-        
-        configureEventHandlers: function ($hostEl) {
-            var view = this;
-            
-            var onRowClickProxy = function () {
-                view.onRowClicked.call(view, $(this));
-            };
 
-            var onRowDoubleClickProxy = function () {
-                view.onRowDoubleClicked.call(view, $(this));
-            };
-            
-            var onDrillDownClickProxy = function () {
-                var $row = $(this).closest("tr");
-                view.onDrillDown.call(view, $row);
-            };
-            
-            var onInputClickProxy = function () {
-                // Select all the text in the input box when it is clicked
-                this.select();
-            };
-            
-            var onInputValueChangedProxy = function () {
-                // Input value has changed, so pass new value to the server
-                var $input = $(this);
-                var $cell = $input.closest("td");
-                var $row = $input.closest("tr");
-                
-                view.onCellValueChanged.call(view, $input, $cell, $row);
-            };
-
-            $hostEl.find("tr").click(this, onRowClickProxy);
-            $hostEl.find("tr").dblclick(this, onRowDoubleClickProxy);
-            $hostEl.find("tr a").click(this, onDrillDownClickProxy);
-            
-            if (this.model.isEditable) {
-                $hostEl.find("input").click(this, onInputClickProxy);
-                $hostEl.find("input").change(this, onInputValueChangedProxy);
-            }
-        },
-
-        onRowClicked: function ($row) {
+        onRowClicked: function (rowView) {
             // Does nothing by default. Function can be redefined or the event raised can be handled by external code as required.
             this.raiseExtensibilityPointEvent("rowClicked");
         },
 
-        onRowDoubleClicked: function ($row) {
+        onRowDoubleClicked: function (rowView) {
             // Does nothing by default. Function can be redefined or the event raised can be handled by external code as required.
             this.raiseExtensibilityPointEvent("rowDoubleClicked");
         },
 
-        onDrillDown: function ($row) {
-            this.model.drillDown($row.attr('id'), $row.attr('type'), null);
+        onDrillDown: function (rowView) {
+            // Function can be redefined or the event raised can be handled by external code as required. Default is to set context on server.
+            var handledExternally = this.raiseExtensibilityPointEvent("rowDrillDown");
+            
+            if (!handledExternally)
+                this.model.drillDown(rowView.model.id, rowView.model.get("type"), null);
         },
 
-        onCellValueChanged: function ($input, $cell, $row) {
-            var columnId = $cell.attr("id");
-            var rowId = $row.attr("id");
+        onCellValueChanged: function ($input, rowView, $cell) {
+            var columnId = $cell.attr("data-columnid");
 
-            var cellModel = this.model.rows.get(rowId).cells.get(columnId);
+            var cellModel = rowView.model.cells.get(columnId);
             var newValue = $input.val();
 
             if ($input.attr("type") === "checkbox")

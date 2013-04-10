@@ -722,7 +722,7 @@ $(function() {
 									<p class="noStock">No stock</p> \
 							<% } else { %>\
 								<div class="productCount left"> \
-									<input class="gridUserInput" type="text" format="numeric"  id="<%= row.id %>_userinput_quantity"></input>\
+									<input class="gridUserInput" type="text" format="numeric"  id="<%= rowModel.id %>_userinput_quantity"></input>\
 								</div> \
 								<div class="left addProductMain"> \
 									<a class="addProduct" methodName="saveItemFromCart"></a> \
