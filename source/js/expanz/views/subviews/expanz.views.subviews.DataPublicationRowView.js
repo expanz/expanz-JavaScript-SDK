@@ -21,7 +21,7 @@ $(function () {
                                        '<%= rowView.renderRowCells(rowModel) %>' +
                                        '</tr>'),
 
-        defaultCellTemplate: _.template('<td data-columnid="<%= cellModel.get("id") %>">' +
+        defaultCellTemplate: _.template('<td data-columnid="<%= cellModel.get("id") %>" class="<%= cellModel.get("displayStyle") || cellModel.column.get("displayStyle") || "" %>">' +
                                         '<%= rowView.renderCellContents(cellModel, rowModel, cellIndex, isDrillDownRow) %>' +
                                         '</td>'),
 

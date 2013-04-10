@@ -690,7 +690,7 @@ function populateDataPublicationModel(dataPublicationModel, data) {
     // Add columns to the grid Model
     _.each($data.find('Column'), function (column) {
         var $column = $(column);
-        dataPublicationModel.addColumn($column.attr('id'), $column.attr('field'), $column.attr('label'), $column.attr('datatype'), $column.attr('width'), $column.attr('editable') === "1", $column.attr('matrixKey'));
+        dataPublicationModel.addColumn($column.attr('id'), $column.attr('field'), $column.attr('label'), $column.attr('datatype'), $column.attr('displayStyle'), $column.attr('width'), $column.attr('editable') === "1", $column.attr('matrixKey'));
     });
 
     // Add rows to the grid Model
@@ -705,7 +705,7 @@ function populateDataPublicationModel(dataPublicationModel, data) {
             cell = serializeXML(cell); // quick fix for htmlunit
             var $cell = $(cell);
             
-            rowModel.addCell($cell.attr('id'), $cell.text(), dataPublicationModel.columns.get($cell.attr('id')), $cell.attr('sortValue'));
+            rowModel.addCell($cell.attr('id'), $cell.text(), dataPublicationModel.columns.get($cell.attr('id')), $cell.attr('sortValue'), $cell.attr('displayStyle'));
         });
     });
 

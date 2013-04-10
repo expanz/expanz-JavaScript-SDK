@@ -39,7 +39,7 @@ $(function () {
             this.trigger("datapublication:dataPublished");
         },
 
-        addColumn: function (id, field, label, datatype, width, isEditable, matrixKey) {
+        addColumn: function (id, field, label, datatype, displayStyle, width, isEditable, matrixKey) {
             // Create a "safe" field name, replacing periods with underscores
             var safeFieldName = field || id;
             safeFieldName = safeFieldName.replace(/\./g, "_");
@@ -50,6 +50,7 @@ $(function () {
                 safeFieldName: safeFieldName,
                 label: label,
                 datatype: datatype,
+                displayStyle: displayStyle,
                 width: width,
                 isEditable: isEditable,
                 matrixKey: matrixKey
