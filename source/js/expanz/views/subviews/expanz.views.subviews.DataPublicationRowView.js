@@ -17,7 +17,7 @@ $(function () {
 
     window.expanz.views.subviews.DataPublicationRowView = Backbone.View.extend({
 
-        defaultRowTemplate: _.template('<tr class="<%= className %>">' +
+        defaultRowTemplate: _.template('<tr class="<%= ((rowIndex % 2 == 1) ? "gridRowAlternate" : "gridRow") + (rowModel.get("displayStyle") ? " grid-" + rowModel.get("displayStyle") : "") %>">' +
                                        '<%= rowView.renderRowCells(rowModel) %>' +
                                        '</tr>'),
 
@@ -33,16 +33,10 @@ $(function () {
             var hasBeenRenderedExternally = this.dataPublicationView.raiseExtensibilityPointEvent("renderingRow");
 
             if (!hasBeenRenderedExternally) {
-                var className = (this.options.rowIndex % 2 == 1) ? 'gridRowAlternate' : 'gridRow';
-
-                // If a displayStyle attribute is passed from the server, use it, prefixed with grid- as the class name
-                if (this.model.get("displayStyle"))
-                    className = "grid-" + this.model.get("displayStyle");
-
                 var cellValues = this.model.getCellValues();
 
                 var itemTemplate = this.getItemTemplate();
-                this.setElement(itemTemplate({ rowModel: this.model, data: cellValues.data, sortValues: cellValues.sortValues, className: className, rowView: this }));
+                this.setElement(itemTemplate({ rowModel: this.model, data: cellValues.data, sortValues: cellValues.sortValues, rowView: this, rowIndex: this.options.rowIndex }));
 
                 // Set attributes on the element that will be used to identify it
                 this.$el.attr("data-rowid", this.model.id);
@@ -168,25 +162,27 @@ $(function () {
             var dataPublicationView = rowView.dataPublicationView;
 
             /* Search for elements with a methodName attribute, and bind them to an action */
-            rowView.$el.find("[methodName]").each(function (index, element) {
-                var action = dataPublicationView.model.actions[$(element).attr('methodName')];
+            rowView.$el.find("[methodName]").click(function () {
+                var action = dataPublicationView.model.actions[$(this).attr('methodName')];
 
-                if (action) {
-                    $(element).click(function () {
-                        rowView._handleActionClick.call(rowView, $(this), action);
-                    });
-                }
+                if (action)
+                    rowView._executeAction.call(rowView, $(this), action);
+            });
+
+            /* Call a method on the server if a user changes the value of an input with the autoUpdate attribute */
+            rowView.$el.find("[autoUpdate]").change(function () {
+                var action = dataPublicationView.model.actions[$(this).attr('autoUpdate')];
+                
+                if (action)
+                    rowView._executeAction.call(rowView, $(this), action);
             });
 
             /* Search for elements with a contextMenu attribute, and bind them to an action */
-            rowView.$el.find("[contextMenu] ").each(function (index, element) {
-                var action = dataPublicationView.model.actions[$(element).attr('contextMenu')];
+            rowView.$el.find("[contextMenu]").click(function () {
+                var action = dataPublicationView.model.actions[$(this).attr('contextMenu')];
 
-                if (action) {
-                    $(element).click(function () {
-                        rowView._handleContextMenuClick.call(rowView, $(this), action);
-                    });
-                }
+                if (action) 
+                    rowView._requestContextMenu.call(rowView, $(this), action);
             });
         },
 
@@ -237,15 +233,15 @@ $(function () {
                 input.focus();
         },
 
-        _handleActionClick: function (actionEl, action) {
+        _executeAction: function ($actionEl, action) {
             var replaceVariablesResult = this._replaceActionParamsVariables(action.params, this);
 
             if (replaceVariablesResult.inputValid) {
-                var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("actionClicked", this, action.name, replaceVariablesResult.actionParams, actionEl);
+                var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("executingAction", this, action.name, replaceVariablesResult.actionParams, $actionEl);
 
                 if (!handledExternally) {
-                    actionEl.attr('disabled', 'disabled');
-                    actionEl.addClass('actionLoading');
+                    $actionEl.attr('disabled', 'disabled');
+                    $actionEl.addClass('actionLoading');
 
                     // TODO: Move into model
                     expanz.net.MethodRequest(action.name, replaceVariablesResult.actionParams, null, this.dataPublicationView.model.get("parent"));
@@ -253,10 +249,10 @@ $(function () {
             }
         },
 
-        _handleContextMenuClick: function ($actionEl, action) {
+        _requestContextMenu: function ($actionEl, action) {
             var replaceVariablesResult = this._replaceActionParamsVariables(action.params, this);
             
-            var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("contextMenuClicked", this, action.name, replaceVariablesResult.actionParams, $actionEl);
+            var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("requestingContextMenu", this, action.name, replaceVariablesResult.actionParams, $actionEl);
 
             if (!handledExternally) {
                 // Create a context menu, and assign it to the clicked element

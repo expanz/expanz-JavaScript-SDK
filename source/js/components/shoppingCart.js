@@ -667,7 +667,7 @@ $(function() {
 			renderStandardOrdersListModule : function(el) {
 				var html = "";
 				html += '<script type="text/template" id="listStandardOrdersItemTemplate">';
-				html += '<div class="item <%= className %>"><div class="loadStandardOrderName"><a methodName="loadStandardOrderWithPrompt" href="javascript:void(0)"><%=data.Name%></a></div>';
+				html += '<div class="item <%= ((rowIndex % 2 == 1) ? "gridRowAlternate" : "gridRow") + (rowModel.get("displayStyle") ? " grid-" + rowModel.get("displayStyle") : "") %>"><div class="loadStandardOrderName"><a methodName="loadStandardOrderWithPrompt" href="javascript:void(0)"><%=data.Name%></a></div>';
 				html += '<button methodName="deleteStandardOrderWithPrompt" class="deleteStandardOrder" href="javascript:void(0)"></button>';
 				html += '<div class="clear"></div></div>';
 				html += '</script>';
@@ -691,7 +691,7 @@ $(function() {
 					</script>\
 					\
 				    <script type="text/template" id="productListItemTemplateGrid"> \
-					<div class="productNDetail <%= className %>"> \
+					<div class="productNDetail <%= ((rowIndex % 2 == 1) ? "gridRowAlternate" : "gridRow") + (rowModel.get("displayStyle") ? " grid-" + rowModel.get("displayStyle") : "") %>"> \
 						<div class="product"> \
 							<% if ( isImageValid(data.ThumbImage_FileContents) ){ %>  \
 								<div class="productIcon left productThumbnail"> \
@@ -784,7 +784,7 @@ $(function() {
 					<td class="cell" style="text-align:center"> \
 					<% if ( true ) { %> \
 						<div> \
-							<input class="gridUserInput" style="width:50px !important" type="text" format="numeric"  id="userinput_quantity"></input>\
+							<input class="gridUserInput" style="width:50px !important" type="text" format="numeric"  id="<%= rowModel.id %>_userinput_quantity"></input>\
 							<button class="addToCartButton" methodName="saveItemFromCart">Add</button> \
 						</div> \
 					<% } %> \
@@ -947,7 +947,7 @@ $(function() {
 				html += window.expanz.html.startDiv("item");
 				html += window.expanz.html.renderGridTemplateField("ItemForSale_Name", 200);
 				html += window.expanz.html.renderGridTemplateField("UnitPrice", 50);
-				html += '<div style="float:left"><input id="userinput_quantity" class="gridUserInput" style="width:48px !important" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/></div>';
+				html += '<div style="float:left"><input id="<%= rowModel.id %>_userinput_quantity" class="gridUserInput" style="width:48px !important" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/></div>';
 				html += window.expanz.html.renderGridTemplateField("ValueIncTax", 65);
 				html += '<button style="display:none" methodName="saveItemFromCart">Adjust</button>';
 				html += '<button methodName="deleteItemFromCart">X</button>';
@@ -1064,7 +1064,7 @@ $(function() {
 				html += window.expanz.html.startDiv("item");
 				html += window.expanz.html.renderGridTemplateField("ItemForSale_Name", 400);
 				html += window.expanz.html.renderGridTemplateField("UnitPrice", 100);
-				html += '<div style="width: 100px; float: left; margin-top:-3px"><input class="gridUserInput" style="width:50px !important" id="userinput_quantity" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/></div>';
+				html += '<div style="width: 100px; float: left; margin-top:-3px"><input class="gridUserInput" style="width:50px !important" id="<%= rowModel.id %>_userinput_quantity" format="numeric" value="<%= data.PlanQuantity %>" autoUpdate="saveItemFromCart"/></div>';
 				html += window.expanz.html.renderGridTemplateField("ValueIncTax", 120);
 				html += '<button style="display:none" methodName="saveItemFromCart">Adjust</button>';
 				html += '<div class="deleteButton"><button methodName="deleteItemFromCart">X</button></div>';
