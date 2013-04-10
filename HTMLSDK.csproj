@@ -69,6 +69,10 @@
     <Content Include="source\js\adapters\BreadcrumbAdapter.js" />
     <Content Include="source\js\expanz\models\expanz.models.DataPublication.js" />
     <Content Include="source\js\expanz\views\expanz.views.DataPublicationView.js" />
+    <Content Include="source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationBodyView.js" />
+    <Content Include="source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationHeaderView.js" />
+    <Content Include="source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationPagingBarView.js" />
+    <Content Include="source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationRowView.js" />
     <Content Include="source\js\lib\backbone.js" />
     <Content Include="source\js\lib\backbone.min.js" />
     <None Include="build\expanz-javascript-sdk-source.nuspec" />
@@ -166,6 +170,7 @@
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
