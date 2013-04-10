@@ -41,8 +41,6 @@
         <file src="..\source\js\expanz\menu\AppSiteMenu.js" target="content\Scripts\expanz\menu\AppSiteMenu.js" />
         <file src="..\source\js\expanz\menu\ProcessAreaMenu.js" target="content\Scripts\expanz\menu\ProcessAreaMenu.js" />
         <file src="..\source\js\expanz\models\data\expanz.models.data.Cell.js" target="content\Scripts\expanz\models\data\expanz.models.data.Cell.js" />
-        <file src="..\source\js\expanz\models\data\expanz.models.data.DataControl.js" target="content\Scripts\expanz\models\data\expanz.models.data.DataControl.js" />
-        <file src="..\source\js\expanz\models\data\expanz.models.data.Grid.js" target="content\Scripts\expanz\models\data\expanz.models.data.Grid.js" />
         <file src="..\source\js\expanz\models\data\expanz.models.data.Row.js" target="content\Scripts\expanz\models\data\expanz.models.data.Row.js" />
         <file src="..\source\js\expanz\models\expanz.models.Activity.js" target="content\Scripts\expanz\models\expanz.models.Activity.js" />
         <file src="..\source\js\expanz\models\expanz.models.Bindable.js" target="content\Scripts\expanz\models\expanz.models.Bindable.js" />
@@ -50,6 +48,7 @@
         <file src="..\source\js\expanz\models\expanz.models.ContextMenu.js" target="content\Scripts\expanz\models\expanz.models.ContextMenu.js" />
         <file src="..\source\js\expanz\models\expanz.models.DashboardField.js" target="content\Scripts\expanz\models\expanz.models.DashboardField.js" />
         <file src="..\source\js\expanz\models\expanz.models.Dashboards.js" target="content\Scripts\expanz\models\expanz.models.Dashboards.js" />
+        <file src="..\source\js\expanz\models\expanz.models.DataPublication.js" target="content\Scripts\expanz\models\expanz.models.DataPublication.js" />
         <file src="..\source\js\expanz\models\expanz.models.Field.js" target="content\Scripts\expanz\models\expanz.models.Field.js" />
         <file src="..\source\js\expanz\models\expanz.models.Login.js" target="content\Scripts\expanz\models\expanz.models.Login.js" />
         <file src="..\source\js\expanz\models\expanz.models.MenuAction.js" target="content\Scripts\expanz\models\expanz.models.MenuAction.js" />
@@ -59,11 +58,10 @@
         <file src="..\source\js\expanz\views\expanz.views.ActivityView.js" target="content\Scripts\expanz\views\expanz.views.ActivityView.js" />
         <file src="..\source\js\expanz\views\expanz.views.CheckboxesView.js" target="content\Scripts\expanz\views\expanz.views.CheckboxesView.js" />
         <file src="..\source\js\expanz\views\expanz.views.ContextMenuView.js" target="content\Scripts\expanz\views\expanz.views.ContextMenuView.js" />
-        <file src="..\source\js\expanz\views\expanz.views.DataControlView.js" target="content\Scripts\expanz\views\expanz.views.DataControlView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.DataPublicationView.js" target="content\Scripts\expanz\views\expanz.views.DataPublicationView.js" />
         <file src="..\source\js\expanz\views\expanz.views.DataFieldView.js" target="content\Scripts\expanz\views\expanz.views.DataFieldView.js" />
         <file src="..\source\js\expanz\views\expanz.views.DependantFieldView.js" target="content\Scripts\expanz\views\expanz.views.DependantFieldView.js" />
         <file src="..\source\js\expanz\views\expanz.views.FieldView.js" target="content\Scripts\expanz\views\expanz.views.FieldView.js" />
-        <file src="..\source\js\expanz\views\expanz.views.GridView.js" target="content\Scripts\expanz\views\expanz.views.GridView.js" />
         <file src="..\source\js\expanz\views\expanz.views.js" target="content\Scripts\expanz\views\expanz.views.js" />
         <file src="..\source\js\expanz\views\expanz.views.LoginView.js" target="content\Scripts\expanz\views\expanz.views.LoginView.js" />
         <file src="..\source\js\expanz\views\expanz.views.ManuallyClosedPopup.js" target="content\Scripts\expanz\views\expanz.views.ManuallyClosedPopup.js" />
@@ -74,6 +72,10 @@
         <file src="..\source\js\expanz\views\expanz.views.RadioButtonsView.js" target="content\Scripts\expanz\views\expanz.views.RadioButtonsView.js" />
         <file src="..\source\js\expanz\views\expanz.views.UIMessage.js" target="content\Scripts\expanz\views\expanz.views.UIMessage.js" />
         <file src="..\source\js\expanz\views\expanz.views.VariantFieldView.js" target="content\Scripts\expanz\views\expanz.views.VariantFieldView.js" />
+        <file src="..\source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationHeaderView.js" target="content\Scripts\expanz\views\subviews\expanz.views.subviews.DataPublicationHeaderView.js" />
+        <file src="..\source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationBodyView.js" target="content\Scripts\expanz\views\subviews\expanz.views.subviews.DataPublicationBodyView.js" />
+        <file src="..\source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationRowView.js" target="content\Scripts\expanz\views\subviews\expanz.views.subviews.DataPublicationRowView.js" />
+        <file src="..\source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationPagingBarView.js" target="content\Scripts\expanz\views\subviews\expanz.views.subviews.DataPublicationPagingBarView.js" />
         <file src="..\source\js\expanz\expanz.collection.js" target="content\Scripts\expanz\expanz.collection.js" />
         <file src="..\source\js\expanz\expanz.component.js" target="content\Scripts\expanz\expanz.component.js" />
         <file src="..\source\js\expanz\expanz.factory.js" target="content\Scripts\expanz\expanz.factory.js" />

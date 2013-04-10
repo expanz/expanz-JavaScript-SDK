@@ -614,140 +614,18 @@ $(function() {
 		            el: dataPubicationEl,
 		            id: modelId,
 		            className: $dataPubicationEl.attr('class'),
-		            renderingType: $dataPubicationEl.attr('renderingType'),
 		            canDrillDown: $dataPubicationEl.attr('candrilldown') == "true",
-		            model: dataModel
-		            //itemsPerPage: $dataControlEl.attr('itemsPerPage'),
-		            //templateName: $dataControlEl.attr('templateName'),
-		            //isHTMLTable: $dataControlEl.attr('isHTMLTable'),
-		            //enableConfiguration: $dataControlEl.attr('enableConfiguration'),
-		            //noItemText: $dataControlEl.attr('noItemText')
+		            templateName: $dataPubicationEl.attr('templateName'),
+		            model: dataModel,
+		            itemsPerPage: $dataPubicationEl.attr('itemsPerPage'),
+		            //enableConfiguration: $dataPubicationEl.attr('enableConfiguration'),
+		            noItemsText: $dataPubicationEl.attr('noItemsText')
 		        });
 
 		        dataPublicationViews.push(view);
 		    });
 
 		    return dataPublicationViews;
-		},
-
-		createDataControlViews : function(activityName, activityStyle, DOMObjects) {
-
-		    var dataControlViewCollection = [];
-		    
-			_.each(DOMObjects, function(dataControlEl) {
-			    var $dataControlEl = $(dataControlEl);
-		        
-			    var dataControlModel;
-			    var dataControlView;
-			    
-				/* case rendering as a grid */
-				if ($dataControlEl.attr('renderingType') == 'grid' || $dataControlEl.attr('renderingType') == 'popupGrid' || $dataControlEl.attr('renderingType') == 'rotatingBar') {
-					dataControlModel = new expanz.models.data.Grid({
-						id : $dataControlEl.attr('id'),
-						dataId: $dataControlEl.attr('dataId') || $dataControlEl.attr('id') || $dataControlEl.attr('name') || $dataControlEl.attr('query') || $dataControlEl.attr('populateMethod'),
-						query: $dataControlEl.attr('query'),
-						fieldName: $dataControlEl.attr('fieldName') || $dataControlEl.attr('dataId'),
-						populateMethod : $dataControlEl.attr('populateMethod'),
-						autoPopulate : $dataControlEl.attr('autoPopulate'),
-						contextObject : $dataControlEl.attr('contextObject'),
-						renderingType : $dataControlEl.attr('renderingType'),
-						selectionChangeAnonymousMethod : $dataControlEl.attr('selectionChangeAnonymousMethod'),
-						selectionChangeAnonymousContextObject : $dataControlEl.attr('selectionChangeAnonymousContextObject'),
-						anonymousBoundMethod : $dataControlEl.attr('anonymousBoundMethod')
-					});
-
-					dataControlView = new expanz.views.GridView({
-					    el: dataControlEl,
-					    id: dataControlModel.get("id"),
-						className : $dataControlEl.attr('class'),
-						itemsPerPage : $dataControlEl.attr('itemsPerPage'),
-						templateName : $dataControlEl.attr('templateName'),
-						isHTMLTable : $dataControlEl.attr('isHTMLTable'),
-						enableConfiguration : $dataControlEl.attr('enableConfiguration'),
-						noItemText : $dataControlEl.attr('noItemText'),
-						model : dataControlModel
-					});
-
-				    // load pre-defined gridview information from formmapping.xml
-					var formMapping = expanz.Storage.getFormMapping();
-				    
-					var activityInfo = _.find($(formMapping).find('activity'), function (activityXML) {
-						return $(activityXML).attr('name') === activityName && $(activityXML).attr('style') === activityStyle;
-					});
-						    
-					if (activityInfo) {
-						var gridviewInfo = _.find($(activityInfo).find('gridview'), function(gridviewXML) {
-							return $(gridviewXML).attr('id') === dataControlModel.get('id');
-						});
-							    
-						if (gridviewInfo) {
-							// add actions
-							_.each($(gridviewInfo).find('action'), function(action) {
-								var params = [];
-								_.each($(action).find('param'), function(param) {
-									params.push({
-										name : $(param).attr('name'),
-										value : $(param).attr('value'),
-										label : $(param).attr('label'),
-										bindValueFromCellId : $(param).attr('bindValueFromCellId')
-									});
-								});
-									    
-								var actionName = $(action).attr('methodName') || $(action).attr('menuAction') || $(action).attr('contextMenu');
-								var type = $(action).attr('methodName') ? 'method' : $(action).attr('menuAction') ? 'menuAction' : 'contextMenu';
-
-								dataControlModel.addAction(type, $(action).attr('id'), $(action).attr('label'), $(action).attr('width'), actionName, params);
-							});
-						}
-					}
-				}
-				/* renderingType is not grid: 'tree' or 'combobox' or checkboxes or empty */
-				/* the attribute fieldName might be defined in case, the datacontrol updates a field value if not specified taking the name */
-				else {
-					dataControlModel = new expanz.models.data.DataControl({
-						id: $dataControlEl.attr('id'),
-						dataId: $dataControlEl.attr('id') || $dataControlEl.attr('name') || $dataControlEl.attr('query') || $dataControlEl.attr('populateMethod'),
-						fieldName: $dataControlEl.attr('fieldName') || $dataControlEl.attr('dataId'),
-						populateMethod : $dataControlEl.attr('populateMethod'),
-						type : $dataControlEl.attr('type'),
-						contextObject : $dataControlEl.attr('contextObject'),
-						autoPopulate : $dataControlEl.attr('autoPopulate'),
-						renderingType : $dataControlEl.attr('renderingType'),
-						selectionChangeAnonymousMethod : $dataControlEl.attr('selectionChangeAnonymousMethod'),
-						selectionChangeAnonymousContextObject : $dataControlEl.attr('selectionChangeAnonymousContextObject'),
-						anonymousBoundMethod : $dataControlEl.attr('anonymousBoundMethod')
-					});
-
-					if ($dataControlEl.attr('renderingType') == 'checkboxes') {
-					    dataControlView = new expanz.views.CheckboxesView({
-					        el: dataControlEl,
-					        id: dataControlModel.get("id"),
-							className : $dataControlEl.attr('class'),
-							model : dataControlModel
-						});
-					}
-					else if ($dataControlEl.attr('renderingType') == 'radiobuttons') {
-					    dataControlView = new expanz.views.RadioButtonsView({
-					        el: dataControlEl,
-					        id: dataControlModel.get("id"),
-							className : $dataControlEl.attr('class'),
-							model : dataControlModel
-						});
-					}
-					else {
-						dataControlView = new expanz.views.DataControlView({
-						    el: dataControlEl,
-						    id: dataControlModel.get("id"),
-							className : $dataControlEl.attr('class'),
-							model : dataControlModel
-						});
-					}
-				}
-
-				dataControlViewCollection.push(dataControlView);
-			});
-		    
-			return dataControlViewCollection;
 		}
 	};
 });
@@ -1762,7 +1640,14 @@ $(function () {
         initialize: function (attrs) {
             this.loading = false;
 
-            this.id = attrs["id"];
+            this.contextId = attrs["contextId"];
+            this.activity = attrs["activity"];
+            this.type = attrs["type"];
+            this.contextObject = attrs["contextObject"];
+        },
+        
+        requestContextMenu: function () {
+            expanz.net.CreateContextMenuRequest(this.activity, this.contextId, this.type, this.contextObject);
         },
 
         loadMenu: function (menuData, activityModel) {
@@ -2174,12 +2059,12 @@ $(function() {
 	});
 });
 
-///#source 1 1 /source/js/expanz/models/data/expanz.models.data.DataControl.js
+///#source 1 1 /source/js/expanz/models/expanz.models.DataPublication.js
 ////////////////////////////////////////////////////////////////////////////////
 //
 //  EXPANZ
-//  Author: Kim Damevin
-//  Copyright 2008-2012 EXPANZ
+//  Author: Chris Anderson
+//  Copyright 2008-2013 EXPANZ
 //  All Rights Reserved.
 //
 //  NOTICE: expanz permits you to use, modify, and distribute this file
@@ -2187,86 +2072,177 @@ $(function() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$(function() {
+$(function () {
 
-	window.expanz = window.expanz || {};
-	window.expanz.models = window.expanz.models || {};
-	window.expanz.models.data = window.expanz.models.data || {};
+    window.expanz = window.expanz || {};
+    window.expanz.models = window.expanz.models || {};
 
-	window.expanz.models.data.DataControl = Backbone.Model.extend({
+    window.expanz.models.DataPublication = Backbone.Model.extend({
 
-	    initialize: function () {
-	        this.rows = new expanz.models.data.RowCollection();
-		},
+        initialize: function () {
+            this.rows = new expanz.models.data.RowCollection();
+            this.columns = new expanz.Collection();
+            this.actions = {};
+            
+            this.rows.dataPublication = this;
+            this.columns.dataPublication = this;
 
-		update : function(attrs) {
+            this.bind("change:parent", this.onParentChanged, this);
+            
+            this.hasActions = false;
+            this.isEditable = false;
+        },
+        
+        dataPublished: function($rawXml) {
+            // Data has been published to this model, so notify the associated view by raising an event.
+            // Note that not all data publications follow the "standard" column/row/cell format, so the
+            // raw XML is being passed through and stored, which adapters can parse differently if required.
+            this.$rawXml = $rawXml;
+            this.trigger("datapublication:dataPublished");
+        },
 
-			expanz.net.DeltaRequest(this.get('dataId'), attrs.value, this.get('parent'));
-			return;
-		},
+        addColumn: function (id, field, label, datatype, width, isEditable, matrixKey) {
+            // Create a "safe" field name, replacing periods with underscores
+            var safeFieldName = field || id;
+            safeFieldName = safeFieldName.replace(/\./g, "_");
+            
+            this.columns.add({
+                id: id,
+                field: field,
+                safeFieldName: safeFieldName,
+                label: label,
+                datatype: datatype,
+                width: width,
+                isEditable: isEditable,
+                matrixKey: matrixKey
+            });
 
-		updateItemSelected : function(selectedId, callbacks) {
-			// window.expanz.logToConsole("DataControl:updateItemSelected id:" + selectedId);
+            return this.columns.get(id);
+        },
 
-			/* anonymous activity case */
-			if (this.get('parent').isAnonymous()) {
-				/* if we are in anonymous mode and the data control is a tree we need to call a method on selection change instead of a delta */
-				if (this.get('renderingType') == 'tree') {
-					var anonymousFields = [
-						{
-							id : this.get('dataId'),
-							value : selectedId
-						}
-					];
+        addRow: function (id, type, displayStyle) {
+            this.rows.add({
+                id: id,
+                type: type,
+                displayStyle: displayStyle,
+                gridId: this.id
+            });
 
-					expanz.net.MethodRequest(this.get('selectionChangeAnonymousMethod'), [
-						{
-							name : "contextObject",
-							value : this.get('selectionChangeAnonymousContextObject')
-						}
-					], null, this.get('parent'), anonymousFields,callbacks);
-				}
-				/* if we are in anonymous mode and the data control is a checkboxes control we need to store the value to send it later */
-				else {
-					var lastValues = this.get('lastValues');
-					if (!lastValues) {
-						lastValues = "";
-					}
+            var row = this.rows.get(id);
+            row.dataPublication = this;
 
-					/* unticked */
-					if (selectedId < 0) {
-						var re = new RegExp("(" + (-selectedId) + ";)|(;?" + (-selectedId) + "$)", "g");
-						lastValues = lastValues.replace(re, "");
-					}
-					/* ticked */
-					else {
-						if (lastValues.length > 0)
-							lastValues += ";";
-						lastValues += selectedId;
-					}
+            return row;
+        },
 
-					this.set({
-						lastValues : lastValues
-					});
-				}
-			}
-			/* logged in case */
-			else {
-				/* exception for documents we have to send a MenuAction request */
-				if (this.get('id') == 'documents') {
-					expanz.net.CreateMenuActionRequest(this.get('parent'), selectedId, null, "File", null, "1", callbacks);
-				}
-				/* normal case we send a delta request */
-				else {
-					expanz.net.DeltaRequest(this.get('fieldName'), selectedId, this.get('parent'), callbacks);
-				}
-			}
-		},
+        sortRowsByFieldName: function (fieldName, inAscendingOrder) {
+            this.rows.comparator = function (compareRow) {
+                return compareRow.getCellValues().sortValues[fieldName] || "";
+            };
 
-		drillDown: function (selectedId, type, contextObject) {
-		    expanz.net.CreateMenuActionRequest(this.get("parent"), selectedId, type, contextObject, null, "1", false);
-		}
-	});
+            this.rows.sort();
+
+            if (!inAscendingOrder)
+                this.rows.models.reverse();
+        },
+        
+        sendContextToServer: function (selectedId, type) {
+            var contextInfo = this._getContextInfoObject(selectedId, type);
+
+            var methodAttributes = [];
+
+            if (this.contextObject) {
+                methodAttributes.push(
+                    {
+                        name: "contextObject",
+                        value: this.contextObject
+                    });
+            }
+
+            expanz.net.MethodRequest('SetIdFromContext', methodAttributes, contextInfo, this.get("parent"));
+        },
+        
+        sendCellUpdateToServer: function (cellModel, newValue) {
+            var contextInfo = this._getContextInfoObject(cellModel.row.id, cellModel.row.get("type"));
+            
+            var deltaInfo = {
+                id: cellModel.column.get("field"),
+                value: newValue,
+                matrixKey: cellModel.column.get("matrixKey")
+            };
+
+            expanz.net.SetContextAndDeltaRequest(contextInfo, deltaInfo, this.get("parent"));
+        },
+        
+        _getContextInfoObject: function (selectedId, type) {
+            var context = {
+                id: selectedId,
+                contextObject: this.contextObject,
+                type: type
+            };
+
+            return context;
+        },
+
+        drillDown: function (selectedId, type, contextObject) {
+            expanz.net.CreateMenuActionRequest(this.get("parent"), selectedId, type, contextObject, null, "1", false);
+        },
+
+        refresh: function () {
+            expanz.net.DataRefreshRequest(this.id, this.get("parent"));
+        },
+        
+        onParentChanged: function () {
+           this.parseActions();
+        },
+        
+        parseActions: function() {
+            // Various actions associated with this data publication can be defined in the form mapping file.
+            // Actions are TODO
+            // Search the form mapping file for these actions, and gather their details.
+            this.actions = {};
+
+            var model = this;
+            var formMapping = expanz.Storage.getFormMapping();
+            var activityModel = this.get("parent");
+
+            var activityInfo = $(formMapping).find("activity[name='" + activityModel.get("name") + "'][style='" + activityModel.get("style") + "']");
+
+            if (activityInfo.length !== 0) {
+                var gridviewInfo = activityInfo.find("gridview[id='" + this.get("dataId") + "']");
+
+                if (gridviewInfo.length !== 0) {
+                    // add actions
+                    _.each($(gridviewInfo).find('action'), function (action) {
+                        var $action = $(action);
+                        var params = {};
+                        
+                        _.each($action.find('param'), function (param) {
+                            var $param = $(param);
+                            var paramName = $param.attr('name');
+                            
+                            params[paramName] = {
+                                name: paramName,
+                                value: $param.attr('value'),
+                                label: $param.attr('label'),
+                                bindValueFromCellId: $param.attr('bindValueFromCellId')
+                            };
+                        });
+
+                        var actionName = $action.attr('methodName') || $action.attr('menuAction') || $action.attr('contextMenu');
+                        
+                        model.actions[actionName] = {
+                            id: $action.attr('id'),
+                            type: $action.attr('methodName') ? 'method' : $action.attr('menuAction') ? 'menuAction' : 'contextMenu',
+                            label: $action.attr('label'),
+                            width: $action.attr('width'),
+                            name: actionName,
+                            params: params
+                        };
+                    });
+                }
+            }
+        }
+    });
 });
 
 ///#source 1 1 /source/js/expanz/models/data/expanz.models.data.Cell.js
@@ -2293,6 +2269,11 @@ $(function() {
             return {
                 selected: false
             };
+        },
+
+        initialize: function(params) {
+            this.row = params.row;
+            this.column = params.column;
         }
 	});
 
@@ -2337,24 +2318,25 @@ $(function() {
 		    this.cells.add({
 		        id: cellId,
 		        value: value,
+		        row: this,
 		        column: column,
 		        sortValue: sortValue
 		    });
 		},
 
 		getCellValues : function() {
-			var values = {};
+		    var values = {};
 			var sortValues = {};
 		    
 			this.cells.each(function(cell) {
-			    var key = cell.get('field') || cell.get('id');
+			    var key = cell.get("column").get("safeFieldName") || cell.get("id");
 			    
 			    values[key] = cell.get('value');
 				sortValues[key] = cell.get('sortValue') || cell.get('value');
 			});
 
 			return {
-			    values: values,
+			    data: values,
 				sortValues: sortValues
 			};
 		}
@@ -2362,171 +2344,6 @@ $(function() {
 
 	window.expanz.models.data.RowCollection = expanz.Collection.extend({
 	    model: expanz.models.data.Row
-	});
-});
-
-///#source 1 1 /source/js/expanz/models/data/expanz.models.data.Grid.js
-////////////////////////////////////////////////////////////////////////////////
-//
-//  EXPANZ
-//  Author: Kim Damevin
-//  Copyright 2008-2012 EXPANZ
-//  All Rights Reserved.
-//
-//  NOTICE: expanz permits you to use, modify, and distribute this file
-//  in accordance with the terms of the license agreement accompanying it.
-//
-////////////////////////////////////////////////////////////////////////////////
-
-$(function() {
-
-	window.expanz = window.expanz || {};
-	window.expanz.models = window.expanz.models || {};
-	window.expanz.models.data = window.expanz.models.data || {};
-
-	window.expanz.models.data.Grid = Backbone.Model.extend({
-
-	    initialize: function () {
-	        this.rows = new expanz.models.data.RowCollection();
-	        //this.columns = new expanz.Collection(); // TODO: Use this instead of proxy row
-	        this.hasActions = false;
-	        
-	        this.rows.add([
-				{
-					id : '_header'
-				}, {
-					id : '_actions'
-				}
-			]);
-		},
-
-		clear : function() {
-		    var grid = this;
-		    
-			_.each(this.getAllRows(), function(row) {
-				grid.rows.remove(row);
-			});
-		    
-			this.removeColumns();
-		},
-
-		removeColumns : function() {
-		    var grid = this;
-		    
-			_.each(this.getAllColumns(), function(col) {
-				grid.rows.get('_header').cells.remove(col);
-			});
-		},
-
-		getColumn : function(id) {
-			return this.rows.get('_header').cells.get(id);
-		},
-	    
-		getAllColumns : function() {
-		    return this.rows.get('_header').cells.reject(function (cell) {
-				return cell.get('id') === '_header';
-			}, this);
-		},
-	    
-		getActions : function() {
-		    return this.rows.get('_actions').cells.reject(function (cell) {
-				return cell.get('id') === '_actions';
-			}, this);
-		},
-	    
-		getAction : function(actionName) {
-		    return this.rows.get('_actions').cells.reject(function (cell) {
-				return cell.get('id') === '_actions' || cell.get('actionName') != actionName;
-			}, this);
-		},
-	    
-		addAction : function(type, id, label, width, name, params) {
-		    this.hasActions = true;
-
-		    this.rows.get('_actions').cells.add({
-				id : id,
-				type : type,
-				label : label,
-				width : width,
-				actionName : name,
-				actionParams : params
-			});
-		},
-	    
-		addColumn : function(id, field, label, datatype, width) {
-		    this.rows.get('_header').cells.add({
-				id : id,
-				field : field,
-				label : label,
-				datatype : datatype,
-				width : width
-			});
-		},
-
-		getAllRows : function() {
-			return this.rows.reject(function(row) {
-				// NOTE: 'this' has been set as expanz.models.DataGrid
-				return (row.id === '_header') || (row.id === '_actions') || (this.id === row.id) || (this.activityId === row.id);
-			}, this);
-		},
-
-		sortRows : function(columnName, ascending) {
-			this.rows.comparator = function(rowA) {
-				var sortValue = rowA.getCellsMapByField().sortedValues[columnName] || "";
-				return sortValue.toLowerCase();
-			};
-		    
-			this.rows.sort();
-
-			if (!ascending)
-			    this.rows.models.reverse();
-		},
-
-		addRow : function(id, type, displayStyle) {
-		    this.rows.add({
-				id : id,
-				type: type,
-				displayStyle: displayStyle,
-				gridId : this.id
-			});
-		},
-
-		addCell : function(rowId, cellId, value, field, sortValue) {
-		    this.rows.get(rowId).cells.add({
-				id : cellId,
-				value : value,
-				field : field,
-				sortValue : sortValue
-			});
-		},
-
-		updateRowSelected : function(selectedId, type) {
-			window.expanz.logToConsole("GridModel:updateRowSelected id:" + selectedId + ' ,type:' + type);
-		},
-
-		updateRowDoubleClicked : function(selectedId, type) {
-			window.expanz.logToConsole("GridModel:updateRowDoubleClicked id:" + selectedId + ' ,type:' + type);
-		},
-
-		actionSelected : function(selectedId, name, params) {
-			window.expanz.logToConsole("GridModel:actionSelected id:" + selectedId + ' ,methodName:' + name + ' ,methodParams:' + JSON.stringify(params));
-		},
-
-		menuActionSelected : function(selectedId, name, params) {
-			window.expanz.logToConsole("GridModel:menuActionSelected id:" + selectedId + ' ,menuActionName:' + name + ' , menuActionParams:' + JSON.stringify(params));
-		},
-
-		contextMenuSelected : function(selectedId, contextMenuType, contextObject, params) {
-			window.expanz.logToConsole("GridModel:contextMenuSelected type:" + contextMenuType + " ,id:" + selectedId + ' ,contextObject:' + contextObject + ' , contextMenuParams:' + JSON.stringify(params));
-		},
-
-		drillDown: function (selectedId, type, contextObject) {
-		    expanz.net.CreateMenuActionRequest(this.get("parent"), selectedId, type, contextObject, null, "1", false);
-		},
-		
-		refresh : function() {
-		    expanz.net.DataRefreshRequest(this.id, this.get("parent"));
-		}
 	});
 });
 
@@ -2745,6 +2562,15 @@ $(function() {
 			SendRequest(requestBuilder.AnonymousMethods(methods, activity), parseResponse(activity, initiator, callbacks), null, true);
 
 		},
+		
+		SetContextAndDeltaRequest: function (contextInfo, deltaInfo, activity, callbacks) {
+		    if (callbacks === undefined)
+		        callbacks = activity.callbacks;
+
+		    var initiator = {};
+		    
+		    SendRequest(requestBuilder.SetContextAndDelta(contextInfo, deltaInfo, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+	    },
 
 		CloseActivityRequest : function(activityHandle, callbacks) {
 
@@ -3114,6 +2940,17 @@ var requestBuilder = {
         };
     },
 
+    SetContextAndDelta: function (contextInfo, deltaInfo, activity, sessionHandle) {
+        var setContextRequestBody = requestBody.createSetContextElement(contextInfo.id, contextInfo.contextObject, contextInfo.type);
+        var deltaRequestBody = requestBody.createDeltaElement(deltaInfo.id, deltaInfo.value, deltaInfo.matrixKey);
+        var fullRequestBody = requestBody.wrapPayloadInActivityRequest(setContextRequestBody + deltaRequestBody, activity);
+        
+        return {
+            data: this.buildRequest('ExecX', XMLNamespace, sessionHandle)(fullRequestBody),
+            url: 'ExecX'
+        };
+    },
+
     CloseActivity: function (activityHandle, sessionHandle) {
         return {
             data: this.buildRequest('ExecX', XMLNamespace, sessionHandle)(requestBody.closeActivity(activityHandle)),
@@ -3271,7 +3108,33 @@ var requestBody = {
     },
 
     delta: function (id, value, activity) {
-        return this.wrapPayloadInActivityRequest('<Delta id="' + id + '" value="' + value + '"/>', activity);
+        return this.wrapPayloadInActivityRequest(this.createDeltaElement(id, value), activity);
+    },
+
+    createDeltaElement: function (id, value, matrixKey) {
+        var delta = '<Delta id="' + id + '" value="' + value + '"';
+
+        if (matrixKey)
+            delta += ' matrixKey="' + matrixKey + '"';
+
+        delta += ' />';
+
+        return delta;
+    },
+
+    createSetContextElement: function (id, contextObject, type) {
+        var body = "";
+
+        if (id) {
+            body += '<Context';
+
+            if (contextObject)
+                body += ' contextObject="' + contextObject + '"';
+
+            body += ' id="' + id + '" type="' + type + '" />';
+        }
+
+        return body;
     },
 
     createMethod: function (name, methodAttributes, context, activity, anonymousFields) {
@@ -3281,13 +3144,12 @@ var requestBody = {
             body += this.getActivityDataPublicationRequests(activity);
         }
 
-        if (context !== null && context.id) {
-            body += '<Context contextObject="' + context.contextObject + '" id="' + context.id + '" type="' + context.type + '" />';
-        }
+        if (context)
+            body += this.createSetContextElement(context.id, context.contextObject, context.type);
 
         body += '<Method name="' + name + '"';
         
-        if (methodAttributes !== undefined && methodAttributes.length > 0) {
+        if (methodAttributes !== undefined) {
             _.each(methodAttributes, function (attribute) {
                 if (attribute.value !== undefined) {
                     body += " " + attribute.name + "='" + attribute.value + "' ";
@@ -3835,7 +3697,7 @@ function parseDataResponse(dataElement, activityModel, activityView) {
 
         expanz.Factory.bindDataControls(activityView, picklistWindow.$el.parent());
 
-        var dataPublicationModel = activityModel.dataPublications.get(elId + "_0");
+        var dataPublicationModel = activityModel.dataPublications.get(elId + "_host_0");
         populateDataPublicationModel(dataPublicationModel, $dataElement);
     }
     else {
@@ -4134,7 +3996,7 @@ function populateDataPublicationModel(dataPublicationModel, data) {
         });
     });
 
-    dataPublicationModel.trigger("datapublication:publishData");
+    dataPublicationModel.dataPublished($data);
 }
 ///#source 1 1 /source/js/expanz/client/ActivityInfo.js
 function ActivityInfo(name, title, url, style, image) {
@@ -4974,7 +4836,7 @@ $(function () {
             this.model.bind("change:loading", this.loading, this);
             this.model.bind("setFocus", this.setFocus, this);
             
-            this.dataModel.bind("datapublication:publishData", this.dataChanged, this);
+            this.dataModel.bind("datapublication:dataPublished", this.dataChanged, this);
         },
 
         valueChanged: function () {
@@ -4996,6 +4858,139 @@ $(function () {
         }
     });
 });
+///#source 1 1 /source/js/expanz/views/expanz.views.DataPublicationView.js
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin, Chris Anderson, Stephen Neander
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+$(function () {
+
+    window.expanz = window.expanz || {};
+    window.expanz.views = window.expanz.views || {};
+
+    window.expanz.views.DataPublicationView = Backbone.View.extend({
+        
+        initialize: function (params) {
+            this.model.bind("datapublication:dataPublished", this.onDataPublished, this);
+
+            this.currentPage = 1;
+            this.itemsPerPage = params.itemsPerPage != undefined ? parseInt(params.itemsPerPage) : 9999;
+        },
+
+        onDataPublished: function () {
+            var handledExternally = this.raiseExtensibilityPointEvent("publishData");
+            
+            if (!handledExternally)
+                this.render();
+        },
+
+        render: function () {
+            // Notify listeners (such as adapters) that we are about to render
+            // the data publication, and give them a chance to take over.
+            var hasBeenRenderedExternally = this.raiseExtensibilityPointEvent("rendering");
+
+            if (hasBeenRenderedExternally === true)
+                return this; // Rendering already performed by adapter, so return early
+
+            this.$el.html(""); // Clear the contents of the host element
+            
+            // Render header
+            var headerView = new expanz.views.subviews.DataPublicationHeaderView({ model: this.model, dataPublicationView: this });
+            this.$el.append(headerView.render().el);
+
+            // Render body
+            var bodyView = new expanz.views.subviews.DataPublicationBodyView({ model: this.model, dataPublicationView: this });
+            this.$el.append(bodyView.render().el);
+            
+            // Render paging bar - needs to append paging bar to parent element, or use the
+            // existing one if found
+            var existingPagingBarElement = this.$el.parent().find("#pagingBar");
+            var pagingBarView = new expanz.views.subviews.DataPublicationPagingBarView({ model: this.model, dataPublicationView: this, el: existingPagingBarElement[0] });
+            var renderedPagingBarElement = pagingBarView.render().el;
+            
+            if (existingPagingBarElement.length === 0)
+                this.$el.parent().append(renderedPagingBarElement);
+
+            // Logic dealing with the number of items in the list. Store the item
+            // count as an attribute on the element, and if there are no items then
+            // apply a class to the element, and show a message (if supplied).
+            this.$el.attr('data-itemcount', this.model.rows.length);
+            
+            if (this.model.rows.length === 0) {
+                this.$el.addClass("empty");
+
+                var noItemsText = this.$el.attr("noItemsText");
+                
+                if (noItemsText)
+                    this.$el.append('<div id="noItemsText" class="emptyListText">' + noItemsText + '</div>');
+            } else {
+                this.$el.removeClass("empty");
+            }
+
+            this.raiseExtensibilityPointEvent("rendered");
+
+            return this;
+        },
+
+        onRowClicked: function (rowView) {
+            // Does nothing by default. Function can be redefined or the event raised can be handled by external code as required.
+            this.raiseExtensibilityPointEvent("rowClicked");
+        },
+
+        onRowDoubleClicked: function (rowView) {
+            // Does nothing by default. Function can be redefined or the event raised can be handled by external code as required.
+            this.raiseExtensibilityPointEvent("rowDoubleClicked");
+        },
+
+        onDrillDown: function (rowView) {
+            // Function can be redefined or the event raised can be handled by external code as required. Default is to set context on server.
+            var handledExternally = this.raiseExtensibilityPointEvent("rowDrillDown");
+            
+            if (!handledExternally)
+                this.model.drillDown(rowView.model.id, rowView.model.get("type"), null);
+        },
+
+        onCellValueChanged: function ($input, rowView, $cell) {
+            var columnId = $cell.attr("data-columnid");
+
+            var cellModel = rowView.model.cells.get(columnId);
+            var newValue = $input.val();
+
+            if ($input.attr("type") === "checkbox")
+                newValue = $input.is(':checked') ? "1" : "0";
+            
+            this.model.sendCellUpdateToServer(cellModel, newValue);
+        },
+
+        itemTemplateName: function () {
+            return this.options['templateName'] || this.model.get("dataId") + "ItemTemplate";
+        },
+        
+        raiseExtensibilityPointEvent: function(eventName, args) {
+            // Notify listeners (such as adapters) that we are about to do
+            // or have done something, and give them a chance to take over.
+            // Acts as an extensibility point for adapters.
+            if (!args)
+                args = {};
+
+            args.handled = false;
+            
+            this.$el.trigger("datapublication:" + eventName, [
+				this.model, this, args
+            ]);
+            
+            return args.handled;
+        }
+    });
+});
+
 ///#source 1 1 /source/js/expanz/views/expanz.views.VariantFieldView.js
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5431,7 +5426,7 @@ $(function () {
             var contextMenuId;
 
             if (this.contextMenuEl === undefined) {
-                contextMenuId = this.collection.id.replace(/\./g, "_") + "_contextMenu";
+                contextMenuId = this.collection.contextId.replace(/\./g, "_") + "_contextMenu";
                 this.$el.append("<div class='contextMenu' id='" + contextMenuId + "' />");
                 this.contextMenuEl = this.$el.find("#" + contextMenuId);
             }
@@ -5530,664 +5525,6 @@ $(function () {
             this.contextMenuEl.remove();
             Backbone.View.prototype.remove.call(this);
 
-        }
-    });
-});
-
-///#source 1 1 /source/js/expanz/views/expanz.views.GridView.js
-////////////////////////////////////////////////////////////////////////////////
-//
-//  EXPANZ
-//  Author: Kim Damevin, Chris Anderson, Stephen Neander
-//  Copyright 2008-2012 EXPANZ
-//  All Rights Reserved.
-//
-//  NOTICE: expanz permits you to use, modify, and distribute this file
-//  in accordance with the terms of the license agreement accompanying it.
-//
-////////////////////////////////////////////////////////////////////////////////
-$(function () {
-
-    window.expanz = window.expanz || {};
-    window.expanz.views = window.expanz.views || {};
-
-    window.expanz.views.GridView = Backbone.View.extend({
-
-        initialize: function () {
-            this.model.bind("update:grid", this.publishData, this);
-            this.bind("rowClicked", this.rowClicked, this);
-            this.bind("rowDoubleClicked", this.rowDoubleClicked, this);
-            this.bind("actionClicked", this.actionClicked, this);
-            this.bind("menuActionClicked", this.menuActionClicked, this);
-            this.bind("contextMenuClicked", this.contextMenuClicked, this);
-            this.bind("drillDown", this.drillDown, this);
-        },
-
-        rowClicked: function (row) {
-            if (row.attr('id') != this.selectedId) {
-                this.selectedId = row.attr('id');
-                this.model.updateRowSelected(this.selectedId, row.attr('type'));
-            }
-        },
-
-        rowDoubleClicked: function (row) {
-            this.model.updateRowDoubleClicked(row.attr('id'), row.attr('type'));
-        },
-
-        actionClicked: function (id, name, params, actionEl) {
-            actionEl.attr('disabled', 'disabled');
-            actionEl.addClass('actionLoading');
-            this.model.actionSelected(id, name, params);
-        },
-
-        menuActionClicked: function (id, name, params) {
-            this.model.menuActionSelected(id, name, params);
-        },
-
-        contextMenuClicked: function (id, contextMenuType, contextObject, params) {
-            this.model.contextMenuSelected(id, contextMenuType, contextObject, params);
-        },
-
-        drillDown: function (row) {
-            this.model.drillDown(row.attr('id'), row.attr('type'), null);
-        },
-
-        publishData: function () {
-            this.$el.trigger("publishData", [
-				this.model, this
-            ]);
-
-            this.render();
-        },
-
-        render: function () {
-            var itemsPerPage = this.options['itemsPerPage'];
-
-            if (!itemsPerPage || itemsPerPage <= 0) {
-                itemsPerPage = 1000;
-            }
-
-            this.renderWithPaging(0, itemsPerPage);
-
-            return this;
-        },
-
-        renderWithPaging: function (currentPage, itemsPerPage, currentSortField, currentSortAsc) {
-            var rows = this.model.getAllRows();
-            var firstItemIndex = parseInt(currentPage * itemsPerPage, 10);
-            var lastItemIndex = Math.min(firstItemIndex + parseInt(itemsPerPage, 10), rows.length);
-
-            var hostEl;
-            var hostId = this.model.id + "_host";
-            
-            // Check if an item template has been defined, and use it if so
-            if (this.itemTemplate() !== null) {
-                hostEl = this.renderGridUsingItemTemplate(hostId, rows, currentPage, firstItemIndex, lastItemIndex, currentSortField, currentSortAsc);
-            }
-            else {
-                hostEl = this.renderGridUsingDefaultLayout(hostId, rows, firstItemIndex, lastItemIndex);
-            }
-
-            this.renderPagingBar(currentPage, itemsPerPage, hostEl, currentSortField, currentSortAsc);
-
-            $(hostEl).attr('nbItems', rows.length);
-
-            if (this.model.renderingType == 'popupGrid') {
-                this.renderAsPopupGrid(hostId, hostEl);
-            }
-            else if (this.model.renderingType == 'rotatingBar') {
-                this.renderAsRotationBar(hostEl, 3, 3, 0);
-            }
-
-            hostEl.trigger("table:rendered");
-
-            return this;
-        },
-        
-        renderGridUsingItemTemplate: function (hostId, rows, currentPage, firstItemIndex, lastItemIndex, currentSortField, currentSortAsc) {
-            var hasItem = (lastItemIndex > firstItemIndex);
-            var wrapperElement = this.options['isHTMLTable'] == "true" ? 'table' : 'div';
-            var enableConfiguration = this.options['enableConfiguration'] ? boolValue(this.options['enableConfiguration']) : false;
-            var noItemText = this.options['noItemText'] || '';
-            var nbItemsPerPageText = this.options['nbItemsPerPageText'] || 'Items per page';
-
-            /* create a div to host our grid if not existing yet */
-            var hostEl = this.$el.find(wrapperElement + '#' + hostId);
-
-            if (hostEl.length < 1) {
-                this.$el.append('<' + wrapperElement + ' id="' + hostId + '"></' + wrapperElement + '>');
-                hostEl = this.$el.find(wrapperElement + '#' + hostId);
-            }
-
-            $(hostEl).html('');
-            $(hostEl).parent().find("#" + hostId + "_Configuration").remove();
-
-            if (!hasItem) {
-                $(hostEl).addClass("emptyGrid");
-                $(hostEl).removeClass("nonEmptyGrid");
-                $(hostEl).append('<div id="noItemText" class="emptyListText">' + noItemText + '</div>');
-            }
-            else {
-                $(hostEl).addClass("nonEmptyGrid");
-                $(hostEl).removeClass("emptyGrid");
-
-                var that;
-                /* datagrid/list configuration (nb items per page, sorting as combo box) */
-                if (enableConfiguration) {
-                    $(hostEl).parent().prepend('<div id="' + hostId + '_Configuration"></div>');
-                    var $confEl = $(hostEl).parent().find("#" + hostId + "_Configuration");
-
-                    var itemsPerPageChoices = [
-                        10, 20, 50, 100
-                    ];
-                    
-                    $confEl.append('<div class="ItemsPerPage" >' + nbItemsPerPageText + '<select id="' + hostId + '_Configuration_ItemsPerPage" name="ItemsPerPage">');
-                    var selectEl = $confEl.find("#" + hostId + "_Configuration_ItemsPerPage");
-                    for (var i = 0; i < itemsPerPageChoices.length; i++) {
-                        var defString = itemsPerPage == itemsPerPageChoices[i] ? ' selected="selected" ' : '';
-                        selectEl.append('<option ' + defString + ' value="' + itemsPerPageChoices[i] + '">' + itemsPerPageChoices[i] + '</option>');
-                    }
-                    selectEl.append('</select></div>');
-
-                    that = this;
-                    selectEl.change(function () {
-                        that.renderWithPaging(currentPage, $(this).val(), currentSortField, !currentSortAsc);
-                    });
-                }
-
-                /* header template if defined */
-                if (this.headerTemplate() != null) {
-                    that = this;
-                    $(hostEl).append(this.headerTemplate().html());
-                    
-                    $(hostEl).find("[sortField]").each(function () {
-                        var fieldName = $(this).attr('sortField');
-
-                        var defaultSorted = $(this).attr('defaultSorted');
-                        if (currentSortField === null && defaultSorted !== null) {
-                            currentSortAsc = defaultSorted.toLowerCase() == 'desc' ? false : true;
-                            currentSortField = fieldName;
-                            that.model.sortRows(currentSortField, currentSortAsc);
-                            rows = that.model.getAllRows();
-                        }
-
-                        $(this).addClass("sortable");
-                        if (fieldName == currentSortField) {
-                            if (currentSortAsc) {
-                                $(this).addClass("sortedAsc");
-                            }
-                            else {
-                                $(this).addClass("sortedDesc");
-                            }
-                        }
-
-                        $(this).click(function () {
-
-                            var sortAsc = true;
-                            if (fieldName == currentSortField) {
-                                sortAsc = !currentSortAsc;
-                            }
-                            /* sort and display again */
-                            that.model.sortRows(fieldName, sortAsc);
-                            that.renderWithPaging(0, itemsPerPage, fieldName, sortAsc);
-                        });
-                    });
-
-                }
-
-                /* create a wrapper for rows if not a table */
-                var gridItems = $(hostEl);
-                if (this.options['isHTMLTable'] != "true") {
-                    $(hostEl).append("<div class='gridItems'></div>");
-                    gridItems = $(hostEl).find(".gridItems");
-                }
-
-                var compiled = _.template(this.itemTemplate().html());
-                var i;
-                for (i = firstItemIndex; i < lastItemIndex; i++) {
-                    var row = rows[i];
-                    var result = compiled(row.getCellsMapByField());
-                    var itemId = this.model.id + "_" + row.id;
-                    result = $(result).attr('id', itemId).attr('rowId', row.id);
-
-                    if (i === 0)
-                        result = $(result).addClass('first');
-                    if (i == (lastItemIndex - 1))
-                        result = $(result).addClass('last');
-                    if (i % 2 === 1) {
-                        result = $(result).addClass('alternate');
-                        result = $(result).addClass('even');
-                    }
-                    else {
-                        result = $(result).addClass('odd');
-                    }
-
-                    /* add row id to prefix id for eventual user inputs */
-                    $(result).find("[id*='userinput_']").each(function () {
-                        $(this).attr('id', row.id + "_" + $(this).attr('id'));
-                    });
-
-                    gridItems.append(result);
-
-                    /* binding method from template */
-                    var that = this;
-                    gridItems.find("#" + itemId + " [methodName] ").each(function (index, element) {
-                        var action = that.model.getAction($(element).attr('methodName'));
-                        if (action && action.length > 0) {
-                            $(element).click(function () {
-                                var rowId = $(this).closest("[rowId]").attr('rowId');
-                                var actionParams = action[0].get('actionParams').clone();
-
-                                that._handleActionClick($(this), rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
-                            });
-                        }
-                    });
-
-                    /* trigger a method call if a user field include a change attribute */
-                    gridItems.find("#" + itemId + "  [autoUpdate] ").change(function (elem) {
-                        var action = that.model.getAction($(this).attr('autoUpdate'));
-                        if (action && action.length > 0) {
-                            var rowId = $(this).closest("[rowId]").attr('rowId');
-                            var actionParams = action[0].get('actionParams').clone();
-                            that._handleActionClick($(this), rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
-                        }
-                        else {
-                            window.expanz.logToConsole("autUpdate action not defined in formapping: " + $(this).attr('autoUpdate'));
-                        }
-                    });
-
-                    /* binding menuAction from template */
-                    hostEl.find("#" + itemId + " [menuAction] ").each(function (index, element) {
-                        var action = that.model.getAction($(element).attr('menuAction'));
-                        if (action && action.length > 0) {
-                            $(element).click(function () {
-                                var rowId = $(this).closest("[rowId]").attr('rowId');
-                                var actionParams = action[0].get('actionParams').clone();
-
-                                that._handleMenuActionClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
-
-                            });
-                        }
-                    });
-
-                    /* binding contextMenu from template */
-                    hostEl.find("#" + itemId + " [contextMenu] ").each(function (index, element) {
-                        var action = that.model.getAction($(element).attr('contextMenu'));
-                        if (action && action.length > 0) {
-                            $(element).click(function () {
-                                var rowId = $(this).closest("[rowId]").attr('rowId');
-                                var actionParams = action[0].get('actionParams').clone();
-
-                                var method;
-                                method = new expanz.models.ContextMenu({
-                                    id: rowId,
-                                    contextObject: action[0].get('actionName'),
-                                    parent: that.model.parent
-                                });
-
-                                var ctxMenuview = new expanz.views.ContextMenuView({
-                                    el: $(this),
-                                    id: $(this).attr('id'),
-                                    className: $(this).attr('class'),
-                                    collection: method
-                                });
-
-                                window.expanz.currentContextMenu = ctxMenuview.collection;
-
-                                that._handleContextMenuClick(rowId, action[0].get('actionName'), actionParams, $(this).closest("[rowId]"));
-
-                            });
-                        }
-                    });
-                }
-            }
-
-            return hostEl;
-        },
-        
-        renderGridUsingDefaultLayout: function (hostId, rows, firstItemIndex, lastItemIndex) {
-            // set table scaffold
-            var $hostEl = this.$el.find('table#' + hostId);
-            
-            if ($hostEl.length < 1) {
-                this.$el.append('<table class="grid" id="' + hostId + '"></table>');
-                $hostEl = this.$el.find('table#' + hostId);
-            }
-
-            this.renderHeaderUsingDefaultTemplate($hostEl);
-            this.renderRowsUsingDefaultTemplate($hostEl, rows, firstItemIndex, lastItemIndex);
-
-            /* handle row click event */
-            var onRowClick = function (event) {
-                event.data.trigger("rowClicked", $(this));
-            };
-
-            /* handle double row click event */
-            var onRowDoubleClick = function (event) {
-                event.data.trigger("rowDoubleClicked", $(this));
-            };
-
-            $('table#' + hostId + ' tr').click(this, onRowClick);
-            $('table#' + hostId + ' tr').dblclick(this, onRowDoubleClick);
-
-            var that = this;
-            /* handle button/actions click event */
-            var onActionClick = function (event) {
-                var rowId = $(this).closest("tr").attr('id');
-                var parentDiv = $(this).parent();
-                var methodName = parentDiv.attr('name');
-                var actionParams = JSON.parse(parentDiv.attr('actionParams'));
-                that._handleActionClick($(this), rowId, methodName, actionParams, parentDiv);
-            };
-
-            $('table#' + hostId + ' tr [bind=method] > button').click(this, onActionClick);
-
-            /* handle drilldown hyperlink click event */
-            var onDrillDownClick = function (event) {
-                var row = $(this).closest("tr");
-                event.data.trigger("drillDown", row);
-            };
-            
-            $('table#' + hostId + ' tr a').click(this, onDrillDownClick);
-
-            /* handle menuAction click event */
-            var onMenuActionClick = function (event) {
-                var rowId = $(this).closest("tr").attr('id');
-                var parentDiv = $(this).parent();
-                var menuActionName = parentDiv.attr('name');
-                var actionParams = JSON.parse(parentDiv.attr('actionParams'));
-                that._handleMenuActionClick(rowId, menuActionName, actionParams, parentDiv);
-            };
-
-            $('table#' + hostId + ' tr [bind=menuAction] > button').click(this, onMenuActionClick);
-
-            /* handle contextMenu click event */
-            var onContextMenuClick = function (event) {
-                var rowId = $(this).closest("tr").attr('id');
-                var parentDiv = $(this).parent();
-                var contextMenuName = parentDiv.attr('name');
-                var actionParams = JSON.parse(parentDiv.attr('actionParams'));
-                that._handleContextMenuClick(rowId, contextMenuName, actionParams, parentDiv);
-            };
-
-            $('table#' + hostId + ' tr [bind=contextMenu] > button').click(this, onContextMenuClick);
-
-            return $hostEl;
-        },
-        
-        renderHeaderUsingDefaultTemplate: function($hostEl) {
-            $hostEl.html('<thead><tr class="item"></tr></thead>');
-
-            // render column header
-            var el = $hostEl.find('thead tr');
-            
-            this.model.columns.each(function (cell) {
-                var html = '<th ';
-                // html += cell.get('width') ? ' width="' + cell.get('width') + '"' : '';
-                html += '>' + cell.get('label') + '</th>';
-                el.append(html);
-            });
-
-            if (this.model.hasActions) {
-                el.append('<th>actions</th>');
-            }
-        },
-        
-        renderRowsUsingDefaultTemplate: function ($hostEl, rows, firstItemIndex, lastItemIndex) {
-            // render rows
-            $hostEl.append('<tbody></tbody>');
-
-            el = $hostEl.find('tbody');
-            var i;
-
-            for (i = firstItemIndex; i < lastItemIndex; i++) {
-                var row = rows[i];
-                var className = ((i - firstItemIndex) % 2 == 1) ? 'gridRowAlternate' : 'gridRow';
-
-                if (row.get("displayStyle"))
-                    className = "grid-" + row.get("displayStyle");
-
-                var html = '<tr id="' + row.id + '" type="' + row.get("type") + '" class="' + className + '">';
-                html += this.renderRowCellsUsingDefaultTemplate(row);
-                html += '</tr>';
-                el.append(html);
-            }
-        },
-
-        renderRowCellsUsingDefaultTemplate: function (row) {
-            var html;
-            var values = {};
-            var model = this.model;
-            var isDrillDownRow = this.$el.attr('candrilldown') == "true" && (row.get("type") !== "Totals" && row.get("type") !== "BlankLine"); // Only show drilldown link if configured to do so, and only on non-totals and non-blank rows
-            var drillDownLinkCreated = !isDrillDownRow;
-            
-            _.each(row.getAllCells(), function (cell) {
-                html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="row' + row.id + ' column' + cell.get('id') + '">';
-
-                if (model.getColumn(cell.get('id')) && model.getColumn(cell.get('id')).get('datatype') === 'BLOB') {
-                    html += '<img width="' + model.getColumn(cell.get('id')).get('width') + '" src="' + cell.get('value') + '"/>';
-                }
-                else if (cell.get('value')) {
-                    if (!drillDownLinkCreated) {
-                        html += '<a href="#' + row.get('id') + '">' + cell.get('value') + '</a>';
-                        drillDownLinkCreated = true;
-                    } else {
-                        html += '<span>' + cell.get('value') + '</span>';
-                    }
-                    
-                    values[cell.get('id')] = cell.get('value');
-                }
-
-                html += '</td>';
-            }, row);
-            
-            if (this.model.hasActions) {
-                html += '<td>';
-
-                _.each(this.model.getActions(), function (cell) {
-                    var buttonId = model.id + "_" + row.id + "_" + cell.get('actionName');
-                    var actionParams = cell.get('actionParams');
-
-                    var userInputs = "";
-
-                    _.each(actionParams, function (actionParams) {
-                        var name = actionParams.name;
-                        var value = actionParams.value;
-                        var label = actionParams.label;
-
-                        if (value == '@userInput.textinput' || value == '@userInput.numericinput') {
-                            var format = (value == '@userInput.numericinput') ? 'numeric' : 'text';
-                            var bindValueFromCellId = actionParams.bindValueFromCellId;
-                            var inputValue = '';
-                            if (bindValueFromCellId) {
-                                inputValue = " value='" + values[bindValueFromCellId] + "' ";
-                            }
-                            userInputs += "<label for='" + row.id + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.id + "_userinput_" + name + "'/>";
-                        }
-                    });
-
-                    html += "<div style='display:inline' name='" + cell.get('actionName') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='" + cell.get('type') + "'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
-                });
-
-                html += '</td>';
-            }
-            
-            return html;
-        },
-
-        renderPagingBar: function (currentPage, itemsPerPage, hostEl, currentSortField, currentSortAsc) {
-            var pagingBar = "";
-
-            var nbItems = this.model.getAllRows().length;
-            if (nbItems > 0) {
-                var nbPages = Math.ceil(nbItems / itemsPerPage);
-                if (nbPages > 1) {
-                    if ($(hostEl).is('table')) {
-                        hostEl.append("<tr class='paging'><td id='pagingBar' colspan='100%'></td></tr>");
-                    }
-                    else {
-                        hostEl.append("<div id='pagingBar' class='paging'></div>");
-                    }
-
-                    pagingBar = hostEl.find("#pagingBar");
-                    for (var i = 0; i < nbPages; i++) {
-                        var inputId = this.model.id + "BtnPage" + i;
-                        var disabled = "";
-                        if (i == currentPage)
-                            disabled = " disabled='disabled'";
-
-                        pagingBar.append("<input id='" + inputId + "' type='button' value='" + (i + 1) + "' " + disabled + " />");
-
-                        var that = this;
-                        $(pagingBar).find("#" + inputId).click(function () {
-                            that.renderWithPaging(this.value - 1, itemsPerPage, currentSortField, currentSortAsc);
-                        });
-                    }
-                }
-
-            }
-        },
-        
-        renderAsPopupGrid: function (hostId, hostEl) {
-            var clientMessage = new expanz.models.ClientMessage({
-                id: hostId + 'PopUp',
-                title: '',
-                text: '',
-                parent: this.model.parent
-            });
-
-            var picklistWindow = new window.expanz.views.PopupView({
-                id: clientMessage.id,
-                model: clientMessage
-            }, $('body'));
-
-            picklistWindow.$el.append(hostEl);
-            picklistWindow.center();
-        },
-
-        renderAsRotationBar: function (el, itemPerPage, rotationStep, firstItemIndex) {
-            var totalItems = $(el).find("li.rotatingItem").length;
-            var that = this;
-            var elId = $(el).attr('id');
-
-            $(el).find("li.rotatingItem").hide();
-
-            var i = 0;
-
-            $(el).find("li.rotatingItem").each(function () {
-
-                if (i >= firstItemIndex) {
-                    $(this).show();
-                }
-                i++;
-                if ((i - firstItemIndex) >= itemPerPage)
-                    return false;
-            });
-
-            if ($(el).find("#" + elId + "NextBtn").length === 0) {
-                $(el).find("li.rotatingItem").last().after("<li class='rotatingButton'><button id='" + elId + "NextBtn'>></button></li>");
-                $(el).find("#" + elId + "NextBtn").unbind("click");
-            }
-            if ($("#" + elId + "PrevBtn").length === 0) {
-                $(el).find("li.rotatingItem").first().before("<li class='rotatingButton'><button  id='" + elId + "PrevBtn'><</button></li>");
-                $(el).find("#" + elId + "PrevBtn").unbind("click");
-            }
-
-            /* show pre button if needed */
-            if (firstItemIndex > 0) {
-                $(el).find("#" + elId + "PrevBtn").click(function () {
-                    that.renderAsRotationBar($(el), itemPerPage, rotationStep, Math.max(firstItemIndex - rotationStep, 0));
-                });
-                $(el).find("#" + elId + "PrevBtn").show();
-            }
-            else {
-                $(el).find("#" + elId + "PrevBtn").hide();
-            }
-
-            /* show next button if needed */
-            if (i < totalItems) {
-                $(el).find("#" + elId + "NextBtn").click(function () {
-                    that.renderAsRotationBar($(el), itemPerPage, rotationStep, Math.min(firstItemIndex + rotationStep, totalItems - itemPerPage));
-                });
-                $(el).find("#" + elId + "NextBtn").show();
-            }
-            else {
-                $(el).find("#" + elId + "NextBtn").hide();
-            }
-        },
-
-        itemTemplateName: function () {
-            return this.options['templateName'] || this.model.id + "ItemTemplate";
-        },
-
-        itemTemplate: function () {
-            var itemTemplate = $("#" + this.itemTemplateName());
-
-            if (itemTemplate.length === 0)
-                itemTemplate = null;
-
-            return itemTemplate;
-        },
-
-        headerTemplate: function () {
-            var headerTemplate = $("#" + this.itemTemplateName() + "Header");
-
-            if (headerTemplate.length === 0)
-                headerTemplate = null;
-
-            return headerTemplate;
-        },
-
-        _handleActionClick: function (actionEl, rowId, methodName, actionParams, divEl) {
-            var inputValid = true;
-            /* handle user input */
-            _.each(actionParams, function (actionParam) {
-                var name = actionParam.name;
-                if (actionParam.value == '@userInput.textinput' || actionParam.value == '@userInput.numericinput') {
-                    var valueInput = divEl.find("#" + rowId + "_userinput_" + name);
-                    if (valueInput.length > 0 && valueInput.val().length > 0) {
-                        actionParam.value = valueInput.val();
-                    }
-                    else {
-                        inputValid = false;
-                    }
-                }
-                else if (actionParam.value == '@contextId') {
-                    actionParam.value = rowId;
-                }
-            });
-
-            if (inputValid)
-                this.trigger("actionClicked", rowId, methodName, actionParams, actionEl);
-        },
-
-        _handleMenuActionClick: function (rowId, menuAction, actionParams, divEl) {
-            /* handle user input */
-            _.each(actionParams, function (actionParam) {
-                var name = actionParam.name;
-                if (actionParam.value == '@contextId') {
-                    actionParam.value = rowId;
-                }
-            });
-
-            this.trigger("menuActionClicked", rowId, menuAction, actionParams);
-        },
-
-        _handleContextMenuClick: function (rowId, contextMenuType, actionParams, divEl) {
-            /* handle user input */
-            var contextObject = '';
-            _.each(actionParams, function (actionParam) {
-                var name = actionParam.name;
-                if (actionParam.value == '@contextId') {
-                    actionParam.value = rowId;
-                }
-                if (actionParam.name == 'contextObject') {
-                    contextObject = actionParam.value;
-                }
-            });
-            contextObject = contextObject || contextMenuType;
-
-            this.trigger("contextMenuClicked", rowId, contextMenuType, contextObject, actionParams);
         }
     });
 });
@@ -6416,42 +5753,6 @@ $(function () {
     });
 });
 
-///#source 1 1 /source/js/expanz/views/expanz.views.DataControlView.js
-////////////////////////////////////////////////////////////////////////////////
-//
-//  EXPANZ
-//  Author: Kim Damevin, Chris Anderson, Stephen Neander
-//  Copyright 2008-2012 EXPANZ
-//  All Rights Reserved.
-//
-//  NOTICE: expanz permits you to use, modify, and distribute this file
-//  in accordance with the terms of the license agreement accompanying it.
-//
-////////////////////////////////////////////////////////////////////////////////
-$(function () {
-
-    window.expanz = window.expanz || {};
-    window.expanz.views = window.expanz.views || {};
-
-    window.expanz.views.DataControlView = Backbone.View.extend({
-
-        initialize: function (attrs) {
-            Backbone.View.prototype.initialize.call(attrs);
-            this.model.bind("change:xml", this.publishData, this); 
-        },
-
-        itemSelected: function (itemId, callbacks) {
-            this.model.updateItemSelected(itemId, callbacks);
-        },
-
-        publishData: function () {
-            this.$el.trigger("publishData", [
-				this.model.get('xml'), this
-            ]);
-        }
-    });
-});
-
 ///#source 1 1 /source/js/expanz/views/expanz.views.CheckboxesView.js
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -6464,45 +5765,45 @@ $(function () {
 //  in accordance with the terms of the license agreement accompanying it.
 //
 ////////////////////////////////////////////////////////////////////////////////
-$(function () {
+//$(function () {
 
-    window.expanz = window.expanz || {};
-    window.expanz.views = window.expanz.views || {};
+//    window.expanz = window.expanz || {};
+//    window.expanz.views = window.expanz.views || {};
 
-    window.expanz.views.CheckboxesView = expanz.views.DataControlView.extend({
-        publishData: function () {
-            /* clean elements */
-            this.$el.html();
-            var that = this;
-            /* no external component needed just have to draw the checkboxes and handle the clicks */
+//    window.expanz.views.CheckboxesView = expanz.views.DataControlView.extend({
+//        publishData: function () {
+//            /* clean elements */
+//            this.$el.html();
+//            var that = this;
+//            /* no external component needed just have to draw the checkboxes and handle the clicks */
 
-            _.each(this.model.get('xml').find('Row'), function (row) {
-                var rowId = $(row).attr('id');
-                var selected = boolValue($(row).attr('selected')) === true ? ' checked="checked" ' : '';
-                _.each($(row).find('Cell'), function (cell) {
-                    var text = $(cell).text();
-                    var id = that.model.id.replace(/\./g, "_") + "_" + rowId;
-                    that.$el.append("<div><input " + selected + " id='" + id + "' value='" + rowId + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
+//            _.each(this.model.get('xml').find('Row'), function (row) {
+//                var rowId = $(row).attr('id');
+//                var selected = boolValue($(row).attr('selected')) === true ? ' checked="checked" ' : '';
+//                _.each($(row).find('Cell'), function (cell) {
+//                    var text = $(cell).text();
+//                    var id = that.model.id.replace(/\./g, "_") + "_" + rowId;
+//                    that.$el.append("<div><input " + selected + " id='" + id + "' value='" + rowId + "' name='checkbox' type='checkbox'></input><span>" + text + "</span></div>");
 
-                    /* handle checkboxes click */
-                    that.$el.find("#" + id).click(function () {
-                        // window.expanz.logToConsole(that.model.id + " filtered with " + $(this).val());
-                        /* send negative value of id to say it has been unselected */
-                        var val = $(this).val();
-                        if (!$(this).is(":checked")) {
-                            val = -val;
-                        }
-                        /* send the delta to the server */
-                        that.model.updateItemSelected(val);
-                    });
+//                    /* handle checkboxes click */
+//                    that.$el.find("#" + id).click(function () {
+//                        // window.expanz.logToConsole(that.model.id + " filtered with " + $(this).val());
+//                        /* send negative value of id to say it has been unselected */
+//                        var val = $(this).val();
+//                        if (!$(this).is(":checked")) {
+//                            val = -val;
+//                        }
+//                        /* send the delta to the server */
+//                        that.model.updateItemSelected(val);
+//                    });
 
-                });
-            });
+//                });
+//            });
 
-        }
+//        }
 
-    });
-});
+//    });
+//});
 
 ///#source 1 1 /source/js/expanz/views/expanz.views.RadioButtonsView.js
 ////////////////////////////////////////////////////////////////////////////////
@@ -6516,39 +5817,39 @@ $(function () {
 //  in accordance with the terms of the license agreement accompanying it.
 //
 ////////////////////////////////////////////////////////////////////////////////
-$(function () {
+//$(function () {
 
-    window.expanz = window.expanz || {};
-    window.expanz.views = window.expanz.views || {};
+//    window.expanz = window.expanz || {};
+//    window.expanz.views = window.expanz.views || {};
 
-    window.expanz.views.RadioButtonsView = expanz.views.DataControlView.extend({
-        publishData: function () {
-            /* clean elements */
-            this.$el.html();
-            var that = this;
-            /* no external component needed just have to draw the checkboxes and handle the clicks */
+//    window.expanz.views.RadioButtonsView = expanz.views.DataControlView.extend({
+//        publishData: function () {
+//            /* clean elements */
+//            this.$el.html();
+//            var that = this;
+//            /* no external component needed just have to draw the checkboxes and handle the clicks */
 
-            _.each(this.model.get('xml').find('Row'), function (row) {
-                var rowId = $(row).attr('id');
-                var selected = boolValue($(row).attr('selected')) === true ? ' checked="checked" ' : '';
-                _.each($(row).find('Cell'), function (cell) {
-                    var text = $(cell).text();
-                    var id = that.model.id.replace(/\./g, "_") + "_" + rowId;
-                    that.$el.append("<div><input " + selected + " id='" + id + "' value='" + rowId + "' name='radio' type='radio'></input><span>" + text + "</span></div>");
+//            _.each(this.model.get('xml').find('Row'), function (row) {
+//                var rowId = $(row).attr('id');
+//                var selected = boolValue($(row).attr('selected')) === true ? ' checked="checked" ' : '';
+//                _.each($(row).find('Cell'), function (cell) {
+//                    var text = $(cell).text();
+//                    var id = that.model.id.replace(/\./g, "_") + "_" + rowId;
+//                    that.$el.append("<div><input " + selected + " id='" + id + "' value='" + rowId + "' name='radio' type='radio'></input><span>" + text + "</span></div>");
 
-                    /* handle radio button click */
-                    that.$el.find("#" + id).click(function () {
-                        /* send the delta to the server */
-                        that.model.updateItemSelected($(this).val());
-                    });
+//                    /* handle radio button click */
+//                    that.$el.find("#" + id).click(function () {
+//                        /* send the delta to the server */
+//                        that.model.updateItemSelected($(this).val());
+//                    });
 
-                });
-            });
+//                });
+//            });
 
-        }
+//        }
 
-    });
-});
+//    });
+//});
 
 ///#source 1 1 /source/js/expanz/views/expanz.views.PopupView.js
 ////////////////////////////////////////////////////////////////////////////////
@@ -6616,6 +5917,8 @@ $(function () {
             var content = '';
             if (this.model.get('text') !== undefined && this.model.get('text').length > 0) {
                 content = this.model.get('text');
+            } else if (this.contentTemplate) {
+                content = this.contentTemplate({ id: this.id });
             }
 
             $container.append("<div class='" + this.cssClass + "' id='" + this.id + "' " + this.divAttributes + " name='" + this.id + "'>" + content + "</div>");
@@ -6701,7 +6004,7 @@ $(function () {
     window.expanz.views = window.expanz.views || {};
 
     window.expanz.views.PicklistWindowView = window.expanz.views.PopupView.extend({
-        divAttributes: " bind='DataControl' renderingType='grid' ",
+        contentTemplate: _.template("<table id='<%= id %>_host' bind='DataControl' class='grid'></table>"),
         
         cssClass: 'pickListPopup popupView',
         
@@ -6709,14 +6012,14 @@ $(function () {
             window.expanz.views.PopupView.prototype.initialize.call(this, attrs, $container);
             
             // Centre the window once the pick list has rendered, and its size has been determined
-            this.$el.on("datapublication:rendered", $.proxy(function(event, dataPublicationView) {
+            this.$el.on("datapublication:rendered", $.proxy(function(event, dataPublicationModel, dataPublicationView) {
                 this.center();
 
                 var picklistWindowView = this;
                 
                 // Redefine the data publication view's onRowClicked event handler function
-                dataPublicationView.onRowClicked = function (row) {
-                    picklistWindowView.onItemSelected(dataPublicationView.model, row.attr("id"), row.attr("type"));
+                dataPublicationView.onRowClicked = function (rowView) {
+                    picklistWindowView.onItemSelected(dataPublicationModel, rowView.model.id, rowView.model.get("type"));
                     picklistWindowView.close();
                 };
             }, this));
@@ -6839,6 +6142,555 @@ $(function () {
     });
 });
 
+///#source 1 1 /source/js/expanz/views/subviews/expanz.views.subviews.DataPublicationHeaderView.js
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Chris Anderson
+//  Copyright 2008-2013 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+$(function () {
+
+    window.expanz = window.expanz || {};
+    window.expanz.views = window.expanz.views || {};
+    window.expanz.views.subviews = window.expanz.views.subviews || {};
+
+    window.expanz.views.subviews.DataPublicationHeaderView = Backbone.View.extend({
+
+        defaultTemplate: _.template('<thead>' +
+                                        '<tr class="tableheader">' +
+                                        '<% columns.each(function(col){ %>' +
+                                           '<th width="<%= col.get("width") %>"><%= col.get("label") %></th>' +
+                                        '<% }); %>' +
+                                        '</tr>' +
+                                    '</thead>'),
+
+        initialize: function (params) {
+            this.dataPublicationView = params.dataPublicationView;
+        },
+
+        render: function () {
+            var hasBeenRenderedExternally = this.dataPublicationView.raiseExtensibilityPointEvent("renderingHeader");
+
+            if (!hasBeenRenderedExternally) {
+                var headerTemplate = this.getHeaderTemplate();
+                this.setElement(headerTemplate({ columns: this.model.columns }));
+
+                this.onHeaderRendered();
+                this.dataPublicationView.raiseExtensibilityPointEvent("headerRendered");
+            }
+
+            return this;
+        },
+
+        getHeaderTemplate: function () {
+            // Looks in the HTML page for a text template with a given name. If found, it is returned.
+            // Otherwise it will return the default template defined as part of this view.
+            var headerTemplate = null;
+            var userDefinedTemplate = $("#" + this.dataPublicationView.itemTemplateName() + "Header");
+
+            if (userDefinedTemplate.length === 0)
+                headerTemplate = this.defaultTemplate;
+            else
+                headerTemplate = _.template(userDefinedTemplate.html());
+
+            return headerTemplate;
+        },
+
+        onHeaderRendered: function () {
+            var headerView = this;
+            var dataPublicationView = headerView.dataPublicationView;
+
+            // Search the header for all the fields marked as being sortable,
+            // and transform them to be as such.
+            this.$el.find("[sortField]").each(function () {
+                var $headerCell = $(this);
+                var fieldName = $headerCell.attr('sortField');
+
+                // Set classes on the field for styling purposes
+                $headerCell.addClass("sortable");
+
+                if (fieldName == dataPublicationView.sortField) {
+                    if (dataPublicationView.sortDirection == "asc") {
+                        $headerCell.removeClass("sortedDesc");
+                        $headerCell.addClass("sortedAsc");
+                    } else {
+                        $headerCell.removeClass("sortedAsc");
+                        $headerCell.addClass("sortedDesc");
+                    }
+                }
+
+                // Handle the user clicking on the colun header to sort the data publication
+                $(this).click(function () {
+                    // The user has clicked on a column header. Sort the data
+                    // publication by the corresponding field and re-render the list
+                    var sortDirection = $headerCell.attr('defaultSortDirection') || "asc";
+
+                    if (fieldName == dataPublicationView.sortField) {
+                        // Reverse the sort direction of this column
+                        sortDirection = dataPublicationView.sortDirection === "desc" ? "asc" : "desc";
+                    }
+
+                    dataPublicationView.sortField = fieldName;
+                    dataPublicationView.sortDirection = sortDirection.toLowerCase();
+
+                    dataPublicationView.model.sortRowsByFieldName(fieldName, (dataPublicationView.sortDirection === "asc"));
+                    dataPublicationView.render();
+                });
+            });
+        }
+    });
+});
+///#source 1 1 /source/js/expanz/views/subviews/expanz.views.subviews.DataPublicationBodyView.js
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Chris Anderson
+//  Copyright 2008-2013 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+$(function () {
+
+    window.expanz = window.expanz || {};
+    window.expanz.views = window.expanz.views || {};
+    window.expanz.views.subviews = window.expanz.views.subviews || {};
+
+    window.expanz.views.subviews.DataPublicationBodyView = Backbone.View.extend({
+
+        tagName: "tbody",
+
+        initialize: function (params) {
+            this.dataPublicationView = params.dataPublicationView;
+
+            // If the host element is not a table, create items in a div instead of the default tbody.
+            if (!this.dataPublicationView.$el.is("table")) {
+                this.setElement($('<div></div>'));
+            }
+        },
+
+        render: function () {
+            var view = this;
+
+            this.rowViewCollection = [];
+            
+            // Calculate which items should be displayed, based upon the items per page and current page number
+            var firstItemIndex = (this.dataPublicationView.currentPage - 1) * this.dataPublicationView.itemsPerPage;
+            var lastItemIndex = Math.min(firstItemIndex + this.dataPublicationView.itemsPerPage, this.model.rows.length);
+            
+            // Enumerate the rows for the current page, and render them
+            for (var rowIndex = firstItemIndex; rowIndex < lastItemIndex; rowIndex++) {
+                var row = this.model.rows.at(rowIndex);
+                
+                // Render row
+                var rowView = new expanz.views.subviews.DataPublicationRowView({ model: row, rowIndex: rowIndex, dataPublicationView: view.dataPublicationView });
+                view.$el.append(rowView.render().el);
+                
+                rowView.bind("input:enterPressed", this.onInputEnterPressed, this);
+                this.rowViewCollection.push(rowView);
+            }
+
+            return this;
+        },
+        
+        onInputEnterPressed: function(rowView, input) {
+            // Enter pressed on an input in a row. Move the focus to the same cell in the next row.
+            var $cell = $(input).closest("td");
+            var columnId = $cell.attr("data-columnid");
+
+            var rowViewIndex = this.rowViewCollection.indexOf(rowView);
+
+            if (rowViewIndex < this.rowViewCollection.length - 1) {
+                var newFocusedRowView = this.rowViewCollection[rowViewIndex + 1];
+                newFocusedRowView.focusCellInput(columnId);
+            }
+        }
+    });
+});
+///#source 1 1 /source/js/expanz/views/subviews/expanz.views.subviews.DataPublicationRowView.js
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Chris Anderson
+//  Copyright 2008-2013 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+$(function () {
+
+    window.expanz = window.expanz || {};
+    window.expanz.views = window.expanz.views || {};
+    window.expanz.views.subviews = window.expanz.views.subviews || {};
+
+    window.expanz.views.subviews.DataPublicationRowView = Backbone.View.extend({
+
+        defaultRowTemplate: _.template('<tr class="<%= className %>">' +
+                                       '<%= rowView.renderRowCells(rowModel) %>' +
+                                       '</tr>'),
+
+        defaultCellTemplate: _.template('<td data-columnid="<%= cellModel.get("id") %>">' +
+                                        '<%= rowView.renderCellContents(cellModel, rowModel, cellIndex, isDrillDownRow) %>' +
+                                        '</td>'),
+
+        initialize: function (params) {
+            this.dataPublicationView = params.dataPublicationView;
+        },
+
+        render: function () {
+            var hasBeenRenderedExternally = this.dataPublicationView.raiseExtensibilityPointEvent("renderingRow");
+
+            if (!hasBeenRenderedExternally) {
+                var className = (this.options.rowIndex % 2 == 1) ? 'gridRowAlternate' : 'gridRow';
+
+                // If a displayStyle attribute is passed from the server, use it, prefixed with grid- as the class name
+                if (this.model.get("displayStyle"))
+                    className = "grid-" + this.model.get("displayStyle");
+
+                var cellValues = this.model.getCellValues();
+
+                var itemTemplate = this.getItemTemplate();
+                this.setElement(itemTemplate({ rowModel: this.model, data: cellValues.data, sortValues: cellValues.sortValues, className: className, rowView: this }));
+
+                // Set attributes on the element that will be used to identify it
+                this.$el.attr("data-rowid", this.model.id);
+                this.$el.attr("data-rowtype", this.model.get("type"));
+
+                this.onRowRendered();
+                this.dataPublicationView.raiseExtensibilityPointEvent("rowRendered");
+            }
+
+            return this;
+        },
+
+        getItemTemplate: function () {
+            // Looks in the HTML page for a text template with a given name. If found, it is returned.
+            // Otherwise it will return the default template defined as part of this view.
+            var itemTemplate = null;
+            var userDefinedTemplate = $("#" + this.dataPublicationView.itemTemplateName());
+
+            if (userDefinedTemplate.length === 0)
+                itemTemplate = this.defaultRowTemplate;
+            else
+                itemTemplate = _.template(userDefinedTemplate.html());
+
+            return itemTemplate;
+        },
+
+        renderRowCells: function (rowModel) {
+            var html = "";
+            var view = this;
+            var isDrillDownRow = this.dataPublicationView.options.canDrillDown && (rowModel.get("type") !== "Totals" && rowModel.get("type") !== "BlankLine"); // Only show drilldown link if configured to do so, and only on non-totals and non-blank rows
+
+            rowModel.cells.each(function (cellModel, cellIndex) {
+                html += view.defaultCellTemplate({ cellModel: cellModel, rowModel: rowModel, rowView: view, cellIndex: cellIndex, isDrillDownRow: isDrillDownRow });
+            });
+
+            return html;
+        },
+
+        renderCellContents: function (cellModel, rowModel, cellIndex, isDrillDownRow) {
+            var html = "";
+
+            if (cellModel.column && cellModel.column.get('datatype') === 'BLOB') {
+                html += '<img width="' + cellModel.column.get('width') + '" src="' + cellModel.get('value') + '"/>';
+            } else if (cellModel.column.get("isEditable")) {
+                html += this.renderCellInputControl(cellModel);
+            } else if (cellModel.get('value')) {
+                if (cellIndex === 0 && isDrillDownRow) {
+                    html += '<a href="#' + rowModel.get('id') + '">' + cellModel.get('value') + '</a>'; // Create a drilldown link
+                } else {
+                    html += '<span>' + cellModel.get('value') + '</span>';
+                }
+            }
+
+            return html;
+        },
+
+        renderCellInputControl: function (cellModel) {
+            // Render the correct type of input control, depending on the cell column's data type
+            var html = "";
+            var dataType = cellModel.column.get("datatype");
+
+            if (dataType === "string" || dataType === "number") {
+                html = "<input type='text' value='" + cellModel.get('value') + "' class='dpinput-" + dataType + "' style='width: 100%;'>";
+            } else if (dataType === "boolean") {
+                html = "<input type='checkbox' class='dpinput-boolean'";
+
+                if (cellModel.get('value') === "1")
+                    html += " checked";
+
+                html += ">";
+            }
+
+            // TODO: Support dropdown lists
+
+            return html;
+        },
+
+        // TODO: Re-instate, and call from default row template?
+        //renderActions: function () {
+        //    var html = "";
+
+            //if (this.model.hasActions) {
+            //    html = '<td>';
+
+            //    _.each(this.model.getActions(), function (cell) {
+            //        var buttonId = model.id + "_" + row.id + "_" + cell.get('name');
+            //        var actionParams = cell.get('actionParams');
+
+            //        var userInputs = "";
+
+            //        _.each(actionParams, function (actionParams) {
+            //            var name = actionParams.name;
+            //            var value = actionParams.value;
+            //            var label = actionParams.label;
+
+            //            if (value == '@userInput.textinput' || value == '@userInput.numericinput') {
+            //                var format = (value == '@userInput.numericinput') ? 'numeric' : 'text';
+            //                var bindValueFromCellId = actionParams.bindValueFromCellId;
+            //                var inputValue = '';
+            //                if (bindValueFromCellId) {
+            //                    inputValue = " value='" + values[bindValueFromCellId] + "' ";
+            //                }
+            //                userInputs += "<label for='" + row.id + "_userinput_" + name + "'>" + (label || name) + "</label><input class='gridUserInput' type='text' format='" + format + "' " + inputValue + " id='" + row.id + "_userinput_" + name + "'/>";
+            //            }
+            //        });
+
+            //        html += "<div style='display:inline' name='" + cell.get('name') + "' actionParams='" + JSON.stringify(actionParams) + "' bind='" + cell.get('type') + "'> " + userInputs + " <button id='" + buttonId + "' attribute='submit'>" + cell.get('label') + "</button></div>";
+            //    });
+
+            //    html += '</td>';
+            //}
+
+        //    return html;
+        //},
+
+        onRowRendered: function () {
+            this.bindActions();
+            this.configureEventHandlers();
+        },
+        
+        bindActions: function() {
+            var rowView = this;
+            var dataPublicationView = rowView.dataPublicationView;
+
+            /* Search for elements with a methodName attribute, and bind them to an action */
+            rowView.$el.find("[methodName]").each(function (index, element) {
+                var action = dataPublicationView.model.actions[$(element).attr('methodName')];
+
+                if (action) {
+                    $(element).click(function () {
+                        rowView._handleActionClick.call(rowView, $(this), action);
+                    });
+                }
+            });
+
+            /* Search for elements with a contextMenu attribute, and bind them to an action */
+            rowView.$el.find("[contextMenu] ").each(function (index, element) {
+                var action = dataPublicationView.model.actions[$(element).attr('contextMenu')];
+
+                if (action) {
+                    $(element).click(function () {
+                        rowView._handleContextMenuClick.call(rowView, $(this), action);
+                    });
+                }
+            });
+        },
+
+        configureEventHandlers: function () {
+            var view = this;
+
+            this.$el.click(this, function () {
+                view.dataPublicationView.onRowClicked.call(view.dataPublicationView, view);
+            });
+
+            this.$el.dblclick(this, function () {
+                view.dataPublicationView.onRowDoubleClicked.call(view.dataPublicationView, view);
+            });
+            
+            this.$el.find("a").click(this, function () {
+                view.dataPublicationView.onDrillDown.call(view.dataPublicationView, view);
+            });
+
+            if (this.dataPublicationView.model.isEditable) {
+                this.$el.find("input").click(this, function () {
+                    // Select all the text in the input box when it is clicked
+                    this.select();
+                });
+                
+                this.$el.find("input").change(this, function () {
+                    // Input value has changed, so pass new value to the server
+                    var $input = $(this);
+                    var $cell = $input.closest("td");
+
+                    view.dataPublicationView.onCellValueChanged.call(view.dataPublicationView, $input, view, $cell);
+                });
+                
+                this.$el.find("input").keypress(function (event) {
+                    // Raise event when enter is pressed in an input
+                    var keycode = (event.keyCode ? event.keyCode : event.which);
+                    
+                    if (keycode == '13') {
+                        view.trigger("input:enterPressed", view, this);
+                    }
+                });
+            }
+        },
+        
+        focusCellInput: function(columnId) {
+            var input = this.$el.find("[data-columnid='" + columnId + "']").find("input");
+
+            if (input.length > 0)
+                input.focus();
+        },
+
+        _handleActionClick: function (actionEl, action) {
+            var replaceVariablesResult = this._replaceActionParamsVariables(action.params, this);
+
+            if (replaceVariablesResult.inputValid) {
+                var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("actionClicked", this, action.name, replaceVariablesResult.actionParams, actionEl);
+
+                if (!handledExternally) {
+                    actionEl.attr('disabled', 'disabled');
+                    actionEl.addClass('actionLoading');
+
+                    // TODO: Move into model
+                    expanz.net.MethodRequest(action.name, replaceVariablesResult.actionParams, null, this.dataPublicationView.model.get("parent"));
+                }
+            }
+        },
+
+        _handleContextMenuClick: function ($actionEl, action) {
+            var replaceVariablesResult = this._replaceActionParamsVariables(action.params, this);
+            
+            var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("contextMenuClicked", this, action.name, replaceVariablesResult.actionParams, $actionEl);
+
+            if (!handledExternally) {
+                // Create a context menu, and assign it to the clicked element
+                var contextMenuModel = new expanz.models.ContextMenu({
+                    contextId: this.model.id,
+                    type: action.name,
+                    contextObject: replaceVariablesResult.actionParams.contextObject ? replaceVariablesResult.actionParams.contextObject.value : null,
+                    activity: this.dataPublicationView.model.get("parent")
+                });
+
+                var contextMenuView = new expanz.views.ContextMenuView({
+                    el: $actionEl,
+                    id: $actionEl.attr("id"), // TODO: Fix
+                    className: $actionEl.attr("class"),
+                    collection: contextMenuModel
+                });
+
+                window.expanz.currentContextMenu = contextMenuView.collection;
+                
+                contextMenuModel.requestContextMenu();
+            }
+        },
+        
+        _replaceActionParamsVariables: function (actionParams, rowView) {
+            // Replaces variables (starting with @) with actual values in an action params array
+            var inputValid = true;
+            var newActionParams = jQuery.extend(true, {}, actionParams); // Clone the params object so that we don't alter the original
+
+            _.each(newActionParams, function (actionParam) {
+                var name = actionParam.name;
+
+                if (actionParam.value == '@userInput.textinput' || actionParam.value == '@userInput.numericinput') {
+                    var valueInput = rowView.$el.find("#" + rowView.model.id + "_userinput_" + name);
+
+                    if (valueInput.length > 0 && valueInput.val().length > 0) {
+                        actionParam.value = valueInput.val();
+                    } else {
+                        inputValid = false;
+                    }
+                }
+                else if (actionParam.value == '@contextId') {
+                    actionParam.value = rowView.model.id;
+                }
+            });
+
+            return {
+                inputValid: inputValid,
+                actionParams: newActionParams
+            };
+        }
+    });
+});
+///#source 1 1 /source/js/expanz/views/subviews/expanz.views.subviews.DataPublicationPagingBarView.js
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Chris Anderson
+//  Copyright 2008-2013 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+$(function () {
+
+    window.expanz = window.expanz || {};
+    window.expanz.views = window.expanz.views || {};
+    window.expanz.views.subviews = window.expanz.views.subviews || {};
+
+    window.expanz.views.subviews.DataPublicationPagingBarView = Backbone.View.extend({
+
+        id: "pagingBar",
+        tagName: "div",
+        className: "paging",
+
+        initialize: function (params) {
+            this.dataPublicationView = params.dataPublicationView;
+        },
+
+        render: function () {
+            var hasBeenRenderedExternally = this.dataPublicationView.raiseExtensibilityPointEvent("renderingPagingBar");
+
+            if (!hasBeenRenderedExternally) {
+                var itemCount = this.dataPublicationView.model.rows.length;
+                var pageCount = Math.ceil(itemCount / this.dataPublicationView.itemsPerPage);
+                
+                this.$el.html(""); // Clear the contents of the paging bar (if any)
+                
+                if (pageCount > 1)
+                    this.renderPageNumberButtons(pageCount);
+            }
+
+            return this;
+        },
+        
+        renderPageNumberButtons: function (pageCount) {
+            var view = this;
+            
+            for (var pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+                var inputId = this.dataPublicationView.model.id + "BtnPage" + pageIndex;
+                var disabled = "";
+
+                if (pageIndex + 1 == this.dataPublicationView.currentPage)
+                    disabled = " disabled='disabled'";
+
+                this.$el.append("<input id='" + inputId + "' type='button' value='" + (pageIndex + 1) + "' " + disabled + " />");
+
+                this.$el.find("#" + inputId).click(function () {
+                    view.dataPublicationView.currentPage = this.value;
+                    view.dataPublicationView.render();
+                });
+            }
+        }
+    });
+});
 ///#source 1 1 /source/js/expanz/expanz.security.js
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -7374,6 +7226,6 @@ $(function () {
         };
 
         // Register event handlers
-        $inputElement.bind("dataPublication:rendering", onRender);
+        $inputElement.bind("datapublication:rendering", onRender);
     };
 });

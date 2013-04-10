@@ -55,6 +55,11 @@
   <file>/source/js/expanz/views/expanz.views.UIMessage.js</file>  
   <file>/source/js/expanz/views/expanz.views.ManuallyClosedPopup.js</file>
   
+  <file>/source/js/expanz/views/subviews/expanz.views.subviews.DataPublicationHeaderView.js</file>
+  <file>/source/js/expanz/views/subviews/expanz.views.subviews.DataPublicationBodyView.js</file>
+  <file>/source/js/expanz/views/subviews/expanz.views.subviews.DataPublicationRowView.js</file>
+  <file>/source/js/expanz/views/subviews/expanz.views.subviews.DataPublicationPagingBarView.js</file>
+  
   <file>/source/js/expanz/expanz.security.js</file>
   <file>/source/js/expanz/expanz.js</file>
   

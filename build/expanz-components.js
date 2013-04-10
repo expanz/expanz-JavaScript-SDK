@@ -488,7 +488,7 @@ $(function() {
 					html += this.renderDefaultListItemGridTemplate();
 				}
 				html += "<div id='searchResultTitle' class='searchResultTitle' style='display:none'>Showing Results for \"<span id='searchString'></span>\"</div>";
-				html += '<div id="' + this.productListName + '" enableConfiguration="' + enableConfiguration + '" noItemText="No item matches your selection" isHTMLTable="' + displayAsTable + '" templateName="' + templateName + '"  itemsPerPage="' + itemsPerPage + '" dataId="' + this.productListName + '" bind="DataControl" renderingType="grid" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
+				html += '<div id="' + this.productListName + '" enableConfiguration="' + enableConfiguration + '" noItemsText="No item matches your selection" templateName="' + templateName + '"  itemsPerPage="' + itemsPerPage + '" dataId="' + this.productListName + '" bind="DataControl" populateMethod="' + this.productListPopMethod + '" autoPopulate="0" contextObject="' + this.productListContextObject + '"></div>';
 				return html;
 			},
 
@@ -506,19 +506,19 @@ $(function() {
 					}
 
 					if (that.lastListAction == 'specials') {
-						$(el).find("#"+this.productListName).find("#noItemText").hide();
-						$(el).find("#"+this.productListName).find("#noItemText").after("<div id='onSpecial' class='emptyListText'>No Specials at this time - Check back later</div>");
+						$(el).find("#"+this.productListName).find("#noItemsText").hide();
+						$(el).find("#"+this.productListName).find("#noItemsText").after("<div id='onSpecial' class='emptyListText'>No Specials at this time - Check back later</div>");
 					}
 					else if (that.lastListAction == 'newItems') {
-						$(el).find("#"+this.productListName).find("#noItemText").hide();
-						$(el).find("#"+this.productListName).find("#noItemText").after("<div id='newItems' class='emptyListText'>No new items at this time - Check back later</div>");
+						$(el).find("#"+this.productListName).find("#noItemsText").hide();
+						$(el).find("#"+this.productListName).find("#noItemsText").after("<div id='newItems' class='emptyListText'>No new items at this time - Check back later</div>");
 					}
 					else if (that.lastListAction == 'endOfLine') {
-						$(el).find("#"+this.productListName).find("#noItemText").hide();
-						$(el).find("#"+this.productListName).find("#noItemText").after("<div id='endOfLine' class='emptyListText'>No end of line items at this time - Check back later</div>");
+						$(el).find("#"+this.productListName).find("#noItemsText").hide();
+						$(el).find("#"+this.productListName).find("#noItemsText").after("<div id='endOfLine' class='emptyListText'>No end of line items at this time - Check back later</div>");
 					}
 					else {
-						$(el).find("#"+this.productListName).find("#noItemText").show();
+						$(el).find("#"+this.productListName).find("#noItemsText").show();
 						$(el).find("#"+this.productListName).find("#onSpecial").remove();
 					}
 
@@ -668,7 +668,7 @@ $(function() {
 			renderStandardOrdersListModule : function(el) {
 				var html = "";
 				html += '<script type="text/template" id="listStandardOrdersItemTemplate">';
-				html += '<div class="item"><div class="loadStandardOrderName"><a methodName="loadStandardOrderWithPrompt" href="javascript:void(0)"><%=data.Name%></a></div>';
+				html += '<div class="item <%= className %>"><div class="loadStandardOrderName"><a methodName="loadStandardOrderWithPrompt" href="javascript:void(0)"><%=data.Name%></a></div>';
 				html += '<button methodName="deleteStandardOrderWithPrompt" class="deleteStandardOrder" href="javascript:void(0)"></button>';
 				html += '<div class="clear"></div></div>';
 				html += '</script>';
@@ -676,7 +676,7 @@ $(function() {
 				html += '<div class="header">My standard orders';
 				html += '</div>';
 				html += '</script>';
-				html += '<div id="listStandardOrders" class="standardOrders" itemsPerPage="10" dataId="listStandardOrders" bind="DataControl" renderingType="grid" populateMethod="' + this.myStandardOrdersPopMethod + '" contextObject="' + this.myStandardOrdersContextObject + '"></div>';
+				html += '<div id="listStandardOrders" class="standardOrders" itemsPerPage="10" dataId="listStandardOrders" bind="DataControl" populateMethod="' + this.myStandardOrdersPopMethod + '" contextObject="' + this.myStandardOrdersContextObject + '"></div>';
 				return html;
 			},
 
@@ -688,8 +688,11 @@ $(function() {
 			renderDefaultListItemGridTemplate : function() {
 				var html = '';
 				html += '\
-					<script type="text/template" id="productListItemTemplateGrid"> \
-					<div class="productNDetail"> \
+					<script type="text/template" id="productListItemTemplateGridHeader"> \
+					</script>\
+					\
+				    <script type="text/template" id="productListItemTemplateGrid"> \
+					<div class="productNDetail <%= className %>"> \
 						<div class="product"> \
 							<% if ( isImageValid(data.ThumbImage_FileContents) ){ %>  \
 								<div class="productIcon left productThumbnail"> \
@@ -720,7 +723,7 @@ $(function() {
 									<p class="noStock">No stock</p> \
 							<% } else { %>\
 								<div class="productCount left"> \
-									<input class="gridUserInput" type="text" format="numeric"  id="userinput_quantity"></input>\
+									<input class="gridUserInput" type="text" format="numeric"  id="<%= rowModel.id %>_userinput_quantity"></input>\
 								</div> \
 								<div class="left addProductMain"> \
 									<a class="addProduct" methodName="saveItemFromCart"></a> \
@@ -738,13 +741,15 @@ $(function() {
 			renderDefaultListItemTemplateHeader : function() {
 				var html = ' \
 					<script type="text/template" id="productListItemTemplateListHeader">\
-					<thead><tr class="item listDisplay" style="height:25px;font-size:16px;text-align:center"> \
+					<thead>\
+			        <tr class="item listDisplay" style="height:25px;font-size:16px;text-align:center"> \
 					<th class="cell" style="width:65px;">&nbsp;</th> \
 					<th class="cell">Name</th> \
 					<th class="cell" style="width:60px;">Price</th> \
 					<th class="cell">Note</th> \
 					<th class="cell" style="">Actions</th> \
-					</tr></thead>\
+					</tr>\
+			        <thead>\
 					</script>';
 				return html;
 			},
@@ -949,7 +954,7 @@ $(function() {
 				html += '<button methodName="deleteItemFromCart">X</button>';
 				html += window.expanz.html.endDiv();
 				html += '</script>';
-				html += "<div bind='DataControl' noItemText='Empty' renderingType='grid' id='lvMiniCart' dataId='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
+				html += "<div bind='DataControl' noItemsText='Empty' renderingType='grid' id='lvMiniCart' dataId='" + this.miniCartName + "' contextObject='" + this.miniCartContextObject + "'></div>";
 				return html
 			},
 
@@ -986,7 +991,7 @@ $(function() {
 			    $("#lvMiniCart").bind("datapublication:rendered", function () {
 
 					/* hiding the checkout part if no items */
-					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === "0") {
+			        if ($("#lvMiniCart > [data-itemcount]").attr("data-itemcount") === "0") {
 						$("#cartCheckout").hide();
 						$("#cartTotals").hide();
 						$("#cartEmptyButton").hide();
@@ -1002,7 +1007,7 @@ $(function() {
 			renderMiniGoToCartBoxModule : function(el) {
 				var html = "";
 				html += '<div><div id="miniCartBox" style="display:none" class="miniCartBox" onclick="if($(\'#nbItems\').text() != 0) window.location=\'' + getPageUrl(this.shoppingCartCheckoutPage) + '\'" >';
-				html += '<span class="miniCartBoxImage">CART</span><span class="miniCartBoxTotal" bind="field" name="Total2"><span attribute="value">$0</span></span> <div bind="field" name="CartItemsCount" class="cartItemCount"><span  id="nbItems" attribute="value">0</span></div></div></div>';
+				html += '<span class="miniCartBoxImage">CART</span><span class="miniCartBoxTotal" bind="field" name="Total2"><span attribute="value">$0</span></span> <div bind="field" name="CartItemsCount" class="cartItemCount"><span id="nbItems" attribute="value">0</span></div></div></div>';
 				return html;
 			},
 
@@ -1199,7 +1204,7 @@ $(function() {
 				var that = this;
 				$("#lvMiniCart").bind("datapublication:rendered", function () {
 					/* hiding the checkout part if no items and not order submitted message displayed */
-					if ($("#lvMiniCart > [nbItems]").attr("nbItems") === "0" && ($('.k-window-title:contains("Order Submitted")').length === 0) && $('.k-window-title:contains("Order Saved")').length === 0) {
+				    if ($("#lvMiniCart > [data-itemcount]").attr("data-itemcount") === "0" && ($('.k-window-title:contains("Order Submitted")').length === 0) && $('.k-window-title:contains("Order Saved")').length === 0) {
 						expanz.views.redirect(that.shoppingCartPage);
 					}
 					else {
@@ -1255,15 +1260,15 @@ $(function() {
 				var itemsPerPage = (el !== undefined && el.attr('itemsPerPage') !== undefined) ? el.attr('itemsPerPage') : 12;
 
 				html += '<script type="text/template" id="orderHistoryItemTemplateHeader">';
-				html += '<thead><tr class="item"><th sortField="SearchCode" style="width:100px">Search code</th><th style="width:200px" sortField="Name" >Name</th><th style="width:100px" sortField="Status" >Status</th><th  style="width:200px" sortField="CreationDate" defaultSorted="desc">Creation Date</th><th style="width:120px" sortField="Total">Amount</th><th>Actions</th></tr></thead>';
+				html += '<thead><tr class="item"><th sortField="SearchCode" style="width:100px">Search code</th><th style="width:200px" sortField="Name" >Name</th><th style="width:100px" sortField="Status" >Status</th><th  style="width:200px" sortField="CreationDate" defaultSortDirection="desc">Creation Date</th><th style="width:120px" sortField="Total">Amount</th><th>Actions</th></tr></thead>';
 				html += '</script>';
 
 				html += '<script type="text/template" id="orderHistoryItemTemplate">';
 				html += '<tr class="item"><td><%=data.SearchCode%></td><td><%=data.Client_Name%></td><td><%=data.Status%></td><td><%=data.CreationDate%></td><td><%=data.Total%></td>';
-				html += '<td class="actions"><% if(sortedValues.Status >= 20){ %><button methodName="showInvoice">Show Invoice</button><% } %></td></tr>';
+				html += '<td class="actions"><% if(sortValues.Status >= 20){ %><button methodName="showInvoice">Show Invoice</button><% } %></td></tr>';
 				html += '</script>';
 
-				html += '<div id="orderHistoryDivList" class="orderHistory" isHTMLTable="true" populateMethod="' + this.orderHistoryPopMethod + '" itemsPerPage="' + itemsPerPage + '" dataId="' + this.orderHistoryListName + '" bind="DataControl" renderingType="grid" contextObject="' + this.orderHistoryContextObject + '"></div>';
+				html += '<table id="orderHistoryDivList" class="orderHistory" populateMethod="' + this.orderHistoryPopMethod + '" itemsPerPage="' + itemsPerPage + '" dataId="' + this.orderHistoryListName + '" bind="DataControl" contextObject="' + this.orderHistoryContextObject + '"></table>';
 				return html;
 			},
 

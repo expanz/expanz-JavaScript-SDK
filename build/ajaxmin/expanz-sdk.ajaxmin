@@ -57,6 +57,11 @@
     <input path="source/js/expanz/views/expanz.views.PicklistWindowView.js" />
     <input path="source/js/expanz/views/expanz.views.UIMessage.js" />
     <input path="source/js/expanz/views/expanz.views.ManuallyClosedPopup.js" />
+    
+    <input path="source/js/expanz/views/subviews/expanz.views.subviews.DataPublicationHeaderView.js" />
+    <input path="source/js/expanz/views/subviews/expanz.views.subviews.DataPublicationBodyView.js" />
+    <input path="source/js/expanz/views/subviews/expanz.views.subviews.DataPublicationRowView.js" />
+    <input path="source/js/expanz/views/subviews/expanz.views.subviews.DataPublicationPagingBarView.js" />
 
     <input path="source/js/expanz/expanz.security.js" />
     <input path="source/js/expanz/expanz.js" />

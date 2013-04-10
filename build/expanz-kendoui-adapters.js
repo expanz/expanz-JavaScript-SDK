@@ -336,14 +336,14 @@ $.fn.KendoMobileListAdapter = function(options) {
 
 ///#source 1 1 /source/js/adapters/KendoPanelBarAdapter.js
 $.fn.KendoPanelBarAdapter = function(options) {
-
 	var panelView = $(this);
-
 	var parentSelectable = true;
 	var labelAttribute = 'title';
 	var idAttribute = 'id';
 	var expandedOnLoad = true;
 	var staticElements = {};
+	var cachedDataPublicationModel = null;
+    var fieldName = panelView.attr("fieldname");
 
 	/* function called after the delta has been sent and the response has been handle by the client */
 	/* format is selectionCallback = { success : function(){ <doing some actions> } } */
@@ -353,8 +353,10 @@ $.fn.KendoPanelBarAdapter = function(options) {
 
 	var onSelection = function(view, id, isChild) {
 		if (!parentSelectable && !isChild)
-			return;
-		view.itemSelected(id, selectionCallback);
+		    return;
+	    
+		expanz.net.DeltaRequest(fieldName, id, cachedDataPublicationModel.get('parent'), selectionCallback);
+		//view.itemSelected(id, selectionCallback);
 	};
 
 	/* handle options */
@@ -380,28 +382,31 @@ $.fn.KendoPanelBarAdapter = function(options) {
 	/**
 	 * define publishData which is called when list of data is ready
 	 */
-	var publishData = function(event, xml, view) {
-		window.expanz.logToConsole("KendoPanelBarAdapter publishData");
-		var xmlData = xml;
+	var publishData = function(event, dataPublicationModel, dataPublicationView, args) {
+	    cachedDataPublicationModel = dataPublicationModel;
+		var $xmlData = dataPublicationModel.$rawXml;
+		var $rootNode = $xmlData;
 		var data = [];
 
 		var childTag = '';
 
 		/* if xml contains rows tag, this is where starts the real data for the panel bar */
-		if ($(xml).find("Rows").length > 0) {
-			xml = $(xml).find("Rows");
+		if ($rootNode.find("Rows").length > 0) {
+		    $rootNode = $rootNode.find("Rows");
 		}
 
-		_.each($(xml).children(), function(parentXml) {
-			var parentId = $(parentXml).attr(idAttribute);
-			var parentObj = {};
-			parentObj.text = $(parentXml).attr(labelAttribute);
-			parentObj.expanded = expandedOnLoad;
-			parentObj.allAttributes = $(parentXml).getAttributes();
-
+		_.each($rootNode.children(), function(parentXml) {
+		    var parentObj = {
+		        text: $(parentXml).attr(labelAttribute),
+		        expanded: expandedOnLoad,
+		        allAttributes: $(parentXml).getAttributes()
+		    }
+	    
 			var items = [];
+		    
 			_.each($(parentXml).children(), function(childXml) {
-				childTag = childXml.tagName;
+			    childTag = childXml.tagName;
+			    
 				items.push({
 					text : $(childXml).attr(labelAttribute),
 					value : $(childXml).attr(idAttribute),
@@ -414,8 +419,8 @@ $.fn.KendoPanelBarAdapter = function(options) {
 				items.sort(getObjectSortAscendingFunction('text'));
 				parentObj.items = items;
 			}
+		    
 			data.push(parentObj);
-
 		});
 
 		/* sort data */
@@ -427,8 +432,7 @@ $.fn.KendoPanelBarAdapter = function(options) {
 				data.push({
 					text : $(elem).attr('label')
 				});
-			}
-			else {
+			} else {
 				data.unshift({
 					text : $(elem).attr('label')
 				});
@@ -442,6 +446,7 @@ $.fn.KendoPanelBarAdapter = function(options) {
 		/* add css class for level 1 / level 2 */
 		/* add css class level 1 */
 		panelView.children("li").addClass("level1");
+	    
 		/* add css class level 2 */
 		panelView.children("li").find("ul").children("li").addClass("level2");
 
@@ -454,49 +459,50 @@ $.fn.KendoPanelBarAdapter = function(options) {
 
 			/* check if it is a static element */
 			var isStatic = false;
+		    
 			if (staticElements.length > 0) {
 				_.each(staticElements, function(elem) {
 					if (selectedText === elem.label) {
-						isStatic = true;
+					    isStatic = true;
+					    
 						/* call the method associated */
 						expanz.net.MethodRequest(elem.method, [
 							{
 								name : "contextObject",
 								value : elem.contextObject
 							}
-						], null, view.model.get('parent'));
+						], null, dataPublicationView.model.get('parent'));
 					}
 				});
-
 			}
 
 			if (!isStatic) {
-
-				var elem;
-				$(xmlData).find("[" + labelAttribute + "]").each(function() {
+			    var elem;
+			    
+				$xmlData.find("[" + labelAttribute + "]").each(function() {
 					if (selectedText === $(this).attr(labelAttribute)) {
 						elem = $(this);
 					}
 				});
 
 				if (onSelection) {
-					onSelection(view, elem.attr('id'), elem.is(childTag));
+				    onSelection(dataPublicationView, elem.attr('id'), elem.is(childTag));
 				}
 			}
 		});
 
 		/* calling runAfterPublish if defined */
 		if (runAfterPublish) {
-			runAfterPublish(xmlData);
+			runAfterPublish($xmlData);
 		}
 		
 		$(this).trigger('dataPublished');
 
+	    args.handled = true;
 	};
 
-	/* bind listenner */
-	$(this).bind("publishData", publishData);
-
+	/* bind listener */
+	$(this).bind("datapublication:publishData", publishData);
 };
 
 ///#source 1 1 /source/js/adapters/KendoPopupMessage.js
@@ -590,9 +596,7 @@ $.fn.KendoTimePickerAdapter = function() {
 
 ///#source 1 1 /source/js/adapters/KendoTreeAdapter.js
 $.fn.KendoTreeAdapter = function(options) {
-
 	var treeView = $(this);
-
 	var parentSelectable = true;
 	var labelAttribute = 'title';
 	var idAttribute = 'id';
@@ -600,56 +604,68 @@ $.fn.KendoTreeAdapter = function(options) {
 	var filteringInput = []; /* array of input element */
 	var displayLoading = true;
 	var staticElements = {};
+	var cachedDataPublicationModel = null;
+	var runAfterPublish = null;
 
 	/* function called after the delta has been sent and the response has been handle by the client */
 	/* format is selectionCallback = function(){ <doing some actions> } */
 	var selectionCallback = null;
 
-	var callback = {
+	var onSelectionCallback = {
 		success : function() {
 			// treeView.data('kendoTreeView').enable(".k-item",true);
-			if (displayLoading) {
-				treeView.removeClass('treeSelectionLoading');
-				var loadingId = "LoadingTree_" + treeView.attr('id');
-				var loadingEL = $(treeView).find("#" + loadingId);
-				if (loadingEL)
-					loadingEL.hide();
-			}
-
+			
 			if (selectionCallback)
 				selectionCallback.call();
 		}
 	};
-
-	var runAfterPublish = null;
-
-	var onSelection = function(view, id, isChild) {
+    
+	var onSelection = function(view, id, isChild, callback, loadingIndicator) {
 		if (!parentSelectable && !isChild)
-			return;
-		view.itemSelected(id, callback);
-		// treeView.data('kendoTreeView').enable(".k-item",false);
-		if (displayLoading) {
-			var loadingId = "LoadingTree_" + treeView.attr('id');
-			var loadingEL = $(view.el).find("#" + loadingId);
-			if (loadingEL.length === 0) {
-				$(view.el).append('<div class="loading" id="' + loadingId + '"><span> </span></div>');
-				loadingEL = $(view.el).find("#" + loadingId);
-			}
+		    return;
 
-			loadingEL.css("position", "absolute");
-			loadingEL.css('width', '100%');
-			loadingEL.css('height', '100%');
-			loadingEL.css('margin', '0');
-			loadingEL.css('padding', '0');
-			loadingEL.css('top', '0px');
-			loadingEL.css('left', '0px');
-			loadingEL.css('z-index', '999');
-			loadingEL.css('overflow', 'hidden');
-			loadingEL.css('background', 'url(data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==) center');
-			loadingEL.show();
-			treeView.addClass('treeSelectionLoading');
-		}
+		//view.itemSelected(id, callback);
+		// treeView.data('kendoTreeView').enable(".k-item",false);
 	};
+
+    var loadingIndicator = {
+        show: function(hostElement) {
+            if (displayLoading) {
+                var loadingId = "LoadingTree_" + treeView.attr('id');
+                var loadingEL = $(hostElement).find("#" + loadingId);
+
+                if (loadingEL.length === 0) {
+                    $(hostElement).append('<div class="loading" id="' + loadingId + '"><span> </span></div>');
+                    loadingEL = $(hostElement).find("#" + loadingId);
+                }
+
+                loadingEL.css("position", "absolute");
+                loadingEL.css('width', '100%');
+                loadingEL.css('height', '100%');
+                loadingEL.css('margin', '0');
+                loadingEL.css('padding', '0');
+                loadingEL.css('top', '0px');
+                loadingEL.css('left', '0px');
+                loadingEL.css('z-index', '999');
+                loadingEL.css('overflow', 'hidden');
+                loadingEL.css('background', 'url(data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==) center');
+                loadingEL.show();
+                treeView.addClass('treeSelectionLoading');
+            }
+        },
+        
+        hide: function() {
+            if (displayLoading) {
+                treeView.removeClass('treeSelectionLoading');
+
+                var loadingId = "LoadingTree_" + treeView.attr('id');
+                var loadingEL = $(treeView).find("#" + loadingId);
+
+                if (loadingEL)
+                    loadingEL.hide();
+            }
+        }
+    };
 
 	/* filter data */
 	var filterData = function(event, filter, originalData) {
@@ -761,19 +777,20 @@ $.fn.KendoTreeAdapter = function(options) {
 	/**
 	 * define publishData which is called when list of data is ready
 	 */
-	var publishData = function(event, xml, view) {
-		window.expanz.logToConsole("KendoTreeAdapter publishData");
-		var xmlData = xml;
+    var publishData = function (event, dataPublicationModel, dataPublicationView, args) {
+        cachedDataPublicationModel = dataPublicationModel;
+        var $xmlData = dataPublicationModel.$rawXml;
+        var $rootNode = $xmlData;
 		var data = [];
 
 		var parentTag = '';
 
-		/* if xml contains rows tag, this is where starts the real data for the tree */
-		if ($(xml).find("Rows").length > 0) {
-			xml = $(xml).find("Rows");
+        /* if xml contains rows tag, this is where starts the real data for the panel bar */
+		if ($rootNode.find("Rows").length > 0) {
+		    $rootNode = $rootNode.find("Rows");
 		}
 
-		_.each($(xml).children(), function(parentXml) {
+		_.each($rootNode.children(), function (parentXml) {
 			var parentObj = parseRow(parentXml);
 			parentTag = parentXml.tagName;
 			data.push(parentObj);
@@ -785,8 +802,7 @@ $.fn.KendoTreeAdapter = function(options) {
 				data.push({
 					text : $(elem).attr('label')
 				});
-			}
-			else {
+			} else {
 				data.unshift({
 					text : $(elem).attr('label')
 				});
@@ -806,6 +822,7 @@ $.fn.KendoTreeAdapter = function(options) {
 
 			/* check if it is a static element */
 			var isStatic = false;
+		    
 			if (staticElements.length > 0) {
 				_.each(staticElements, function(elem) {
 					if (selectedText === elem.label) {
@@ -816,29 +833,27 @@ $.fn.KendoTreeAdapter = function(options) {
 								name : "contextObject",
 								value : elem.contextObject
 							}
-						], null, view.model.get('parent'));
+						], null, dataPublicationModel.get('parent'));
 
 						$(treeView).trigger("TreeSelectionChanged", {
 							id : 'static',
 							text : selectedText
 						});
-
 					}
 				});
-
 			}
 
 			if (!isStatic) {
-
-				var elem;
-				$(xmlData).find("[" + labelAttribute + "]").each(function() {
+			    var elem;
+			    
+				$xmlData.find("[" + labelAttribute + "]").each(function() {
 					if (selectedText === $(this).attr(labelAttribute)) {
 						elem = $(this);
 					}
 				});
 
 				if (onSelection) {
-					onSelection(view, elem.attr('id'), !elem.is(parentTag));
+				    onSelection(dataPublicationView, elem.attr('id'), !elem.is(parentTag), onSelectionCallback, loadingIndicator);
 				}
 
 				$(treeView).trigger("TreeSelectionChanged", {
@@ -866,24 +881,22 @@ $.fn.KendoTreeAdapter = function(options) {
 				if ($(el).is("input")) {
 					$(el).val("");
 					$(el).bind("change", filterInputs);
-				}
-				else if ($(el).is("button")) {
+				} else if ($(el).is("button")) {
 					$(el).bind("click", filterButtons);
 				}
 			});
-
 		}
 
 		/* calling runAfterPublish if defined */
 		if (runAfterPublish) {
-			runAfterPublish(xmlData);
+			runAfterPublish($xmlData);
 		}
 
+		args.handled = true;
 	};
 
-	/* bind listenner */
-	$(this).bind("publishData", publishData);
+	/* bind listener */
+	$(this).bind("datapublication:publishData", publishData);
 	$(this).bind("filterData", filterData);
-
 };
 
