@@ -31,6 +31,7 @@
         <file src="..\source\js\adapters\TimeInputAdapter.js" target="content\Scripts\expanz\adapters\TimeInputAdapter.js" />
         <file src="..\source\js\adapters\BreadcrumbAdapter.js" target="content\Scripts\expanz\adapters\BreadcrumbAdapter.js" />
         <file src="..\source\js\expanz\client\ActivityInfo.js" target="content\Scripts\expanz\client\ActivityInfo.js" />
+        <file src="..\source\js\expanz\client\GridViewInfo.js" target="content\Scripts\expanz\client\GridViewInfo.js" />
         <file src="..\source\js\expanz\client\ProcessArea.js" target="content\Scripts\expanz\client\ProcessArea.js" />
         <file src="..\source\js\expanz\client\requestBody.js" target="content\Scripts\expanz\client\requestBody.js" />
         <file src="..\source\js\expanz\client\requestBuilder.js" target="content\Scripts\expanz\client\requestBuilder.js" />
