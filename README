@@ -127,7 +127,9 @@ window.config = {
 
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/expanz.models.Bindable.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/expanz.models.Field.js"></script>
+    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/expanz.models.CustomContent.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/expanz.models.DashboardField.js"></script>
+    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/expanz.models.DataPublication.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/expanz.models.Method.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/expanz.models.MenuAction.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/expanz.models.ContextMenu.js"></script>
@@ -138,10 +140,8 @@ window.config = {
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/expanz.models.Activity.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/expanz.models.ClientMessage.js"></script>
 
-    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/data/expanz.models.data.DataControl.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/data/expanz.models.data.Cell.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/data/expanz.models.data.Row.js"></script>
-    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/models/data/expanz.models.data.Grid.js"></script>
 
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/expanz.net.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/client/requestBuilder.js"></script>
@@ -149,7 +149,6 @@ window.config = {
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/client/responseParser.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/client/ActivityInfo.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/client/ProcessArea.js"></script>
-    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/client/GridViewInfo.js"></script>
 
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/expanz.storage.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/menu/AppSiteMenu.js"></script>
@@ -166,16 +165,21 @@ window.config = {
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.MethodView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.MessagesView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.ContextMenuView.js"></script>
-    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.GridView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.LoginView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.ActivityView.js"></script>
-    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.DataControlView.js"></script>
+    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.DataPublicationView.js"></script>
+    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.CustomContentView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.CheckboxesView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.RadioButtonsView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.PopupView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.PicklistWindowView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.UIMessage.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.ManuallyClosedPopup.js"></script>
+        
+    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/subviews/expanz.views.subviews.DataPublicationHeaderView.js"></script>
+    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/subviews/expanz.views.subviews.DataPublicationBodyView.js"></script>
+    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/subviews/expanz.views.subviews.DataPublicationRowView.js"></script>
+    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/subviews/expanz.views.subviews.DataPublicationPagingBarView.js"></script>
 
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/expanz.security.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/expanz.js"></script>

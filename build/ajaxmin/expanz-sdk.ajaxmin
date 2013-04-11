@@ -34,7 +34,6 @@
     <input path="source/js/expanz/client/responseParser.js" />
     <input path="source/js/expanz/client/ActivityInfo.js" />
     <input path="source/js/expanz/client/ProcessArea.js" />
-    <input path="source/js/expanz/client/GridViewInfo.js" />
 
     <input path="source/js/expanz/expanz.storage.js" />
     <input path="source/js/expanz/menu/AppSiteMenu.js" />
