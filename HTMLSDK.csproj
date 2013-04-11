@@ -75,8 +75,8 @@
     <Content Include="source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationHeaderView.js" />
     <Content Include="source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationPagingBarView.js" />
     <Content Include="source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationRowView.js" />
+    <Content Include="source\js\lib\backbone-min.js" />
     <Content Include="source\js\lib\backbone.js" />
-    <Content Include="source\js\lib\backbone.min.js" />
     <None Include="build\expanz-javascript-sdk-source.nuspec" />
     <None Include="build\expanz-javascript-sdk.nuspec" />
     <None Include="Properties\PublishProfiles\Test AU.pubxml" />
