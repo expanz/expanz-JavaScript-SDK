@@ -203,6 +203,7 @@ $(function() {
 			expanz.Factory.bindMessageControl(activityView);
 			expanz.Factory.bindMethods(activityView);
 			expanz.Factory.bindDataControls(activityView);
+			expanz.Factory.bindCustomContentControls(activityView);
 			expanz.Factory.bindFields(activityView);
 		    
 			return activityView;
@@ -256,7 +257,6 @@ $(function() {
 
 		bindFields: function (activityView) {
 		    var activityModel = activityView.model;
-		    var fieldIdSuffixIndex = 0;
 		    
 		    var fieldViewCollection = expanz.Factory.createFieldViews(activityView.$el.find('[bind=field]'));
 		    var dataFieldViewCollection = expanz.Factory.createDataFieldViews(activityView.$el.find('[bind=datafield]'));
@@ -363,6 +363,25 @@ $(function() {
 					}
 				}
 			});
+		},
+
+		bindCustomContentControls: function (activityView) {
+		    var activityModel = activityView.model;
+
+		    var customContentViewCollection = expanz.Factory.createCustomContentViews(activityView.$el.find('[bind=customcontent]'));
+
+		    _.each(customContentViewCollection, function (customContentView) {
+		        var customContentModel = customContentView.model;
+
+		        customContentModel.set({
+		            parent: activityModel
+		        }, {
+		            silent: true
+		        });
+
+		        activityModel.customContentCollection.add(customContentModel);
+		        activityView.addCustomContentView(customContentView);
+		    });
 		},
 
 		createFieldViews : function(DOMObjects) {
@@ -626,7 +645,31 @@ $(function() {
 		    });
 
 		    return dataPublicationViews;
-		}
+		},
+
+		createCustomContentViews: function (domObjects) {
+		    var customContentViews = [];
+
+		    _.each(domObjects, function (customContentEl) {
+		        var $customContentEl = $(customContentEl);
+
+		        var model = new expanz.models.CustomContent({
+		            id: $customContentEl.attr("id"),
+		            method: $customContentEl.attr("method"),
+		            type: $customContentEl.attr("type")
+		        });
+
+		        var view = new expanz.views.CustomContentView({
+		            el: customContentEl,
+		            id: model.get("id"),
+		            model: model
+		        });
+
+		        customContentViews.push(view);
+		    });
+
+		    return customContentViews;
+		},
 	};
 });
 ///#source 1 1 /source/js/expanz/expanz.html.js
@@ -1454,6 +1497,35 @@ $(function() {
 	});
 });
 
+///#source 1 1 /source/js/expanz/models/expanz.models.CustomContent.js
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Chris Anderson
+//  Copyright 2008-2013 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+$(function () {
+
+    window.expanz = window.expanz || {};
+    window.expanz.models = window.expanz.models || {};
+
+    window.expanz.models.CustomContent = Backbone.Model.extend({
+
+        publish: function ($rawXml) {
+            // Content has been published to this model, so notify the associated view by raising an event.
+            // Adapters can parse this content as they wish.
+            this.$rawXml = $rawXml;
+            this.trigger("customcontent:contentPublished");
+        }
+    });
+});
+
 ///#source 1 1 /source/js/expanz/models/expanz.models.DashboardField.js
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1640,7 +1712,7 @@ $(function () {
         initialize: function (attrs) {
             this.loading = false;
 
-            this.contextId = attrs["contextId"];
+            this.contextId = attrs["contextId"] || attrs["id"];
             this.activity = attrs["activity"];
             this.type = attrs["type"];
             this.contextObject = attrs["contextObject"];
@@ -1996,6 +2068,7 @@ $(function() {
 	        this.fields = new expanz.Collection();
 	        this.methods = new expanz.Collection();
 	        this.dataPublications = new expanz.Collection();
+	        this.customContentCollection = new expanz.Collection();
 	        this.messageCollection = new expanz.models.MessageCollection();
 	        this.loading = false;
 	    },
@@ -2101,7 +2174,7 @@ $(function () {
             this.trigger("datapublication:dataPublished");
         },
 
-        addColumn: function (id, field, label, datatype, width, isEditable, matrixKey) {
+        addColumn: function (id, field, label, datatype, displayStyle, width, isEditable, matrixKey) {
             // Create a "safe" field name, replacing periods with underscores
             var safeFieldName = field || id;
             safeFieldName = safeFieldName.replace(/\./g, "_");
@@ -2112,6 +2185,7 @@ $(function () {
                 safeFieldName: safeFieldName,
                 label: label,
                 datatype: datatype,
+                displayStyle: displayStyle,
                 width: width,
                 isEditable: isEditable,
                 matrixKey: matrixKey
@@ -2314,13 +2388,14 @@ $(function() {
 		    this.dataPublication = null; // Will be set in populateDataPublicationModel in responseParser
 		},
 
-		addCell: function (cellId, value, column, sortValue) {
+		addCell: function (cellId, value, column, sortValue, displayStyle) {
 		    this.cells.add({
 		        id: cellId,
 		        value: value,
 		        row: this,
 		        column: column,
-		        sortValue: sortValue
+		        sortValue: sortValue,
+		        displayStyle: displayStyle
 		    });
 		},
 
@@ -3605,6 +3680,9 @@ function parseActivityResponse(activityElement, initiator) {
                 case "Data":
                     parseDataResponse(currentElement, activityModel, activityView);
                     break;
+                case "CustomContent":
+                    parseCustomContentResponse(currentElement, activityModel);
+                    break;
                 case "Messages":
                     parseActivityLevelMessagesResponse(currentElement, activityModel);
                     break;
@@ -3713,6 +3791,17 @@ function parseDataResponse(dataElement, activityModel, activityView) {
         _.each(activityModel.fields.where({ fieldId: id }), function (field) {
             field.publishData($dataElement);
         });
+    }
+}
+
+function parseCustomContentResponse(customContentElement, activityModel) {
+    var $customContentElement = $(customContentElement);
+    var id = $customContentElement.attr('id');
+
+    var customContentModel = activityModel.customContentCollection.get(id);
+
+    if (customContentModel) {
+        customContentModel.publish($customContentElement);
     }
 }
 
@@ -3977,7 +4066,7 @@ function populateDataPublicationModel(dataPublicationModel, data) {
     // Add columns to the grid Model
     _.each($data.find('Column'), function (column) {
         var $column = $(column);
-        dataPublicationModel.addColumn($column.attr('id'), $column.attr('field'), $column.attr('label'), $column.attr('datatype'), $column.attr('width'), $column.attr('editable') === "1", $column.attr('matrixKey'));
+        dataPublicationModel.addColumn($column.attr('id'), $column.attr('field'), $column.attr('label'), $column.attr('datatype'), $column.attr('displayStyle'), $column.attr('width'), $column.attr('editable') === "1", $column.attr('matrixKey'));
     });
 
     // Add rows to the grid Model
@@ -3992,7 +4081,7 @@ function populateDataPublicationModel(dataPublicationModel, data) {
             cell = serializeXML(cell); // quick fix for htmlunit
             var $cell = $(cell);
             
-            rowModel.addCell($cell.attr('id'), $cell.text(), dataPublicationModel.columns.get($cell.attr('id')), $cell.attr('sortValue'));
+            rowModel.addCell($cell.attr('id'), $cell.text(), dataPublicationModel.columns.get($cell.attr('id')), $cell.attr('sortValue'), $cell.attr('displayStyle'));
         });
     });
 
@@ -5156,6 +5245,39 @@ $(function () {
         }
     });
 });
+///#source 1 1 /source/js/expanz/views/expanz.views.CustomContentView.js
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Kim Damevin, Chris Anderson, Stephen Neander
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+$(function () {
+
+    window.expanz = window.expanz || {};
+    window.expanz.views = window.expanz.views || {};
+
+    window.expanz.views.CustomContentView = Backbone.View.extend({
+        
+        initialize: function() {
+            this.model.bind("customcontent:contentPublished", this.onContentPublished, this);
+        },
+
+        onContentPublished: function () {
+            var args = { handled: false };
+            
+            this.$el.trigger("customcontent:contentPublished", [
+				this.model, this, args
+            ]);
+        }
+    });
+});
+
 ///#source 1 1 /source/js/expanz/views/expanz.views.DependantFieldView.js
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5637,6 +5759,7 @@ $(function () {
             this.fieldViewCollection = {};
             this.methodViewCollection = {};
             this.dataControlViewCollection = {};
+            this.customContentViewCollection = {};
             
             this.model.bind("error", this.updateError, this);
             this.model.bind("change:loading", this.loading, this);
@@ -5747,6 +5870,15 @@ $(function () {
                 this.dataControlViewCollection[dataControlView.id] = [];
 
             this.dataControlViewCollection[dataControlView.id].push(dataControlView);
+
+            return;
+        },
+
+        addCustomContentView: function (customContentView) {
+            if (this.customContentViewCollection[customContentView.id] === undefined)
+                this.customContentViewCollection[customContentView.id] = [];
+
+            this.customContentViewCollection[customContentView.id].push(customContentView);
 
             return;
         }
@@ -6335,11 +6467,11 @@ $(function () {
 
     window.expanz.views.subviews.DataPublicationRowView = Backbone.View.extend({
 
-        defaultRowTemplate: _.template('<tr class="<%= className %>">' +
+        defaultRowTemplate: _.template('<tr class="<%= ((rowIndex % 2 == 1) ? "gridRowAlternate" : "gridRow") + (rowModel.get("displayStyle") ? " grid-" + rowModel.get("displayStyle") : "") %>">' +
                                        '<%= rowView.renderRowCells(rowModel) %>' +
                                        '</tr>'),
 
-        defaultCellTemplate: _.template('<td data-columnid="<%= cellModel.get("id") %>">' +
+        defaultCellTemplate: _.template('<td data-columnid="<%= cellModel.get("id") %>" class="<%= cellModel.get("displayStyle") || cellModel.column.get("displayStyle") || "" %>">' +
                                         '<%= rowView.renderCellContents(cellModel, rowModel, cellIndex, isDrillDownRow) %>' +
                                         '</td>'),
 
@@ -6351,16 +6483,10 @@ $(function () {
             var hasBeenRenderedExternally = this.dataPublicationView.raiseExtensibilityPointEvent("renderingRow");
 
             if (!hasBeenRenderedExternally) {
-                var className = (this.options.rowIndex % 2 == 1) ? 'gridRowAlternate' : 'gridRow';
-
-                // If a displayStyle attribute is passed from the server, use it, prefixed with grid- as the class name
-                if (this.model.get("displayStyle"))
-                    className = "grid-" + this.model.get("displayStyle");
-
                 var cellValues = this.model.getCellValues();
 
                 var itemTemplate = this.getItemTemplate();
-                this.setElement(itemTemplate({ rowModel: this.model, data: cellValues.data, sortValues: cellValues.sortValues, className: className, rowView: this }));
+                this.setElement(itemTemplate({ rowModel: this.model, data: cellValues.data, sortValues: cellValues.sortValues, rowView: this, rowIndex: this.options.rowIndex }));
 
                 // Set attributes on the element that will be used to identify it
                 this.$el.attr("data-rowid", this.model.id);
@@ -6486,25 +6612,27 @@ $(function () {
             var dataPublicationView = rowView.dataPublicationView;
 
             /* Search for elements with a methodName attribute, and bind them to an action */
-            rowView.$el.find("[methodName]").each(function (index, element) {
-                var action = dataPublicationView.model.actions[$(element).attr('methodName')];
+            rowView.$el.find("[methodName]").click(function () {
+                var action = dataPublicationView.model.actions[$(this).attr('methodName')];
 
-                if (action) {
-                    $(element).click(function () {
-                        rowView._handleActionClick.call(rowView, $(this), action);
-                    });
-                }
+                if (action)
+                    rowView._executeAction.call(rowView, $(this), action);
+            });
+
+            /* Call a method on the server if a user changes the value of an input with the autoUpdate attribute */
+            rowView.$el.find("[autoUpdate]").change(function () {
+                var action = dataPublicationView.model.actions[$(this).attr('autoUpdate')];
+                
+                if (action)
+                    rowView._executeAction.call(rowView, $(this), action);
             });
 
             /* Search for elements with a contextMenu attribute, and bind them to an action */
-            rowView.$el.find("[contextMenu] ").each(function (index, element) {
-                var action = dataPublicationView.model.actions[$(element).attr('contextMenu')];
+            rowView.$el.find("[contextMenu]").click(function () {
+                var action = dataPublicationView.model.actions[$(this).attr('contextMenu')];
 
-                if (action) {
-                    $(element).click(function () {
-                        rowView._handleContextMenuClick.call(rowView, $(this), action);
-                    });
-                }
+                if (action) 
+                    rowView._requestContextMenu.call(rowView, $(this), action);
             });
         },
 
@@ -6555,15 +6683,15 @@ $(function () {
                 input.focus();
         },
 
-        _handleActionClick: function (actionEl, action) {
+        _executeAction: function ($actionEl, action) {
             var replaceVariablesResult = this._replaceActionParamsVariables(action.params, this);
 
             if (replaceVariablesResult.inputValid) {
-                var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("actionClicked", this, action.name, replaceVariablesResult.actionParams, actionEl);
+                var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("executingAction", this, action.name, replaceVariablesResult.actionParams, $actionEl);
 
                 if (!handledExternally) {
-                    actionEl.attr('disabled', 'disabled');
-                    actionEl.addClass('actionLoading');
+                    $actionEl.attr('disabled', 'disabled');
+                    $actionEl.addClass('actionLoading');
 
                     // TODO: Move into model
                     expanz.net.MethodRequest(action.name, replaceVariablesResult.actionParams, null, this.dataPublicationView.model.get("parent"));
@@ -6571,10 +6699,10 @@ $(function () {
             }
         },
 
-        _handleContextMenuClick: function ($actionEl, action) {
+        _requestContextMenu: function ($actionEl, action) {
             var replaceVariablesResult = this._replaceActionParamsVariables(action.params, this);
             
-            var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("contextMenuClicked", this, action.name, replaceVariablesResult.actionParams, $actionEl);
+            var handledExternally = this.dataPublicationView.raiseExtensibilityPointEvent("requestingContextMenu", this, action.name, replaceVariablesResult.actionParams, $actionEl);
 
             if (!handledExternally) {
                 // Create a context menu, and assign it to the clicked element

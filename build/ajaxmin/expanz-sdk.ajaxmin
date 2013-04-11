@@ -12,6 +12,7 @@
 
     <input path="source/js/expanz/models/expanz.models.Bindable.js" />
     <input path="source/js/expanz/models/expanz.models.Field.js" />
+    <input path="source/js/expanz/models/expanz.models.CustomContent.js" />
     <input path="source/js/expanz/models/expanz.models.DashboardField.js" />
     <input path="source/js/expanz/models/expanz.models.Method.js" />
     <input path="source/js/expanz/models/expanz.models.MenuAction.js" />
@@ -42,6 +43,7 @@
 
     <input path="source/js/expanz/views/expanz.views.js" />
     <input path="source/js/expanz/views/expanz.views.FieldView.js" />
+    <input path="source/js/expanz/views/expanz.views.CustomContentView.js" />
     <input path="source/js/expanz/views/expanz.views.DataFieldView.js" />
     <input path="source/js/expanz/views/expanz.views.DataPublicationView.js" />
     <input path="source/js/expanz/views/expanz.views.VariantFieldView.js" />

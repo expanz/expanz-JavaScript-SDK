@@ -46,6 +46,7 @@
         <file src="..\source\js\expanz\models\expanz.models.Bindable.js" target="content\Scripts\expanz\models\expanz.models.Bindable.js" />
         <file src="..\source\js\expanz\models\expanz.models.ClientMessage.js" target="content\Scripts\expanz\models\expanz.models.ClientMessage.js" />
         <file src="..\source\js\expanz\models\expanz.models.ContextMenu.js" target="content\Scripts\expanz\models\expanz.models.ContextMenu.js" />
+        <file src="..\source\js\expanz\models\expanz.models.CustomContent.js" target="content\Scripts\expanz\models\expanz.models.CustomContent.js" />
         <file src="..\source\js\expanz\models\expanz.models.DashboardField.js" target="content\Scripts\expanz\models\expanz.models.DashboardField.js" />
         <file src="..\source\js\expanz\models\expanz.models.Dashboards.js" target="content\Scripts\expanz\models\expanz.models.Dashboards.js" />
         <file src="..\source\js\expanz\models\expanz.models.DataPublication.js" target="content\Scripts\expanz\models\expanz.models.DataPublication.js" />
@@ -58,6 +59,7 @@
         <file src="..\source\js\expanz\views\expanz.views.ActivityView.js" target="content\Scripts\expanz\views\expanz.views.ActivityView.js" />
         <file src="..\source\js\expanz\views\expanz.views.CheckboxesView.js" target="content\Scripts\expanz\views\expanz.views.CheckboxesView.js" />
         <file src="..\source\js\expanz\views\expanz.views.ContextMenuView.js" target="content\Scripts\expanz\views\expanz.views.ContextMenuView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.CustomContentView.js" target="content\Scripts\expanz\views\expanz.views.CustomContentView.js" />
         <file src="..\source\js\expanz\views\expanz.views.DataPublicationView.js" target="content\Scripts\expanz\views\expanz.views.DataPublicationView.js" />
         <file src="..\source\js\expanz\views\expanz.views.DataFieldView.js" target="content\Scripts\expanz\views\expanz.views.DataFieldView.js" />
         <file src="..\source\js\expanz\views\expanz.views.DependantFieldView.js" target="content\Scripts\expanz\views\expanz.views.DependantFieldView.js" />

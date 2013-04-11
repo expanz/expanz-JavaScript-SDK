@@ -27,6 +27,7 @@ $(function () {
             this.fieldViewCollection = {};
             this.methodViewCollection = {};
             this.dataControlViewCollection = {};
+            this.customContentViewCollection = {};
             
             this.model.bind("error", this.updateError, this);
             this.model.bind("change:loading", this.loading, this);
@@ -137,6 +138,15 @@ $(function () {
                 this.dataControlViewCollection[dataControlView.id] = [];
 
             this.dataControlViewCollection[dataControlView.id].push(dataControlView);
+
+            return;
+        },
+
+        addCustomContentView: function (customContentView) {
+            if (this.customContentViewCollection[customContentView.id] === undefined)
+                this.customContentViewCollection[customContentView.id] = [];
+
+            this.customContentViewCollection[customContentView.id].push(customContentView);
 
             return;
         }

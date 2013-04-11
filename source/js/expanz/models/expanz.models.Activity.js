@@ -27,6 +27,7 @@ $(function() {
 	        this.fields = new expanz.Collection();
 	        this.methods = new expanz.Collection();
 	        this.dataPublications = new expanz.Collection();
+	        this.customContentCollection = new expanz.Collection();
 	        this.messageCollection = new expanz.models.MessageCollection();
 	        this.loading = false;
 	    },

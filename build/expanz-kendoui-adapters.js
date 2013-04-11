@@ -896,7 +896,7 @@ $.fn.KendoTreeAdapter = function(options) {
 	};
 
 	/* bind listener */
-	$(this).bind("datapublication:publishData", publishData);
+    $(this).bind("customcontent:contentPublished", publishData);
 	$(this).bind("filterData", filterData);
 };
 

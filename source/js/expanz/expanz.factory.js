@@ -54,6 +54,7 @@ $(function() {
 			expanz.Factory.bindMessageControl(activityView);
 			expanz.Factory.bindMethods(activityView);
 			expanz.Factory.bindDataControls(activityView);
+			expanz.Factory.bindCustomContentControls(activityView);
 			expanz.Factory.bindFields(activityView);
 		    
 			return activityView;
@@ -107,7 +108,6 @@ $(function() {
 
 		bindFields: function (activityView) {
 		    var activityModel = activityView.model;
-		    var fieldIdSuffixIndex = 0;
 		    
 		    var fieldViewCollection = expanz.Factory.createFieldViews(activityView.$el.find('[bind=field]'));
 		    var dataFieldViewCollection = expanz.Factory.createDataFieldViews(activityView.$el.find('[bind=datafield]'));
@@ -214,6 +214,25 @@ $(function() {
 					}
 				}
 			});
+		},
+
+		bindCustomContentControls: function (activityView) {
+		    var activityModel = activityView.model;
+
+		    var customContentViewCollection = expanz.Factory.createCustomContentViews(activityView.$el.find('[bind=customcontent]'));
+
+		    _.each(customContentViewCollection, function (customContentView) {
+		        var customContentModel = customContentView.model;
+
+		        customContentModel.set({
+		            parent: activityModel
+		        }, {
+		            silent: true
+		        });
+
+		        activityModel.customContentCollection.add(customContentModel);
+		        activityView.addCustomContentView(customContentView);
+		    });
 		},
 
 		createFieldViews : function(DOMObjects) {
@@ -477,6 +496,30 @@ $(function() {
 		    });
 
 		    return dataPublicationViews;
-		}
+		},
+
+		createCustomContentViews: function (domObjects) {
+		    var customContentViews = [];
+
+		    _.each(domObjects, function (customContentEl) {
+		        var $customContentEl = $(customContentEl);
+
+		        var model = new expanz.models.CustomContent({
+		            id: $customContentEl.attr("id"),
+		            method: $customContentEl.attr("method"),
+		            type: $customContentEl.attr("type")
+		        });
+
+		        var view = new expanz.views.CustomContentView({
+		            el: customContentEl,
+		            id: model.get("id"),
+		            model: model
+		        });
+
+		        customContentViews.push(view);
+		    });
+
+		    return customContentViews;
+		},
 	};
 });

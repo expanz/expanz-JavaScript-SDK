@@ -318,6 +318,9 @@ function parseActivityResponse(activityElement, initiator) {
                 case "Data":
                     parseDataResponse(currentElement, activityModel, activityView);
                     break;
+                case "CustomContent":
+                    parseCustomContentResponse(currentElement, activityModel);
+                    break;
                 case "Messages":
                     parseActivityLevelMessagesResponse(currentElement, activityModel);
                     break;
@@ -426,6 +429,17 @@ function parseDataResponse(dataElement, activityModel, activityView) {
         _.each(activityModel.fields.where({ fieldId: id }), function (field) {
             field.publishData($dataElement);
         });
+    }
+}
+
+function parseCustomContentResponse(customContentElement, activityModel) {
+    var $customContentElement = $(customContentElement);
+    var id = $customContentElement.attr('id');
+
+    var customContentModel = activityModel.customContentCollection.get(id);
+
+    if (customContentModel) {
+        customContentModel.publish($customContentElement);
     }
 }
 
