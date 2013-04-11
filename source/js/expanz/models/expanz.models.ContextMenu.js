@@ -21,7 +21,7 @@ $(function () {
         initialize: function (attrs) {
             this.loading = false;
 
-            this.contextId = attrs["contextId"];
+            this.contextId = attrs["contextId"] || attrs["id"];
             this.activity = attrs["activity"];
             this.type = attrs["type"];
             this.contextObject = attrs["contextObject"];
