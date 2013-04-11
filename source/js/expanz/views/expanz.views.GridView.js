@@ -428,7 +428,7 @@ $(function () {
 				var className = 'row' + row.id + ' column' + cell.get('id');
                 if (cell.get("displayStyle"))
                     className += " grid-" + cell.get("displayStyle");
-                html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="' + className + '">';
+                html += '<td id="' + cell.get('id') + '" field="' + cell.get('field') + '" class="' + className + '">"';
 
                 if (model.getColumn(cell.get('id')) && model.getColumn(cell.get('id')).get('datatype') === 'BLOB') {
                     html += '<img width="' + model.getColumn(cell.get('id')).get('width') + '" src="' + cell.get('value') + '"/>';
