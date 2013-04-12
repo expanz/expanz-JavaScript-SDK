@@ -10,10 +10,12 @@
         this.url = url;
         this.img = img;
 
-        this.load = function(el, displayAsIcons) {
+        this.render = function(el, displayAsIcons) {
             this.title = this.title.replace("[CR]", "<br />");
+            
             if (displayAsIcons === true) {
-                el.append('<li><div class="icon navContainer"><a class="nav-' + this.name.replace(/\./g, "-") + "-" + this.style.replace(/\./g, "-") + ' navItem" href="' + this.url + '"></a><a class="navText" href="' + this.url + '">' + this.title + '</a></div></li>');
+                if (this.displayInHomeMenu) // TODO: displayAsIcons should be handled by an external adapter
+                    el.append('<li><div class="icon navContainer"><a class="nav-' + this.name.replace(/\./g, "-") + "-" + this.style.replace(/\./g, "-") + ' navItem" href="' + this.url + '"></a><a class="navText" href="' + this.url + '">' + this.title + '</a></div></li>');
             } else {
                 el.append('<li class="activity">' + '<a href=\'' + this.url + '\'>' + this.title + '</a>' + '</li>');
             }

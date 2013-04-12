@@ -245,17 +245,16 @@ $(function() {
 	}
 
 	function loadMenu(el, displayEmptyItems) {
-
-		// Load Menu & insert it into #menu
-		var menu = new expanz.menu.AppSiteMenu();
+		// Render site menu
+	    var menu = new expanz.menu.AppSiteMenu();
 		var processAreas = loadProcessMap(expanz.Storage.getProcessAreaList(), displayEmptyItems);
-		if (processAreas.length > 0)
-			menu.processAreas = processAreas;
-		menu.load(el);
+
+		menu.render(el, processAreas);
 	}
 
 	function loadProcessMap(processAreas, displayEmptyItems, parentProcessAreaMenu) {
-		var processAreasMenu = [];
+	    var processAreasMenu = [];
+	    
 		_.each(processAreas, function(processArea) {
 			if (displayEmptyItems || processArea.activities.length > 0 || processArea.pa.length > 0) {
 				var menuItem = new expanz.menu.ProcessAreaMenu(processArea.id, processArea.title);
@@ -264,20 +263,29 @@ $(function() {
 					menuItem.parent = parentProcessAreaMenu;
 
 				_.each(processArea.activities, function(activity) {
-					if (displayEmptyItems || (activity.url !== '' && activity.url.length > 1)) {
-						menuItem.activities.push(new expanz.menu.ActivityMenu(activity.name, activity.style, activity.title, activity.url, activity.img));
+				    if (displayEmptyItems || (activity.url !== '' && activity.url.length > 1)) {
+				        var activityMenu = new expanz.menu.ActivityMenu(activity.name, activity.style, activity.title, activity.url, activity.img);
+				        
+				        // Add data attributes as properties on the activity object, but without the data- prefix
+				        for (var propertyName in activity) {
+				            if (propertyName.indexOf("data-") === 0)
+				                activityMenu[propertyName.substring(5)] = activity[propertyName];
+				        }
+				        
+				        menuItem.activities.push(activityMenu);
 					}
 				});
 
-				if (processArea.pa.length > 0) {
-					menuItem.pa = loadProcessArea(processArea.pa, displayEmptyItems, menuItem);
-				}
+				//if (processArea.pa.length > 0) {
+				//	menuItem.pa = loadProcessArea(processArea.pa, displayEmptyItems, menuItem);
+				//}
 
 				if (displayEmptyItems || menuItem.activities.length > 0) {
 					processAreasMenu.push(menuItem);
 				}
 			}
 		});
+	    
 		return processAreasMenu;
 	}
 

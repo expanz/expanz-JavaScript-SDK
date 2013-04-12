@@ -189,17 +189,22 @@ function parseGetSessionDataResponse(callbacks) {
             expanz.Storage.setFormMapping(data);
 
             $(data).find('activity').each(function () {
-                var name = $(this).attr('name');
-                var url = getPageUrl($(this).attr('form'));
-                var style = $(this).attr('style') || "";
+                var $activityElement = $(this);
+                var name = $activityElement.attr('name');
+                var url = getPageUrl($activityElement.attr('form'));
+                var style = $activityElement.attr('style') || "";
+                
+                // Parse data attributes, and add them to the object
+                var dataAttributes = [].filter.call($activityElement[0].attributes, function(at) { return /^data-/.test(at.name); });
+                
                 var gridviewList = [];
-                $(this).find('gridview').each(function () {
+                
+                $activityElement.find('gridview').each(function () {
                     var gridview = new GridViewInfo($(this).attr('id'));
                     gridviewList.push(gridview);
                 });
 
-                fillActivityData(processAreas, url, name, style, gridviewList);
-
+                fillActivityData(processAreas, url, name, style, dataAttributes, gridviewList);
             });
 
             expanz.Storage.setProcessAreaList(processAreas);
@@ -209,6 +214,7 @@ function parseGetSessionDataResponse(callbacks) {
                     if (callbacks && callbacks.success) {
                         callbacks.success($(this).attr('form'));
                     }
+                    
                     return;
                 }
             });
@@ -674,18 +680,22 @@ function parseReleaseSessionResponse(callbacks) {
     };
 }
 
-function fillActivityData(processAreas, url, name, style, gridviewList) {
+function fillActivityData(processAreas, url, name, style, dataAttributes, gridviewList) {
     $.each(processAreas, function (i, processArea) {
         $.each(processArea.activities, function (j, activity) {
             if (activity.name == name && activity.style == style) {
                 activity.url = url;
                 activity.gridviews = gridviewList;
+                
+                // Add data attributes as properties on the activity object
+                for (var attrIndex = 0; attrIndex < dataAttributes.length; attrIndex++) {
+                    activity[dataAttributes[attrIndex].name] = dataAttributes[attrIndex].value;
+                }
             }
         });
 
-        /* do it for sub process activity */
-        fillActivityData(processArea.pa, url, name, style, gridviewList);
-
+        /* Search for activity under sub process areas */
+        fillActivityData(processArea.pa, url, name, style, dataAttributes, gridviewList);
     });
 }
 
