@@ -66,7 +66,7 @@ $(function () {
         renderRowCells: function (rowModel) {
             var html = "";
             var view = this;
-            var isDrillDownRow = this.dataPublicationView.options.canDrillDown && (rowModel.get("type") !== "Totals" && rowModel.get("type") !== "BlankLine"); // Only show drilldown link if configured to do so, and only on non-totals and non-blank rows
+            var isDrillDownRow = this.dataPublicationView.options.canDrillDown && (rowModel.get("type") !== "Totals" && rowModel.get("type") !== "BlankLine") && rowModel.get("canDrillDown") !== "false"; // Only show drilldown link if configured to do so, and only on non-totals and non-blank rows
 
             rowModel.cells.each(function (cellModel, cellIndex) {
                 html += view.defaultCellTemplate({ cellModel: cellModel, rowModel: rowModel, rowView: view, cellIndex: cellIndex, isDrillDownRow: isDrillDownRow });

@@ -29,14 +29,15 @@ $(function() {
 		    this.dataPublication = null; // Will be set in populateDataPublicationModel in responseParser
 		},
 
-		addCell: function (cellId, value, column, sortValue, displayStyle) {
+		addCell: function (cellId, value, column, sortValue, displayStyle, canDrillDown) {
 		    this.cells.add({
 		        id: cellId,
 		        value: value,
 		        row: this,
 		        column: column,
 		        sortValue: sortValue,
-		        displayStyle: displayStyle
+		        displayStyle: displayStyle,
+		        canDrillDown: canDrillDown
 		    });
 		},
 
