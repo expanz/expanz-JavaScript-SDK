@@ -729,7 +729,7 @@ function populateDataPublicationModel(dataPublicationModel, data) {
             cell = serializeXML(cell); // quick fix for htmlunit
             var $cell = $(cell);
             
-            rowModel.addCell($cell.attr('id'), $cell.text(), dataPublicationModel.columns.get($cell.attr('id')), $cell.attr('sortValue'), $cell.attr('displayStyle'));
+            rowModel.addCell($cell.attr('id'), $cell.text(), dataPublicationModel.columns.get($cell.attr('id')), $cell.attr('sortValue'), $cell.attr('displayStyle'), $cell.attr('canDrillDown'));
         });
     });
 

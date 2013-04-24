@@ -6533,7 +6533,7 @@ $(function () {
             } else if (cellModel.column.get("isEditable")) {
                 html += this.renderCellInputControl(cellModel);
             } else if (cellModel.get('value')) {
-                if (cellIndex === 0 && isDrillDownRow) {
+                if (cellIndex === 0 && isDrillDownRow && cellModel.get('canDrillDown') !== 'false') {
                     html += '<a href="#' + rowModel.get('id') + '">' + cellModel.get('value') + '</a>'; // Create a drilldown link
                 } else {
                     html += '<span>' + cellModel.get('value') + '</span>';
