@@ -36,7 +36,7 @@ $(function() {
 	        expanz.net.CreateActivityRequest(this, this.callbacks);
 	    },
 	    
-	    closeActivity: function () {
+	    closeActivity: function (callAsync) {
 	        this.trigger("closingActivity");
 	        
 	        // Remove the cached activity handle
@@ -46,7 +46,7 @@ $(function() {
 	        window.expanz.OnActivityClosed(this.get('handle'));
 
 	        // Close the activity on the server
-	        expanz.net.CloseActivityRequest(this.get('handle'));
+	        expanz.net.CloseActivityRequest(this.get('handle'), null, callAsync);
 	        
 	        this.destroy();
 	    },

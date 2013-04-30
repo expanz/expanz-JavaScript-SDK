@@ -222,14 +222,14 @@ $(function() {
 		    SendRequest(requestBuilder.SetContextAndDelta(contextInfo, deltaInfo, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
 	    },
 
-		CloseActivityRequest : function(activityHandle, callbacks) {
+		CloseActivityRequest: function (activityHandle, callbacks, callAsync) {
 
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
 			}
 
-			SendRequest(requestBuilder.CloseActivity(activityHandle, expanz.Storage.getSessionHandle()), parseCloseActivityResponse(callbacks));
+			SendRequest(requestBuilder.CloseActivity(activityHandle, expanz.Storage.getSessionHandle()), parseCloseActivityResponse(callbacks), false, callAsync);
 		},
 
 		DataRefreshRequest : function(dataId, activity, callbacks) {
@@ -366,6 +366,7 @@ $(function() {
 	 */
 	var requestBusy;
 	var requestQueue = [];
+    
 	var SendRequest = function (request, responseHandler, isPopup, callAsync) {
 		if (false && requestBusy) {
 			requestQueue.push([request, responseHandler, isPopup]);
@@ -377,16 +378,43 @@ $(function() {
 		requestBusy = true;
 		window.expanz.net.lastRequest = request.data;
 	    
-		var isAsync = true;
-		//if (callAsync !== undefined && callAsync) {
-		//	isAsync = true;
-		//}
+		var isAsync = callAsync === undefined || callAsync;
 	    
 		$(window.expanz.html.busyIndicator()).trigger("isBusy");
 	    
 		$.ajaxSetup({
 		    headers: { "cache-control": "no-cache" } // http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
 		});
+
+		var onRequestComplete = function (HTTPrequest) {
+		    requestBusy = false;
+		    window.expanz.net.lastResponse = HTTPrequest.responseText;
+		    $(window.expanz.html.busyIndicator()).trigger("notBusy");
+
+		    window.expanz.logToConsole("RESPONSE:");
+		    window.expanz.logToConsole(HTTPrequest.responseText);
+
+		    if (HTTPrequest.status === 0) {
+		        // Request was cancelled
+		    }
+		    else if (HTTPrequest.status != 200) {
+		        //eval(responseHandler)('There was a problem with the last request.');
+		        alert("There was a problem with the last server request. Status code " + HTTPrequest.status);
+		    }
+		    else {
+		        if (isPopup !== undefined && isPopup === true) {
+		            var WinId = window.open('', 'newwin', 'width=400,height=500');
+		            WinId.document.open();
+		            WinId.document.write(HTTPrequest.responseText);
+		            WinId.document.close();
+		        }
+		        else {
+		            if (responseHandler) {
+		                eval(responseHandler)(HTTPrequest.responseXML);
+		            }
+		        }
+		    }
+		};
 	    
 		if (config.urlProxy !== undefined && config.urlProxy.length > 0) {
 			$.ajax({
@@ -406,31 +434,7 @@ $(function() {
 				
 				async: isAsync,
 
-				complete: function (HTTPrequest) {
-					requestBusy = false;
-					window.expanz.net.lastResponse = HTTPrequest.responseText;
-					$(window.expanz.html.busyIndicator()).trigger("notBusy");
-
-					window.expanz.logToConsole("RESPONSE:");
-					window.expanz.logToConsole(HTTPrequest.responseText);
-				    
-					if (HTTPrequest.status != 200) {
-						eval(responseHandler)('There was a problem with the last request.');
-					}
-					else {
-						if (isPopup !== undefined && isPopup === true) {
-							var WinId = window.open('', 'newwin', 'width=400,height=500');
-							WinId.document.open();
-							WinId.document.write(HTTPrequest.responseText);
-							WinId.document.close();
-						}
-						else {
-							if (responseHandler) {
-								eval(responseHandler)(HTTPrequest.responseXML);
-							}
-						}
-					}
-				}
+				complete: onRequestComplete
 			});
 		}
 		else {
@@ -444,25 +448,10 @@ $(function() {
 			    dataType: 'XML',
 			    
 			    processData: true,
+
+			    async: isAsync,
 			    
-				complete : function(HTTPrequest) {
-					if (HTTPrequest.status != 200) {
-						eval(responseHandler)('There was a problem with the last request.');
-					}
-					else {
-						if (isPopup !== undefined && isPopup === true) {
-							var WinId = window.open('', 'newwin', 'width=400,height=500');
-							WinId.document.open();
-							WinId.document.write(HTTPrequest.responseText);
-							WinId.document.close();
-						}
-						else {
-							if (responseHandler) {
-								eval(responseHandler)(HTTPrequest.responseXML);
-							}
-						}
-					}
-				}
+			    complete : onRequestComplete
 			});
 		}
 	};

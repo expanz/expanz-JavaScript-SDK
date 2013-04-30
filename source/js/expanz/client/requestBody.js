@@ -40,34 +40,19 @@ var requestBody = {
         }
 
         center = '';
-        
-        if (handle) {
-            if (activity.get('optimisation') === true) {
-                center += this.wrapPayloadInActivityRequest(unmaskedFields, activity);
-            }
+        center += '<CreateActivity ';
+        center += 'name="' + activity.get('name') + '"';
+        center += activity.get('style') ? ' style="' + activity.get('style') + '"' : '';
+        center += activity.get('optimisation') ? ' suppressFields="1"' : '';
+        center += activity.get('key') ? ' initialKey="' + activity.get('key') + '"' : '';
+        center += '>';
             
-            center += '<PublishSchema activityHandle="' + handle + '"> ';
-        }
-        else {
-            center += '<CreateActivity ';
-            center += 'name="' + activity.get('name') + '"';
-            center += activity.get('style') ? ' style="' + activity.get('style') + '"' : '';
-            center += activity.get('optimisation') ? ' suppressFields="1"' : '';
-            center += activity.get('key') ? ' initialKey="' + activity.get('key') + '">' : '>';
-
-            if (activity.get('optimisation') === true) {
-                center += unmaskedFields;
-            }
+        if (activity.get('optimisation') === true) {
+            center += unmaskedFields;
         }
 
         center += this.getActivityDataPublicationRequests(activity);
-        
-        if (handle) {
-            center += '</PublishSchema>';
-        }
-        else {
-            center += '</CreateActivity>';
-        }
+        center += '</CreateActivity>';
         
         return center;
     },

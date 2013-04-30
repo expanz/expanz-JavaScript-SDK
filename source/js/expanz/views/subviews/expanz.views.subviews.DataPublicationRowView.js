@@ -197,10 +197,12 @@ $(function () {
             this.$el.dblclick(this, function () {
                 view.dataPublicationView.onRowDoubleClicked.call(view.dataPublicationView, view);
             });
-            
-            this.$el.find("a").click(this, function () {
-                view.dataPublicationView.onDrillDown.call(view.dataPublicationView, view);
-            });
+
+            if (!view.dataPublicationView.options.drillDownPage) {
+                this.$el.find("a").click(this, function() {
+                    view.dataPublicationView.onDrillDown.call(view.dataPublicationView, view);
+                });
+            }
 
             if (this.dataPublicationView.model.isEditable) {
                 this.$el.find("input").click(this, function () {

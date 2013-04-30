@@ -288,6 +288,16 @@ $(function() {
 		return processAreasMenu;
 	}
 
+	window.onbeforeunload = function () {
+	    // Close open activities
+	    for (var i = 0; i < window.openActivityViews.length; i++) {
+	        var activityView = window.openActivityViews[i];
+	        
+	        if (activityView.model.get("keepOpenForSession") === false)
+	            activityView.model.closeActivity(false);
+	    }
+    };
+
 	/* check if website is on maintenance or web server is down except on maintenance page */
 	if (document.location.href.indexOf(window.expanz.getMaintenancePage()) === -1) {
 		if (window.expanz.isOnMaintenance()) {
