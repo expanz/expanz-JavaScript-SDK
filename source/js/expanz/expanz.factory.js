@@ -40,6 +40,7 @@ $(function() {
 				url : $activityEl.attr('url'),
 				key : $activityEl.attr('key'),
 				style : $activityEl.attr('activityStyle'),
+				keepOpenForSession: $activityEl.attr('keepOpenForSession') === undefined ? window.config.keepActivitiesOpenForSession : $activityEl.attr('keepOpenForSession') == "true",
 				optimisation : $activityEl.attr('optimisation') ? boolValue($activityEl.attr('optimisation')) : true,
 				allowAnonymous : $activityEl.attr('allowAnonymous') ? boolValue($activityEl.attr('allowAnonymous')) : false
 			});
@@ -485,6 +486,7 @@ $(function() {
 		            id: modelId,
 		            className: $dataPubicationEl.attr('class'),
 		            canDrillDown: $dataPubicationEl.attr('candrilldown') == "true",
+		            drillDownPage: $dataPubicationEl.attr('drillDownPage'),
 		            templateName: $dataPubicationEl.attr('templateName'),
 		            model: dataModel,
 		            itemsPerPage: $dataPubicationEl.attr('itemsPerPage'),

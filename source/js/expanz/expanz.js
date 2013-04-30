@@ -232,9 +232,8 @@ $(function() {
 		    var activityView = expanz.Factory.createActivityView(dom);
 
 			/* look for initial key in the query parameters */
-		    var initialKey = paramInitialKey || getQueryParameterByName(activityView.model.get('name') + (activityView.model.get('style') || '') + 'initialKey');
 			activityView.model.set({
-				'key' : initialKey
+			    'key' : paramInitialKey || getQueryParameterByName("id") || getQueryHashParameterByName("id")
 			});
 
 			activityView.model.load(callbacks);

@@ -85,25 +85,25 @@ $(function() {
 			/* if allow anonymous and session doesn't exist we don't create anything on the server */
 			if (expanz.Storage.getSessionHandle() && expanz.Storage.getSessionHandle() !== "") {
 			    var initiator = null;
-			    
-				/* check if an activity has already been created, if so specify it instead of creating a new one */
-				var activityHandle = expanz.Storage.getActivityHandle(activity.get('name'), activity.get('style'));
 
-				if (activityHandle !== undefined && activityHandle !== null) {
-				    activity.set({
-				        'handle': activityHandle
-				    });
-				} else {
-				    // When parsing the create activity response, the parser won't have an activity handle
-				    // that it can use to find the activity in the list of open activities, so ween need to
-				    // pass the instance as an initiator.
-				    initiator = {
-				        type : "CreateActivity",
-				        activityModel: activity
+			    /* check if an activity has already been created, if so specify it instead of creating a new one */
+			    var activityHandle = expanz.Storage.getActivityHandle(activity.get('name'), activity.get('style'));
+
+			    if (activity.get("keepOpenForSession") === true && activityHandle !== undefined && activityHandle !== null) {
+			        activity.set({
+			            'handle': activityHandle
+			        });
+			    } else {
+			        // When parsing the create activity response, the parser won't have an activity handle
+			        // that it can use to find the activity in the list of open activities, so we need to
+			        // pass the instance as an initiator.
+			        initiator = {
+			            type: "CreateActivity",
+			            activityModel: activity
 			        };
-				}
+			    }
 
-				activity.set({
+			    activity.set({
 					loading : true
 				});
 

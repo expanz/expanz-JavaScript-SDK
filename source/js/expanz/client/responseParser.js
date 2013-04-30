@@ -553,7 +553,7 @@ function parseActivityRequestResponse(activityRequestElement) {
     var $activityRequestElement = $(activityRequestElement);
 
     var id = $activityRequestElement.attr('id');
-    var key = $activityRequestElement.attr('key');
+    var key = $activityRequestElement.attr('key') || $activityRequestElement.attr('initialKey');
     var style = $activityRequestElement.attr('style') || "";
 
     window.expanz.openActivity(id, style, key);

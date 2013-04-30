@@ -84,7 +84,8 @@ $(function () {
                 html += this.renderCellInputControl(cellModel);
             } else if (cellModel.get('value')) {
                 if (cellIndex === 0 && isDrillDownRow && cellModel.get('canDrillDown') !== 'false') {
-                    html += '<a href="#' + rowModel.get('id') + '">' + cellModel.get('value') + '</a>'; // Create a drilldown link
+                    var drillDownPage = this.dataPublicationView.options.drillDownPage || "";
+                    html += '<a href="' + drillDownPage + '#id=' + rowModel.get('id') + '">' + cellModel.get('value') + '</a>'; // Create a drilldown link
                 } else {
                     html += '<span>' + cellModel.get('value') + '</span>';
                 }
