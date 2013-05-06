@@ -25,6 +25,10 @@ $(function() {
 	    },
 
 	    update: function (attrs) {
+	        this.set({
+	            value: attrs.value
+	        });
+	        
 	        if (this.get('parent').isAnonymous()) {
 	            this.set({
 	                lastValue: attrs.value
