@@ -379,8 +379,8 @@ $(function() {
 		window.expanz.net.lastRequest = request.data;
 	    
 		var isAsync = callAsync === undefined || callAsync;
-	    
-		$(window.expanz.html.busyIndicator()).trigger("isBusy");
+
+	    $(window).trigger("serverRequestStarted");
 	    
 		$.ajaxSetup({
 		    headers: { "cache-control": "no-cache" } // http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
@@ -389,7 +389,6 @@ $(function() {
 		var onRequestComplete = function (HTTPrequest) {
 		    requestBusy = false;
 		    window.expanz.net.lastResponse = HTTPrequest.responseText;
-		    $(window.expanz.html.busyIndicator()).trigger("notBusy");
 
 		    window.expanz.logToConsole("RESPONSE:");
 		    window.expanz.logToConsole(HTTPrequest.responseText);
@@ -414,6 +413,8 @@ $(function() {
 		            }
 		        }
 		    }
+
+		    $(window).trigger("serverRequestCompleted");
 		};
 	    
 		if (config.urlProxy !== undefined && config.urlProxy.length > 0) {
