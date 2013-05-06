@@ -20,6 +20,10 @@
             var onDrillDownClick = function (event) {
                 var $anchor = $(this);
                 view.model.drillDown($anchor.attr('id'), $anchor.attr('type'), null);
+                
+                view.$el.trigger("datapublication:rowDrillDown", [
+				    dataPublicationModel, view
+                ]);
             };
 
             view.$el.find("a").click(this, onDrillDownClick);
