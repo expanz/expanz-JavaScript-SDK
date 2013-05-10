@@ -18,13 +18,16 @@ $(function() {
 
 	    createLoginView: function (loginEl) {
 	        var $loginEl = $(loginEl);
-			var loginModel = new window.expanz.models.Login();
+	        var loginModel = new window.expanz.models.Login({
+	            id: $loginEl.attr('name'),
+	            type: $loginEl.attr('type'),
+	            authenticationMode: $loginEl.attr('authenticationMode')
+	        });
 		    
 			var loginView = new window.expanz.views.LoginView({
 			    el: loginEl,
 			    id: $loginEl.attr('name'),
-			    type: $loginEl.attr('type'),
-				model : loginModel
+				model: loginModel
 			});
 
 			return loginView;

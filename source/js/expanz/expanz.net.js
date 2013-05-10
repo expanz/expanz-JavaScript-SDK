@@ -23,11 +23,10 @@ $(function() {
 	window.expanz.net = {
 		lastRequest:"", lastResponse:"",
 		// Request Objects -> to be passed to SendRequest
-		CreateSessionRequest : function(username, password, callbacks) {
+		CreateSessionRequest : function(username, password, authenticationMode, callbacks) {
 			expanz.Storage.clearSession(); /* clear previous existing sessions */
 			var appsite = config.appSite;
-			var authenticationMode = config.authenticationMode;
-			SendRequest(requestBuilder.CreateSession(username, password, appsite, authenticationMode), parseCreateSessionResponse(callbacks));
+			SendRequest(requestBuilder.CreateSession(username, password, appsite, authenticationMode || config.authenticationMode), parseCreateSessionResponse(callbacks));
 		},
 
 		WebServerPing : function(nbAttempts) {

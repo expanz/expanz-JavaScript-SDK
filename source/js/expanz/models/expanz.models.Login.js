@@ -28,7 +28,7 @@ $(function() {
 	        this.messageCollection = new expanz.models.MessageCollection();
 	    },
 
-	    login: function (userName, password, isPopup) {
+	    login: function (userName, password) {
 	        var that = this;
 
 	        this.set({
@@ -44,6 +44,8 @@ $(function() {
 	            else {
 	                expanz.net.GetSessionDataRequest({
 	                    success: function (url) {
+	                        var isPopup = (this.model.get("type") === "popup");
+	                        
 	                        if (isPopup) {
 	                            // reload the page
 	                            window.location.reload();
@@ -68,7 +70,7 @@ $(function() {
 	            }
 	        };
 	            
-	        expanz.net.CreateSessionRequest(userName, password, {
+	        expanz.net.CreateSessionRequest(userName, password, this.get("authenticationMode"), {
 	            success: loginCallback,
 	            error: function (message) {
 	                that.messageCollection.addErrorMessageByText(message);

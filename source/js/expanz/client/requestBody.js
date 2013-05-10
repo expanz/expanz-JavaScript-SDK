@@ -13,9 +13,7 @@
 var requestBody = {
 
     createSession: function (username, password, appsite, authenticationMode) {
-        if (authenticationMode === undefined)
-            authenticationMode = "Primary";
-        return '<CreateSession source="MixiLink" user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + authenticationMode + '" clientType="HTML" clientVersion="' + window.expanz.clientVersion + '" schemaVersion="2.0"/>';
+        return '<CreateSession source="MixiLink" user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + (authenticationMode || "Primary") + '" clientType="HTML" clientVersion="' + window.expanz.clientVersion + '" schemaVersion="2.0"/>';
     },
 
     getSessionData: function () {

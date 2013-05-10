@@ -56,7 +56,7 @@ $(function () {
                 this.model.messageCollection.addErrorMessageByKey("loginOrPasswordEmpty");
             }
             else {
-                this.model.login(usernameEl.val(), passwordEl.val(), this.$el.attr('type') == 'popup');
+                this.model.login(usernameEl.val(), passwordEl.val());
             }
         },
 
