@@ -44,7 +44,7 @@ $(function() {
 	            else {
 	                expanz.net.GetSessionDataRequest({
 	                    success: function (url) {
-	                        var isPopup = (this.model.get("type") === "popup");
+	                        var isPopup = (that.get("type") === "popup");
 	                        
 	                        if (isPopup) {
 	                            // reload the page
