@@ -49,6 +49,18 @@ $(function() {
 			return true;
 		},
 
+		getAuthenticationMode : function() {
+			var sessionHandle = this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'authenticationMode');
+			if (sessionHandle == 'undefined')
+				return undefined;
+			return sessionHandle;
+		},
+
+		setAuthenticationMode: function (authenticationMode) {
+		    this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'authenticationMode', authenticationMode);
+			return true;
+		},
+
 		getActivityHandle : function(activityName, activityStyle) {
 			var activityHandle = this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'activity.handle.' + activityName + activityStyle);
 
@@ -170,7 +182,11 @@ $(function() {
 			storage.remove(storageGlobalName + 'session.handle');
 			storage.remove(storageGlobalName + 'lastPingSuccess');
 			storage.remove(storageGlobalName + 'roles.list');
+			storage.remove(storageGlobalName + 'processarea.list');
+			storage.remove(storageGlobalName + 'userdetails.list');
 			storage.remove(storageGlobalName + 'dashboards');
+			storage.remove(storageGlobalName + 'FormMapping');
+			storage.remove(storageGlobalName + 'authenticationMode');
 			this.clearActivityHandles();
 			return true;
 		},

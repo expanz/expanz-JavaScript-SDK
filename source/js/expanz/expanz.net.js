@@ -26,7 +26,7 @@ $(function() {
 		CreateSessionRequest : function(username, password, authenticationMode, callbacks) {
 			expanz.Storage.clearSession(); /* clear previous existing sessions */
 			var appsite = config.appSite;
-			SendRequest(requestBuilder.CreateSession(username, password, appsite, authenticationMode || config.authenticationMode), parseCreateSessionResponse(callbacks));
+			SendRequest(requestBuilder.CreateSession(username, password, appsite, authenticationMode), parseCreateSessionResponse(callbacks));
 		},
 
 		WebServerPing : function(nbAttempts) {

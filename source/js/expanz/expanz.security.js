@@ -51,7 +51,7 @@ $(function() {
         
         content = '<div class="loginMsg">Sorry, your session timed out, please log in again.</div>';
 
-        content += '<form bind="login" type="popup" name="login" action="javascript:">';
+        content += '<form bind="login" type="popup" name="login" action="javascript:" authenticationMode="' + expanz.Storage.getAuthenticationMode() + '">';
         content += '  <div name="username" id="username">';
         content += '    <input class="loginInput"  attribute="value" type="text" placeholder="Username"/>';
         content += '  </div>';

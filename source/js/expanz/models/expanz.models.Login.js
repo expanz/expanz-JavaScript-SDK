@@ -42,6 +42,9 @@ $(function() {
 	                });
 	            }
 	            else {
+	                // Store authentication mode for use when popup login window is displayed
+	                expanz.Storage.setAuthenticationMode(that.get("authenticationMode") || config.authenticationMode);
+
 	                expanz.net.GetSessionDataRequest({
 	                    success: function (url) {
 	                        var isPopup = (that.get("type") === "popup");
@@ -70,7 +73,7 @@ $(function() {
 	            }
 	        };
 	            
-	        expanz.net.CreateSessionRequest(userName, password, this.get("authenticationMode"), {
+	        expanz.net.CreateSessionRequest(userName, password, this.get("authenticationMode") || config.authenticationMode, {
 	            success: loginCallback,
 	            error: function (message) {
 	                that.messageCollection.addErrorMessageByText(message);
