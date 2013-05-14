@@ -26,8 +26,10 @@ $(function() {
 
 	    update: function (attrs) {
 	        this.set({
-	            value: attrs.value
-	        });
+	                value: attrs.value
+	            }, {
+	                silent: true // Must be silent, or controls like the time adapter start behaving wierdly
+	            });
 	        
 	        if (this.get('parent').isAnonymous()) {
 	            this.set({
@@ -67,6 +69,13 @@ $(function() {
 	            // needing to be processed in a specific order, or needing their values transformed (e.g. converted 
 	            // to bool, long data handling, etc)
 	            if (xml.is("[value]")) {
+	                // Need to unset the value so that controls (like the time adapter) which rely on 
+	                // a different attribute than the value attribute get change notifications. Essentially,
+	                // this just forces the change event to be triggered when the value is set.
+	                this.unset("value", {
+	                    silent: true
+	                });
+	                
 	                this.set({
 	                    // NOTE: The model doesn't currently populate the items property anymore, as it leads to an
 	                    // endless loop in underscore.js in Chrome. As not required for now, commenting out.
