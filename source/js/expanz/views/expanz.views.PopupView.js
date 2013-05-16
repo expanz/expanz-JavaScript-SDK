@@ -117,6 +117,8 @@ $(function () {
             
             if (this.postCloseActions)
                 this.postCloseActions(this.model.get('title'));
+            
+            window.expanz.currentPopup = this.parentPopup; // TODO: This should be removed
         },
 
         /* may be redifined depending on the plug-in used */
