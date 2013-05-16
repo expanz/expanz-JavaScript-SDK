@@ -17,6 +17,7 @@ $(function () {
     window.expanz.views.MethodView = Backbone.View.extend({
         initialize: function () {
             this.model.bind("change:label", this.labelChanged(), this);
+            this.model.bind("change:state", this.stateChanged(), this);
             this.model.bind("change:loading", this.loading, this);
             this.model.bind("contextMenuLoaded", this.onContextMenuLoaded, this);
         },
@@ -32,7 +33,31 @@ $(function () {
 
         labelChanged: function () {
             return function () {
-                this.getButton().text(this.model.get("label"));
+                var $button = this.getButton();
+                var $labelElement = $button;
+                
+                var $span = $button.find("span");
+
+                if ($span.length != 0)
+                    $labelElement = $span;
+                
+                $labelElement.text(this.model.get("label"));
+            };
+        },
+
+        stateChanged: function () {
+            return function () {
+                var state = this.model.get("state");
+                var $button = this.getButton();
+                
+                if (state === "hidden") {
+                    $button.hide();
+                } else if (state === "disabled") {
+                    $button.attr('disabled', 'disabled');
+                } else {
+                    $button.show();
+                    $button.removeAttr('disabled');
+                }
             };
         },
 
@@ -62,14 +87,8 @@ $(function () {
                 else {
                     var hyperlinks = this.$el.find("a");
                     
-                    if (hyperlinks.length != 0) {
-			var spans = this.$el.find("span");
-			if (spans.length != 0) {
-				buttonElement = spans;
-			} else {
-				buttonElement = hyperlinks;
-			}
-		    }
+                    if (hyperlinks.length != 0)
+                        buttonElement = hyperlinks;
                 }
             }
 

@@ -73,6 +73,12 @@ $(function() {
 	                    label: xml.attr('label')
 	                });
 	            }
+	            
+	            if (xml.attr('state')) {
+	                this.set({
+	                    state: xml.attr('state')
+	                });
+	            }
 	        } else {
 	            window.expanz.logToConsole("window.expanz.models.Method: xml.attr is undefined");
 	        }
