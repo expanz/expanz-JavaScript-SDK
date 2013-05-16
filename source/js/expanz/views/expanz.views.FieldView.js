@@ -171,9 +171,13 @@ $(function () {
 
         setFocus: function () {
             var inputElement = this.getInputElement();
-            
-            if (inputElement != undefined && inputElement != null)
+
+            if (inputElement != undefined && inputElement != null) {
                 inputElement.focus();
+
+                // Extensibility point. This allows adapters to handle this event differently if necessary.
+                inputElement.trigger("setFocus");
+            }
         }
     });
 });
