@@ -29,6 +29,7 @@
   <file>/source/js/expanz/client/requestBuilder.js</file>
   <file>/source/js/expanz/client/requestBody.js</file>
   <file>/source/js/expanz/client/responseParser.js</file>
+  <file>/source/js/expanz/client/serverRequestManager.js</file>
   <file>/source/js/expanz/client/ActivityInfo.js</file>
   <file>/source/js/expanz/client/GridViewInfo.js</file>
   <file>/source/js/expanz/client/ProcessArea.js</file>

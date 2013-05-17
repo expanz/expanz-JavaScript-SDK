@@ -21,12 +21,11 @@ $(function() {
 	window.expanz.helper = window.expanz.helper || {};
 
 	window.expanz.net = {
-		lastRequest:"", lastResponse:"",
-		// Request Objects -> to be passed to SendRequest
+		// Request Objects -> to be passed to ServerRequestManager
 		CreateSessionRequest : function(username, password, authenticationMode, callbacks) {
 			expanz.Storage.clearSession(); /* clear previous existing sessions */
 			var appsite = config.appSite;
-			SendRequest(requestBuilder.CreateSession(username, password, appsite, authenticationMode), parseCreateSessionResponse(callbacks));
+			serverRequestManager.queueRequest(requestBuilder.CreateSession(username, password, appsite, authenticationMode), parseCreateSessionResponse(callbacks));
 		},
 
 		WebServerPing : function(nbAttempts) {
@@ -36,7 +35,7 @@ $(function() {
 			if (window.expanz.pingError === undefined)
 				window.expanz.pingError = 0;
 
-			SendRequest(requestBuilder.WebServerPing(), function(data) {
+			serverRequestManager.queueRequest(requestBuilder.WebServerPing(), function(data) {
 			    var res = ($(data).find("WebServerPingResult"));
 			    
 				if (res.length > 0 && res.text() == "true") {
@@ -57,23 +56,18 @@ $(function() {
 					}
 				}
 			});
-
 		},
 
 		GetSessionDataRequest : function(callbacks) {
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
 			}
 
-			SendRequest(requestBuilder.GetSessionData(expanz.Storage.getSessionHandle()), parseGetSessionDataResponse(callbacks));
+			serverRequestManager.queueRequest(requestBuilder.GetSessionData(expanz.Storage.getSessionHandle()), parseGetSessionDataResponse(callbacks));
 		},
 
 		CreateActivityRequest : function(activity, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			if (activity.get('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 					expanz.views.requestLogin();
@@ -106,7 +100,7 @@ $(function() {
 					loading : true
 				});
 
-				SendRequest(requestBuilder.CreateActivity(activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks));
+			    serverRequestManager.queueRequest(requestBuilder.CreateActivity(activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks));
 			}
 			else {
 				/* anonymous case because no session handle is set */
@@ -114,7 +108,6 @@ $(function() {
 		},
 
 		GetSavePreferencesRequest : function(activity, key, value, updateClientStorage, callbacks) {
-
 			if (activity.get('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 					expanz.views.requestLogin();
@@ -128,14 +121,11 @@ $(function() {
 
 			if (!activity.isAnonymous()) {
 				// TODO check if we need a callback
-				SendRequest(requestBuilder.GetSavePreferences(key, value, expanz.Storage.getSessionHandle()));
+				serverRequestManager.queueRequest(requestBuilder.GetSavePreferences(key, value, expanz.Storage.getSessionHandle()));
 			}
 		},
 
 		DeltaRequest : function(id, value, activity, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			if (activity.get('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 					expanz.views.requestLogin();
@@ -155,13 +145,10 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks),null,true);
+			serverRequestManager.queueRequest(requestBuilder.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 		},
 
 		MethodRequest : function(name, methodAttributes, context, activity, anonymousFields, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			if (activity.get('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 					expanz.views.requestLogin();
@@ -183,19 +170,15 @@ $(function() {
 
 			// activity allows anonymous and user not logged in
 			if (activity.isAnonymous()) {
-			    SendRequest(requestBuilder.AnonymousMethod(name, methodAttributes, context, activity, anonymousFields), parseResponse(activity, initiator, callbacks), null, true);
+			    serverRequestManager.queueRequest(requestBuilder.AnonymousMethod(name, methodAttributes, context, activity, anonymousFields), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 			}
 			else {
-			    SendRequest(requestBuilder.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+			    serverRequestManager.queueRequest(requestBuilder.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 			}
-
 		},
 
 		/* only use on load of the page to load the datapublications in anonymous context */
 		AnonymousMethodsRequest : function(methods, activity, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			var initiator = {
 				type : "anonymous",
 				id : "anonymous"
@@ -208,33 +191,24 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.AnonymousMethods(methods, activity), parseResponse(activity, initiator, callbacks), null, true);
-
+			serverRequestManager.queueRequest(requestBuilder.AnonymousMethods(methods, activity), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 		},
 		
 		SetContextAndDeltaRequest: function (contextInfo, deltaInfo, activity, callbacks) {
-		    if (callbacks === undefined)
-		        callbacks = activity.callbacks;
-
 		    var initiator = {};
-		    
-		    SendRequest(requestBuilder.SetContextAndDelta(contextInfo, deltaInfo, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+		    serverRequestManager.queueRequest(requestBuilder.SetContextAndDelta(contextInfo, deltaInfo, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 	    },
 
 		CloseActivityRequest: function (activityHandle, callbacks, callAsync) {
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
 			}
 
-			SendRequest(requestBuilder.CloseActivity(activityHandle, expanz.Storage.getSessionHandle()), parseCloseActivityResponse(callbacks), false, callAsync);
+			serverRequestManager.queueRequest(requestBuilder.CloseActivity(activityHandle, expanz.Storage.getSessionHandle()), parseCloseActivityResponse(callbacks), false, callAsync);
 		},
 
 		DataRefreshRequest : function(dataId, activity, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
@@ -252,7 +226,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.DataRefresh(dataId, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+			serverRequestManager.queueRequest(requestBuilder.DataRefresh(dataId, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 		},
 
 		ReleaseSessionRequest : function(callbacks) {
@@ -260,11 +234,11 @@ $(function() {
 				expanz.views.requestLogin();
 				return;
 			}
-			SendRequest(requestBuilder.ReleaseSession(expanz.Storage.getSessionHandle()), parseReleaseSessionResponse(callbacks));
+		    
+			serverRequestManager.queueRequest(requestBuilder.ReleaseSession(expanz.Storage.getSessionHandle()), parseReleaseSessionResponse(callbacks));
 		},
 
 		GetBlobRequest : function(blobId, activity, initiator) {
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
@@ -278,11 +252,10 @@ $(function() {
 				}
 			});
 
-			SendNormalRequest(requestBuilder.GetBlob(blobId, activity, expanz.Storage.getSessionHandle()));
+			serverRequestManager.sendNormalRequest(requestBuilder.GetBlob(blobId, activity, expanz.Storage.getSessionHandle()));
 		},
 
 		GetFileRequest : function(filename, activity, initiator) {
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
@@ -296,14 +269,11 @@ $(function() {
 				}
 			});
 
-			SendNormalRequest(requestBuilder.GetFile(filename, activity, expanz.Storage.getSessionHandle()));
+			serverRequestManager.sendNormalRequest(requestBuilder.GetFile(filename, activity, expanz.Storage.getSessionHandle()));
 		},
 
 		/* call when selecting something from the tree view (file) or menu action */
 		CreateMenuActionRequest: function (activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
@@ -321,14 +291,11 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.CreateMenuAction(activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+			serverRequestManager.queueRequest(requestBuilder.CreateMenuAction(activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 		},
 
 		/* call when selecting something from the tree view (file) or menu action */
 		CreateContextMenuRequest : function(activity, contextId, contextMenuType, contextObject, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
@@ -346,144 +313,12 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.CreateContextMenuAction(activity, contextId, contextMenuType, contextObject, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+			serverRequestManager.queueRequest(requestBuilder.CreateContextMenuAction(activity, contextId, contextMenuType, contextObject, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 		},
 
 		/* create an anonymous request */
 		CreateAnonymousRequest : function(xmlData, callbacks) {
-			if (callbacks === undefined)
-			    callbacks = window.expanz.defaultCallbacks;
-		    
-			SendRequest(requestBuilder.CreateAnonymousRequest(xmlData), parseExecAnonymousResponse(callbacks));
-		}
-
-	};
-
-
-	/*
-	 * Send Request :manage the sending of XML requests to the server, and dispatching of response handlers
-	 */
-	var requestBusy;
-	var requestQueue = [];
-    
-	var SendRequest = function (request, responseHandler, isPopup, callAsync) {
-		if (false && requestBusy) {
-			requestQueue.push([request, responseHandler, isPopup]);
-		}
-
-		window.expanz.logToConsole("REQUEST:");
-		window.expanz.logToConsole(request.data);
-
-		requestBusy = true;
-		window.expanz.net.lastRequest = request.data;
-	    
-		var isAsync = callAsync === undefined || callAsync;
-
-	    $(window).trigger("serverRequestStarted");
-	    
-		$.ajaxSetup({
-		    headers: { "cache-control": "no-cache" } // http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
-		});
-
-		var onRequestComplete = function (HTTPrequest) {
-		    requestBusy = false;
-		    window.expanz.net.lastResponse = HTTPrequest.responseText;
-
-		    window.expanz.logToConsole("RESPONSE:");
-		    window.expanz.logToConsole(HTTPrequest.responseText);
-
-		    if (HTTPrequest.status === 0) {
-		        // Request was cancelled
-		    }
-		    else if (HTTPrequest.status != 200) {
-		        //eval(responseHandler)('There was a problem with the last request.');
-		        alert("There was a problem with the last server request. Status code " + HTTPrequest.status);
-		    }
-		    else {
-		        if (isPopup !== undefined && isPopup === true) {
-		            var WinId = window.open('', 'newwin', 'width=400,height=500');
-		            WinId.document.open();
-		            WinId.document.write(HTTPrequest.responseText);
-		            WinId.document.close();
-		        }
-		        else {
-		            if (responseHandler) {
-		                eval(responseHandler)(HTTPrequest.responseXML);
-		            }
-		        }
-		    }
-
-		    $(window).trigger("serverRequestCompleted");
-		};
-	    
-		if (config.urlProxy !== undefined && config.urlProxy.length > 0) {
-			$.ajax({
-				type : 'POST',
-
-				url: config.urlProxy,
-
-				data: {
-					url : getUrlRestService(request.url),
-					data : request.data,
-					method : request.method || "POST"
-				},
-
-				dataType: 'XML',
-
-				processData: true,
-				
-				async: isAsync,
-
-				complete: onRequestComplete
-			});
-		}
-		else {
-			$.ajax({
-			    type: request.method || "POST",
-			    
-			    url: getUrlRestService(request.url),
-			    
-			    data: request.data,
-			    
-			    dataType: 'XML',
-			    
-			    processData: true,
-
-			    async: isAsync,
-			    
-			    complete : onRequestComplete
-			});
+			serverRequestManager.queueRequest(requestBuilder.CreateAnonymousRequest(xmlData), parseExecAnonymousResponse(callbacks || window.expanz.defaultCallbacks));
 		}
 	};
-
-	/*
-	 * Send Request :manage the sending of XML requests to the server, and dispatching of response handlers. Proxy is needed.
-	 */
-
-	var SendNormalRequest = function(request) {
-
-		if ($("#formFile")) {
-			$("#formFile").remove();
-		}
-
-		var form = '';
-		form += "<form method='post' id='formFile' target='_blank' action='" + config.urlProxy + "'>";
-		form += "<input type='hidden' name='url' value='" + getUrlRestService(request.url) + "'>";
-
-		form += "<input type='hidden' name='data' value='" + request.data + "'>";
-		form += "</form>";
-		$("body").append(form);
-
-		$("#formFile").submit();
-
-	};
-
-	function getUrlRestService(path) {
-	    var sep = "";
-	    
-		if (!config.urlPrefix.endsWith("/"))
-		    sep = "/";
-	    
-		return config.urlPrefix + sep + path;
-	}
 });

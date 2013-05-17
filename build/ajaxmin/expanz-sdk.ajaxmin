@@ -32,6 +32,7 @@
     <input path="source/js/expanz/client/requestBuilder.js" />
     <input path="source/js/expanz/client/requestBody.js" />
     <input path="source/js/expanz/client/responseParser.js" />
+    <input path="source/js/expanz/client/serverRequestManager.js" />
     <input path="source/js/expanz/client/ActivityInfo.js" />
     <input path="source/js/expanz/client/GridViewInfo.js" />
     <input path="source/js/expanz/client/ProcessArea.js" />

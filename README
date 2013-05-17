@@ -147,6 +147,7 @@ window.config = {
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/client/requestBuilder.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/client/requestBody.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/client/responseParser.js"></script>
+    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/client/serverRequestManager.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/client/ActivityInfo.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/client/GridViewInfo.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/client/ProcessArea.js"></script>

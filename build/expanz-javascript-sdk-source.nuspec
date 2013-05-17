@@ -36,6 +36,7 @@
         <file src="..\source\js\expanz\client\requestBody.js" target="content\Scripts\expanz\client\requestBody.js" />
         <file src="..\source\js\expanz\client\requestBuilder.js" target="content\Scripts\expanz\client\requestBuilder.js" />
         <file src="..\source\js\expanz\client\responseParser.js" target="content\Scripts\expanz\client\responseParser.js" />
+        <file src="..\source\js\expanz\client\serverRequestManager.js" target="content\Scripts\expanz\client\serverRequestManager.js" />
         <file src="..\source\js\components\shoppingCart.js" target="content\Scripts\expanz\components\shoppingCart.js" />
         <file src="..\source\js\expanz\menu\ActivityMenu.js" target="content\Scripts\expanz\menu\ActivityMenu.js" />
         <file src="..\source\js\expanz\menu\AppSiteMenu.js" target="content\Scripts\expanz\menu\AppSiteMenu.js" />
