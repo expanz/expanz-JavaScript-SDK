@@ -22,9 +22,10 @@ $(function() {
 	        window.expanz.currentContextMenu = this; // Used for context menu buttons, as need a way to know which button was pressed when handling response. TODO: Find a better way.
 
 	        var anonymousFields = [];
+
 	        if (this.get('anonymousFields')) {
 	            $.each(this.get('anonymousFields'), function (index, value) {
-	                if (value instanceof expanz.models.data.DataControl) {
+	                if (value instanceof expanz.models.DataPublication) {
 	                    anonymousFields.push({
 	                        id: value.get('dataId'),
 	                        value: value.get('lastValues') || ""
@@ -53,17 +54,17 @@ $(function() {
 	        /* bind eventual dynamic values -> requiring user input for example, format is %input_id% */
 	        /* input id must be unique in the page */
 	        methodAttributes = methodAttributes.clone();
+	        
 	        for (var i = 0; i < methodAttributes.length; i++) {
 	            var value = methodAttributes[i].value;
 	            var inputField = /^%(.*)%$/.exec(value);
+	            
 	            if (inputField) {
 	                methodAttributes[i].value = $("#" + inputField[1]).val();
 	            }
 	        }
 
 	        expanz.net.MethodRequest(this.get('id'), methodAttributes, null, this.get('parent'), anonymousFields);
-	        return;
-
 	    },
 
 	    publish: function (xml) {
@@ -87,10 +88,13 @@ $(function() {
 	    /* add an anonymous field or datacontrol to the method, will be added to the xml message when the method is called */
 	    addAnonymousElement: function (element) {
 	        var anonymousFields = this.get('anonymousFields');
+	        
 	        if (anonymousFields === undefined || anonymousFields === null) {
 	            anonymousFields = [];
 	        }
+	        
 	        anonymousFields.push(element);
+	        
 	        this.set({
 	            anonymousFields: anonymousFields
 	        });
