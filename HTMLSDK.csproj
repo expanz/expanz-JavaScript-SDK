@@ -71,6 +71,7 @@
     <Content Include="source\js\expanz\client\serverRequestManager.js" />
     <Content Include="source\js\expanz\models\expanz.models.CustomContent.js" />
     <Content Include="source\js\expanz\models\expanz.models.DataPublication.js" />
+    <Content Include="source\js\expanz\views\expanz.views.EnumCollectionFieldView.js" />
     <Content Include="source\js\expanz\views\expanz.views.CustomContentView.js" />
     <Content Include="source\js\expanz\views\expanz.views.DataPublicationView.js" />
     <Content Include="source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationBodyView.js" />

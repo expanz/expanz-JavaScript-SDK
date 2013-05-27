@@ -116,6 +116,7 @@ $(function() {
 		    var fieldViewCollection = expanz.Factory.createFieldViews(activityView.$el.find('[bind=field]'));
 		    var dataFieldViewCollection = expanz.Factory.createDataFieldViews(activityView.$el.find('[bind=datafield]'));
 		    var variantFieldViewCollection = expanz.Factory.createVariantFieldViews(activityView.$el.find('[bind=variantfield]'));
+		    var enumCollectionFieldViewCollection = expanz.Factory.createEnumCollectionFieldViews(activityView.$el.find('[bind=enumcollectionfield]'));
 		    var dashboardFieldViewCollection = expanz.Factory.createDashboardFieldViews(activityView.$el.find('[bind=dashboardfield]'));
 		    var dependantFieldViewCollection = expanz.Factory.createDependantFieldViews(activityView.$el.find('[bind=dependant]'));
 
@@ -143,6 +144,7 @@ $(function() {
 		    _.each(fieldViewCollection, bindFieldToActivity);
 		    _.each(dataFieldViewCollection, bindFieldToActivity);
 		    _.each(variantFieldViewCollection, bindFieldToActivity);
+		    _.each(enumCollectionFieldViewCollection, bindFieldToActivity);
 		    _.each(dependantFieldViewCollection, bindFieldToActivity);
 			
 		    _.each(dashboardFieldViewCollection, function (dashboardFieldView) {
@@ -351,6 +353,42 @@ $(function() {
 			    });
 		
 		        var view = new expanz.views.VariantFieldView({
+		            el: fieldEl,
+		            id: modelId,
+		            className: $fieldEl.attr('class'),
+		            model: model
+		        });
+
+		        fieldViews.push(view);
+		    });
+		    
+		    return fieldViews;
+		},
+		
+		createEnumCollectionFieldViews: function (DOMObjects) {
+
+		    var fieldViews = [];
+		    
+		    _.each(DOMObjects, function (fieldEl, index) {
+		        var $fieldEl = $(fieldEl);
+
+		        // There are a number of ways that the user can specify a field ID. The preferred means is using
+		        // the fieldId attribute, but if this doesn't exist then it looks for a name attribute, and
+		        // finally an id attribute. This will map to a field on the server.
+		        var fieldId = $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id');
+
+		        // We also need to generate a unique ID for the model. We'll use the field ID, but if a field
+		        // already exists using that ID (such as when a field is used twice on the page) then append
+		        // a number to the name to make it unique.
+		        var modelId = fieldId + "_" + index;
+
+		        // Create a model and a view for each enum collection field, and associate the two together
+		        var model = new expanz.models.Field({
+		            id: modelId,
+		            fieldId: fieldId,
+			    });
+		
+		        var view = new expanz.views.EnumCollectionFieldView({
 		            el: fieldEl,
 		            id: modelId,
 		            className: $fieldEl.attr('class'),

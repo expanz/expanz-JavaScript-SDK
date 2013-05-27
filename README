@@ -163,6 +163,7 @@ window.config = {
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.FieldView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.DataFieldView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.VariantFieldView.js"></script>
+    <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.EnumCollectionFieldView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.DependantFieldView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.MethodView.js"></script>
     <script type="text/javascript" src="~/Scripts/expanz-sdk/expanz/views/expanz.views.MessagesView.js"></script>

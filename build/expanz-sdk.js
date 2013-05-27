@@ -167,13 +167,16 @@ $(function() {
 
 	    createLoginView: function (loginEl) {
 	        var $loginEl = $(loginEl);
-			var loginModel = new window.expanz.models.Login();
+	        var loginModel = new window.expanz.models.Login({
+	            id: $loginEl.attr('name'),
+	            type: $loginEl.attr('type'),
+	            authenticationMode: $loginEl.attr('authenticationMode')
+	        });
 		    
 			var loginView = new window.expanz.views.LoginView({
 			    el: loginEl,
 			    id: $loginEl.attr('name'),
-			    type: $loginEl.attr('type'),
-				model : loginModel
+				model: loginModel
 			});
 
 			return loginView;
@@ -189,6 +192,7 @@ $(function() {
 				url : $activityEl.attr('url'),
 				key : $activityEl.attr('key'),
 				style : $activityEl.attr('activityStyle'),
+				keepOpenForSession: $activityEl.attr('keepOpenForSession') === undefined ? window.config.keepActivitiesOpenForSession : $activityEl.attr('keepOpenForSession') == "true",
 				optimisation : $activityEl.attr('optimisation') ? boolValue($activityEl.attr('optimisation')) : true,
 				allowAnonymous : $activityEl.attr('allowAnonymous') ? boolValue($activityEl.attr('allowAnonymous')) : false
 			});
@@ -261,6 +265,7 @@ $(function() {
 		    var fieldViewCollection = expanz.Factory.createFieldViews(activityView.$el.find('[bind=field]'));
 		    var dataFieldViewCollection = expanz.Factory.createDataFieldViews(activityView.$el.find('[bind=datafield]'));
 		    var variantFieldViewCollection = expanz.Factory.createVariantFieldViews(activityView.$el.find('[bind=variantfield]'));
+		    var enumCollectionFieldViewCollection = expanz.Factory.createEnumCollectionFieldViews(activityView.$el.find('[bind=enumcollectionfield]'));
 		    var dashboardFieldViewCollection = expanz.Factory.createDashboardFieldViews(activityView.$el.find('[bind=dashboardfield]'));
 		    var dependantFieldViewCollection = expanz.Factory.createDependantFieldViews(activityView.$el.find('[bind=dependant]'));
 
@@ -288,6 +293,7 @@ $(function() {
 		    _.each(fieldViewCollection, bindFieldToActivity);
 		    _.each(dataFieldViewCollection, bindFieldToActivity);
 		    _.each(variantFieldViewCollection, bindFieldToActivity);
+		    _.each(enumCollectionFieldViewCollection, bindFieldToActivity);
 		    _.each(dependantFieldViewCollection, bindFieldToActivity);
 			
 		    _.each(dashboardFieldViewCollection, function (dashboardFieldView) {
@@ -507,6 +513,42 @@ $(function() {
 		    
 		    return fieldViews;
 		},
+		
+		createEnumCollectionFieldViews: function (DOMObjects) {
+
+		    var fieldViews = [];
+		    
+		    _.each(DOMObjects, function (fieldEl, index) {
+		        var $fieldEl = $(fieldEl);
+
+		        // There are a number of ways that the user can specify a field ID. The preferred means is using
+		        // the fieldId attribute, but if this doesn't exist then it looks for a name attribute, and
+		        // finally an id attribute. This will map to a field on the server.
+		        var fieldId = $fieldEl.attr('fieldId') || $fieldEl.attr('name') || $fieldEl.attr('id');
+
+		        // We also need to generate a unique ID for the model. We'll use the field ID, but if a field
+		        // already exists using that ID (such as when a field is used twice on the page) then append
+		        // a number to the name to make it unique.
+		        var modelId = fieldId + "_" + index;
+
+		        // Create a model and a view for each enum collection field, and associate the two together
+		        var model = new expanz.models.Field({
+		            id: modelId,
+		            fieldId: fieldId,
+			    });
+		
+		        var view = new expanz.views.EnumCollectionFieldView({
+		            el: fieldEl,
+		            id: modelId,
+		            className: $fieldEl.attr('class'),
+		            model: model
+		        });
+
+		        fieldViews.push(view);
+		    });
+		    
+		    return fieldViews;
+		},
 
 		createDashboardFieldViews : function(DOMObjects) {
 
@@ -634,6 +676,7 @@ $(function() {
 		            id: modelId,
 		            className: $dataPubicationEl.attr('class'),
 		            canDrillDown: $dataPubicationEl.attr('candrilldown') == "true",
+		            drillDownPage: $dataPubicationEl.attr('drillDownPage'),
 		            templateName: $dataPubicationEl.attr('templateName'),
 		            model: dataModel,
 		            itemsPerPage: $dataPubicationEl.attr('itemsPerPage'),
@@ -1402,7 +1445,17 @@ $(function() {
 	        };
 	    },
 
+	    initialize: function (params) {
+	        this.items = new expanz.models.FieldItemCollection(); // Items are used in enum collection fields
+	    },
+
 	    update: function (attrs) {
+	        this.set({
+	                value: attrs.value
+	            }, {
+	                silent: true // Must be silent, or controls like the time adapter start behaving wierdly
+	            });
+	        
 	        if (this.get('parent').isAnonymous()) {
 	            this.set({
 	                lastValue: attrs.value
@@ -1411,6 +1464,7 @@ $(function() {
 	        else {
 	            expanz.net.DeltaRequest(this.get('fieldId'), attrs.value, this.get('parent'));
 	        }
+	        
 	        return;
 	    },
 
@@ -1441,13 +1495,30 @@ $(function() {
 	            // needing to be processed in a specific order, or needing their values transformed (e.g. converted 
 	            // to bool, long data handling, etc)
 	            if (xml.is("[value]")) {
+	                // Need to unset the value so that controls (like the time adapter) which rely on 
+	                // a different attribute than the value attribute get change notifications. Essentially,
+	                // this just forces the change event to be triggered when the value is set.
+	                this.unset("value", {
+	                    silent: true
+	                });
+	                
 	                this.set({
-	                    // NOTE: The model doesn't currently populate the items property anymore, as it leads to an
-	                    // endless loop in underscore.js in Chrome. As not required for now, commenting out.
-	                    //items: xml.find("Item"),
 	                    value: xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value')
 	                });
 	            }
+	            
+	            if (xml.find("Item").length !== 0) {
+	                // Items are used in enum collection fields
+	                var items = [];
+	                
+	                xml.find("Item").each(function () {
+	                    var $item = $(this);
+	                    items.push({ value: $item.attr("value"), text: $item.attr("text"), isSelected: boolValue($item.attr("selected")) });
+	                });
+	                
+                    // NOTE: The EnumCollectionFieldView is listening for the reset event
+	                this.items.reset(items);
+                }
 
 	            if (xml.is('[visualType]')) {
 	                this.set({
@@ -1494,6 +1565,14 @@ $(function() {
 	    setFocus: function () {
 	        this.trigger("setFocus");
 	    }
+	});
+    
+	window.expanz.models.FieldItem = expanz.models.Bindable.extend({
+	    
+	});
+
+	window.expanz.models.FieldItemCollection = expanz.Collection.extend({
+	    model: expanz.models.FieldItem
 	});
 });
 
@@ -1578,9 +1657,10 @@ $(function() {
 	        window.expanz.currentContextMenu = this; // Used for context menu buttons, as need a way to know which button was pressed when handling response. TODO: Find a better way.
 
 	        var anonymousFields = [];
+
 	        if (this.get('anonymousFields')) {
 	            $.each(this.get('anonymousFields'), function (index, value) {
-	                if (value instanceof expanz.models.data.DataControl) {
+	                if (value instanceof expanz.models.DataPublication) {
 	                    anonymousFields.push({
 	                        id: value.get('dataId'),
 	                        value: value.get('lastValues') || ""
@@ -1609,17 +1689,17 @@ $(function() {
 	        /* bind eventual dynamic values -> requiring user input for example, format is %input_id% */
 	        /* input id must be unique in the page */
 	        methodAttributes = methodAttributes.clone();
+	        
 	        for (var i = 0; i < methodAttributes.length; i++) {
 	            var value = methodAttributes[i].value;
 	            var inputField = /^%(.*)%$/.exec(value);
+	            
 	            if (inputField) {
 	                methodAttributes[i].value = $("#" + inputField[1]).val();
 	            }
 	        }
 
 	        expanz.net.MethodRequest(this.get('id'), methodAttributes, null, this.get('parent'), anonymousFields);
-	        return;
-
 	    },
 
 	    publish: function (xml) {
@@ -1627,6 +1707,12 @@ $(function() {
 	            if (xml.attr('label')) {
 	                this.set({
 	                    label: xml.attr('label')
+	                });
+	            }
+	            
+	            if (xml.attr('state')) {
+	                this.set({
+	                    state: xml.attr('state')
 	                });
 	            }
 	        } else {
@@ -1637,10 +1723,13 @@ $(function() {
 	    /* add an anonymous field or datacontrol to the method, will be added to the xml message when the method is called */
 	    addAnonymousElement: function (element) {
 	        var anonymousFields = this.get('anonymousFields');
+	        
 	        if (anonymousFields === undefined || anonymousFields === null) {
 	            anonymousFields = [];
 	        }
+	        
 	        anonymousFields.push(element);
+	        
 	        this.set({
 	            anonymousFields: anonymousFields
 	        });
@@ -1782,7 +1871,7 @@ $(function() {
 	        this.messageCollection = new expanz.models.MessageCollection();
 	    },
 
-	    login: function (userName, password, isPopup) {
+	    login: function (userName, password) {
 	        var that = this;
 
 	        this.set({
@@ -1796,8 +1885,13 @@ $(function() {
 	                });
 	            }
 	            else {
+	                // Store authentication mode for use when popup login window is displayed
+	                expanz.Storage.setAuthenticationMode(that.get("authenticationMode") || config.authenticationMode);
+
 	                expanz.net.GetSessionDataRequest({
 	                    success: function (url) {
+	                        var isPopup = (that.get("type") === "popup");
+	                        
 	                        if (isPopup) {
 	                            // reload the page
 	                            window.location.reload();
@@ -1822,7 +1916,7 @@ $(function() {
 	            }
 	        };
 	            
-	        expanz.net.CreateSessionRequest(userName, password, {
+	        expanz.net.CreateSessionRequest(userName, password, this.get("authenticationMode") || config.authenticationMode, {
 	            success: loginCallback,
 	            error: function (message) {
 	                that.messageCollection.addErrorMessageByText(message);
@@ -2077,7 +2171,7 @@ $(function() {
 	        expanz.net.CreateActivityRequest(this, this.callbacks);
 	    },
 	    
-	    closeActivity: function () {
+	    closeActivity: function (callAsync) {
 	        this.trigger("closingActivity");
 	        
 	        // Remove the cached activity handle
@@ -2087,7 +2181,7 @@ $(function() {
 	        window.expanz.OnActivityClosed(this.get('handle'));
 
 	        // Close the activity on the server
-	        expanz.net.CloseActivityRequest(this.get('handle'));
+	        expanz.net.CloseActivityRequest(this.get('handle'), null, callAsync);
 	        
 	        this.destroy();
 	    },
@@ -2388,14 +2482,15 @@ $(function() {
 		    this.dataPublication = null; // Will be set in populateDataPublicationModel in responseParser
 		},
 
-		addCell: function (cellId, value, column, sortValue, displayStyle) {
+		addCell: function (cellId, value, column, sortValue, displayStyle, canDrillDown) {
 		    this.cells.add({
 		        id: cellId,
 		        value: value,
 		        row: this,
 		        column: column,
 		        sortValue: sortValue,
-		        displayStyle: displayStyle
+		        displayStyle: displayStyle,
+		        canDrillDown: canDrillDown
 		    });
 		},
 
@@ -2446,13 +2541,11 @@ $(function() {
 	window.expanz.helper = window.expanz.helper || {};
 
 	window.expanz.net = {
-		lastRequest:"", lastResponse:"",
-		// Request Objects -> to be passed to SendRequest
-		CreateSessionRequest : function(username, password, callbacks) {
+		// Request Objects -> to be passed to ServerRequestManager
+		CreateSessionRequest : function(username, password, authenticationMode, callbacks) {
 			expanz.Storage.clearSession(); /* clear previous existing sessions */
 			var appsite = config.appSite;
-			var authenticationMode = config.authenticationMode;
-			SendRequest(requestBuilder.CreateSession(username, password, appsite, authenticationMode), parseCreateSessionResponse(callbacks));
+			serverRequestManager.queueRequest(requestBuilder.CreateSession(username, password, appsite, authenticationMode), parseCreateSessionResponse(callbacks));
 		},
 
 		WebServerPing : function(nbAttempts) {
@@ -2462,7 +2555,7 @@ $(function() {
 			if (window.expanz.pingError === undefined)
 				window.expanz.pingError = 0;
 
-			SendRequest(requestBuilder.WebServerPing(), function(data) {
+			serverRequestManager.queueRequest(requestBuilder.WebServerPing(), function(data) {
 			    var res = ($(data).find("WebServerPingResult"));
 			    
 				if (res.length > 0 && res.text() == "true") {
@@ -2483,23 +2576,18 @@ $(function() {
 					}
 				}
 			});
-
 		},
 
 		GetSessionDataRequest : function(callbacks) {
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
 			}
 
-			SendRequest(requestBuilder.GetSessionData(expanz.Storage.getSessionHandle()), parseGetSessionDataResponse(callbacks));
+			serverRequestManager.queueRequest(requestBuilder.GetSessionData(expanz.Storage.getSessionHandle()), parseGetSessionDataResponse(callbacks));
 		},
 
 		CreateActivityRequest : function(activity, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			if (activity.get('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 					expanz.views.requestLogin();
@@ -2510,29 +2598,29 @@ $(function() {
 			/* if allow anonymous and session doesn't exist we don't create anything on the server */
 			if (expanz.Storage.getSessionHandle() && expanz.Storage.getSessionHandle() !== "") {
 			    var initiator = null;
-			    
-				/* check if an activity has already been created, if so specify it instead of creating a new one */
-				var activityHandle = expanz.Storage.getActivityHandle(activity.get('name'), activity.get('style'));
 
-				if (activityHandle !== undefined && activityHandle !== null) {
-				    activity.set({
-				        'handle': activityHandle
-				    });
-				} else {
-				    // When parsing the create activity response, the parser won't have an activity handle
-				    // that it can use to find the activity in the list of open activities, so ween need to
-				    // pass the instance as an initiator.
-				    initiator = {
-				        type : "CreateActivity",
-				        activityModel: activity
+			    /* check if an activity has already been created, if so specify it instead of creating a new one */
+			    var activityHandle = expanz.Storage.getActivityHandle(activity.get('name'), activity.get('style'));
+
+			    if (activity.get("keepOpenForSession") === true && activityHandle !== undefined && activityHandle !== null) {
+			        activity.set({
+			            'handle': activityHandle
+			        });
+			    } else {
+			        // When parsing the create activity response, the parser won't have an activity handle
+			        // that it can use to find the activity in the list of open activities, so we need to
+			        // pass the instance as an initiator.
+			        initiator = {
+			            type: "CreateActivity",
+			            activityModel: activity
 			        };
-				}
+			    }
 
-				activity.set({
+			    activity.set({
 					loading : true
 				});
 
-				SendRequest(requestBuilder.CreateActivity(activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks));
+			    serverRequestManager.queueRequest(requestBuilder.CreateActivity(activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks));
 			}
 			else {
 				/* anonymous case because no session handle is set */
@@ -2540,7 +2628,6 @@ $(function() {
 		},
 
 		GetSavePreferencesRequest : function(activity, key, value, updateClientStorage, callbacks) {
-
 			if (activity.get('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 					expanz.views.requestLogin();
@@ -2554,14 +2641,11 @@ $(function() {
 
 			if (!activity.isAnonymous()) {
 				// TODO check if we need a callback
-				SendRequest(requestBuilder.GetSavePreferences(key, value, expanz.Storage.getSessionHandle()));
+				serverRequestManager.queueRequest(requestBuilder.GetSavePreferences(key, value, expanz.Storage.getSessionHandle()));
 			}
 		},
 
 		DeltaRequest : function(id, value, activity, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			if (activity.get('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 					expanz.views.requestLogin();
@@ -2581,13 +2665,10 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks),null,true);
+			serverRequestManager.queueRequest(requestBuilder.Delta(id, value, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 		},
 
 		MethodRequest : function(name, methodAttributes, context, activity, anonymousFields, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			if (activity.get('allowAnonymous') === false) {
 				if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 					expanz.views.requestLogin();
@@ -2609,19 +2690,15 @@ $(function() {
 
 			// activity allows anonymous and user not logged in
 			if (activity.isAnonymous()) {
-			    SendRequest(requestBuilder.AnonymousMethod(name, methodAttributes, context, activity, anonymousFields), parseResponse(activity, initiator, callbacks), null, true);
+			    serverRequestManager.queueRequest(requestBuilder.AnonymousMethod(name, methodAttributes, context, activity, anonymousFields), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 			}
 			else {
-			    SendRequest(requestBuilder.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+			    serverRequestManager.queueRequest(requestBuilder.Method(name, methodAttributes, context, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 			}
-
 		},
 
 		/* only use on load of the page to load the datapublications in anonymous context */
 		AnonymousMethodsRequest : function(methods, activity, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			var initiator = {
 				type : "anonymous",
 				id : "anonymous"
@@ -2634,33 +2711,24 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.AnonymousMethods(methods, activity), parseResponse(activity, initiator, callbacks), null, true);
-
+			serverRequestManager.queueRequest(requestBuilder.AnonymousMethods(methods, activity), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 		},
 		
 		SetContextAndDeltaRequest: function (contextInfo, deltaInfo, activity, callbacks) {
-		    if (callbacks === undefined)
-		        callbacks = activity.callbacks;
-
 		    var initiator = {};
-		    
-		    SendRequest(requestBuilder.SetContextAndDelta(contextInfo, deltaInfo, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+		    serverRequestManager.queueRequest(requestBuilder.SetContextAndDelta(contextInfo, deltaInfo, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 	    },
 
-		CloseActivityRequest : function(activityHandle, callbacks) {
-
+		CloseActivityRequest: function (activityHandle, callbacks, callAsync) {
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
 			}
 
-			SendRequest(requestBuilder.CloseActivity(activityHandle, expanz.Storage.getSessionHandle()), parseCloseActivityResponse(callbacks));
+			serverRequestManager.queueRequest(requestBuilder.CloseActivity(activityHandle, expanz.Storage.getSessionHandle()), parseCloseActivityResponse(callbacks), false, callAsync);
 		},
 
 		DataRefreshRequest : function(dataId, activity, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
@@ -2678,7 +2746,7 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.DataRefresh(dataId, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+			serverRequestManager.queueRequest(requestBuilder.DataRefresh(dataId, activity, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 		},
 
 		ReleaseSessionRequest : function(callbacks) {
@@ -2686,11 +2754,11 @@ $(function() {
 				expanz.views.requestLogin();
 				return;
 			}
-			SendRequest(requestBuilder.ReleaseSession(expanz.Storage.getSessionHandle()), parseReleaseSessionResponse(callbacks));
+		    
+			serverRequestManager.queueRequest(requestBuilder.ReleaseSession(expanz.Storage.getSessionHandle()), parseReleaseSessionResponse(callbacks));
 		},
 
 		GetBlobRequest : function(blobId, activity, initiator) {
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
@@ -2704,11 +2772,10 @@ $(function() {
 				}
 			});
 
-			SendNormalRequest(requestBuilder.GetBlob(blobId, activity, expanz.Storage.getSessionHandle()));
+			serverRequestManager.sendNormalRequest(requestBuilder.GetBlob(blobId, activity, expanz.Storage.getSessionHandle()));
 		},
 
 		GetFileRequest : function(filename, activity, initiator) {
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
@@ -2722,14 +2789,11 @@ $(function() {
 				}
 			});
 
-			SendNormalRequest(requestBuilder.GetFile(filename, activity, expanz.Storage.getSessionHandle()));
+			serverRequestManager.sendNormalRequest(requestBuilder.GetFile(filename, activity, expanz.Storage.getSessionHandle()));
 		},
 
 		/* call when selecting something from the tree view (file) or menu action */
 		CreateMenuActionRequest: function (activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
@@ -2747,14 +2811,11 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.CreateMenuAction(activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+			serverRequestManager.queueRequest(requestBuilder.CreateMenuAction(activity, contextId, contextType, contextObject, menuAction, defaultAction, setIdFromContext, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 		},
 
 		/* call when selecting something from the tree view (file) or menu action */
 		CreateContextMenuRequest : function(activity, contextId, contextMenuType, contextObject, callbacks) {
-			if (callbacks === undefined)
-				callbacks = activity.callbacks;
-
 			if (!expanz.Storage.getSessionHandle() || expanz.Storage.getSessionHandle() === "") {
 				expanz.views.requestLogin();
 				return;
@@ -2772,156 +2833,14 @@ $(function() {
 				}
 			});
 
-			SendRequest(requestBuilder.CreateContextMenuAction(activity, contextId, contextMenuType, contextObject, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks), null, true);
+			serverRequestManager.queueRequest(requestBuilder.CreateContextMenuAction(activity, contextId, contextMenuType, contextObject, expanz.Storage.getSessionHandle()), parseResponse(activity, initiator, callbacks || activity.callbacks), null, true);
 		},
 
 		/* create an anonymous request */
 		CreateAnonymousRequest : function(xmlData, callbacks) {
-			if (callbacks === undefined)
-			    callbacks = window.expanz.defaultCallbacks;
-		    
-			SendRequest(requestBuilder.CreateAnonymousRequest(xmlData), parseExecAnonymousResponse(callbacks));
-		}
-
-	};
-
-
-	/*
-	 * Send Request :manage the sending of XML requests to the server, and dispatching of response handlers
-	 */
-	var requestBusy;
-	var requestQueue = [];
-	var SendRequest = function (request, responseHandler, isPopup, callAsync) {
-		if (false && requestBusy) {
-			requestQueue.push([request, responseHandler, isPopup]);
-		}
-
-		window.expanz.logToConsole("REQUEST:");
-		window.expanz.logToConsole(request.data);
-
-		requestBusy = true;
-		window.expanz.net.lastRequest = request.data;
-	    
-		var isAsync = true;
-		//if (callAsync !== undefined && callAsync) {
-		//	isAsync = true;
-		//}
-	    
-		$(window.expanz.html.busyIndicator()).trigger("isBusy");
-	    
-		$.ajaxSetup({
-		    headers: { "cache-control": "no-cache" } // http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
-		});
-	    
-		if (config.urlProxy !== undefined && config.urlProxy.length > 0) {
-			$.ajax({
-				type : 'POST',
-
-				url: config.urlProxy,
-
-				data: {
-					url : getUrlRestService(request.url),
-					data : request.data,
-					method : request.method || "POST"
-				},
-
-				dataType: 'XML',
-
-				processData: true,
-				
-				async: isAsync,
-
-				complete: function (HTTPrequest) {
-					requestBusy = false;
-					window.expanz.net.lastResponse = HTTPrequest.responseText;
-					$(window.expanz.html.busyIndicator()).trigger("notBusy");
-
-					window.expanz.logToConsole("RESPONSE:");
-					window.expanz.logToConsole(HTTPrequest.responseText);
-				    
-					if (HTTPrequest.status != 200) {
-						eval(responseHandler)('There was a problem with the last request.');
-					}
-					else {
-						if (isPopup !== undefined && isPopup === true) {
-							var WinId = window.open('', 'newwin', 'width=400,height=500');
-							WinId.document.open();
-							WinId.document.write(HTTPrequest.responseText);
-							WinId.document.close();
-						}
-						else {
-							if (responseHandler) {
-								eval(responseHandler)(HTTPrequest.responseXML);
-							}
-						}
-					}
-				}
-			});
-		}
-		else {
-			$.ajax({
-			    type: request.method || "POST",
-			    
-			    url: getUrlRestService(request.url),
-			    
-			    data: request.data,
-			    
-			    dataType: 'XML',
-			    
-			    processData: true,
-			    
-				complete : function(HTTPrequest) {
-					if (HTTPrequest.status != 200) {
-						eval(responseHandler)('There was a problem with the last request.');
-					}
-					else {
-						if (isPopup !== undefined && isPopup === true) {
-							var WinId = window.open('', 'newwin', 'width=400,height=500');
-							WinId.document.open();
-							WinId.document.write(HTTPrequest.responseText);
-							WinId.document.close();
-						}
-						else {
-							if (responseHandler) {
-								eval(responseHandler)(HTTPrequest.responseXML);
-							}
-						}
-					}
-				}
-			});
+			serverRequestManager.queueRequest(requestBuilder.CreateAnonymousRequest(xmlData), parseExecAnonymousResponse(callbacks || window.expanz.defaultCallbacks));
 		}
 	};
-
-	/*
-	 * Send Request :manage the sending of XML requests to the server, and dispatching of response handlers. Proxy is needed.
-	 */
-
-	var SendNormalRequest = function(request) {
-
-		if ($("#formFile")) {
-			$("#formFile").remove();
-		}
-
-		var form = '';
-		form += "<form method='post' id='formFile' target='_blank' action='" + config.urlProxy + "'>";
-		form += "<input type='hidden' name='url' value='" + getUrlRestService(request.url) + "'>";
-
-		form += "<input type='hidden' name='data' value='" + request.data + "'>";
-		form += "</form>";
-		$("body").append(form);
-
-		$("#formFile").submit();
-
-	};
-
-	function getUrlRestService(path) {
-	    var sep = "";
-	    
-		if (!config.urlPrefix.endsWith("/"))
-		    sep = "/";
-	    
-		return config.urlPrefix + sep + path;
-	}
 });
 
 ///#source 1 1 /source/js/expanz/client/requestBuilder.js
@@ -3123,9 +3042,7 @@ var requestBuilder = {
 var requestBody = {
 
     createSession: function (username, password, appsite, authenticationMode) {
-        if (authenticationMode === undefined)
-            authenticationMode = "Primary";
-        return '<CreateSession source="MixiLink" user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + authenticationMode + '" clientType="HTML" clientVersion="' + window.expanz.clientVersion + '" schemaVersion="2.0"/>';
+        return '<CreateSession source="MixiLink" user="' + username + '" password="' + password + '" appSite="' + appsite + '" authenticationMode="' + (authenticationMode || "Primary") + '" clientType="HTML" clientVersion="' + window.expanz.clientVersion + '" schemaVersion="2.0"/>';
     },
 
     getSessionData: function () {
@@ -3150,34 +3067,19 @@ var requestBody = {
         }
 
         center = '';
-        
-        if (handle) {
-            if (activity.get('optimisation') === true) {
-                center += this.wrapPayloadInActivityRequest(unmaskedFields, activity);
-            }
+        center += '<CreateActivity ';
+        center += 'name="' + activity.get('name') + '"';
+        center += activity.get('style') ? ' style="' + activity.get('style') + '"' : '';
+        center += activity.get('optimisation') ? ' suppressFields="1"' : '';
+        center += activity.get('key') ? ' initialKey="' + activity.get('key') + '"' : '';
+        center += '>';
             
-            center += '<PublishSchema activityHandle="' + handle + '"> ';
-        }
-        else {
-            center += '<CreateActivity ';
-            center += 'name="' + activity.get('name') + '"';
-            center += activity.get('style') ? ' style="' + activity.get('style') + '"' : '';
-            center += activity.get('optimisation') ? ' suppressFields="1"' : '';
-            center += activity.get('key') ? ' initialKey="' + activity.get('key') + '">' : '>';
-
-            if (activity.get('optimisation') === true) {
-                center += unmaskedFields;
-            }
+        if (activity.get('optimisation') === true) {
+            center += unmaskedFields;
         }
 
         center += this.getActivityDataPublicationRequests(activity);
-        
-        if (handle) {
-            center += '</PublishSchema>';
-        }
-        else {
-            center += '</CreateActivity>';
-        }
+        center += '</CreateActivity>';
         
         return center;
     },
@@ -3551,17 +3453,22 @@ function parseGetSessionDataResponse(callbacks) {
             expanz.Storage.setFormMapping(data);
 
             $(data).find('activity').each(function () {
-                var name = $(this).attr('name');
-                var url = getPageUrl($(this).attr('form'));
-                var style = $(this).attr('style') || "";
+                var $activityElement = $(this);
+                var name = $activityElement.attr('name');
+                var url = getPageUrl($activityElement.attr('form'));
+                var style = $activityElement.attr('style') || "";
+                
+                // Parse data attributes, and add them to the object
+                var dataAttributes = [].filter.call($activityElement[0].attributes, function(at) { return /^data-/.test(at.name); });
+                
                 var gridviewList = [];
-                $(this).find('gridview').each(function () {
+                
+                $activityElement.find('gridview').each(function () {
                     var gridview = new GridViewInfo($(this).attr('id'));
                     gridviewList.push(gridview);
                 });
 
-                fillActivityData(processAreas, url, name, style, gridviewList);
-
+                fillActivityData(processAreas, url, name, style, dataAttributes, gridviewList);
             });
 
             expanz.Storage.setProcessAreaList(processAreas);
@@ -3571,6 +3478,7 @@ function parseGetSessionDataResponse(callbacks) {
                     if (callbacks && callbacks.success) {
                         callbacks.success($(this).attr('form'));
                     }
+                    
                     return;
                 }
             });
@@ -3909,7 +3817,7 @@ function parseActivityRequestResponse(activityRequestElement) {
     var $activityRequestElement = $(activityRequestElement);
 
     var id = $activityRequestElement.attr('id');
-    var key = $activityRequestElement.attr('key');
+    var key = $activityRequestElement.attr('key') || $activityRequestElement.attr('initialKey');
     var style = $activityRequestElement.attr('style') || "";
 
     window.expanz.openActivity(id, style, key);
@@ -4036,18 +3944,22 @@ function parseReleaseSessionResponse(callbacks) {
     };
 }
 
-function fillActivityData(processAreas, url, name, style, gridviewList) {
+function fillActivityData(processAreas, url, name, style, dataAttributes, gridviewList) {
     $.each(processAreas, function (i, processArea) {
         $.each(processArea.activities, function (j, activity) {
             if (activity.name == name && activity.style == style) {
                 activity.url = url;
                 activity.gridviews = gridviewList;
+                
+                // Add data attributes as properties on the activity object
+                for (var attrIndex = 0; attrIndex < dataAttributes.length; attrIndex++) {
+                    activity[dataAttributes[attrIndex].name] = dataAttributes[attrIndex].value;
+                }
             }
         });
 
-        /* do it for sub process activity */
-        fillActivityData(processArea.pa, url, name, style, gridviewList);
-
+        /* Search for activity under sub process areas */
+        fillActivityData(processArea.pa, url, name, style, dataAttributes, gridviewList);
     });
 }
 
@@ -4081,12 +3993,166 @@ function populateDataPublicationModel(dataPublicationModel, data) {
             cell = serializeXML(cell); // quick fix for htmlunit
             var $cell = $(cell);
             
-            rowModel.addCell($cell.attr('id'), $cell.text(), dataPublicationModel.columns.get($cell.attr('id')), $cell.attr('sortValue'), $cell.attr('displayStyle'));
+            rowModel.addCell($cell.attr('id'), $cell.text(), dataPublicationModel.columns.get($cell.attr('id')), $cell.attr('sortValue'), $cell.attr('displayStyle'), $cell.attr('canDrillDown'));
         });
     });
 
     dataPublicationModel.dataPublished($data);
 }
+///#source 1 1 /source/js/expanz/client/serverRequestManager.js
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Chris Anderson
+//  Copyright 2008-2013 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+/*
+ * Send Request :manage the sending of XML requests to the server, and dispatching of response handlers
+ */
+var serverRequestManager = {
+    isRequestInProgress: false,
+    requestQueue: [],
+
+    queueRequest: function (payload, responseCallback, isPopup, callAsync) {
+        var requestInfo = {
+            payload: payload,
+            responseCallback: responseCallback,
+            isPopup: isPopup,
+            isAsync: callAsync === undefined || callAsync
+        };
+
+        // Push this request onto the queue
+        this.requestQueue.push(requestInfo);
+
+        if (this.isRequestInProgress === false)
+            this.startNextQueuedRequest();
+    },
+
+    startNextQueuedRequest: function () {
+        // Execute the next request in the queue
+        if (this.requestQueue.length !== 0) {
+            window.expanz.logToConsole("Executing queued request");
+
+            var executeRequestInfo = this.requestQueue.shift();
+            this.sendRequest(executeRequestInfo);
+        }
+    },
+
+    sendRequest: function (requestInfo) {
+        window.expanz.logToConsole("REQUEST:");
+        window.expanz.logToConsole(requestInfo.payload.data);
+
+        this.isRequestInProgress = true;
+
+        var manager = this;
+
+        $(window).trigger("serverRequestStarted");
+
+        $.ajaxSetup({
+            headers: { "cache-control": "no-cache" } // http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
+        });
+
+        if (config.urlProxy !== undefined && config.urlProxy.length > 0) {
+            $.ajax({
+                type: 'POST',
+                url: config.urlProxy,
+
+                data: {
+                    url: this.getUrlRestService(requestInfo.payload.url),
+                    data: requestInfo.payload.data,
+                    method: requestInfo.payload.method || "POST"
+                },
+
+                dataType: 'XML',
+                processData: true,
+                async: requestInfo.isAsync,
+                complete: function (jqXHR) {
+                    manager.onRequestComplete.call(manager, jqXHR, requestInfo);
+                }
+            });
+        }
+        else {
+            $.ajax({
+                type: requestInfo.payload.method || "POST",
+                url: this.getUrlRestService(requestInfo.payload.url),
+                data: requestInfo.payload.data,
+                dataType: 'XML',
+                processData: true,
+                async: requestInfo.isAsync,
+                complete: function (jqXHR) {
+                    manager.onRequestComplete.call(manager, jqXHR, requestInfo);
+                }
+            });
+        }
+    },
+
+    onRequestComplete: function (jqXHR, requestInfo) {
+        this.isRequestInProgress = false;
+
+        window.expanz.logToConsole("RESPONSE:");
+        window.expanz.logToConsole(jqXHR.responseText);
+
+        if (jqXHR.status === 0) {
+            // Request was cancelled
+            requestQueue = [];  // Future requests made invalid due to error, so clear the queue. TODO: Determine whether there is a better strategy for dealing with queued requests after an error.
+        }
+        else if (jqXHR.status != 200) {
+            alert("There was a problem with the last server request. Status code " + jqXHR.status);
+            requestQueue = [];  // Future requests made invalid due to error, so clear the queue. TODO: Determine whether there is a better strategy for dealing with queued requests after an error.
+        }
+        else {
+            if (requestInfo.isPopup !== undefined && requestInfo.isPopup === true) {
+                var WinId = window.open('', 'newwin', 'width=400,height=500');
+                WinId.document.open();
+                WinId.document.write(jqXHR.responseText);
+                WinId.document.close();
+            }
+            else {
+                if (requestInfo.responseCallback) {
+                    eval(requestInfo.responseCallback)(jqXHR.responseXML);
+                }
+            }
+        }
+
+        $(window).trigger("serverRequestCompleted", requestInfo);
+
+        // Send next queued request
+        this.startNextQueuedRequest();
+    },
+
+    sendNormalRequest: function (request) {
+        // Send Request :manage the sending of XML requests to the server, and dispatching of response handlers. Proxy is needed.
+        if ($("#formFile")) {
+            $("#formFile").remove();
+        }
+
+        var form = '';
+        form += "<form method='post' id='formFile' target='_blank' action='" + config.urlProxy + "'>";
+        form += "<input type='hidden' name='url' value='" + this.getUrlRestService(request.url) + "'>";
+        form += "<input type='hidden' name='data' value='" + request.data + "'>";
+        form += "</form>";
+
+        $("body").append(form);
+
+        $("#formFile").submit();
+    },
+
+    getUrlRestService: function (path) {
+        var sep = "";
+
+        if (!config.urlPrefix.endsWith("/"))
+            sep = "/";
+
+        return config.urlPrefix + sep + path;
+    }
+};
 ///#source 1 1 /source/js/expanz/client/ActivityInfo.js
 function ActivityInfo(name, title, url, style, image) {
     this.name = name;
@@ -4102,14 +4168,6 @@ function ActivityInfo(name, title, url, style, image) {
     }
     this.gridviews = [];
 }
-///#source 1 1 /source/js/expanz/client/ProcessArea.js
-// TODO reduce name length because store in cookies as json string and take bandwiths (limitation on cookie size can be reached as well)
-function ProcessArea(id, title) {
-    this.id = id;
-    this.title = title;
-    this.activities = [];
-    this.pa = []; /* sub process area */
-}
 ///#source 1 1 /source/js/expanz/client/GridViewInfo.js
 function GridViewInfo(id) {
     this.id = id;
@@ -4123,6 +4181,14 @@ function GridViewInfo(id) {
         this.field = field;
         this.width = width;
     }
+}
+///#source 1 1 /source/js/expanz/client/ProcessArea.js
+// TODO reduce name length because store in cookies as json string and take bandwiths (limitation on cookie size can be reached as well)
+function ProcessArea(id, title) {
+    this.id = id;
+    this.title = title;
+    this.activities = [];
+    this.pa = []; /* sub process area */
 }
 ///#source 1 1 /source/js/expanz/expanz.storage.js
 ////////////////////////////////////////////////////////////////////////////////
@@ -4173,6 +4239,18 @@ $(function() {
 
 		setSessionHandle : function(sessionHandle) {
 			this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'session.handle', sessionHandle);
+			return true;
+		},
+
+		getAuthenticationMode : function() {
+			var sessionHandle = this._getBestStorage().get(expanz.Storage._getStorageGlobalName() + 'authenticationMode');
+			if (sessionHandle == 'undefined')
+				return undefined;
+			return sessionHandle;
+		},
+
+		setAuthenticationMode: function (authenticationMode) {
+		    this._getBestStorage().set(expanz.Storage._getStorageGlobalName() + 'authenticationMode', authenticationMode);
 			return true;
 		},
 
@@ -4297,7 +4375,11 @@ $(function() {
 			storage.remove(storageGlobalName + 'session.handle');
 			storage.remove(storageGlobalName + 'lastPingSuccess');
 			storage.remove(storageGlobalName + 'roles.list');
+			storage.remove(storageGlobalName + 'processarea.list');
+			storage.remove(storageGlobalName + 'userdetails.list');
 			storage.remove(storageGlobalName + 'dashboards');
+			storage.remove(storageGlobalName + 'FormMapping');
+			storage.remove(storageGlobalName + 'authenticationMode');
 			this.clearActivityHandles();
 			return true;
 		},
@@ -4421,42 +4503,40 @@ $(function() {
     window.expanz.menu = window.expanz.menu || {};
 
     window.expanz.menu.AppSiteMenu = function() {
-        this.processAreas = [];
-
-        this.load = function(el, level, parentSubProcesses) {
-            el.html("");
-            if (el.attr('type') == 'icon') {
+        this.render = function ($el, processAreas, level, parentSubProcesses) {
+            $el.html(""); // Clear the contents of the menu host element
+            
+            if ($el.attr('type') == 'icon') {
                 if (level > 0) {
-                    el.append('<div id="backOneLevel" class="icon"><img src="assets/images/home.png">Back</div>');
-                    el.find("#backOneLevel").click(function() {
+                    $el.append('<div id="backOneLevel" class="icon"><img src="assets/images/home.png">Back</div>');
+                    
+                    $el.find("#backOneLevel").click(function() {
                         var menu = new expanz.Storage.AppSiteMenu();
-                        menu.processAreas = parentSubProcesses;
-                        menu.load(el.closest("[bind=menu]"), level - 1);
+                        menu.render($el.closest("[bind=menu]"), parentSubProcesses, level - 1);
                     });
                 }
-                var that = this;
-                _.each(this.processAreas, function(pA) {
-                    pA.load(el, 0, true, that.processAreas);
+                
+                _.each(processAreas, function(processArea) {
+                    processArea.render($el, 0, true, processAreas);
                 });
             } else {
-                // clear the DOM menu
-
                 var url = window.location.href;
                 var currentPage = url.substring(url.lastIndexOf('/') + 1);
+                
                 if (window.config.homePage && currentPage.length == 0) {
                     currentPage = getPageUrl(window.config.homePage);
                 }
 
                 // load process areas into DOM menu
-                el.append('<ul id="menuUL" class="menu"></ul>');
+                $el.append('<ul id="menuUL" class="menu"></ul>');
 
-                var homeLabel = el.attr('homeLabel') || 'Home';
-                var logoutLabel = el.attr('logoutLabel') || 'Logout';
-                var backLabel = el.attr('backLabel') || 'Back';
+                var homeLabel = $el.attr('homeLabel') || 'Home';
+                var logoutLabel = $el.attr('logoutLabel') || 'Logout';
+                var backLabel = $el.attr('backLabel') || 'Back';
 
                 // add back button if defined
                 if (window.config.backButton === true) {
-                    el.find("#menuUL").before('<a href="javascript:void(0);" onclick="history.go(-1);return true;" class="backbutton">' + backLabel + '</a>');
+                    $el.find("#menuUL").before('<a href="javascript:void(0);" onclick="history.go(-1);return true;" class="backbutton">' + backLabel + '</a>');
                 }
 
                 // add home page if defined
@@ -4465,26 +4545,33 @@ $(function() {
 
                     url = getPageUrl($(this).attr('form'));
                     var urlHome = getPageUrl(window.config.homePage);
+                    
                     if (urlHome == currentPage) {
                         homeClass = "selected selectedNew ";
                     }
-                    el.find("#menuUL").append('<li class="' + homeClass + ' processarea menuitem" id="home"><a href="' + urlHome + '" class="home menuTitle">' + homeLabel + '</a></li>');
+                    
+                    $el.find("#menuUL").append('<li class="' + homeClass + ' processarea menuitem" id="home"><a href="' + urlHome + '" class="home menuTitle">' + homeLabel + '</a></li>');
                 }
 
-                _.each(this.processAreas, function(pA) {
+                _.each(processAreas, function(processArea) {
                     var menuItemClass = "";
-                    if (pA.title.indexOf("[CR]") != -1) {
+                    
+                    if (processArea.title.indexOf("[CR]") != -1) {
                         menuItemClass = "small";
                     }
-                    pA.title = pA.title.replace("[CR]", "<br />");
-                    el.find("#menuUL").append('<li class="processarea menuitem ' + menuItemClass + '" id="' + pA.id + '"><a class="menuTitle" href="#">' + pA.title + '</a></li>');
-                    pA.load(el.find('#' + pA.id + '.processarea.menuitem'), 0, false);
-                });
-                // add html and click handler to DOM
-                el.append('<ul class="right logoutContainer"><li class="processarea" id="logout"><a class="logout menuTitle">' + logoutLabel + '</a></li></ul>');
-                el.append('<div style="clear:both"></div>');
+                    
+                    processArea.title = processArea.title.replace("[CR]", "<br />");
+                    
+                    $el.find("#menuUL").append('<li class="processarea menuitem ' + menuItemClass + '" id="' + processArea.id + '"><a class="menuTitle" href="#">' + processArea.title + '</a></li>');
 
-                $(el.find('#logout')[0]).click(function(e) {
+                    processArea.render($el.find('#' + processArea.id + '.processarea.menuitem'), 0, false);
+                });
+                
+                // Add html and click handler to DOM
+                $el.append('<ul class="right logoutContainer"><li class="processarea" id="logout"><a class="logout menuTitle">' + logoutLabel + '</a></li></ul>');
+                $el.append('<div style="clear:both"></div>');
+
+                $($el.find('#logout')[0]).click(function(e) {
                     expanz.security.logout();
                 });
             }
@@ -4502,41 +4589,40 @@ $(function() {
         this.id = id;
         this.title = title;
         this.activities = [];
-        this.pa = []; /* sub process area */
+        this.processArea = []; /* sub process area */
 
-        this.load = function(el, level, displayAsIcons, parentSubProcesses) {
+        this.render = function (el, level, displayAsIcons, parentSubProcesses) {
             var url = window.location.href;
             var currentPage = url.substring(url.lastIndexOf('/') + 1);
 
             if (displayAsIcons === true) {
-
                 _.each(this.activities, function(activity) {
-                    activity.load(el, true);
+                    activity.render(el, true);
                 });
 
-                if (this.pa && this.pa.length > 0) {
+                if (this.processArea && this.processArea.length > 0) {
                     var i = 0;
                     var j = new Date().getTime();
-                    _.each(this.pa, function(subprocess) {
+                    
+                    _.each(this.processArea, function (subprocess) {
                         var subId = 'subprocess' + j + "_" + i++;
                         el.append('<div id="' + subId + '" class="icon"><img src="' + subprocess.img + '"/><br/> ' + subprocess.title + '</div>');
 
                         el.find("#" + subId).click(function() {
                             var menu = new expanz.Storage.AppSiteMenu();
-                            menu.processAreas = [
-                                subprocess
-                            ];
-                            menu.load(el.closest("[bind=menu]"), level + 1, parentSubProcesses);
+                            menu.render(el.closest("[bind=menu]"), subprocess, level + 1, parentSubProcesses);
                         });
                     });
                 }
             } else {
                 var ulId = this.id + '_' + level;
+                
                 if (this.activities.length > 0) {
                     /* replace the link of the parent if only one activity in the menu */
                     if (this.activities.length == 1) {
                         url = this.activities[0].url;
                         el.find("[class='menuTitle']").attr('href', url);
+                        
                         /* workaround for kendo issue : bind touchend */
                         el.find("[class='menuTitle']").bind("touchend", function(e) {
                             window.location.href = url;
@@ -4548,26 +4634,33 @@ $(function() {
                         }
                     } else {
                         el.append('<ul style="display:none" id="' + ulId + '"></ul>');
+                        
                         el.click(function() {
                             // el.find("#" + ulId).toggle();
                         });
+                        
                         _.each(this.activities, function(activity) {
-                            activity.load(el.find("#" + ulId), false);
+                            activity.render(el.find("#" + ulId), false);
                         });
                     }
                 }
 
-                if (this.pa && this.pa.length > 0) {
+                if (this.processArea && this.processArea.length > 0) {
                     if (el.find("#" + ulId).length === 0) {
                         el.append('<ul style="display:none" id="' + ulId + '"></ul>');
                     }
+                    
                     var i = 0;
-                    _.each(this.pa, function(subprocess) {
+                    
+                    _.each(this.processArea, function (subprocess) {
                         var liID = ulId + '_li_' + i++;
+                        
                         if (subprocess.id === undefined)
                             subprocess.id = liID;
+                        
                         el.find("#" + ulId).append('<li class="processarea menuitem" id="' + liID + '"><a class="menuTitle" href="#">' + subprocess.title + '</a></li>');
-                        subprocess.load(el.find('#' + liID + '.processarea.menuitem'), level + 1);
+
+                        subprocess.render(el.find('#' + liID + '.processarea.menuitem'), level + 1);
                     });
                 }
             }
@@ -4588,10 +4681,12 @@ $(function() {
         this.url = url;
         this.img = img;
 
-        this.load = function(el, displayAsIcons) {
+        this.render = function(el, displayAsIcons) {
             this.title = this.title.replace("[CR]", "<br />");
+            
             if (displayAsIcons === true) {
-                el.append('<li><div class="icon navContainer"><a class="nav-' + this.name.replace(/\./g, "-") + "-" + this.style.replace(/\./g, "-") + ' navItem" href="' + this.url + '"></a><a class="navText" href="' + this.url + '">' + this.title + '</a></div></li>');
+                if (this.displayInHomeMenu) // TODO: displayAsIcons should be handled by an external adapter
+                    el.append('<li><div class="icon navContainer"><a class="nav-' + this.name.replace(/\./g, "-") + "-" + this.style.replace(/\./g, "-") + ' navItem" href="' + this.url + '"></a><a class="navText" href="' + this.url + '">' + this.title + '</a></div></li>');
             } else {
                 el.append('<li class="activity">' + '<a href=\'' + this.url + '\'>' + this.title + '</a>' + '</li>');
             }
@@ -4863,18 +4958,10 @@ $(function () {
             return value;
         },
 
-        viewUpdate: function (event) {
-            // handle multi-choices
-            if (this.model.get('items') !== undefined && this.model.get('items').length > 0) {
-                this.model.update({
-                    value: (event.target.checked ? 1 : -1) * (event.target.value)
-                });
-            }
-            else {
-                this.model.update({
-                    value: this.getValue()
-                });
-            }
+        viewUpdate: function () {
+            this.model.update({
+                value: this.getValue()
+            });
 
             this.$el.trigger('update:field');
         },
@@ -4885,9 +4972,13 @@ $(function () {
 
         setFocus: function () {
             var inputElement = this.getInputElement();
-            
-            if (inputElement != undefined && inputElement != null)
+
+            if (inputElement != undefined && inputElement != null) {
                 inputElement.focus();
+
+                // Extensibility point. This allows adapters to handle this event differently if necessary.
+                inputElement.trigger("setFocus");
+            }
         }
     });
 });
@@ -5101,7 +5192,7 @@ $(function () {
 
         template: _.template("<input id='textinput' attribute='value' type='text' style='display: none' /> " +
 	                         "<label id='booleaninput' style='display: none'><input attribute='value' type='checkbox' /> Yes / I Agree</label>" +
-	                         "<div id='options' style='display: none' />"),
+	                         "<div id='options' style='display: none'></div>"),
 
         initialize: function () {
             this.model.bind("change:label", this.modelUpdate('label'), this);
@@ -5245,6 +5336,71 @@ $(function () {
         }
     });
 });
+///#source 1 1 /source/js/expanz/views/expanz.views.EnumCollectionFieldView.js
+////////////////////////////////////////////////////////////////////////////////
+//
+//  EXPANZ
+//  Author: Chris Anderson
+//  Copyright 2008-2012 EXPANZ
+//  All Rights Reserved.
+//
+//  NOTICE: expanz permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+$(function () {
+
+    window.expanz = window.expanz || {};
+    window.expanz.views = window.expanz.views || {};
+
+    window.expanz.views.EnumCollectionFieldView = window.expanz.views.FieldView.extend({
+
+        template: _.template("<div class='enumcollectionitem'><label><input type='checkbox' value='<%= value %>' <%= isSelected ? 'checked' : '' %> /> <%= text %></label><div>"),
+
+        initialize: function () {
+            this.model.bind("change:label", this.modelUpdate('label'), this);
+            this.model.bind("change:disabled", this.onDisabledChanged, this);
+            this.model.bind("change:hidden", this.onHiddenChanged, this);
+            this.model.bind("change:errorMessage", this.displayError(), this);
+            this.model.bind("change:loading", this.loading, this);
+            this.model.items.bind("reset", this.onItemsChanged(), this);
+
+            this.$contentArea = this.$el.find("[attribute=value]");
+
+            if (this.$contentArea.length === 0)
+                this.$contentArea = this.$el;
+            
+            this.$contentArea.html(""); // Clear the content area
+        },
+
+        onItemsChanged: function () {
+            var view = this;
+            return function () {
+                view.render();
+            };
+        },
+
+        render: function () {
+            var view = this;
+            
+            this.$contentArea.html(""); // Clear the content area
+            
+            this.model.items.each(function (fieldItem) {
+                view.$contentArea.append(view.template({ value: fieldItem.get("value"), text: fieldItem.get("text"), isSelected: fieldItem.get("isSelected") }));
+            });
+
+            return this;
+        },
+
+        viewUpdate: function (event) {
+            this.model.update({
+                value: (event.target.checked ? 1 : -1) * (event.target.value)
+            });
+
+            this.$el.trigger('update:field');
+        }
+    });
+});
 ///#source 1 1 /source/js/expanz/views/expanz.views.CustomContentView.js
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -5337,6 +5493,7 @@ $(function () {
     window.expanz.views.MethodView = Backbone.View.extend({
         initialize: function () {
             this.model.bind("change:label", this.labelChanged(), this);
+            this.model.bind("change:state", this.stateChanged(), this);
             this.model.bind("change:loading", this.loading, this);
             this.model.bind("contextMenuLoaded", this.onContextMenuLoaded, this);
         },
@@ -5352,7 +5509,31 @@ $(function () {
 
         labelChanged: function () {
             return function () {
-                this.getButton().text(this.model.get("label"));
+                var $button = this.getButton();
+                var $labelElement = $button;
+                
+                var $span = $button.find("span");
+
+                if ($span.length != 0)
+                    $labelElement = $span;
+                
+                $labelElement.text(this.model.get("label"));
+            };
+        },
+
+        stateChanged: function () {
+            return function () {
+                var state = this.model.get("state");
+                var $button = this.getButton();
+                
+                if (state === "hidden") {
+                    $button.hide();
+                } else if (state === "disabled") {
+                    $button.attr('disabled', 'disabled');
+                } else {
+                    $button.show();
+                    $button.removeAttr('disabled');
+                }
             };
         },
 
@@ -5382,14 +5563,8 @@ $(function () {
                 else {
                     var hyperlinks = this.$el.find("a");
                     
-                    if (hyperlinks.length != 0) {
-			var spans = this.$el.find("span");
-			if (spans.length != 0) {
-				buttonElement = spans;
-			} else {
-				buttonElement = hyperlinks;
-			}
-		    }
+                    if (hyperlinks.length != 0)
+                        buttonElement = hyperlinks;
                 }
             }
 
@@ -5710,7 +5885,7 @@ $(function () {
                 this.model.messageCollection.addErrorMessageByKey("loginOrPasswordEmpty");
             }
             else {
-                this.model.login(usernameEl.val(), passwordEl.val(), this.$el.attr('type') == 'popup');
+                this.model.login(usernameEl.val(), passwordEl.val());
             }
         },
 
@@ -6103,6 +6278,8 @@ $(function () {
             
             if (this.postCloseActions)
                 this.postCloseActions(this.model.get('title'));
+            
+            window.expanz.currentPopup = this.parentPopup; // TODO: This should be removed
         },
 
         /* may be redifined depending on the plug-in used */
@@ -6516,7 +6693,7 @@ $(function () {
         renderRowCells: function (rowModel) {
             var html = "";
             var view = this;
-            var isDrillDownRow = this.dataPublicationView.options.canDrillDown && (rowModel.get("type") !== "Totals" && rowModel.get("type") !== "BlankLine"); // Only show drilldown link if configured to do so, and only on non-totals and non-blank rows
+            var isDrillDownRow = this.dataPublicationView.options.canDrillDown && (rowModel.get("type") !== "Totals" && rowModel.get("type") !== "BlankLine") && rowModel.get("canDrillDown") !== "false"; // Only show drilldown link if configured to do so, and only on non-totals and non-blank rows
 
             rowModel.cells.each(function (cellModel, cellIndex) {
                 html += view.defaultCellTemplate({ cellModel: cellModel, rowModel: rowModel, rowView: view, cellIndex: cellIndex, isDrillDownRow: isDrillDownRow });
@@ -6534,7 +6711,8 @@ $(function () {
                 html += this.renderCellInputControl(cellModel);
             } else if (cellModel.get('value')) {
                 if (cellIndex === 0 && isDrillDownRow && cellModel.get('canDrillDown') !== 'false') {
-                    html += '<a href="#' + rowModel.get('id') + '">' + cellModel.get('value') + '</a>'; // Create a drilldown link
+                    var drillDownPage = this.dataPublicationView.options.drillDownPage || "";
+                    html += '<a href="' + drillDownPage + '#id=' + rowModel.get('id') + '">' + cellModel.get('value') + '</a>'; // Create a drilldown link
                 } else {
                     html += '<span>' + cellModel.get('value') + '</span>';
                 }
@@ -6646,10 +6824,12 @@ $(function () {
             this.$el.dblclick(this, function () {
                 view.dataPublicationView.onRowDoubleClicked.call(view.dataPublicationView, view);
             });
-            
-            this.$el.find("a").click(this, function () {
-                view.dataPublicationView.onDrillDown.call(view.dataPublicationView, view);
-            });
+
+            if (!view.dataPublicationView.options.drillDownPage) {
+                this.$el.find("a").click(this, function() {
+                    view.dataPublicationView.onDrillDown.call(view.dataPublicationView, view);
+                });
+            }
 
             if (this.dataPublicationView.model.isEditable) {
                 this.$el.find("input").click(this, function () {
@@ -6873,7 +7053,7 @@ $(function() {
         
         content = '<div class="loginMsg">Sorry, your session timed out, please log in again.</div>';
 
-        content += '<form bind="login" type="popup" name="login" action="javascript:">';
+        content += '<form bind="login" type="popup" name="login" action="javascript:" authenticationMode="' + expanz.Storage.getAuthenticationMode() + '">';
         content += '  <div name="username" id="username">';
         content += '    <input class="loginInput"  attribute="value" type="text" placeholder="Username"/>';
         content += '  </div>';
@@ -7143,9 +7323,8 @@ $(function() {
 		    var activityView = expanz.Factory.createActivityView(dom);
 
 			/* look for initial key in the query parameters */
-		    var initialKey = paramInitialKey || getQueryParameterByName(activityView.model.get('name') + (activityView.model.get('style') || '') + 'initialKey');
 			activityView.model.set({
-				'key' : initialKey
+			    'key' : paramInitialKey || getQueryParameterByName("id") || getQueryHashParameterByName("id")
 			});
 
 			activityView.model.load(callbacks);
@@ -7156,17 +7335,16 @@ $(function() {
 	}
 
 	function loadMenu(el, displayEmptyItems) {
-
-		// Load Menu & insert it into #menu
-		var menu = new expanz.menu.AppSiteMenu();
+		// Render site menu
+	    var menu = new expanz.menu.AppSiteMenu();
 		var processAreas = loadProcessMap(expanz.Storage.getProcessAreaList(), displayEmptyItems);
-		if (processAreas.length > 0)
-			menu.processAreas = processAreas;
-		menu.load(el);
+
+		menu.render(el, processAreas);
 	}
 
 	function loadProcessMap(processAreas, displayEmptyItems, parentProcessAreaMenu) {
-		var processAreasMenu = [];
+	    var processAreasMenu = [];
+	    
 		_.each(processAreas, function(processArea) {
 			if (displayEmptyItems || processArea.activities.length > 0 || processArea.pa.length > 0) {
 				var menuItem = new expanz.menu.ProcessAreaMenu(processArea.id, processArea.title);
@@ -7175,22 +7353,41 @@ $(function() {
 					menuItem.parent = parentProcessAreaMenu;
 
 				_.each(processArea.activities, function(activity) {
-					if (displayEmptyItems || (activity.url !== '' && activity.url.length > 1)) {
-						menuItem.activities.push(new expanz.menu.ActivityMenu(activity.name, activity.style, activity.title, activity.url, activity.img));
+				    if (displayEmptyItems || (activity.url !== '' && activity.url.length > 1)) {
+				        var activityMenu = new expanz.menu.ActivityMenu(activity.name, activity.style, activity.title, activity.url, activity.img);
+				        
+				        // Add data attributes as properties on the activity object, but without the data- prefix
+				        for (var propertyName in activity) {
+				            if (propertyName.indexOf("data-") === 0)
+				                activityMenu[propertyName.substring(5)] = activity[propertyName];
+				        }
+				        
+				        menuItem.activities.push(activityMenu);
 					}
 				});
 
-				if (processArea.pa.length > 0) {
-					menuItem.pa = loadProcessArea(processArea.pa, displayEmptyItems, menuItem);
-				}
+				//if (processArea.pa.length > 0) {
+				//	menuItem.pa = loadProcessArea(processArea.pa, displayEmptyItems, menuItem);
+				//}
 
 				if (displayEmptyItems || menuItem.activities.length > 0) {
 					processAreasMenu.push(menuItem);
 				}
 			}
 		});
+	    
 		return processAreasMenu;
 	}
+
+	window.onbeforeunload = function () {
+	    // Close open activities
+	    for (var i = 0; i < window.openActivityViews.length; i++) {
+	        var activityView = window.openActivityViews[i];
+	        
+	        if (activityView.model.get("keepOpenForSession") === false)
+	            activityView.model.closeActivity(false);
+	    }
+    };
 
 	/* check if website is on maintenance or web server is down except on maintenance page */
 	if (document.location.href.indexOf(window.expanz.getMaintenancePage()) === -1) {
@@ -7346,6 +7543,10 @@ $(function () {
             var onDrillDownClick = function (event) {
                 var $anchor = $(this);
                 view.model.drillDown($anchor.attr('id'), $anchor.attr('type'), null);
+                
+                view.$el.trigger("datapublication:rowDrillDown", [
+				    dataPublicationModel, view
+                ]);
             };
 
             view.$el.find("a").click(this, onDrillDownClick);

@@ -149,18 +149,10 @@ $(function () {
             return value;
         },
 
-        viewUpdate: function (event) {
-            // handle multi-choices
-            if (this.model.get('items') !== undefined && this.model.get('items').length > 0) {
-                this.model.update({
-                    value: (event.target.checked ? 1 : -1) * (event.target.value)
-                });
-            }
-            else {
-                this.model.update({
-                    value: this.getValue()
-                });
-            }
+        viewUpdate: function () {
+            this.model.update({
+                value: this.getValue()
+            });
 
             this.$el.trigger('update:field');
         },

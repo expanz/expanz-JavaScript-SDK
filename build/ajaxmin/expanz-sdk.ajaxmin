@@ -48,6 +48,7 @@
     <input path="source/js/expanz/views/expanz.views.DataFieldView.js" />
     <input path="source/js/expanz/views/expanz.views.DataPublicationView.js" />
     <input path="source/js/expanz/views/expanz.views.VariantFieldView.js" />
+    <input path="source/js/expanz/views/expanz.views.EnumCollectionFieldView.js" />
     <input path="source/js/expanz/views/expanz.views.DependantFieldView.js" />
     <input path="source/js/expanz/views/expanz.views.MethodView.js" />
     <input path="source/js/expanz/views/expanz.views.MessagesView.js" />

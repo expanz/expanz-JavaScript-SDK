@@ -24,6 +24,10 @@ $(function() {
 	        };
 	    },
 
+	    initialize: function (params) {
+	        this.items = new expanz.models.FieldItemCollection(); // Items are used in enum collection fields
+	    },
+
 	    update: function (attrs) {
 	        this.set({
 	                value: attrs.value
@@ -39,6 +43,7 @@ $(function() {
 	        else {
 	            expanz.net.DeltaRequest(this.get('fieldId'), attrs.value, this.get('parent'));
 	        }
+	        
 	        return;
 	    },
 
@@ -77,12 +82,22 @@ $(function() {
 	                });
 	                
 	                this.set({
-	                    // NOTE: The model doesn't currently populate the items property anymore, as it leads to an
-	                    // endless loop in underscore.js in Chrome. As not required for now, commenting out.
-	                    //items: xml.find("Item"),
 	                    value: xml.attr('value') == '$longData$' ? xml.text() : xml.attr('value')
 	                });
 	            }
+	            
+	            if (xml.find("Item").length !== 0) {
+	                // Items are used in enum collection fields
+	                var items = [];
+	                
+	                xml.find("Item").each(function () {
+	                    var $item = $(this);
+	                    items.push({ value: $item.attr("value"), text: $item.attr("text"), isSelected: boolValue($item.attr("selected")) });
+	                });
+	                
+                    // NOTE: The EnumCollectionFieldView is listening for the reset event
+	                this.items.reset(items);
+                }
 
 	            if (xml.is('[visualType]')) {
 	                this.set({
@@ -129,5 +144,13 @@ $(function() {
 	    setFocus: function () {
 	        this.trigger("setFocus");
 	    }
+	});
+    
+	window.expanz.models.FieldItem = expanz.models.Bindable.extend({
+	    
+	});
+
+	window.expanz.models.FieldItemCollection = expanz.Collection.extend({
+	    model: expanz.models.FieldItem
 	});
 });

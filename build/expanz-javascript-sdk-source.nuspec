@@ -75,6 +75,7 @@
         <file src="..\source\js\expanz\views\expanz.views.RadioButtonsView.js" target="content\Scripts\expanz\views\expanz.views.RadioButtonsView.js" />
         <file src="..\source\js\expanz\views\expanz.views.UIMessage.js" target="content\Scripts\expanz\views\expanz.views.UIMessage.js" />
         <file src="..\source\js\expanz\views\expanz.views.VariantFieldView.js" target="content\Scripts\expanz\views\expanz.views.VariantFieldView.js" />
+        <file src="..\source\js\expanz\views\expanz.views.EnumCollectionFieldView.js" target="content\Scripts\expanz\views\expanz.views.EnumCollectionFieldView.js" />
         <file src="..\source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationHeaderView.js" target="content\Scripts\expanz\views\subviews\expanz.views.subviews.DataPublicationHeaderView.js" />
         <file src="..\source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationBodyView.js" target="content\Scripts\expanz\views\subviews\expanz.views.subviews.DataPublicationBodyView.js" />
         <file src="..\source\js\expanz\views\subviews\expanz.views.subviews.DataPublicationRowView.js" target="content\Scripts\expanz\views\subviews\expanz.views.subviews.DataPublicationRowView.js" />

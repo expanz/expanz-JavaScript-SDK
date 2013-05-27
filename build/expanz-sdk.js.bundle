@@ -44,6 +44,7 @@
   <file>/source/js/expanz/views/expanz.views.DataFieldView.js</file>
   <file>/source/js/expanz/views/expanz.views.DataPublicationView.js</file>
   <file>/source/js/expanz/views/expanz.views.VariantFieldView.js</file>
+  <file>/source/js/expanz/views/expanz.views.EnumCollectionFieldView.js</file>
   <file>/source/js/expanz/views/expanz.views.CustomContentView.js</file>
   <file>/source/js/expanz/views/expanz.views.DependantFieldView.js</file>
   <file>/source/js/expanz/views/expanz.views.MethodView.js</file>

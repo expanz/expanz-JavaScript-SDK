@@ -18,7 +18,7 @@ $(function () {
 
         template: _.template("<input id='textinput' attribute='value' type='text' style='display: none' /> " +
 	                         "<label id='booleaninput' style='display: none'><input attribute='value' type='checkbox' /> Yes / I Agree</label>" +
-	                         "<div id='options' style='display: none' />"),
+	                         "<div id='options' style='display: none'></div>"),
 
         initialize: function () {
             this.model.bind("change:label", this.modelUpdate('label'), this);
