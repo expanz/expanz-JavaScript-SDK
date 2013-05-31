@@ -194,9 +194,7 @@ function parseGetSessionDataResponse(callbacks) {
                 var url = getPageUrl($activityElement.attr('form'));
                 var style = $activityElement.attr('style') || "";
                 
-                // Parse data attributes, and add them to the object
-                var dataAttributes = [].filter.call($activityElement[0].attributes, function(at) { return /^data-/.test(at.name); });
-                
+                var dataAttributes = getDataAttributes($activityElement[0]);
                 var gridviewList = [];
                 
                 $activityElement.find('gridview').each(function () {
@@ -219,8 +217,20 @@ function parseGetSessionDataResponse(callbacks) {
                 }
             });
         });
-
     };
+}
+
+function getDataAttributes(tag) {
+    // Parse data attributes, and add them to the object
+    //var dataAttributes = [].filter.call($activityElement[0].attributes, function(at) { return /^data-/.test(at.name); }); // Doesn't work in IE8
+    var dataAttributes = [];
+
+    _.each(tag.attributes, function (attribute) {
+        if (/^data-/.test(attribute.name)) // Check if starts with data-
+            dataAttributes.push(attribute);
+    });
+
+    return dataAttributes;
 }
 
 function parseResponse(activity, initiator, callbacks) {
