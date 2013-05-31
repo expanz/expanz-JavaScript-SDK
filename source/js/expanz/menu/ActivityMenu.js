@@ -14,7 +14,7 @@
             this.title = this.title.replace("[CR]", "<br />");
             
             if (displayAsIcons === true) {
-                if (this.displayInHomeMenu) // TODO: displayAsIcons should be handled by an external adapter
+                if (this.displayInHomeMenu == "true") // TODO: displayAsIcons should be handled by an external adapter
                     el.append('<li><div class="icon navContainer"><a class="nav-' + this.name.replace(/\./g, "-") + "-" + this.style.replace(/\./g, "-") + ' navItem" href="' + this.url + '"></a><a class="navText" href="' + this.url + '">' + this.title + '</a></div></li>');
             } else {
                 el.append('<li class="activity">' + '<a href=\'' + this.url + '\'>' + this.title + '</a>' + '</li>');
