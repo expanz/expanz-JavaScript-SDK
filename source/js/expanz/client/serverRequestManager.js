@@ -127,19 +127,16 @@ var serverRequestManager = {
 
     sendNormalRequest: function (request) {
         // Send Request :manage the sending of XML requests to the server, and dispatching of response handlers. Proxy is needed.
-        if ($("#formFile")) {
-            $("#formFile").remove();
-        }
-
         var form = '';
-        form += "<form method='post' id='formFile' target='_blank' action='" + config.urlProxy + "'>";
+        form += "<form method='post' id='formFile" + "' action='" + config.urlProxy + "'>";
         form += "<input type='hidden' name='url' value='" + this.getUrlRestService(request.url) + "'>";
         form += "<input type='hidden' name='data' value='" + request.data + "'>";
         form += "</form>";
 
-        $("body").append(form);
-
-        $("#formFile").submit();
+        var popup = window.open("about:blank", "_blank");
+        popup.document.write(form);
+        popup.document.write("Please wait - loading...");
+        popup.document.write("<script type='text/javascript'>document.getElementById('formFile').submit();</script>");
     },
 
     getUrlRestService: function (path) {
