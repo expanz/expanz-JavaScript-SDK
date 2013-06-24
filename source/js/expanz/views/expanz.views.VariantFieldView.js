@@ -154,7 +154,7 @@ $(function () {
             if (visualType == 'cb') {
                 this.booleanInput.prop("checked", value == 1);
             } else if (visualType == 'rb') {
-                var selectedCheckBox = this.optionInput.find("[value=" + value + "]"); // Gets the radio button to be selected
+                var selectedCheckBox = this.optionInput.find("[value='" + value + "']"); // Gets the radio button to be selected
                 selectedCheckBox.prop("checked", true);
             } else if (visualType == 'txt') {
                 this.textInput.val(value);

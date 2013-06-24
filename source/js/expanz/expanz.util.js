@@ -64,7 +64,7 @@ function escapeBadCharForURL(data) {
 function escapeHTML(data) {
 	if (!data)
 		return "";
-	return data.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	return data.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function getObjectSortAscendingFunction(attribute) {

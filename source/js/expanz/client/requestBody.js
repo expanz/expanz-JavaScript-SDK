@@ -60,7 +60,7 @@ var requestBody = {
     },
 
     createDeltaElement: function (id, value, matrixKey) {
-        var delta = '<Delta id="' + id + '" value="' + value + '"';
+        var delta = '<Delta id="' + id + '" value="' + escapeHTML(value) + '"'; // Encode the value in case it contains special xml characters
 
         if (matrixKey)
             delta += ' matrixKey="' + matrixKey + '"';
